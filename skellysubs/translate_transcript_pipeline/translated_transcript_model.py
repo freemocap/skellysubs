@@ -1,4 +1,12 @@
+from pydantic import BaseModel, Field
 
+from skellysubs.audio_transcription.whisper_transcript_result_full_model import \
+    WhisperTranscriptionResult, WhisperWordTimestamp
+from skellysubs.translate_transcript_pipeline.language_models import LanguageNames, LanguagePairs, \
+    LanguagePair
+from skellysubs.translate_transcript_pipeline.translation_typehints import NOT_TRANSLATED_YET_TEXT, \
+    LanguageNameString, RomanizationMethodString, RomanizedTextString, TranslatedTextString, OriginalTextString, \
+    StartingTimestamp, EndingTimestamp
 from pydantic import BaseModel, Field
 
 from skellysubs.audio_transcription.whisper_transcript_result_full_model import \
@@ -28,6 +36,7 @@ class TranslatedText(BaseModel):
 
 
 class TranslationsCollection(BaseModel):
+    english: TranslatedText = Field(description="The original text in English")
     spanish: TranslatedText = Field(description="The translation of the original text into Spanish")
     chinese: TranslatedText = Field(description="The translation of the original text into Chinese Mandarin Simplified")
     arabic: TranslatedText = Field(description="The translation of the original text into Arabic Levantine")
@@ -39,12 +48,14 @@ class TranslationsCollection(BaseModel):
 
     @classmethod
     def create(cls):
-        return cls(spanish=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.SPANISH)),
+        return cls(english=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.ENGLISH)),
+                   spanish=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.SPANISH)),
                    chinese=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.CHINESE_MANDARIN_SIMPLIFIED)),
                    arabic=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.ARABIC_LEVANTINE)))
 
     def languages_and_romanizations(self) -> dict[LanguageNameString, RomanizationMethodString]:
-        return {LanguageNames.SPANISH.value: self.spanish.romanization_method,
+        return {LanguageNames.ENGLISH.value: self.english.romanization_method,
+                LanguageNames.SPANISH.value: self.spanish.romanization_method,
                 LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value: self.chinese.romanization_method,
                 LanguageNames.ARABIC_LEVANTINE.value: self.arabic.romanization_method}
 
@@ -69,19 +80,20 @@ class TranslatedWhisperWordTimestamp(BaseModel):
                    original_word=word.word,
                    translations=TranslationsCollection.create(),
                    )
-                   # word_type=WordTypeSchemas.NOT_PROCESSED.name)
+        # word_type=WordTypeSchemas.NOT_PROCESSED.name)
 
-    def get_word_by_language(self, language: LanguageNameString) -> tuple[str, str|None]:
-        if language.lower() == LanguageNames.ENGLISH.value.lower() or language.lower() == "original_text" or language.lower() == "original_word" or language.lower() == "original":
+    def get_word_by_language(self, language: LanguageNameString) -> tuple[str, str | None]:
+        if language.lower() in LanguageNames.ENGLISH.value.lower() or language.lower() in "original_text" or language.lower() in "original_word" or language.lower() in "original":
             return self.original_word, None
-        if language.lower() == LanguageNames.SPANISH.value.lower():
-            return self.translations.spanish.translated_text , None
-        if language.lower() == LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
+        if language.lower() in LanguageNames.SPANISH.value.lower():
+            return self.translations.spanish.translated_text, None
+        if language.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
             return self.translations.chinese.translated_text, self.translations.chinese.romanized_text
-        if language.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
+        if language.lower() in LanguageNames.ARABIC_LEVANTINE.value.lower():
             return self.translations.arabic.translated_text, self.translations.arabic.romanized_text
         else:
             raise ValueError(f"Language {language} not found in the translations collection.")
+
 
 class TranslatedTranscriptSegmentWithoutWords(BaseModel):
     original_segment_text: OriginalTextString = Field(
@@ -94,21 +106,27 @@ class TranslatedTranscriptSegmentWithoutWords(BaseModel):
         description="The end time of the segment in the recording when the segment was spoken in seconds since the start of the recording. Should match the start time of the next segment or the end time of the recording for the last segment.")
 
     @property
-    def og_text_and_translations(self) -> dict:
-        return {"original_text": self.original_segment_text,
-                **self.translations.model_dump()}
+    def og_text_and_translations(self) -> dict[str, dict[str, str]]:
+        return {LanguageNames.ENGLISH.value: {'text': self.original_segment_text, 'romanization': None},
+                LanguageNames.SPANISH.value: {'text': self.translations.spanish.translated_text,
+                                              'romanization': None},
+                LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value: {'text': self.translations.chinese.translated_text,
+                                                                  'romanziation': self.translations.chinese.romanized_text},
+                LanguageNames.ARABIC_LEVANTINE.value: {'text': self.translations.arabic.translated_text,
+                                                       'romanziation': self.translations.arabic.romanized_text}}
 
-    def get_text_by_language(self, language: LanguageNameString) -> tuple[str, str|None]:
-        if language.lower() == LanguageNames.ENGLISH.value.lower() or language.lower() == "original_text" or language.lower() == "original_word" or language.lower() == "original":
+    def get_text_by_language(self, language: LanguageNameString) -> tuple[str, str | None]:
+        if language.lower() in LanguageNames.ENGLISH.value.lower() or language.lower() in "original_text" or language.lower() in "original_word" or language.lower() in "original":
             return self.original_segment_text, None
-        if language.lower() == LanguageNames.SPANISH.value.lower():
+        if language.lower() in LanguageNames.SPANISH.value.lower():
             return self.translations.spanish.translated_text, None
-        if language.lower() == LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-            return self.translations.chinese.translated_text , self.translations.chinese.romanized_text
-        if language.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
-            return self.translations.arabic.translated_text , self.translations.arabic.romanized_text
+        if language.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
+            return self.translations.chinese.translated_text, self.translations.chinese.romanized_text
+        if language.lower() in LanguageNames.ARABIC_LEVANTINE.value.lower():
+            return self.translations.arabic.translated_text, self.translations.arabic.romanized_text
         else:
             raise ValueError(f"Language {language} not found in the translations collection.")
+
 
 class TranslatedTranscriptSegmentWithWords(TranslatedTranscriptSegmentWithoutWords):
     words: list[TranslatedWhisperWordTimestamp] = Field(
@@ -142,12 +160,13 @@ class TranslatedTranscriptionWithoutWords(BaseModel):
         return self.translations.has_translations
 
     @property
-    def og_text_and_translations(self) -> dict:
-        return {'English': self.original_text,
-                'Spanish': self.translations.spanish.translated_text,
-                'Chinese': self.translations.chinese.translated_text + '\n' + self.translations.chinese.romanized_text,
-                'Arabic': self.translations.arabic.translated_text + '\n' + self.translations.arabic.romanized_text}
-
+    def og_text_and_translations(self) -> dict[str, dict[str, str]]:
+        return {LanguageNames.ENGLISH.value: {'text': self.original_text, 'romanization': None},
+                LanguageNames.SPANISH.value: {'text': self.translations.spanish.translated_text, 'romanization': None},
+                LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value: {'text': self.translations.chinese.translated_text,
+                                                                  'romanziation': self.translations.chinese.romanized_text},
+                LanguageNames.ARABIC_LEVANTINE.value: {'text': self.translations.arabic.translated_text,
+                                                       'romanziation': self.translations.arabic.romanized_text}}
 
     @classmethod
     def initialize(cls,
@@ -212,14 +231,12 @@ class TranslatedTranscription(TranslatedTranscriptionWithoutWords):
                     relevant_word_end_time = segment.words[word_number + 1].start if word_number < len(
                         segment.words) - 1 else word.end
                     if relevant_word_start_time <= timestamp <= relevant_word_end_time:
-                        return segment, word
-        final_segment = self.segments[-1]
-        final_word = final_segment.words[-1]
-        return final_segment, final_word
+                        matched_segment = segment
+                        matched_word = word
+        matched_segment = self.segments[-1]
+        matched_word = self.segments[-1].words[-1]
 
-
-
-
+        return matched_segment, matched_word
 
 
 if __name__ == '__main__':

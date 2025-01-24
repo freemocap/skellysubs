@@ -20,6 +20,8 @@ def validate_audio_path(audio_path: str) -> None:
 
 def transcribe_audio(audio_path: str, model_name: str = "large") -> WhisperTranscriptionResult:
     import whisper
+    import torch
+    logger.info(f"Transcribing audio: {audio_path} with whisper model: {model_name} - import torch; torch.cuda_is_available(): {torch.cuda.is_available()}")
 
     validate_audio_path(audio_path)
     model = whisper.load_model(model_name)

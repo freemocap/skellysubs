@@ -141,7 +141,8 @@ def annotate_video_with_subtitles(video_path: str,
             image_annotator = ImageDraw.Draw(pil_image)
 
             current_segment, current_word = translated_transcript.get_segment_and_word_at_timestamp(frame_timestamp)
-            highlighted_current_segment, highlighted_current_word = highlight_current_word(segment= current_segment, word= current_word)
+            highlighted_segment_texts_by_langauge = highlight_current_word(current_segment=current_segment,
+                                                                           current_word=current_word)
             for language_name, config in LANGUAGE_ANNOTATION_CONFIGS.items():
 
                 multiline_y_start = config.language_start_y(video_height)
@@ -157,26 +158,33 @@ def annotate_video_with_subtitles(video_path: str,
                 else:
                     segment_text_display = segment_text
 
-                highlighted_segment_text = highlight_current_word(current_word_text, language_name,
-                                                                  segment_text_display)
+                highlighted_segment_text = highlighted_segment_texts_by_langauge[language_name]
 
                 if language_name.lower() == LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-                    multiline_text = create_multiline_text_chinese(highlighted_segment_text, config.language_font,
+                    multiline_text = create_multiline_text_chinese(highlighted_segment_text['text'],
+                                                                   config.language_font,
                                                                    video_width,
                                                                    config.buffer_size)
                 else:
-                    multiline_text = create_multiline_text(highlighted_segment_text, config.language_font, video_width,
+                    multiline_text = create_multiline_text(highlighted_segment_text['text'], config.language_font,
+                                                           video_width,
                                                            config.buffer_size)
+                romanized_multiline_text = None
+                if highlighted_segment_text.get('romanized'):
+                    romanized_segment_text = highlighted_segment_text['romanized']
+                    romanized_multiline_text = create_multiline_text(romanized_segment_text, config.language_font,
+                                                                     video_width, config.buffer_size)
 
                 # Reverse lines for Arabic text to render correctly
                 if language_name.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
                     lines = multiline_text.split('\n')
                     multiline_text = '\n'.join(reversed(lines))
 
-                number_of_lines = multiline_text.count('\n') + 1
-
-                annotate_image_with_subtitles(config, image_annotator, multiline_text, multiline_y_start,
-                                              number_of_lines, romanized_segment_text, video_width)
+                annotate_image_with_subtitles(config=config,
+                                              image_annotator=image_annotator,
+                                              multiline_text=multiline_text,
+                                              multiline_y_start=multiline_y_start,
+                                              romanized_multiline_text=romanized_multiline_text)
 
             image = write_frame_to_video_file(pil_image=pil_image,
                                               video_writer=video_writer)
@@ -204,9 +212,10 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                   image_annotator: ImageDraw,
                                   multiline_text: str,
                                   multiline_y_start: int,
-                                  number_of_lines: int,
-                                  romanized_segment_text: str,
-                                  video_width: int) -> None:
+                                  romanized_multiline_text: str = None
+                                  ) -> None:
+    number_of_lines = multiline_text.count('\n') + 1
+
     # Annotate the frame with the current segment using PIL
     image_annotator.multiline_text(xy=(config.buffer_size, multiline_y_start),
                                    text=multiline_text,
@@ -214,58 +223,74 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                    stroke_width=3,
                                    stroke_fill=(0, 0, 0),
                                    font=config.language_font)
-    if romanized_segment_text:
-        multiline_text = create_multiline_text(romanized_segment_text,
-                                               config.language_font,
-                                               video_width,
-                                               config.buffer_size)
+    if romanized_multiline_text is not None:
+
         image_annotator.multiline_text(
             xy=(config.buffer_size, multiline_y_start + config.language_font.size * number_of_lines * 1.5),
-            text=multiline_text,
+            text=romanized_multiline_text,
             fill=config.color,
             stroke_width=3,
             stroke_fill=(0, 0, 0),
             font=config.language_font)
 
 
-def highlight_current_word(segment:TranslatedTranscriptSegmentWithWords, word:TranslatedWhisperWordTimestamp) -> tuple[str, str]:
+def highlight_current_word(current_segment: TranslatedTranscriptSegmentWithWords,
+                           current_word: TranslatedWhisperWordTimestamp) -> dict[str, dict[str, str]]:
     """Highlight the current word in the segment text, ignoring punctuation."""
 
     # Define a helper function to strip punctuation
     def strip_punctuation(text: str) -> str:
         return re.sub(r'[^\w\s]', '', text)
 
-    highlighted_segment_words = []
-    if language_name.lower() == LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-        # Use jieba cut words for highlighting
-        segment_words = list(jieba.cut(segment_text_display))
-        stripped_current_word_text = strip_punctuation(current_word_text)
-        for word in segment_words:
-            stripped_word = strip_punctuation(word)
-            if stripped_word in stripped_current_word_text:
-                highlighted_segment_words.append(f"[{word}]")
-            else:
-                highlighted_segment_words.append(word)
-    elif language_name.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
-        # Use space-split words for Arabic text
-        segment_words = segment_text_display.split()
-        stripped_current_word_text = strip_punctuation(current_word_text)
-        for word in segment_words:
-            stripped_word = strip_punctuation(word)
-            if stripped_word in stripped_current_word_text:
-                highlighted_segment_words.append(f"[{word}]")
-            else:
-                highlighted_segment_words.append(word)
-    else:
-        # Use space-split words for other languages
-        segment_words = segment_text_display.split()
-        stripped_current_word_text = strip_punctuation(current_word_text)
-        for word in segment_words:
-            stripped_word = strip_punctuation(word)
-            if stripped_current_word_text in stripped_word:
-                highlighted_segment_words.append(f"[{word}]")
-            else:
-                highlighted_segment_words.append(word)
+    highlighted_segments = {}
+    for language_name in current_segment.og_text_and_translations.keys():
+        # if language_name.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
+        #     # Use jieba cut words for highlighting
+        #     segment_words = list(jieba.cut(current_segment))
+        #     stripped_current_word_text = strip_punctuation(current_word_text)
+        #     for current_word in segment_words:
+        #         stripped_word = strip_punctuation(current_word)
+        #         if stripped_word in stripped_current_word_text:
+        #             highlighted_segment_words.append(f"[{current_word}]")
+        #         else:
+        #             highlighted_segment_words.append(current_word)
+        # elif language_name.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
+        #     # Use space-split words for Arabic text
+        #     segment_words = segment_text_display.split()
+        #     stripped_current_word_text = strip_punctuation(current_word_text)
+        #     for current_word in segment_words:
+        #         stripped_word = strip_punctuation(current_word)
+        #         if stripped_word in stripped_current_word_text:
+        #             highlighted_segment_words.append(f"[{current_word}]")
+        #         else:
+        #             highlighted_segment_words.append(current_word)
+        # else:
 
-    highlighted_segment_text = ' '.join(highlighted_segment_words)
-    return highlighted_segment_text
+        # Use space-split words for other languages
+        segment_text, romanized_text = current_segment.get_text_by_language(language_name)
+        current_word_text, romanized_current_word_text = current_word.get_word_by_language(language_name)
+
+        stripped_current_word_text = strip_punctuation(current_word_text)
+        segment_words = segment_text.split()
+
+        highlighted_words = []
+        for segment_word in segment_words:
+            if stripped_current_word_text == strip_punctuation(segment_word):
+                highlighted_words.append(f"[{segment_word}]")
+            else:
+                highlighted_words.append(segment_word)
+        highlighted_segments[language_name] = {}
+        highlighted_segments[language_name]['text'] = " ".join(highlighted_words)
+
+        if romanized_text is not None:
+            stripped_romanized_word_text = strip_punctuation(romanized_current_word_text)
+            romanized_words = romanized_text.split()
+            highlighted_words = []
+            for romanized_word in romanized_words:
+                if stripped_romanized_word_text == strip_punctuation(romanized_word):
+                    highlighted_words.append(f"[{romanized_word}]")
+                else:
+                    highlighted_words.append(romanized_word)
+            highlighted_segments[language_name]['romanized'] = " ".join(highlighted_words)
+
+    return highlighted_segments
