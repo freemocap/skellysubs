@@ -1,0 +1,222 @@
+{
+    "text": " Hello, my name is Jon Matthis. Nice to meet you. 1, 2, 3, 4, 5, blue, green, red, dog, cat, cow, bird. Thank you and goodbye.",
+    "segments": [
+        {
+            "id": 0,
+            "seek": 0.0,
+            "start": 0.0,
+            "end": 8.58,
+            "text": " Hello, my name is Jon Matthis. Nice to meet you. 1, 2, 3, 4, 5, blue, green, red, dog, cat, cow, bird. Thank you and goodbye.",
+            "tokens": [
+                50365,
+                2425,
+                11,
+                452,
+                1315,
+                307,
+                2619,
+                15776,
+                271,
+                13,
+                5490,
+                281,
+                1677,
+                291,
+                13,
+                502,
+                11,
+                568,
+                11,
+                805,
+                11,
+                1017,
+                11,
+                1025,
+                11,
+                3344,
+                11,
+                3092,
+                11,
+                2182,
+                11,
+                3000,
+                11,
+                3857,
+                11,
+                8408,
+                11,
+                5255,
+                13,
+                1044,
+                291,
+                293,
+                12084,
+                13,
+                50801
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1149312102276346,
+            "compression_ratio": 1.1261261261261262,
+            "no_speech_prob": 0.018763946369290352,
+            "words": [
+                {
+                    "start": 0.0,
+                    "end": 0.42,
+                    "word": " Hello,",
+                    "probability": 0.9555587768554688
+                },
+                {
+                    "start": 0.46,
+                    "end": 0.58,
+                    "word": " my",
+                    "probability": 0.99156254529953
+                },
+                {
+                    "start": 0.58,
+                    "end": 0.78,
+                    "word": " name",
+                    "probability": 0.9996175765991211
+                },
+                {
+                    "start": 0.78,
+                    "end": 0.96,
+                    "word": " is",
+                    "probability": 0.9988061189651489
+                },
+                {
+                    "start": 0.96,
+                    "end": 1.14,
+                    "word": " Jon",
+                    "probability": 0.9050883650779724
+                },
+                {
+                    "start": 1.14,
+                    "end": 1.6,
+                    "word": " Matthis.",
+                    "probability": 0.9306676983833313
+                },
+                {
+                    "start": 1.6,
+                    "end": 1.78,
+                    "word": " Nice",
+                    "probability": 0.9939496517181396
+                },
+                {
+                    "start": 1.78,
+                    "end": 1.98,
+                    "word": " to",
+                    "probability": 0.9996269941329956
+                },
+                {
+                    "start": 1.98,
+                    "end": 2.16,
+                    "word": " meet",
+                    "probability": 0.9994921684265137
+                },
+                {
+                    "start": 2.16,
+                    "end": 2.4,
+                    "word": " you.",
+                    "probability": 0.9994829893112183
+                },
+                {
+                    "start": 2.46,
+                    "end": 2.64,
+                    "word": " 1,",
+                    "probability": 0.7483758330345154
+                },
+                {
+                    "start": 2.76,
+                    "end": 2.94,
+                    "word": " 2,",
+                    "probability": 0.9878314137458801
+                },
+                {
+                    "start": 2.96,
+                    "end": 3.16,
+                    "word": " 3,",
+                    "probability": 0.9999362230300903
+                },
+                {
+                    "start": 3.24,
+                    "end": 3.38,
+                    "word": " 4,",
+                    "probability": 0.9999099969863892
+                },
+                {
+                    "start": 3.52,
+                    "end": 3.74,
+                    "word": " 5,",
+                    "probability": 0.9995974898338318
+                },
+                {
+                    "start": 3.94,
+                    "end": 4.26,
+                    "word": " blue,",
+                    "probability": 0.8488960266113281
+                },
+                {
+                    "start": 4.42,
+                    "end": 4.72,
+                    "word": " green,",
+                    "probability": 0.9998418092727661
+                },
+                {
+                    "start": 4.9,
+                    "end": 5.16,
+                    "word": " red,",
+                    "probability": 0.9997788071632385
+                },
+                {
+                    "start": 5.28,
+                    "end": 5.98,
+                    "word": " dog,",
+                    "probability": 0.9991201758384705
+                },
+                {
+                    "start": 6.1,
+                    "end": 6.4,
+                    "word": " cat,",
+                    "probability": 0.9997175335884094
+                },
+                {
+                    "start": 6.5,
+                    "end": 6.7,
+                    "word": " cow,",
+                    "probability": 0.9998272061347961
+                },
+                {
+                    "start": 6.98,
+                    "end": 7.3,
+                    "word": " bird.",
+                    "probability": 0.999880313873291
+                },
+                {
+                    "start": 7.58,
+                    "end": 7.94,
+                    "word": " Thank",
+                    "probability": 0.9999276399612427
+                },
+                {
+                    "start": 7.94,
+                    "end": 8.14,
+                    "word": " you",
+                    "probability": 0.9999843835830688
+                },
+                {
+                    "start": 8.14,
+                    "end": 8.32,
+                    "word": " and",
+                    "probability": 0.9874918460845947
+                },
+                {
+                    "start": 8.32,
+                    "end": 8.58,
+                    "word": " goodbye.",
+                    "probability": 0.9994076490402222
+                }
+            ]
+        }
+    ],
+    "language": "en"
+}

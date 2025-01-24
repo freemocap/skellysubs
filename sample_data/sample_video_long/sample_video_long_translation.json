@@ -1,0 +1,2317 @@
+{
+    "original_text": " Hello, I'm saying words to the microphone. My name is John Mathis with no H and two T's in Mathis. 1, 2, 3, 4, 5, 6, 7, 8, 9. And I have a cat named Pooh and another one named Ollie. And dogs are good and horses are tall. Thank you for listening. Thank you for coming to this wonderful day. And I hope that everything will be good in the future too. Cthulhu, dinosaur, vibrant, hexagon, sparkling water, juggling balls. Thank you.",
+    "original_language": "en",
+    "translations": {
+        "spanish": {
+            "translated_text": "Hola, estoy diciendo palabras al micrófono. Mi nombre es John Mathis sin H y con dos T en Mathis. Uno, dos, tres, cuatro, cinco, seis, siete, ocho, nueve. Y tengo un gato llamado Pooh y otro llamado Ollie. Y los perros son buenos y los caballos son altos. Gracias por escuchar. Gracias por venir a este día maravilloso. Y espero que todo esté bien en el futuro también. Cthulhu, dinosaurio, vibrante, hexágono, agua con gas, bolas de malabarista. Gracias.",
+            "translated_language": "SPANISH",
+            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+            "romanized_text": ""
+        },
+        "chinese": {
+            "translated_text": "你好，我在对着麦克风说话。我的名字是约翰·马蒂斯，没有H，Mathis中有两个T。1, 2, 3, 4, 5, 6, 7, 8, 9。 我有一只叫小熊的猫，还有另一只叫Ollie的。狗很好，马很高。感谢你的倾听。感谢你来到这美好的一天。 我希望未来一切都会好。克苏鲁，恐龙，生机勃勃，六边形，气泡水，杂耍球。谢谢。",
+            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+            "romanized_text": "Nǐ hǎo, wǒ zài duìzhe màikèfēng shuōhuà. Wǒ de míngzì shì Yuēhàn·Mǎdìsī, méiyǒu H, Mathis zhōng yǒu liǎng gè T. 1, 2, 3, 4, 5, 6, 7, 8, 9. Wǒ yǒu yī zhī jiào Xiǎoxióng de māo, hái yǒu lìng yī zhī jiào Ollie de. Gǒu hěn hǎo, mǎ hěn gāo. Gǎnxiè nǐ de qīngtīng. Gǎnxiè nǐ lái dào zhè měihǎo de yītiān. Wǒ xīwàng wèilái yīqiè dōu huì hǎo. Kè sū lǔ, kǒnglóng, shēngjī bófó, liùbiānxíng, qìpào shuǐ, záshuǎ qiú. Xièxiè."
+        },
+        "arabic": {
+            "translated_text": "مرحباً، أنا أقول كلمات إلى الميكروفون. اسمي جون ماثيس بدون H وبه حرفين T في ماثيس. واحد، اثنان، ثلاثة، أربعة، خمسة، ستة، سبعة، ثمانية، تسعة. ولدي قطة اسمها Pooh وأخرى اسمها Ollie. والكلاب جيدة والخيول طويلة. شكراً للاستماع. شكراً لمجيئك إلى هذا اليوم الرائع. وآمل أن تكون كل الأمور جيدة في المستقبل أيضاً. كذبة، ديناصور، نابض بالحياة، مسدس سداسي، مياه فوارة، كرات ملهى. شكراً.",
+            "translated_language": "ARABIC_LEVANTINE",
+            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+            "romanized_text": "Marḥabā, anā aqūl kalimāt ʾilā al-mīkrafūn. Ismī Jūn Māthīs bidūn H wa bih ḥarfayn T fī Māthīs. Wāḥid, ʾithnān, thalātha, ʾarbaʿa, khamsa, sitta, sabʿa, thamāniya, tisʿa. Wa-ladayya qiṭṭa ismuhā Pooh wa ʾukhra ismuhā Ollie. Wa-l-kilāb jayyida wa-l-khayūl ṭawīla. Shukrān lil-istimāʿ. Shukrān limajī'ik ʾilā hādhā al-yawm al-rāʾiʿ. Wa ʾāmulu an takūn kull al-ʾamūr jayyida fī al-mustaqbal aydan. Kidhba, dīnāsūr, nābiḍ bi-l-ḥayāh, musaddas sudāsī, māʾ fāwara, kurāt malhā. Shukrān."
+        }
+    },
+    "segments": [
+        {
+            "original_segment_text": " Hello, I'm saying words to the microphone. My name is John Mathis with no H and two T's in Mathis.",
+            "translations": {
+                "spanish": {
+                    "translated_text": "Hola, estoy diciendo palabras al micrófono. Mi nombre es John Mathis sin H y con dos T en Mathis.",
+                    "translated_language": "SPANISH",
+                    "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                    "romanized_text": ""
+                },
+                "chinese": {
+                    "translated_text": "你好，我在对着麦克风说话。我的名字是约翰·马蒂斯，没有H，Mathis中有两个T。",
+                    "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                    "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                    "romanized_text": "Nǐ hǎo, wǒ zài duìzhe màikèfēng shuōhuà. Wǒ de míngzì shì Yuēhàn·Mǎdìsī, méiyǒu H, Mathis zhōng yǒu liǎng gè T."
+                },
+                "arabic": {
+                    "translated_text": "مرحباً، أنا أقول كلمات إلى الميكروفون. اسمي جون ماثيس بدون H وبه حرفين T في ماثيس.",
+                    "translated_language": "ARABIC_LEVANTINE",
+                    "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                    "romanized_text": "Marḥabā, anā aqūl kalimāt ʾilā al-mīkrafūn. Ismī Jūn Māthīs bidūn H wa bih ḥarfayn T fī Māthīs."
+                }
+            },
+            "start": 0.0,
+            "end": 8.58,
+            "words": [
+                {
+                    "start": 0.0,
+                    "end": 0.6,
+                    "original_word": " Hello,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Hola,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "你好，",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Nǐ hǎo,"
+                        },
+                        "arabic": {
+                            "translated_text": "مرحباً،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Marḥabā,"
+                        }
+                    }
+                },
+                {
+                    "start": 0.66,
+                    "end": 0.88,
+                    "original_word": " I'm",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Soy",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "我在",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Wǒ zài"
+                        },
+                        "arabic": {
+                            "translated_text": "أنا",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "anā"
+                        }
+                    }
+                },
+                {
+                    "start": 0.88,
+                    "end": 1.24,
+                    "original_word": " saying",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "diciendo",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "说话",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "shuōhuà"
+                        },
+                        "arabic": {
+                            "translated_text": "أقول",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "aqūl"
+                        }
+                    }
+                },
+                {
+                    "start": 1.24,
+                    "end": 1.86,
+                    "original_word": " words",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "palabras",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "单词",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "dāncí"
+                        },
+                        "arabic": {
+                            "translated_text": "كلمات",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "kalimāt"
+                        }
+                    }
+                },
+                {
+                    "start": 1.86,
+                    "end": 2.3,
+                    "original_word": " to",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "al",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "对着",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "duìzhe"
+                        },
+                        "arabic": {
+                            "translated_text": "إلى",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʾilā"
+                        }
+                    }
+                },
+                {
+                    "start": 2.3,
+                    "end": 2.62,
+                    "original_word": " the",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "el",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "的",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "de"
+                        },
+                        "arabic": {
+                            "translated_text": "ال",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "al"
+                        }
+                    }
+                },
+                {
+                    "start": 2.62,
+                    "end": 3.1,
+                    "original_word": " microphone.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "micrófono.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "麦克风。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "màikèfēng"
+                        },
+                        "arabic": {
+                            "translated_text": "الميكروفون.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "al-mīkrafūn."
+                        }
+                    }
+                },
+                {
+                    "start": 3.18,
+                    "end": 3.52,
+                    "original_word": " My",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Mi",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "我的",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "wǒ de"
+                        },
+                        "arabic": {
+                            "translated_text": "اسمي",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ismī"
+                        }
+                    }
+                },
+                {
+                    "start": 3.52,
+                    "end": 3.72,
+                    "original_word": " name",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "nombre",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "名字",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "míngzì"
+                        },
+                        "arabic": {
+                            "translated_text": "اسم",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ism"
+                        }
+                    }
+                },
+                {
+                    "start": 3.72,
+                    "end": 3.92,
+                    "original_word": " is",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "es",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "是",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "shì"
+                        },
+                        "arabic": {
+                            "translated_text": "هو",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "huwa"
+                        }
+                    }
+                },
+                {
+                    "start": 3.92,
+                    "end": 4.18,
+                    "original_word": " John",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "John",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "约翰",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Yuēhàn"
+                        },
+                        "arabic": {
+                            "translated_text": "جون",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Jūn"
+                        }
+                    }
+                },
+                {
+                    "start": 4.18,
+                    "end": 5.42,
+                    "original_word": " Mathis",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Mathis",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "马蒂斯",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Mǎdìsī"
+                        },
+                        "arabic": {
+                            "translated_text": "ماثيس",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Māthīs"
+                        }
+                    }
+                },
+                {
+                    "start": 5.42,
+                    "end": 6.18,
+                    "original_word": " with",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "con",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "与",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "yǔ"
+                        },
+                        "arabic": {
+                            "translated_text": "بـ",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "bi"
+                        }
+                    }
+                },
+                {
+                    "start": 6.18,
+                    "end": 6.76,
+                    "original_word": " no",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "sin",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "没有",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "méiyǒu"
+                        },
+                        "arabic": {
+                            "translated_text": "بدون",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "bidūn"
+                        }
+                    }
+                },
+                {
+                    "start": 6.76,
+                    "end": 7.12,
+                    "original_word": " H",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "H",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "H",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "H"
+                        },
+                        "arabic": {
+                            "translated_text": "H",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "H"
+                        }
+                    }
+                },
+                {
+                    "start": 7.12,
+                    "end": 7.38,
+                    "original_word": " and",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "y",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "和",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "hé"
+                        },
+                        "arabic": {
+                            "translated_text": "و",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "wa"
+                        }
+                    }
+                },
+                {
+                    "start": 7.38,
+                    "end": 7.56,
+                    "original_word": " two",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "dos",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "两个",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "liǎng gè"
+                        },
+                        "arabic": {
+                            "translated_text": "اثنان",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʾithnān"
+                        }
+                    }
+                },
+                {
+                    "start": 7.56,
+                    "end": 8.08,
+                    "original_word": " T's",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "T's",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "T",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "T"
+                        },
+                        "arabic": {
+                            "translated_text": "T",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "T"
+                        }
+                    }
+                },
+                {
+                    "start": 8.08,
+                    "end": 8.14,
+                    "original_word": " in",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "en",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "在",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "zài"
+                        },
+                        "arabic": {
+                            "translated_text": "في",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "fī"
+                        }
+                    }
+                },
+                {
+                    "start": 8.14,
+                    "end": 8.58,
+                    "original_word": " Mathis.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Mathis.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "马蒂斯。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Mǎdìsī."
+                        },
+                        "arabic": {
+                            "translated_text": "ماثيس.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Māthīs."
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "original_segment_text": " 1, 2, 3, 4, 5, 6, 7, 8, 9.",
+            "translations": {
+                "spanish": {
+                    "translated_text": "Uno, dos, tres, cuatro, cinco, seis, siete, ocho, nueve.",
+                    "translated_language": "SPANISH",
+                    "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                    "romanized_text": ""
+                },
+                "chinese": {
+                    "translated_text": "1, 2, 3, 4, 5, 6, 7, 8, 9。",
+                    "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                    "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                    "romanized_text": "1, 2, 3, 4, 5, 6, 7, 8, 9."
+                },
+                "arabic": {
+                    "translated_text": "واحد، اثنان، ثلاثة، أربعة، خمسة، ستة، سبعة، ثمانية، تسعة.",
+                    "translated_language": "ARABIC_LEVANTINE",
+                    "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                    "romanized_text": "Wāḥid, ʾithnān, thalātha, ʾarbaʿa, khamsa, sitta, sabʿa, thamāniya, tisʿa."
+                }
+            },
+            "start": 9.66,
+            "end": 13.34,
+            "words": [
+                {
+                    "start": 9.66,
+                    "end": 10.3,
+                    "original_word": " 1,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Uno,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "1,",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "1,"
+                        },
+                        "arabic": {
+                            "translated_text": "واحد،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Wāḥid,"
+                        }
+                    }
+                },
+                {
+                    "start": 10.44,
+                    "end": 10.72,
+                    "original_word": " 2,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "dos,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "2,",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "2,"
+                        },
+                        "arabic": {
+                            "translated_text": "اثنان،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʾithnān,"
+                        }
+                    }
+                },
+                {
+                    "start": 10.78,
+                    "end": 11.1,
+                    "original_word": " 3,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "tres,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "3,",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "3,"
+                        },
+                        "arabic": {
+                            "translated_text": "ثلاثة،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "thalātha,"
+                        }
+                    }
+                },
+                {
+                    "start": 11.14,
+                    "end": 11.36,
+                    "original_word": " 4,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "cuatro,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "4,",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "4,"
+                        },
+                        "arabic": {
+                            "translated_text": "أربعة،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʾarbaʿa,"
+                        }
+                    }
+                },
+                {
+                    "start": 11.52,
+                    "end": 11.8,
+                    "original_word": " 5,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "cinco,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "5,",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "5,"
+                        },
+                        "arabic": {
+                            "translated_text": "خمسة،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "khamsa,"
+                        }
+                    }
+                },
+                {
+                    "start": 11.88,
+                    "end": 12.24,
+                    "original_word": " 6,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "seis,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "6,",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "6,"
+                        },
+                        "arabic": {
+                            "translated_text": "ستة،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "sitta,"
+                        }
+                    }
+                },
+                {
+                    "start": 12.28,
+                    "end": 12.6,
+                    "original_word": " 7,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "siete,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "7,",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "7,"
+                        },
+                        "arabic": {
+                            "translated_text": "سبعة،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "sabʿa,"
+                        }
+                    }
+                },
+                {
+                    "start": 12.66,
+                    "end": 13.04,
+                    "original_word": " 8,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "ocho,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "8,",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "8,"
+                        },
+                        "arabic": {
+                            "translated_text": "ثمانية،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "thamāniya,"
+                        }
+                    }
+                },
+                {
+                    "start": 13.06,
+                    "end": 13.34,
+                    "original_word": " 9.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "nueve.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "9。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "9."
+                        },
+                        "arabic": {
+                            "translated_text": "تسعة.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "tisʿa."
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "original_segment_text": " And I have a cat named Pooh and another one named Ollie.",
+            "translations": {
+                "spanish": {
+                    "translated_text": "Y tengo un gato llamado Pooh y otro llamado Ollie.",
+                    "translated_language": "SPANISH",
+                    "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                    "romanized_text": ""
+                },
+                "chinese": {
+                    "translated_text": "我有一只叫小熊的猫，还有另一只叫Ollie的。",
+                    "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                    "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                    "romanized_text": "Wǒ yǒu yī zhī jiào Xiǎoxióng de māo, hái yǒu lìng yī zhī jiào Ollie de."
+                },
+                "arabic": {
+                    "translated_text": "ولدي قطة اسمها Pooh وأخرى اسمها Ollie.",
+                    "translated_language": "ARABIC_LEVANTINE",
+                    "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                    "romanized_text": "Waladī qiṭṭa ismuhā Pooh wa ʾukhra ismuhā Ollie."
+                }
+            },
+            "start": 15.16,
+            "end": 19.16,
+            "words": [
+                {
+                    "start": 15.16,
+                    "end": 15.8,
+                    "original_word": " And",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Y",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "和",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Hé"
+                        },
+                        "arabic": {
+                            "translated_text": "و",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Wa"
+                        }
+                    }
+                },
+                {
+                    "start": 15.8,
+                    "end": 16.44,
+                    "original_word": " I",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Yo",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "我",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Wǒ"
+                        },
+                        "arabic": {
+                            "translated_text": "أنا",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Anā"
+                        }
+                    }
+                },
+                {
+                    "start": 16.44,
+                    "end": 16.6,
+                    "original_word": " have",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "tengo",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "有",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Yǒu"
+                        },
+                        "arabic": {
+                            "translated_text": "عندي",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʿIndī"
+                        }
+                    }
+                },
+                {
+                    "start": 16.6,
+                    "end": 16.7,
+                    "original_word": " a",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "un",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "一只",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Yī zhī"
+                        },
+                        "arabic": {
+                            "translated_text": "قطة",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "qiṭṭa"
+                        }
+                    }
+                },
+                {
+                    "start": 16.7,
+                    "end": 16.94,
+                    "original_word": " cat",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "gato",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "猫",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Māo"
+                        },
+                        "arabic": {
+                            "translated_text": "قطة",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "qiṭṭa"
+                        }
+                    }
+                },
+                {
+                    "start": 16.94,
+                    "end": 17.34,
+                    "original_word": " named",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "llamado",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "叫",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Jiào"
+                        },
+                        "arabic": {
+                            "translated_text": "اسمها",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ismuhā"
+                        }
+                    }
+                },
+                {
+                    "start": 17.34,
+                    "end": 17.9,
+                    "original_word": " Pooh",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Pooh",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "小熊",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Xiǎoxióng"
+                        },
+                        "arabic": {
+                            "translated_text": "Pooh",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Pooh"
+                        }
+                    }
+                },
+                {
+                    "start": 17.9,
+                    "end": 18.16,
+                    "original_word": " and",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "y",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "和",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Hé"
+                        },
+                        "arabic": {
+                            "translated_text": "و",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Wa"
+                        }
+                    }
+                },
+                {
+                    "start": 18.16,
+                    "end": 18.38,
+                    "original_word": " another",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "otro",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "另一只",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Lìng yī zhī"
+                        },
+                        "arabic": {
+                            "translated_text": "أخرى",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʾukhra"
+                        }
+                    }
+                },
+                {
+                    "start": 18.38,
+                    "end": 18.56,
+                    "original_word": " one",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "واحدة",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "只",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Zhī"
+                        },
+                        "arabic": {
+                            "translated_text": "واحدة",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Wāḥida"
+                        }
+                    }
+                },
+                {
+                    "start": 18.56,
+                    "end": 18.8,
+                    "original_word": " named",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "اسمها",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "叫",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Jiào"
+                        },
+                        "arabic": {
+                            "translated_text": "اسمها",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ismuhā"
+                        }
+                    }
+                },
+                {
+                    "start": 18.8,
+                    "end": 19.16,
+                    "original_word": " Ollie.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Ollie.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "Ollie。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Ollie"
+                        },
+                        "arabic": {
+                            "translated_text": "Ollie.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Ollie"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "original_segment_text": " And dogs are good and horses are tall.",
+            "translations": {
+                "spanish": {
+                    "translated_text": "Y los perros son buenos y los caballos son altos.",
+                    "translated_language": "SPANISH",
+                    "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                    "romanized_text": ""
+                },
+                "chinese": {
+                    "translated_text": "狗很好，马很高。",
+                    "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                    "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                    "romanized_text": "Gǒu hěn hǎo, mǎ hěn gāo."
+                },
+                "arabic": {
+                    "translated_text": "والكلاب جيدة والخيول طويلة.",
+                    "translated_language": "ARABIC_LEVANTINE",
+                    "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                    "romanized_text": "Wa-l-kilāb jayyida wa-l-khayūl ṭawīla."
+                }
+            },
+            "start": 19.82,
+            "end": 24.98,
+            "words": [
+                {
+                    "start": 19.82,
+                    "end": 20.14,
+                    "original_word": " And",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Y",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "和",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Hé"
+                        },
+                        "arabic": {
+                            "translated_text": "و",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Wa"
+                        }
+                    }
+                },
+                {
+                    "start": 20.14,
+                    "end": 21.08,
+                    "original_word": " dogs",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "perros",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "狗",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Gǒu"
+                        },
+                        "arabic": {
+                            "translated_text": "كلاب",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Kilāb"
+                        }
+                    }
+                },
+                {
+                    "start": 21.08,
+                    "end": 21.64,
+                    "original_word": " are",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "son",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "是",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Shì"
+                        },
+                        "arabic": {
+                            "translated_text": "هُم",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Hum"
+                        }
+                    }
+                },
+                {
+                    "start": 21.64,
+                    "end": 22.02,
+                    "original_word": " good",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "buenos",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "很好",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Hěn hǎo"
+                        },
+                        "arabic": {
+                            "translated_text": "جيدة",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Jayyida"
+                        }
+                    }
+                },
+                {
+                    "start": 22.02,
+                    "end": 22.8,
+                    "original_word": " and",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "y",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "和",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Hé"
+                        },
+                        "arabic": {
+                            "translated_text": "و",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Wa"
+                        }
+                    }
+                },
+                {
+                    "start": 22.8,
+                    "end": 23.52,
+                    "original_word": " horses",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "caballos",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "马",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Mǎ"
+                        },
+                        "arabic": {
+                            "translated_text": "خيول",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Khayūl"
+                        }
+                    }
+                },
+                {
+                    "start": 23.52,
+                    "end": 24.12,
+                    "original_word": " are",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "son",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "是",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Shì"
+                        },
+                        "arabic": {
+                            "translated_text": "هُم",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Hum"
+                        }
+                    }
+                },
+                {
+                    "start": 24.12,
+                    "end": 24.98,
+                    "original_word": " tall.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "altos.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "高。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Gāo."
+                        },
+                        "arabic": {
+                            "translated_text": "طويلة.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Ṭawīla."
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "original_segment_text": " Thank you for listening. Thank you for coming to this wonderful day.",
+            "translations": {
+                "spanish": {
+                    "translated_text": "Gracias por escuchar. Gracias por venir a este día maravilloso.",
+                    "translated_language": "SPANISH",
+                    "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                    "romanized_text": ""
+                },
+                "chinese": {
+                    "translated_text": "感谢你的倾听。感谢你来到这美好的一天。",
+                    "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                    "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                    "romanized_text": "Gǎnxiè nǐ de qīngtīng. Gǎnxiè nǐ lái dào zhè měihǎo de yītiān."
+                },
+                "arabic": {
+                    "translated_text": "شكراً للاستماع. شكراً لمجيئك إلى هذا اليوم الرائع.",
+                    "translated_language": "ARABIC_LEVANTINE",
+                    "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                    "romanized_text": "Shukrān lil-istimāʿ. Shukrān limajī'ik ʾilā hādhā al-yawm al-rāʾiʿ."
+                }
+            },
+            "start": 24.98,
+            "end": 31.96,
+            "words": [
+                {
+                    "start": 24.98,
+                    "end": 25.68,
+                    "original_word": "Thank",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Gracias",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "感谢",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Gǎnxiè"
+                        },
+                        "arabic": {
+                            "translated_text": "شكراً",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Shukrān"
+                        }
+                    }
+                },
+                {
+                    "start": 25.68,
+                    "end": 27.04,
+                    "original_word": "you",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "tú",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "你",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "nǐ"
+                        },
+                        "arabic": {
+                            "translated_text": "أنت",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʾant"
+                        }
+                    }
+                },
+                {
+                    "start": 27.04,
+                    "end": 27.4,
+                    "original_word": "for",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "por",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "为了",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "wèile"
+                        },
+                        "arabic": {
+                            "translated_text": "لـ",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "li-"
+                        }
+                    }
+                },
+                {
+                    "start": 27.4,
+                    "end": 27.88,
+                    "original_word": "listening.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "escuchar.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "倾听。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "qīngtīng"
+                        },
+                        "arabic": {
+                            "translated_text": "الاستماع.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "al-istimāʿ."
+                        }
+                    }
+                },
+                {
+                    "start": 28.04,
+                    "end": 28.74,
+                    "original_word": "Thank",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Gracias",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "感谢",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Gǎnxiè"
+                        },
+                        "arabic": {
+                            "translated_text": "شكراً",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Shukrān"
+                        }
+                    }
+                },
+                {
+                    "start": 28.74,
+                    "end": 28.96,
+                    "original_word": "you",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "tú",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "你",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "nǐ"
+                        },
+                        "arabic": {
+                            "translated_text": "أنت",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʾant"
+                        }
+                    }
+                },
+                {
+                    "start": 28.96,
+                    "end": 29.1,
+                    "original_word": "for",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "por",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "为了",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "wèile"
+                        },
+                        "arabic": {
+                            "translated_text": "لـ",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "li-"
+                        }
+                    }
+                },
+                {
+                    "start": 29.1,
+                    "end": 29.4,
+                    "original_word": "coming",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "venir",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "来",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "lái"
+                        },
+                        "arabic": {
+                            "translated_text": "مجيئ",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "majī'ī"
+                        }
+                    }
+                },
+                {
+                    "start": 29.4,
+                    "end": 29.7,
+                    "original_word": "to",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "a",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "到",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "dào"
+                        },
+                        "arabic": {
+                            "translated_text": "إلى",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ilā"
+                        }
+                    }
+                },
+                {
+                    "start": 29.7,
+                    "end": 30.42,
+                    "original_word": "this",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "este",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "这个",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "zhège"
+                        },
+                        "arabic": {
+                            "translated_text": "هذا",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "hādhā"
+                        }
+                    }
+                },
+                {
+                    "start": 30.42,
+                    "end": 31.42,
+                    "original_word": "wonderful",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "maravilloso",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "美好的",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "měihǎo de"
+                        },
+                        "arabic": {
+                            "translated_text": "رائع",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "rāʾiʿ"
+                        }
+                    }
+                },
+                {
+                    "start": 31.42,
+                    "end": 31.96,
+                    "original_word": "day.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "يوم.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "天。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "tiān"
+                        },
+                        "arabic": {
+                            "translated_text": "اليوم.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "al-yawm."
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "original_segment_text": " And I hope that everything will be good in the future too.",
+            "translations": {
+                "spanish": {
+                    "translated_text": "Y espero que todo esté bien en el futuro también.",
+                    "translated_language": "SPANISH",
+                    "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                    "romanized_text": ""
+                },
+                "chinese": {
+                    "translated_text": "我希望未来一切都会好。",
+                    "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                    "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                    "romanized_text": "Wǒ xīwàng wèilái yīqiè dōu huì hǎo."
+                },
+                "arabic": {
+                    "translated_text": "وآمل أن تكون كل الأمور جيدة في المستقبل أيضاً.",
+                    "translated_language": "ARABIC_LEVANTINE",
+                    "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                    "romanized_text": "Wa ʾāmulu an takūn kull al-ʾamūr jayyida fī al-mustaqbal aydan."
+                }
+            },
+            "start": 32.87,
+            "end": 38.26,
+            "words": [
+                {
+                    "start": 32.87,
+                    "end": 33.32,
+                    "original_word": "And",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Y",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "和",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "hé"
+                        },
+                        "arabic": {
+                            "translated_text": "و",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Wa"
+                        }
+                    }
+                },
+                {
+                    "start": 33.32,
+                    "end": 33.84,
+                    "original_word": "I",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Yo",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "我",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Wǒ"
+                        },
+                        "arabic": {
+                            "translated_text": "أنا",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Anā"
+                        }
+                    }
+                },
+                {
+                    "start": 33.84,
+                    "end": 34.1,
+                    "original_word": "hope",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "espero",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "希望",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "xīwàng"
+                        },
+                        "arabic": {
+                            "translated_text": "آمل",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Āmel"
+                        }
+                    }
+                },
+                {
+                    "start": 34.1,
+                    "end": 34.4,
+                    "original_word": "that",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "que",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "那个",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "nàgè"
+                        },
+                        "arabic": {
+                            "translated_text": "أن",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "An"
+                        }
+                    }
+                },
+                {
+                    "start": 34.4,
+                    "end": 35.08,
+                    "original_word": "everything",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "todo",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "一切",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "yīqiè"
+                        },
+                        "arabic": {
+                            "translated_text": "كل الأمور",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Kull al-ʾamūr"
+                        }
+                    }
+                },
+                {
+                    "start": 35.08,
+                    "end": 35.5,
+                    "original_word": "will",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "serán",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "将会",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "jiāng huì"
+                        },
+                        "arabic": {
+                            "translated_text": "تكون",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "takūn"
+                        }
+                    }
+                },
+                {
+                    "start": 35.5,
+                    "end": 36.06,
+                    "original_word": "be",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "bien",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "好",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "hǎo"
+                        },
+                        "arabic": {
+                            "translated_text": "جيدة",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "jayyida"
+                        }
+                    }
+                },
+                {
+                    "start": 36.06,
+                    "end": 37.0,
+                    "original_word": "good",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "buena",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "好",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "hǎo"
+                        },
+                        "arabic": {
+                            "translated_text": "جيد",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "jayyid"
+                        }
+                    }
+                },
+                {
+                    "start": 37.0,
+                    "end": 37.56,
+                    "original_word": "in",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "en",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "在",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "zài"
+                        },
+                        "arabic": {
+                            "translated_text": "في",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "fī"
+                        }
+                    }
+                },
+                {
+                    "start": 37.56,
+                    "end": 37.64,
+                    "original_word": "the",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "el",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "这个",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "zhège"
+                        },
+                        "arabic": {
+                            "translated_text": "ال",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "al"
+                        }
+                    }
+                },
+                {
+                    "start": 37.64,
+                    "end": 37.98,
+                    "original_word": "future",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "futuro",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "未来",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "wèilái"
+                        },
+                        "arabic": {
+                            "translated_text": "المستقبل",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "al-mustaqbal"
+                        }
+                    }
+                },
+                {
+                    "start": 37.98,
+                    "end": 38.26,
+                    "original_word": "too.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "también.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "也。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "yě."
+                        },
+                        "arabic": {
+                            "translated_text": "أيضاً.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "ʾaydān."
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "original_segment_text": " Cthulhu, dinosaur, vibrant, hexagon, sparkling water, juggling balls.",
+            "translations": {
+                "spanish": {
+                    "translated_text": "Cthulhu, dinosaurio, vibrante, hexágono, agua con gas, bolas de malabarista.",
+                    "translated_language": "SPANISH",
+                    "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                    "romanized_text": ""
+                },
+                "chinese": {
+                    "translated_text": "克苏鲁，恐龙，生机勃勃，六边形，气泡水，杂耍球。",
+                    "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                    "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                    "romanized_text": "Kè sū lǔ, kǒnglóng, shēngjī bófó, liùbiānxíng, qìpào shuǐ, záshuǎ qiú."
+                },
+                "arabic": {
+                    "translated_text": "كذبة، ديناصور، نابض بالحياة، مسدس سداسي، مياه فائرة، كرات ملهى.",
+                    "translated_language": "ARABIC_LEVANTINE",
+                    "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                    "romanized_text": "Kidhba, dīnāsūr, nābiḍ bi-l-ḥayāh, musaddas sudāsī, māʾ fāra, kurāt malhā."
+                }
+            },
+            "start": 39.64,
+            "end": 52.3,
+            "words": [
+                {
+                    "start": 39.64,
+                    "end": 40.54,
+                    "original_word": " Cthulhu,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Cthulhu,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "克苏鲁，",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Kè sū lǔ,"
+                        },
+                        "arabic": {
+                            "translated_text": "كذبة،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Kidhba,"
+                        }
+                    }
+                },
+                {
+                    "start": 40.54,
+                    "end": 41.44,
+                    "original_word": " dinosaur,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "dinosaurio,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "恐龙，",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "kǒnglóng,"
+                        },
+                        "arabic": {
+                            "translated_text": "ديناصور،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "dīnāsūr,"
+                        }
+                    }
+                },
+                {
+                    "start": 41.76,
+                    "end": 43.48,
+                    "original_word": " vibrant,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "vibrante,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "生机勃勃，",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "shēngjī bófó,"
+                        },
+                        "arabic": {
+                            "translated_text": "نابض بالحياة،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "nābiḍ bi-l-ḥayāh,"
+                        }
+                    }
+                },
+                {
+                    "start": 43.78,
+                    "end": 46.56,
+                    "original_word": " hexagon,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "hexágono,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "六边形，",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "liùbiānxíng,"
+                        },
+                        "arabic": {
+                            "translated_text": "مسدس سداسي،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "musaddas sudāsī,"
+                        }
+                    }
+                },
+                {
+                    "start": 46.76,
+                    "end": 50.28,
+                    "original_word": " sparkling",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "agua con gas,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "气泡水，",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "qìpào shuǐ,"
+                        },
+                        "arabic": {
+                            "translated_text": "مياه فائرة،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "māʾ fāra,"
+                        }
+                    }
+                },
+                {
+                    "start": 50.28,
+                    "end": 51.24,
+                    "original_word": " water,",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "agua,",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "水，",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "shuǐ,"
+                        },
+                        "arabic": {
+                            "translated_text": "مياه،",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "māʾ,"
+                        }
+                    }
+                },
+                {
+                    "start": 51.44,
+                    "end": 51.94,
+                    "original_word": " juggling",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "malabarista",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "杂耍，",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "záshuǎ,"
+                        },
+                        "arabic": {
+                            "translated_text": "ملهاة",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "malhā"
+                        }
+                    }
+                },
+                {
+                    "start": 51.94,
+                    "end": 52.3,
+                    "original_word": " balls.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "كرات.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "球。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "qiú."
+                        },
+                        "arabic": {
+                            "translated_text": "كرات.",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "kurāt."
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "original_segment_text": " Thank you.",
+            "translations": {
+                "spanish": {
+                    "translated_text": "Gracias.",
+                    "translated_language": "SPANISH",
+                    "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                    "romanized_text": ""
+                },
+                "chinese": {
+                    "translated_text": "谢谢。",
+                    "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                    "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                    "romanized_text": "Xièxiè."
+                },
+                "arabic": {
+                    "translated_text": "شكراً.",
+                    "translated_language": "ARABIC_LEVANTINE",
+                    "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                    "romanized_text": "Shukrān."
+                }
+            },
+            "start": 54.98,
+            "end": 55.54,
+            "words": [
+                {
+                    "start": 54.98,
+                    "end": 55.24,
+                    "original_word": " Thank",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "Gracias",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "谢谢",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Xiè"
+                        },
+                        "arabic": {
+                            "translated_text": "أشكرك",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Ashkuruka"
+                        }
+                    }
+                },
+                {
+                    "start": 55.24,
+                    "end": 55.54,
+                    "original_word": " you.",
+                    "translations": {
+                        "spanish": {
+                            "translated_text": "a ti.",
+                            "translated_language": "SPANISH",
+                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
+                            "romanized_text": ""
+                        },
+                        "chinese": {
+                            "translated_text": "你。",
+                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
+                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
+                            "romanized_text": "Nǐ."
+                        },
+                        "arabic": {
+                            "translated_text": "لك",
+                            "translated_language": "ARABIC_LEVANTINE",
+                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
+                            "romanized_text": "Laka."
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

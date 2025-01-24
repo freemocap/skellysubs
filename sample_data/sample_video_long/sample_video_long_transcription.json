@@ -1,0 +1,757 @@
+{
+    "text": " Hello, I'm saying words to the microphone. My name is John Mathis with no H and two T's in Mathis. 1, 2, 3, 4, 5, 6, 7, 8, 9. And I have a cat named Pooh and another one named Ollie. And dogs are good and horses are tall. Thank you for listening. Thank you for coming to this wonderful day. And I hope that everything will be good in the future too. Cthulhu, dinosaur, vibrant, hexagon, sparkling water, juggling balls. Thank you.",
+    "segments": [
+        {
+            "id": 0,
+            "seek": 0.0,
+            "start": 0.0,
+            "end": 8.58,
+            "text": " Hello, I'm saying words to the microphone. My name is John Mathis with no H and two T's in Mathis.",
+            "tokens": [
+                50365,
+                2425,
+                11,
+                286,
+                478,
+                1566,
+                2283,
+                281,
+                264,
+                10952,
+                13,
+                1222,
+                1315,
+                307,
+                2619,
+                15776,
+                271,
+                365,
+                572,
+                389,
+                293,
+                732,
+                314,
+                311,
+                294,
+                15776,
+                271,
+                13,
+                50804
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.16471077845646784,
+            "compression_ratio": 1.3558282208588956,
+            "no_speech_prob": 0.0023688767105340958,
+            "words": [
+                {
+                    "start": 0.0,
+                    "end": 0.6,
+                    "word": " Hello,",
+                    "probability": 0.8931488990783691
+                },
+                {
+                    "start": 0.66,
+                    "end": 0.88,
+                    "word": " I'm",
+                    "probability": 0.9994361400604248
+                },
+                {
+                    "start": 0.88,
+                    "end": 1.24,
+                    "word": " saying",
+                    "probability": 0.9996486902236938
+                },
+                {
+                    "start": 1.24,
+                    "end": 1.86,
+                    "word": " words",
+                    "probability": 0.9994332194328308
+                },
+                {
+                    "start": 1.86,
+                    "end": 2.3,
+                    "word": " to",
+                    "probability": 0.9997337460517883
+                },
+                {
+                    "start": 2.3,
+                    "end": 2.62,
+                    "word": " the",
+                    "probability": 0.9998664855957031
+                },
+                {
+                    "start": 2.62,
+                    "end": 3.1,
+                    "word": " microphone.",
+                    "probability": 0.9998583793640137
+                },
+                {
+                    "start": 3.18,
+                    "end": 3.52,
+                    "word": " My",
+                    "probability": 0.9997757077217102
+                },
+                {
+                    "start": 3.52,
+                    "end": 3.72,
+                    "word": " name",
+                    "probability": 0.9999830722808838
+                },
+                {
+                    "start": 3.72,
+                    "end": 3.92,
+                    "word": " is",
+                    "probability": 0.999967098236084
+                },
+                {
+                    "start": 3.92,
+                    "end": 4.18,
+                    "word": " John",
+                    "probability": 0.9882426857948303
+                },
+                {
+                    "start": 4.18,
+                    "end": 5.42,
+                    "word": " Mathis",
+                    "probability": 0.9910938739776611
+                },
+                {
+                    "start": 5.42,
+                    "end": 6.18,
+                    "word": " with",
+                    "probability": 0.8662067651748657
+                },
+                {
+                    "start": 6.18,
+                    "end": 6.76,
+                    "word": " no",
+                    "probability": 0.9986862540245056
+                },
+                {
+                    "start": 6.76,
+                    "end": 7.12,
+                    "word": " H",
+                    "probability": 0.890481173992157
+                },
+                {
+                    "start": 7.12,
+                    "end": 7.38,
+                    "word": " and",
+                    "probability": 0.9905694723129272
+                },
+                {
+                    "start": 7.38,
+                    "end": 7.56,
+                    "word": " two",
+                    "probability": 0.9928076267242432
+                },
+                {
+                    "start": 7.56,
+                    "end": 8.08,
+                    "word": " T's",
+                    "probability": 0.8410437703132629
+                },
+                {
+                    "start": 8.08,
+                    "end": 8.14,
+                    "word": " in",
+                    "probability": 0.99140864610672
+                },
+                {
+                    "start": 8.14,
+                    "end": 8.58,
+                    "word": " Mathis.",
+                    "probability": 0.993122011423111
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "seek": 0.0,
+            "start": 9.66,
+            "end": 13.34,
+            "text": " 1, 2, 3, 4, 5, 6, 7, 8, 9.",
+            "tokens": [
+                50857,
+                502,
+                11,
+                568,
+                11,
+                805,
+                11,
+                1017,
+                11,
+                1025,
+                11,
+                1386,
+                11,
+                1614,
+                11,
+                1649,
+                11,
+                1722,
+                13,
+                51050
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.16471077845646784,
+            "compression_ratio": 1.3558282208588956,
+            "no_speech_prob": 0.0023688767105340958,
+            "words": [
+                {
+                    "start": 9.66,
+                    "end": 10.3,
+                    "word": " 1,",
+                    "probability": 0.6544336080551147
+                },
+                {
+                    "start": 10.44,
+                    "end": 10.72,
+                    "word": " 2,",
+                    "probability": 0.9996541738510132
+                },
+                {
+                    "start": 10.78,
+                    "end": 11.1,
+                    "word": " 3,",
+                    "probability": 0.9999951124191284
+                },
+                {
+                    "start": 11.14,
+                    "end": 11.36,
+                    "word": " 4,",
+                    "probability": 0.9999797344207764
+                },
+                {
+                    "start": 11.52,
+                    "end": 11.8,
+                    "word": " 5,",
+                    "probability": 0.9999809265136719
+                },
+                {
+                    "start": 11.88,
+                    "end": 12.24,
+                    "word": " 6,",
+                    "probability": 0.9999839067459106
+                },
+                {
+                    "start": 12.28,
+                    "end": 12.6,
+                    "word": " 7,",
+                    "probability": 0.9999910593032837
+                },
+                {
+                    "start": 12.66,
+                    "end": 13.04,
+                    "word": " 8,",
+                    "probability": 0.99998939037323
+                },
+                {
+                    "start": 13.06,
+                    "end": 13.34,
+                    "word": " 9.",
+                    "probability": 0.999976396560669
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "seek": 0.0,
+            "start": 15.16,
+            "end": 19.16,
+            "text": " And I have a cat named Pooh and another one named Ollie.",
+            "tokens": [
+                51136,
+                400,
+                286,
+                362,
+                257,
+                3857,
+                4926,
+                6165,
+                1445,
+                293,
+                1071,
+                472,
+                4926,
+                35089,
+                13,
+                51330
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.16471077845646784,
+            "compression_ratio": 1.3558282208588956,
+            "no_speech_prob": 0.0023688767105340958,
+            "words": [
+                {
+                    "start": 15.16,
+                    "end": 15.8,
+                    "word": " And",
+                    "probability": 0.9882516264915466
+                },
+                {
+                    "start": 15.8,
+                    "end": 16.44,
+                    "word": " I",
+                    "probability": 0.9988722205162048
+                },
+                {
+                    "start": 16.44,
+                    "end": 16.6,
+                    "word": " have",
+                    "probability": 0.995464026927948
+                },
+                {
+                    "start": 16.6,
+                    "end": 16.7,
+                    "word": " a",
+                    "probability": 0.999991774559021
+                },
+                {
+                    "start": 16.7,
+                    "end": 16.94,
+                    "word": " cat",
+                    "probability": 0.9999659061431885
+                },
+                {
+                    "start": 16.94,
+                    "end": 17.34,
+                    "word": " named",
+                    "probability": 0.9999828338623047
+                },
+                {
+                    "start": 17.34,
+                    "end": 17.9,
+                    "word": " Pooh",
+                    "probability": 0.7987465560436249
+                },
+                {
+                    "start": 17.9,
+                    "end": 18.16,
+                    "word": " and",
+                    "probability": 0.9988555908203125
+                },
+                {
+                    "start": 18.16,
+                    "end": 18.38,
+                    "word": " another",
+                    "probability": 0.9999282360076904
+                },
+                {
+                    "start": 18.38,
+                    "end": 18.56,
+                    "word": " one",
+                    "probability": 0.9999476671218872
+                },
+                {
+                    "start": 18.56,
+                    "end": 18.8,
+                    "word": " named",
+                    "probability": 0.9986674785614014
+                },
+                {
+                    "start": 18.8,
+                    "end": 19.16,
+                    "word": " Ollie.",
+                    "probability": 0.9954805374145508
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "seek": 0.0,
+            "start": 20.04,
+            "end": 24.98,
+            "text": " And dogs are good and horses are tall.",
+            "tokens": [
+                51367,
+                400,
+                7197,
+                366,
+                665,
+                293,
+                13112,
+                366,
+                6764,
+                13,
+                51630
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.16471077845646784,
+            "compression_ratio": 1.3558282208588956,
+            "no_speech_prob": 0.0023688767105340958,
+            "words": [
+                {
+                    "start": 19.82,
+                    "end": 20.14,
+                    "word": " And",
+                    "probability": 0.9984166622161865
+                },
+                {
+                    "start": 20.14,
+                    "end": 21.08,
+                    "word": " dogs",
+                    "probability": 0.9997001886367798
+                },
+                {
+                    "start": 21.08,
+                    "end": 21.64,
+                    "word": " are",
+                    "probability": 0.9999717473983765
+                },
+                {
+                    "start": 21.64,
+                    "end": 22.02,
+                    "word": " good",
+                    "probability": 0.9999487400054932
+                },
+                {
+                    "start": 22.02,
+                    "end": 22.8,
+                    "word": " and",
+                    "probability": 0.9830557107925415
+                },
+                {
+                    "start": 22.8,
+                    "end": 23.52,
+                    "word": " horses",
+                    "probability": 0.9999247789382935
+                },
+                {
+                    "start": 23.52,
+                    "end": 24.12,
+                    "word": " are",
+                    "probability": 0.9999823570251465
+                },
+                {
+                    "start": 24.12,
+                    "end": 24.98,
+                    "word": " tall.",
+                    "probability": 0.9997329115867615
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "seek": 2498.0,
+            "start": 24.98,
+            "end": 31.96,
+            "text": " Thank you for listening. Thank you for coming to this wonderful day.",
+            "tokens": [
+                50365,
+                1044,
+                291,
+                337,
+                4764,
+                13,
+                1044,
+                291,
+                337,
+                1348,
+                281,
+                341,
+                3715,
+                786,
+                13,
+                50727
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1307516098022461,
+            "compression_ratio": 1.3586206896551725,
+            "no_speech_prob": 0.00039536101394332945,
+            "words": [
+                {
+                    "start": 24.98,
+                    "end": 25.68,
+                    "word": " Thank",
+                    "probability": 0.5340523719787598
+                },
+                {
+                    "start": 25.68,
+                    "end": 27.04,
+                    "word": " you",
+                    "probability": 0.9995949864387512
+                },
+                {
+                    "start": 27.04,
+                    "end": 27.4,
+                    "word": " for",
+                    "probability": 0.9933444261550903
+                },
+                {
+                    "start": 27.4,
+                    "end": 27.88,
+                    "word": " listening.",
+                    "probability": 0.9948242902755737
+                },
+                {
+                    "start": 28.04,
+                    "end": 28.74,
+                    "word": " Thank",
+                    "probability": 0.999226450920105
+                },
+                {
+                    "start": 28.74,
+                    "end": 28.96,
+                    "word": " you",
+                    "probability": 0.9999675750732422
+                },
+                {
+                    "start": 28.96,
+                    "end": 29.1,
+                    "word": " for",
+                    "probability": 0.9995947480201721
+                },
+                {
+                    "start": 29.1,
+                    "end": 29.4,
+                    "word": " coming",
+                    "probability": 0.9996975660324097
+                },
+                {
+                    "start": 29.4,
+                    "end": 29.7,
+                    "word": " to",
+                    "probability": 0.9929291605949402
+                },
+                {
+                    "start": 29.7,
+                    "end": 30.42,
+                    "word": " this",
+                    "probability": 0.988066554069519
+                },
+                {
+                    "start": 30.42,
+                    "end": 31.42,
+                    "word": " wonderful",
+                    "probability": 0.9753841757774353
+                },
+                {
+                    "start": 31.42,
+                    "end": 31.96,
+                    "word": " day.",
+                    "probability": 0.9997575879096985
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "seek": 2498.0,
+            "start": 33.16,
+            "end": 38.26,
+            "text": " And I hope that everything will be good in the future too.",
+            "tokens": [
+                50774,
+                400,
+                286,
+                1454,
+                300,
+                1203,
+                486,
+                312,
+                665,
+                294,
+                264,
+                2027,
+                886,
+                13,
+                51039
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1307516098022461,
+            "compression_ratio": 1.3586206896551725,
+            "no_speech_prob": 0.00039536101394332945,
+            "words": [
+                {
+                    "start": 32.87,
+                    "end": 33.32,
+                    "word": " And",
+                    "probability": 0.972574770450592
+                },
+                {
+                    "start": 33.32,
+                    "end": 33.84,
+                    "word": " I",
+                    "probability": 0.9843299984931946
+                },
+                {
+                    "start": 33.84,
+                    "end": 34.1,
+                    "word": " hope",
+                    "probability": 0.9999301433563232
+                },
+                {
+                    "start": 34.1,
+                    "end": 34.4,
+                    "word": " that",
+                    "probability": 0.9995852112770081
+                },
+                {
+                    "start": 34.4,
+                    "end": 35.08,
+                    "word": " everything",
+                    "probability": 0.9877553582191467
+                },
+                {
+                    "start": 35.08,
+                    "end": 35.5,
+                    "word": " will",
+                    "probability": 0.9994137287139893
+                },
+                {
+                    "start": 35.5,
+                    "end": 36.06,
+                    "word": " be",
+                    "probability": 0.9994314312934875
+                },
+                {
+                    "start": 36.06,
+                    "end": 37.0,
+                    "word": " good",
+                    "probability": 0.9049047231674194
+                },
+                {
+                    "start": 37.0,
+                    "end": 37.56,
+                    "word": " in",
+                    "probability": 0.9998230338096619
+                },
+                {
+                    "start": 37.56,
+                    "end": 37.64,
+                    "word": " the",
+                    "probability": 0.9999535083770752
+                },
+                {
+                    "start": 37.64,
+                    "end": 37.98,
+                    "word": " future",
+                    "probability": 0.9999635219573975
+                },
+                {
+                    "start": 37.98,
+                    "end": 38.26,
+                    "word": " too.",
+                    "probability": 0.6411810517311096
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "seek": 2498.0,
+            "start": 39.64,
+            "end": 52.3,
+            "text": " Cthulhu, dinosaur, vibrant, hexagon, sparkling water, juggling balls.",
+            "tokens": [
+                51089,
+                383,
+                392,
+                425,
+                12086,
+                11,
+                23627,
+                11,
+                21571,
+                11,
+                23291,
+                6709,
+                11,
+                39967,
+                1281,
+                11,
+                361,
+                29921,
+                9803,
+                13,
+                51747
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1307516098022461,
+            "compression_ratio": 1.3586206896551725,
+            "no_speech_prob": 0.00039536101394332945,
+            "words": [
+                {
+                    "start": 39.64,
+                    "end": 40.54,
+                    "word": " Cthulhu,",
+                    "probability": 0.9992391765117645
+                },
+                {
+                    "start": 40.54,
+                    "end": 41.44,
+                    "word": " dinosaur,",
+                    "probability": 0.9566866159439087
+                },
+                {
+                    "start": 41.76,
+                    "end": 43.48,
+                    "word": " vibrant,",
+                    "probability": 0.9995517134666443
+                },
+                {
+                    "start": 43.78,
+                    "end": 46.56,
+                    "word": " hexagon,",
+                    "probability": 0.9990465939044952
+                },
+                {
+                    "start": 46.76,
+                    "end": 50.28,
+                    "word": " sparkling",
+                    "probability": 0.9931592345237732
+                },
+                {
+                    "start": 50.28,
+                    "end": 51.24,
+                    "word": " water,",
+                    "probability": 0.9989247918128967
+                },
+                {
+                    "start": 51.44,
+                    "end": 51.94,
+                    "word": " juggling",
+                    "probability": 0.9991902112960815
+                },
+                {
+                    "start": 51.94,
+                    "end": 52.3,
+                    "word": " balls.",
+                    "probability": 0.9993253946304321
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "seek": 5498.0,
+            "start": 54.98,
+            "end": 55.54,
+            "text": " Thank you.",
+            "tokens": [
+                50365,
+                1044,
+                291,
+                13,
+                51864
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.6181266705195109,
+            "compression_ratio": 0.5555555555555556,
+            "no_speech_prob": 0.30392712354660034,
+            "words": [
+                {
+                    "start": 54.98,
+                    "end": 55.54,
+                    "word": " Thank",
+                    "probability": 0.1884411722421646
+                },
+                {
+                    "start": 55.54,
+                    "end": 55.54,
+                    "word": " you.",
+                    "probability": 0.9987871050834656
+                }
+            ]
+        }
+    ],
+    "language": "en"
+}
