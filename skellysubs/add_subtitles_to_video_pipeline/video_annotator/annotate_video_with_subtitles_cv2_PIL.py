@@ -147,18 +147,14 @@ def annotate_video_with_subtitles(video_path: str,
 
                 multiline_y_start = config.language_start_y(video_height)
 
-                segment_text, romanized_segment_text = current_segment.get_text_by_language(language_name)
-
-                current_word_text, current_word_romanized_text = current_word.get_word_by_language(language_name)
+                highlighted_segment_text = highlighted_segment_texts_by_langauge[language_name]
 
                 # Arabic text reshaping and display
                 if language_name.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
-                    reshaped_text = arabic_reshaper.reshape(segment_text)
-                    segment_text_display = get_display(reshaped_text)
-                else:
-                    segment_text_display = segment_text
+                    reshaped_text = arabic_reshaper.reshape(highlighted_segment_text['text'])
+                    highlighted_segment_text['text'] = get_display(reshaped_text)
 
-                highlighted_segment_text = highlighted_segment_texts_by_langauge[language_name]
+
 
                 if language_name.lower() == LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
                     multiline_text = create_multiline_text_chinese(highlighted_segment_text['text'],
