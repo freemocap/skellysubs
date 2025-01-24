@@ -231,12 +231,9 @@ class TranslatedTranscription(TranslatedTranscriptionWithoutWords):
                     relevant_word_end_time = segment.words[word_number + 1].start if word_number < len(
                         segment.words) - 1 else word.end
                     if relevant_word_start_time <= timestamp <= relevant_word_end_time:
-                        matched_segment = segment
-                        matched_word = word
-        matched_segment = self.segments[-1]
-        matched_word = self.segments[-1].words[-1]
+                        return segment, word
+        return self.segments[-1],self.segments[-1].words[-1]
 
-        return matched_segment, matched_word
 
 
 if __name__ == '__main__':

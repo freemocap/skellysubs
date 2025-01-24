@@ -58,8 +58,7 @@ LANGUAGE_ANNOTATION_CONFIGS = {
         language_start_y=lambda video_height: int(video_height // 3),
         buffer_size=100),
     LanguageNames.ARABIC_LEVANTINE: LanguageAnnotationConfig(language_name=LanguageNames.ARABIC_LEVANTINE,
-                                                             font_path=str(
-                                                                 FONT_BASE_PATH / "NotoKufiArabic-Regular.otf"),
+                                                             font_path=str(FONT_BASE_PATH / "ARIAL.TTF"),
                                                              color=(231, 41, 138),
                                                              font_size=48,
                                                              language_start_y=lambda video_height: int(
@@ -141,8 +140,8 @@ def annotate_video_with_subtitles(video_path: str,
             image_annotator = ImageDraw.Draw(pil_image)
 
             current_segment, current_word = translated_transcript.get_segment_and_word_at_timestamp(frame_timestamp)
-            highlighted_segment_texts_by_langauge = highlight_current_word(current_segment=current_segment,
-                                                                           current_word=current_word)
+            highlighted_segment_texts_by_langauge = highlight_current_word_in_segment_texts(current_segment=current_segment,
+                                                                                            current_word=current_word)
             for language_name, config in LANGUAGE_ANNOTATION_CONFIGS.items():
 
                 multiline_y_start = config.language_start_y(video_height)
@@ -230,8 +229,8 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
             font=config.language_font)
 
 
-def highlight_current_word(current_segment: TranslatedTranscriptSegmentWithWords,
-                           current_word: TranslatedWhisperWordTimestamp) -> dict[str, dict[str, str]]:
+def highlight_current_word_in_segment_texts(current_segment: TranslatedTranscriptSegmentWithWords,
+                                            current_word: TranslatedWhisperWordTimestamp) -> dict[str, dict[str, str]]:
     """Highlight the current word in the segment text, ignoring punctuation."""
 
     # Define a helper function to strip punctuation
@@ -240,38 +239,22 @@ def highlight_current_word(current_segment: TranslatedTranscriptSegmentWithWords
 
     highlighted_segments = {}
     for language_name in current_segment.og_text_and_translations.keys():
-        # if language_name.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-        #     # Use jieba cut words for highlighting
-        #     segment_words = list(jieba.cut(current_segment))
-        #     stripped_current_word_text = strip_punctuation(current_word_text)
-        #     for current_word in segment_words:
-        #         stripped_word = strip_punctuation(current_word)
-        #         if stripped_word in stripped_current_word_text:
-        #             highlighted_segment_words.append(f"[{current_word}]")
-        #         else:
-        #             highlighted_segment_words.append(current_word)
-        # elif language_name.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
-        #     # Use space-split words for Arabic text
-        #     segment_words = segment_text_display.split()
-        #     stripped_current_word_text = strip_punctuation(current_word_text)
-        #     for current_word in segment_words:
-        #         stripped_word = strip_punctuation(current_word)
-        #         if stripped_word in stripped_current_word_text:
-        #             highlighted_segment_words.append(f"[{current_word}]")
-        #         else:
-        #             highlighted_segment_words.append(current_word)
-        # else:
 
-        # Use space-split words for other languages
+
         segment_text, romanized_text = current_segment.get_text_by_language(language_name)
         current_word_text, romanized_current_word_text = current_word.get_word_by_language(language_name)
 
         stripped_current_word_text = strip_punctuation(current_word_text)
-        segment_words = segment_text.split()
+        if language_name.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
+            # Use jieba cut words for highlighting
+            segment_words = list(jieba.cut(segment_text))
+        else:
+            segment_words = segment_text.split()
 
         highlighted_words = []
+
         for segment_word in segment_words:
-            if stripped_current_word_text == strip_punctuation(segment_word):
+            if stripped_current_word_text and  stripped_current_word_text == strip_punctuation(segment_word):
                 highlighted_words.append(f"[{segment_word}]")
             else:
                 highlighted_words.append(segment_word)
@@ -283,10 +266,16 @@ def highlight_current_word(current_segment: TranslatedTranscriptSegmentWithWords
             romanized_words = romanized_text.split()
             highlighted_words = []
             for romanized_word in romanized_words:
-                if stripped_romanized_word_text == strip_punctuation(romanized_word):
+                if stripped_romanized_word_text == strip_punctuation(romanized_word) or strip_punctuation(romanized_word) in stripped_romanized_word_text:
                     highlighted_words.append(f"[{romanized_word}]")
                 else:
                     highlighted_words.append(romanized_word)
+
+            # combine adjacent highlighted words
+            for i in range(len(highlighted_words) - 1):
+                if highlighted_words[i].startswith('[') and highlighted_words[i + 1].startswith('['):
+                    highlighted_words[i] = highlighted_words[i][:-1] + ' ' + highlighted_words[i + 1][1:]
+                    highlighted_words[i + 1] = ''
             highlighted_segments[language_name]['romanized'] = " ".join(highlighted_words)
 
     return highlighted_segments
