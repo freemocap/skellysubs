@@ -39,129 +39,129 @@
                 50804
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.16471077845646784,
+            "avg_logprob": -0.16553767522176108,
             "compression_ratio": 1.3558282208588956,
-            "no_speech_prob": 0.0023688767105340958,
+            "no_speech_prob": 0.0023593297228217125,
             "words": [
                 {
                     "start": 0.0,
                     "end": 0.6,
                     "word": " Hello,",
-                    "probability": 0.8931488990783691
+                    "probability": 0.8928027153015137
                 },
                 {
                     "start": 0.66,
                     "end": 0.88,
                     "word": " I'm",
-                    "probability": 0.9994361400604248
+                    "probability": 0.9994353652000427
                 },
                 {
                     "start": 0.88,
                     "end": 1.24,
                     "word": " saying",
-                    "probability": 0.9996486902236938
+                    "probability": 0.9996484518051147
                 },
                 {
                     "start": 1.24,
                     "end": 1.86,
                     "word": " words",
-                    "probability": 0.9994332194328308
+                    "probability": 0.9994231462478638
                 },
                 {
                     "start": 1.86,
                     "end": 2.3,
                     "word": " to",
-                    "probability": 0.9997337460517883
+                    "probability": 0.9997307658195496
                 },
                 {
                     "start": 2.3,
                     "end": 2.62,
                     "word": " the",
-                    "probability": 0.9998664855957031
+                    "probability": 0.9998637437820435
                 },
                 {
                     "start": 2.62,
                     "end": 3.1,
                     "word": " microphone.",
-                    "probability": 0.9998583793640137
+                    "probability": 0.9998588562011719
                 },
                 {
                     "start": 3.18,
                     "end": 3.52,
                     "word": " My",
-                    "probability": 0.9997757077217102
+                    "probability": 0.999772846698761
                 },
                 {
                     "start": 3.52,
                     "end": 3.72,
                     "word": " name",
-                    "probability": 0.9999830722808838
+                    "probability": 0.9999825954437256
                 },
                 {
                     "start": 3.72,
                     "end": 3.92,
                     "word": " is",
-                    "probability": 0.999967098236084
+                    "probability": 0.9999666213989258
                 },
                 {
                     "start": 3.92,
                     "end": 4.18,
                     "word": " John",
-                    "probability": 0.9882426857948303
+                    "probability": 0.9882352352142334
                 },
                 {
                     "start": 4.18,
                     "end": 5.42,
                     "word": " Mathis",
-                    "probability": 0.9910938739776611
+                    "probability": 0.9910253584384918
                 },
                 {
                     "start": 5.42,
                     "end": 6.18,
                     "word": " with",
-                    "probability": 0.8662067651748657
+                    "probability": 0.8667222857475281
                 },
                 {
                     "start": 6.18,
                     "end": 6.76,
                     "word": " no",
-                    "probability": 0.9986862540245056
+                    "probability": 0.9986879229545593
                 },
                 {
                     "start": 6.76,
                     "end": 7.12,
                     "word": " H",
-                    "probability": 0.890481173992157
+                    "probability": 0.891036331653595
                 },
                 {
                     "start": 7.12,
                     "end": 7.38,
                     "word": " and",
-                    "probability": 0.9905694723129272
+                    "probability": 0.9907633662223816
                 },
                 {
                     "start": 7.38,
                     "end": 7.56,
                     "word": " two",
-                    "probability": 0.9928076267242432
+                    "probability": 0.9927352666854858
                 },
                 {
                     "start": 7.56,
                     "end": 8.08,
                     "word": " T's",
-                    "probability": 0.8410437703132629
+                    "probability": 0.8416871428489685
                 },
                 {
                     "start": 8.08,
                     "end": 8.14,
                     "word": " in",
-                    "probability": 0.99140864610672
+                    "probability": 0.9913613200187683
                 },
                 {
                     "start": 8.14,
                     "end": 8.58,
                     "word": " Mathis.",
-                    "probability": 0.993122011423111
+                    "probability": 0.9930236041545868
                 }
             ]
         },
@@ -172,7 +172,7 @@
             "end": 13.34,
             "text": " 1, 2, 3, 4, 5, 6, 7, 8, 9.",
             "tokens": [
-                50857,
+                50855,
                 502,
                 11,
                 568,
@@ -194,45 +194,45 @@
                 51050
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.16471077845646784,
+            "avg_logprob": -0.16553767522176108,
             "compression_ratio": 1.3558282208588956,
-            "no_speech_prob": 0.0023688767105340958,
+            "no_speech_prob": 0.0023593297228217125,
             "words": [
                 {
                     "start": 9.66,
                     "end": 10.3,
                     "word": " 1,",
-                    "probability": 0.6544336080551147
+                    "probability": 0.6529009342193604
                 },
                 {
                     "start": 10.44,
                     "end": 10.72,
                     "word": " 2,",
-                    "probability": 0.9996541738510132
+                    "probability": 0.9996562004089355
                 },
                 {
                     "start": 10.78,
                     "end": 11.1,
                     "word": " 3,",
-                    "probability": 0.9999951124191284
+                    "probability": 0.9999949932098389
                 },
                 {
                     "start": 11.14,
                     "end": 11.36,
                     "word": " 4,",
-                    "probability": 0.9999797344207764
+                    "probability": 0.9999798536300659
                 },
                 {
                     "start": 11.52,
                     "end": 11.8,
                     "word": " 5,",
-                    "probability": 0.9999809265136719
+                    "probability": 0.9999810457229614
                 },
                 {
                     "start": 11.88,
                     "end": 12.24,
                     "word": " 6,",
-                    "probability": 0.9999839067459106
+                    "probability": 0.9999837875366211
                 },
                 {
                     "start": 12.28,
@@ -244,13 +244,13 @@
                     "start": 12.66,
                     "end": 13.04,
                     "word": " 8,",
-                    "probability": 0.99998939037323
+                    "probability": 0.9999892711639404
                 },
                 {
                     "start": 13.06,
                     "end": 13.34,
                     "word": " 9.",
-                    "probability": 0.999976396560669
+                    "probability": 0.9999765157699585
                 }
             ]
         },
@@ -279,39 +279,39 @@
                 51330
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.16471077845646784,
+            "avg_logprob": -0.16553767522176108,
             "compression_ratio": 1.3558282208588956,
-            "no_speech_prob": 0.0023688767105340958,
+            "no_speech_prob": 0.0023593297228217125,
             "words": [
                 {
                     "start": 15.16,
                     "end": 15.8,
                     "word": " And",
-                    "probability": 0.9882516264915466
+                    "probability": 0.9881426692008972
                 },
                 {
                     "start": 15.8,
                     "end": 16.44,
                     "word": " I",
-                    "probability": 0.9988722205162048
+                    "probability": 0.9988715052604675
                 },
                 {
                     "start": 16.44,
                     "end": 16.6,
                     "word": " have",
-                    "probability": 0.995464026927948
+                    "probability": 0.9955431818962097
                 },
                 {
                     "start": 16.6,
                     "end": 16.7,
                     "word": " a",
-                    "probability": 0.999991774559021
+                    "probability": 0.9999912977218628
                 },
                 {
                     "start": 16.7,
                     "end": 16.94,
                     "word": " cat",
-                    "probability": 0.9999659061431885
+                    "probability": 0.9999656677246094
                 },
                 {
                     "start": 16.94,
@@ -323,37 +323,37 @@
                     "start": 17.34,
                     "end": 17.9,
                     "word": " Pooh",
-                    "probability": 0.7987465560436249
+                    "probability": 0.7980062961578369
                 },
                 {
                     "start": 17.9,
                     "end": 18.16,
                     "word": " and",
-                    "probability": 0.9988555908203125
+                    "probability": 0.998853325843811
                 },
                 {
                     "start": 18.16,
                     "end": 18.38,
                     "word": " another",
-                    "probability": 0.9999282360076904
+                    "probability": 0.9999268054962158
                 },
                 {
                     "start": 18.38,
                     "end": 18.56,
                     "word": " one",
-                    "probability": 0.9999476671218872
+                    "probability": 0.9999463558197021
                 },
                 {
                     "start": 18.56,
                     "end": 18.8,
                     "word": " named",
-                    "probability": 0.9986674785614014
+                    "probability": 0.9986600875854492
                 },
                 {
                     "start": 18.8,
                     "end": 19.16,
                     "word": " Ollie.",
-                    "probability": 0.9954805374145508
+                    "probability": 0.9954476952552795
                 }
             ]
         },
@@ -377,57 +377,57 @@
                 51630
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.16471077845646784,
+            "avg_logprob": -0.16553767522176108,
             "compression_ratio": 1.3558282208588956,
-            "no_speech_prob": 0.0023688767105340958,
+            "no_speech_prob": 0.0023593297228217125,
             "words": [
                 {
                     "start": 19.82,
                     "end": 20.14,
                     "word": " And",
-                    "probability": 0.9984166622161865
+                    "probability": 0.9984074234962463
                 },
                 {
                     "start": 20.14,
                     "end": 21.08,
                     "word": " dogs",
-                    "probability": 0.9997001886367798
+                    "probability": 0.9996986389160156
                 },
                 {
                     "start": 21.08,
                     "end": 21.64,
                     "word": " are",
-                    "probability": 0.9999717473983765
+                    "probability": 0.9999709129333496
                 },
                 {
                     "start": 21.64,
                     "end": 22.02,
                     "word": " good",
-                    "probability": 0.9999487400054932
+                    "probability": 0.9999475479125977
                 },
                 {
                     "start": 22.02,
-                    "end": 22.8,
+                    "end": 22.78,
                     "word": " and",
-                    "probability": 0.9830557107925415
+                    "probability": 0.9831268787384033
                 },
                 {
-                    "start": 22.8,
+                    "start": 22.78,
                     "end": 23.52,
                     "word": " horses",
-                    "probability": 0.9999247789382935
+                    "probability": 0.999923586845398
                 },
                 {
                     "start": 23.52,
                     "end": 24.12,
                     "word": " are",
-                    "probability": 0.9999823570251465
+                    "probability": 0.9999814033508301
                 },
                 {
                     "start": 24.12,
                     "end": 24.98,
                     "word": " tall.",
-                    "probability": 0.9997329115867615
+                    "probability": 0.99973064661026
                 }
             ]
         },
@@ -456,81 +456,81 @@
                 50727
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.1307516098022461,
+            "avg_logprob": -0.13050364548305296,
             "compression_ratio": 1.3586206896551725,
-            "no_speech_prob": 0.00039536101394332945,
+            "no_speech_prob": 0.0003981931658927351,
             "words": [
                 {
                     "start": 24.98,
                     "end": 25.68,
                     "word": " Thank",
-                    "probability": 0.5340523719787598
+                    "probability": 0.5334398150444031
                 },
                 {
                     "start": 25.68,
                     "end": 27.04,
                     "word": " you",
-                    "probability": 0.9995949864387512
+                    "probability": 0.9995927214622498
                 },
                 {
                     "start": 27.04,
                     "end": 27.4,
                     "word": " for",
-                    "probability": 0.9933444261550903
+                    "probability": 0.9933591485023499
                 },
                 {
                     "start": 27.4,
                     "end": 27.88,
                     "word": " listening.",
-                    "probability": 0.9948242902755737
+                    "probability": 0.9948648810386658
                 },
                 {
                     "start": 28.04,
                     "end": 28.74,
                     "word": " Thank",
-                    "probability": 0.999226450920105
+                    "probability": 0.9992233514785767
                 },
                 {
                     "start": 28.74,
                     "end": 28.96,
                     "word": " you",
-                    "probability": 0.9999675750732422
+                    "probability": 0.9999672174453735
                 },
                 {
                     "start": 28.96,
                     "end": 29.1,
                     "word": " for",
-                    "probability": 0.9995947480201721
+                    "probability": 0.9995928406715393
                 },
                 {
                     "start": 29.1,
                     "end": 29.4,
                     "word": " coming",
-                    "probability": 0.9996975660324097
+                    "probability": 0.9996902942657471
                 },
                 {
                     "start": 29.4,
                     "end": 29.7,
                     "word": " to",
-                    "probability": 0.9929291605949402
+                    "probability": 0.9930043816566467
                 },
                 {
                     "start": 29.7,
                     "end": 30.42,
                     "word": " this",
-                    "probability": 0.988066554069519
+                    "probability": 0.9880714416503906
                 },
                 {
                     "start": 30.42,
                     "end": 31.42,
                     "word": " wonderful",
-                    "probability": 0.9753841757774353
+                    "probability": 0.9751760959625244
                 },
                 {
                     "start": 31.42,
                     "end": 31.96,
                     "word": " day.",
-                    "probability": 0.9997575879096985
+                    "probability": 0.9997523427009583
                 }
             ]
         },
@@ -558,21 +558,21 @@
                 51039
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.1307516098022461,
+            "avg_logprob": -0.13050364548305296,
             "compression_ratio": 1.3586206896551725,
-            "no_speech_prob": 0.00039536101394332945,
+            "no_speech_prob": 0.0003981931658927351,
             "words": [
                 {
                     "start": 32.87,
                     "end": 33.32,
                     "word": " And",
-                    "probability": 0.972574770450592
+                    "probability": 0.9726848006248474
                 },
                 {
                     "start": 33.32,
                     "end": 33.84,
                     "word": " I",
-                    "probability": 0.9843299984931946
+                    "probability": 0.9844277501106262
                 },
                 {
                     "start": 33.84,
@@ -584,55 +584,55 @@
                     "start": 34.1,
                     "end": 34.4,
                     "word": " that",
-                    "probability": 0.9995852112770081
+                    "probability": 0.9995836615562439
                 },
                 {
                     "start": 34.4,
                     "end": 35.08,
                     "word": " everything",
-                    "probability": 0.9877553582191467
+                    "probability": 0.9878029227256775
                 },
                 {
                     "start": 35.08,
                     "end": 35.5,
                     "word": " will",
-                    "probability": 0.9994137287139893
+                    "probability": 0.9994145631790161
                 },
                 {
                     "start": 35.5,
                     "end": 36.06,
                     "word": " be",
-                    "probability": 0.9994314312934875
+                    "probability": 0.9994301199913025
                 },
                 {
                     "start": 36.06,
                     "end": 37.0,
                     "word": " good",
-                    "probability": 0.9049047231674194
+                    "probability": 0.9061603546142578
                 },
                 {
                     "start": 37.0,
                     "end": 37.56,
                     "word": " in",
-                    "probability": 0.9998230338096619
+                    "probability": 0.9998206496238708
                 },
                 {
                     "start": 37.56,
                     "end": 37.64,
                     "word": " the",
-                    "probability": 0.9999535083770752
+                    "probability": 0.9999504089355469
                 },
                 {
                     "start": 37.64,
                     "end": 37.98,
                     "word": " future",
-                    "probability": 0.9999635219573975
+                    "probability": 0.9999624490737915
                 },
                 {
                     "start": 37.98,
                     "end": 38.26,
                     "word": " too.",
-                    "probability": 0.6411810517311096
+                    "probability": 0.6397113800048828
                 }
             ]
         },
@@ -666,57 +666,57 @@
                 51747
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.1307516098022461,
+            "avg_logprob": -0.13050364548305296,
             "compression_ratio": 1.3586206896551725,
-            "no_speech_prob": 0.00039536101394332945,
+            "no_speech_prob": 0.0003981931658927351,
             "words": [
                 {
                     "start": 39.64,
                     "end": 40.54,
                     "word": " Cthulhu,",
-                    "probability": 0.9992391765117645
+                    "probability": 0.9992311000823975
                 },
                 {
                     "start": 40.54,
                     "end": 41.44,
                     "word": " dinosaur,",
-                    "probability": 0.9566866159439087
+                    "probability": 0.9565435647964478
                 },
                 {
                     "start": 41.76,
                     "end": 43.48,
                     "word": " vibrant,",
-                    "probability": 0.9995517134666443
+                    "probability": 0.9995484948158264
                 },
                 {
                     "start": 43.78,
                     "end": 46.56,
                     "word": " hexagon,",
-                    "probability": 0.9990465939044952
+                    "probability": 0.9990471303462982
                 },
                 {
                     "start": 46.76,
                     "end": 50.28,
                     "word": " sparkling",
-                    "probability": 0.9931592345237732
+                    "probability": 0.9931156039237976
                 },
                 {
                     "start": 50.28,
                     "end": 51.24,
                     "word": " water,",
-                    "probability": 0.9989247918128967
+                    "probability": 0.9989283680915833
                 },
                 {
                     "start": 51.44,
                     "end": 51.94,
                     "word": " juggling",
-                    "probability": 0.9991902112960815
+                    "probability": 0.9991861283779144
                 },
                 {
                     "start": 51.94,
                     "end": 52.3,
                     "word": " balls.",
-                    "probability": 0.9993253946304321
+                    "probability": 0.9993232488632202
                 }
             ]
         },
@@ -734,21 +734,21 @@
                 51864
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.6181266705195109,
+            "avg_logprob": -0.616893490155538,
             "compression_ratio": 0.5555555555555556,
-            "no_speech_prob": 0.30392712354660034,
+            "no_speech_prob": 0.30376362800598145,
             "words": [
                 {
                     "start": 54.98,
                     "end": 55.54,
                     "word": " Thank",
-                    "probability": 0.1884411722421646
+                    "probability": 0.18857988715171814
                 },
                 {
                     "start": 55.54,
                     "end": 55.54,
                     "word": " you.",
-                    "probability": 0.9987871050834656
+                    "probability": 0.9987836480140686
                 }
             ]
         }

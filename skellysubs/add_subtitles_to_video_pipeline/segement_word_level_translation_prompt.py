@@ -1,8 +1,6 @@
-import json
-
 from skellysubs.add_subtitles_to_video_pipeline.full_text_transcript_translation_prompt import \
     BASE_TRANSLATION_PROMPT
-from skellysubs.translate_transcript_pipeline.translated_transcript_model import \
+from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import \
     TranslatedTranscription
 
 import logging

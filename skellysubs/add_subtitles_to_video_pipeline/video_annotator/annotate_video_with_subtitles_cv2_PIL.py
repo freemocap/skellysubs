@@ -11,10 +11,12 @@ from arabic_reshaper import arabic_reshaper
 from bidi.algorithm import get_display
 from tqdm import tqdm
 
+from skellysubs.add_subtitles_to_video_pipeline.video_annotator.create_multi_line_text import \
+    create_multiline_text_chinese, create_multiline_text
 from skellysubs.add_subtitles_to_video_pipeline.video_annotator.video_reader_writer_methods import \
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
-from skellysubs.translate_transcript_pipeline.language_models import LanguageNames
-from skellysubs.translate_transcript_pipeline.translated_transcript_model import \
+from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
+from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import \
     TranslatedTranscription, TranslatedTranscriptSegmentWithWords, TranslatedWhisperWordTimestamp
 
 logger = logging.getLogger(__name__)
@@ -65,48 +67,6 @@ LANGUAGE_ANNOTATION_CONFIGS = {
                                                                  video_height // 1.35),
                                                              buffer_size=100),
 }
-
-
-def create_multiline_text_chinese(text: str, font: ImageFont, screen_width: int, buffer: int) -> str:
-    """
-    Break a long string of Chinese text into multiple lines of text that fit within the screen width.
-    Uses jieba for segmentation.
-    """
-    words = list(jieba.cut(text))
-    lines = []
-    current_line = ""
-    for word in words:
-        if font.getlength(current_line + word) + 2 * buffer < screen_width:
-            current_line += word
-        else:
-            lines.append(current_line)
-            current_line = word
-    lines.append(current_line)
-    return '\n'.join(lines)
-
-
-def create_multiline_text(text: str, font: ImageFont, screen_width: int, buffer: int) -> str:
-    """
-    Break a long string into multiple lines of text that fit within the screen width by inserting `\n` characters
-    at appropriate locations. to ensure the text will fit within the screen width with `buffer` pixels of padding on each side.
-    will use `font.getlength('word1 + ' + 'word2' ...) method to determine when to break lines.
-
-    :param text: The text to break into multiple lines
-    :param font: The font to use for the text
-    :param screen_width: The width of the screen
-    :param buffer: The number of pixels of padding to leave on each side of the text
-    """
-    words = text.split()
-    lines = []
-    current_line = ""
-    for word in words:
-        if font.getlength(current_line + ' ' + word) + 2 * buffer < screen_width:
-            current_line += ' ' + word
-        else:
-            lines.append(current_line)
-            current_line = word
-    lines.append(current_line)
-    return '\n'.join(lines)
 
 
 def annotate_video_with_subtitles(video_path: str,

@@ -1,7 +1,7 @@
 import json
 import logging
 
-from skellysubs.translate_transcript_pipeline.translated_transcript_model import TranslatedTranscriptionWithoutWords
+from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import TranslatedTranscriptionWithoutWords
 
 
 logger = logging.getLogger(__name__)

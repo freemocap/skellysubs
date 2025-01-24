@@ -1,12 +1,11 @@
 import os
 from pathlib import Path
 
-import PIL
 import cv2
 import numpy as np
 from PIL.Image import Image
 
-from skellysubs.translate_transcript_pipeline.transcribe_video import scrape_and_save_audio_from_video
+from skellysubs.audio_transcription.transcribe_video import scrape_and_save_audio_from_video
 
 
 def create_video_reader_and_writer(subtitled_video_path, video_path):
