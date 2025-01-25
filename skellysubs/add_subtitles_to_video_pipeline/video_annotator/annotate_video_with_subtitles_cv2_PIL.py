@@ -117,6 +117,7 @@ def annotate_video_with_subtitles(video_path: str,
                         (get_display(arabic_reshaper.reshape(word)), is_highlighted)
                         for word, is_highlighted in highlighted_segment_text['text']
                     ]
+                    # reversed for correct display
                     highlighted_segment_text['text'] = reshaped_words
 
 
@@ -172,9 +173,7 @@ def highlight_current_word_in_segment_texts(current_segment: TranslatedTranscrip
     highlighted_segments = {}
 
     segment_text, romanized_text = current_segment.get_text_by_language(language_name)
-    # current_word_text, romanized_current_word_text = current_word.get_word_by_language(language_name)
 
-    # stripped_current_word_text = strip_punctuation(current_word_text)
     segment_words = current_segment.get_word_list_by_language(language_name)
 
     highlighted_words = []
@@ -213,6 +212,7 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                   romanized_multiline_text_tuples: list[tuple[str, bool]] = None) -> None:
     current_y = multiline_y_start
     current_x = config.buffer_size
+
     for word, is_highlighted in multiline_text_tuples:
 
         _, _, text_width, text_height = config.language_font.getbbox(word)
@@ -231,7 +231,7 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                              font=config.language_font,
                              stroke_width=2,
                              stroke_fill=(0, 0, 0),
-                             align="left" if config.language_name != LanguageNames.ARABIC_LEVANTINE else "right"
+                             align="left", # if config.language_name != LanguageNames.ARABIC_LEVANTINE else "right"
                              )
         if current_x + text_width > video_width - config.buffer_size:
             current_y += text_height + 5  # Add some space between lines

@@ -9,22 +9,22 @@
             "romanized_text": ""
         },
         "spanish": {
-            "translated_text": " Hola, mi nombre es John Mathis. Encantado de conocerte. 1, 2, 3, 4, 5, azul, verde, rojo, perro, gato, vaca, pájaro. Gracias y adiós.",
+            "translated_text": "Hola, mi nombre es John Mathis. Encantado de conocerte. 1, 2, 3, 4, 5, azul, verde, rojo, perro, gato, vaca, pájaro. Gracias y adiós.",
             "translated_language": "SPANISH",
             "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
             "romanized_text": ""
         },
         "chinese": {
-            "translated_text": " 你好，我叫约翰·马蒂斯。很高兴认识你。1，2，3，4，5，蓝色，绿色，红色，狗，猫，牛，鸟。谢谢，再见。",
+            "translated_text": "你好，我的名字是约翰·马蒂斯。很高兴见到你。1, 2, 3, 4, 5，蓝色，绿色，红色，狗，猫，牛，鸟。谢谢，再见。",
             "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
             "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-            "romanized_text": "Nǐ hǎo, wǒ jiào Yuēhàn Mǎdǐsī. Hěn gāoxìng rènshì nǐ. 1, 2, 3, 4, 5, lán sè, lǜ sè, hóng sè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
+            "romanized_text": "Nǐ hǎo, wǒ de míngzì shì Yuēhàn·Mǎdí sī. Hěn gāoxìng jiàn dào nǐ. 1, 2, 3, 4, 5, lán sè, lǜ sè, hóng sè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
         },
         "arabic": {
-            "translated_text": " مرحبا، اسمي جون ماثيس. من الجيد مقابلتك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرا ووداعا.",
+            "translated_text": "مرحبًا، اسمي جون ماثيس. سررت بلقائك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرًا ووداعًا.",
             "translated_language": "ARABIC_LEVANTINE",
             "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-            "romanized_text": "Marḥabā, ismī Jūn Māthīs. Min al-jayyid muqābalatak. 1, 2, 3, 4, 5, azraq, akhḍar, ahmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukran wa-wadā'."
+            "romanized_text": "Marḥabā, ismī Yūn Māthīs. Surirtu biliqā'ik. 1, 2, 3, 4, 5, azraq, akhḍar, aḥmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukran wa wada‘an."
         }
     },
     "segments": [
@@ -38,22 +38,22 @@
                     "romanized_text": ""
                 },
                 "spanish": {
-                    "translated_text": " Hola, mi nombre es John Mathis. Encantado de conocerte. 1, 2, 3, 4, 5, azul, verde, rojo, perro, gato, vaca, pájaro. Gracias y adiós.",
+                    "translated_text": "Hola, mi nombre es John Mathis. Encantado de conocerte. 1, 2, 3, 4, 5, azul, verde, rojo, perro, gato, vaca, pájaro. Gracias y adiós.",
                     "translated_language": "SPANISH",
                     "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
                     "romanized_text": ""
                 },
                 "chinese": {
-                    "translated_text": " 你好，我叫约翰·马蒂斯。很高兴认识你。1，2，3，4，5，蓝色，绿色，红色，狗，猫，牛，鸟。谢谢，再见。",
+                    "translated_text": "你好，我的名字是约翰·马蒂斯。很高兴见到你。1, 2, 3, 4, 5，蓝色，绿色，红色，狗，猫，牛，鸟。谢谢，再见。",
                     "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
                     "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                    "romanized_text": "Nǐ hǎo, wǒ jiào Yuēhàn Mǎdǐsī. Hěn gāoxìng rènshì nǐ. 1, 2, 3, 4, 5, lán sè, lǜ sè, hóng sè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
+                    "romanized_text": "Nǐ hǎo, wǒ de míngzì shì Yuēhàn·Mǎdí sī. Hěn gāoxìng jiàn dào nǐ. 1, 2, 3, 4, 5, lán sè, lǜ sè, hóng sè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
                 },
                 "arabic": {
-                    "translated_text": " مرحبا، اسمي جون ماثيس. من الجيد مقابلتك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرا ووداعا.",
+                    "translated_text": "مرحبًا، اسمي جون ماثيس. سررت بلقائك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرًا ووداعًا.",
                     "translated_language": "ARABIC_LEVANTINE",
                     "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                    "romanized_text": "Marḥabā, ismī Jūn Māthīs. Min al-jayyid muqābalatak. 1, 2, 3, 4, 5, azraq, akhḍar, ahmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukran wa-wadā'."
+                    "romanized_text": "Marḥabā, ismī Yūn Māthīs. Surirtu biliqā'ik. 1, 2, 3, 4, 5, azraq, akhḍar, aḥmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukran wa wada‘an."
                 }
             },
             "start": 0.0,
@@ -98,7 +98,7 @@
                             "original_word_index": 0,
                             "translated_word_text": "你好",
                             "translated_word_romanized_text": "nǐ hǎo",
-                            "translated_word_index": 1
+                            "translated_word_index": 0
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -108,7 +108,7 @@
                             },
                             "original_word_text": "Hello,",
                             "original_word_index": 0,
-                            "translated_word_text": "مرحبا،",
+                            "translated_word_text": "مرحبًا،",
                             "translated_word_romanized_text": "marhaban,",
                             "translated_word_index": 0
                         }
@@ -147,12 +147,12 @@
                             "original_language": "ENGLISH",
                             "target_language_pair": {
                                 "language": "CHINESE_MANDARIN_SIMPLIFIED",
-                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                                "romanization_method": "PINYIN"
                             },
                             "original_word_text": "my",
                             "original_word_index": 1,
-                            "translated_word_text": "我",
-                            "translated_word_romanized_text": "wǒ",
+                            "translated_word_text": "的",
+                            "translated_word_romanized_text": "de",
                             "translated_word_index": 3
                         },
                         "ARABIC_LEVANTINE": {
@@ -206,8 +206,8 @@
                             },
                             "original_word_text": "name",
                             "original_word_index": 2,
-                            "translated_word_text": "叫",
-                            "translated_word_romanized_text": "jiào",
+                            "translated_word_text": "名字",
+                            "translated_word_romanized_text": "míngzì",
                             "translated_word_index": 4
                         },
                         "ARABIC_LEVANTINE": {
@@ -261,9 +261,9 @@
                             },
                             "original_word_text": "is",
                             "original_word_index": 3,
-                            "translated_word_text": "叫",
-                            "translated_word_romanized_text": "jiào",
-                            "translated_word_index": 4
+                            "translated_word_text": "是",
+                            "translated_word_romanized_text": "shì",
+                            "translated_word_index": 5
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -274,7 +274,7 @@
                             "original_word_text": "is",
                             "original_word_index": 3,
                             "translated_word_text": "ماثيس.",
-                            "translated_word_romanized_text": "Mathis.",
+                            "translated_word_romanized_text": "Māthīs.",
                             "translated_word_index": 3
                         }
                     }
@@ -312,13 +312,13 @@
                             "original_language": "ENGLISH",
                             "target_language_pair": {
                                 "language": "CHINESE_MANDARIN_SIMPLIFIED",
-                                "romanization_method": "PINYIN"
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
                             },
                             "original_word_text": "John",
                             "original_word_index": 4,
                             "translated_word_text": "约翰",
                             "translated_word_romanized_text": "Yuēhàn",
-                            "translated_word_index": 5
+                            "translated_word_index": 6
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -329,7 +329,7 @@
                             "original_word_text": "John",
                             "original_word_index": 4,
                             "translated_word_text": "جون",
-                            "translated_word_romanized_text": "Jun",
+                            "translated_word_romanized_text": "Jūn",
                             "translated_word_index": 2
                         }
                     }
@@ -373,7 +373,7 @@
                             "original_word_index": 5,
                             "translated_word_text": "马蒂斯",
                             "translated_word_romanized_text": "Mǎdìsī",
-                            "translated_word_index": 7
+                            "translated_word_index": 8
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -384,7 +384,7 @@
                             "original_word_text": "Mathis.",
                             "original_word_index": 5,
                             "translated_word_text": "ماثيس.",
-                            "translated_word_romanized_text": "Māthīs.",
+                            "translated_word_romanized_text": "Māthis.",
                             "translated_word_index": 3
                         }
                     }
@@ -422,13 +422,13 @@
                             "original_language": "ENGLISH",
                             "target_language_pair": {
                                 "language": "CHINESE_MANDARIN_SIMPLIFIED",
-                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                                "romanization_method": "PINYIN"
                             },
                             "original_word_text": "Nice",
                             "original_word_index": 6,
                             "translated_word_text": "很",
                             "translated_word_romanized_text": "hěn",
-                            "translated_word_index": 9
+                            "translated_word_index": 10
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -438,9 +438,9 @@
                             },
                             "original_word_text": "Nice",
                             "original_word_index": 6,
-                            "translated_word_text": "الجيد",
-                            "translated_word_romanized_text": "al-jayyid",
-                            "translated_word_index": 5
+                            "translated_word_text": "سررت",
+                            "translated_word_romanized_text": "surirt",
+                            "translated_word_index": 4
                         }
                     }
                 },
@@ -481,9 +481,9 @@
                             },
                             "original_word_text": "to",
                             "original_word_index": 7,
-                            "translated_word_text": "认识",
-                            "translated_word_romanized_text": "rènshì",
-                            "translated_word_index": 11
+                            "translated_word_text": "见到",
+                            "translated_word_romanized_text": "jiàn dào",
+                            "translated_word_index": 12
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -493,9 +493,9 @@
                             },
                             "original_word_text": "to",
                             "original_word_index": 7,
-                            "translated_word_text": "المقابلة",
-                            "translated_word_romanized_text": "al-muqābala",
-                            "translated_word_index": 6
+                            "translated_word_text": "بلقائك.",
+                            "translated_word_romanized_text": "bil-lika'ika.",
+                            "translated_word_index": 5
                         }
                     }
                 },
@@ -536,9 +536,9 @@
                             },
                             "original_word_text": "meet",
                             "original_word_index": 8,
-                            "translated_word_text": "认识",
-                            "translated_word_romanized_text": "rènshì",
-                            "translated_word_index": 11
+                            "translated_word_text": "见到",
+                            "translated_word_romanized_text": "jiàn dào",
+                            "translated_word_index": 12
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -548,9 +548,9 @@
                             },
                             "original_word_text": "meet",
                             "original_word_index": 8,
-                            "translated_word_text": "مقابلتك.",
-                            "translated_word_romanized_text": "muqābalatik.",
-                            "translated_word_index": 6
+                            "translated_word_text": "بلقائك.",
+                            "translated_word_romanized_text": "bilqā'ika",
+                            "translated_word_index": 5
                         }
                     }
                 },
@@ -589,11 +589,11 @@
                                 "language": "CHINESE_MANDARIN_SIMPLIFIED",
                                 "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
                             },
-                            "original_word_text": "you.",
+                            "original_word_text": "you",
                             "original_word_index": 9,
                             "translated_word_text": "你",
                             "translated_word_romanized_text": "nǐ",
-                            "translated_word_index": 12
+                            "translated_word_index": 13
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -603,9 +603,9 @@
                             },
                             "original_word_text": "you.",
                             "original_word_index": 9,
-                            "translated_word_text": "مقابلتك.",
-                            "translated_word_romanized_text": "muqābalatak.",
-                            "translated_word_index": 6
+                            "translated_word_text": "بلقائك.",
+                            "translated_word_romanized_text": "biliqā'ik.",
+                            "translated_word_index": 5
                         }
                     }
                 },
@@ -648,7 +648,7 @@
                             "original_word_index": 10,
                             "translated_word_text": "1",
                             "translated_word_romanized_text": "1",
-                            "translated_word_index": 14
+                            "translated_word_index": 15
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -660,7 +660,7 @@
                             "original_word_index": 10,
                             "translated_word_text": "1،",
                             "translated_word_romanized_text": "1,",
-                            "translated_word_index": 7
+                            "translated_word_index": 6
                         }
                     }
                 },
@@ -703,7 +703,7 @@
                             "original_word_index": 11,
                             "translated_word_text": "2",
                             "translated_word_romanized_text": "2",
-                            "translated_word_index": 16
+                            "translated_word_index": 18
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -715,7 +715,7 @@
                             "original_word_index": 11,
                             "translated_word_text": "2،",
                             "translated_word_romanized_text": "2,",
-                            "translated_word_index": 8
+                            "translated_word_index": 7
                         }
                     }
                 },
@@ -757,8 +757,8 @@
                             "original_word_text": "3,",
                             "original_word_index": 12,
                             "translated_word_text": "3",
-                            "translated_word_romanized_text": "3",
-                            "translated_word_index": 18
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 21
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -770,7 +770,7 @@
                             "original_word_index": 12,
                             "translated_word_text": "3،",
                             "translated_word_romanized_text": "3,",
-                            "translated_word_index": 9
+                            "translated_word_index": 8
                         }
                     }
                 },
@@ -807,13 +807,13 @@
                             "original_language": "ENGLISH",
                             "target_language_pair": {
                                 "language": "CHINESE_MANDARIN_SIMPLIFIED",
-                                "romanization_method": "PINYIN"
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
                             },
                             "original_word_text": "4,",
                             "original_word_index": 13,
                             "translated_word_text": "4",
                             "translated_word_romanized_text": "4",
-                            "translated_word_index": 20
+                            "translated_word_index": 24
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -825,7 +825,7 @@
                             "original_word_index": 13,
                             "translated_word_text": "4،",
                             "translated_word_romanized_text": "4,",
-                            "translated_word_index": 10
+                            "translated_word_index": 9
                         }
                     }
                 },
@@ -867,8 +867,8 @@
                             "original_word_text": "5,",
                             "original_word_index": 14,
                             "translated_word_text": "5",
-                            "translated_word_romanized_text": "5",
-                            "translated_word_index": 22
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 27
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -880,7 +880,7 @@
                             "original_word_index": 14,
                             "translated_word_text": "5،",
                             "translated_word_romanized_text": "5,",
-                            "translated_word_index": 11
+                            "translated_word_index": 10
                         }
                     }
                 },
@@ -907,9 +907,9 @@
                                 "language": "SPANISH",
                                 "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
                             },
-                            "original_word_text": "blue,",
+                            "original_word_text": "blue",
                             "original_word_index": 15,
-                            "translated_word_text": "azul,",
+                            "translated_word_text": "azul",
                             "translated_word_romanized_text": null,
                             "translated_word_index": 14
                         },
@@ -919,11 +919,11 @@
                                 "language": "CHINESE_MANDARIN_SIMPLIFIED",
                                 "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
                             },
-                            "original_word_text": "blue,",
+                            "original_word_text": "blue",
                             "original_word_index": 15,
                             "translated_word_text": "蓝色",
                             "translated_word_romanized_text": "lánsè",
-                            "translated_word_index": 24
+                            "translated_word_index": 29
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -931,11 +931,11 @@
                                 "language": "ARABIC_LEVANTINE",
                                 "romanization_method": "ALA-LC"
                             },
-                            "original_word_text": "blue,",
+                            "original_word_text": "blue",
                             "original_word_index": 15,
                             "translated_word_text": "أزرق،",
                             "translated_word_romanized_text": "azraq,",
-                            "translated_word_index": 12
+                            "translated_word_index": 11
                         }
                     }
                 },
@@ -952,7 +952,7 @@
                             },
                             "original_word_text": "green,",
                             "original_word_index": 16,
-                            "translated_word_text": "green",
+                            "translated_word_text": "green,",
                             "translated_word_romanized_text": null,
                             "translated_word_index": 16
                         },
@@ -978,7 +978,7 @@
                             "original_word_index": 16,
                             "translated_word_text": "绿色",
                             "translated_word_romanized_text": "lǜsè",
-                            "translated_word_index": 26
+                            "translated_word_index": 31
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -988,9 +988,9 @@
                             },
                             "original_word_text": "green",
                             "original_word_index": 16,
-                            "translated_word_text": "أخضر،",
-                            "translated_word_romanized_text": "akhḍar,",
-                            "translated_word_index": 13
+                            "translated_word_text": "أخضر",
+                            "translated_word_romanized_text": "akhḍar",
+                            "translated_word_index": 12
                         }
                     }
                 },
@@ -1017,9 +1017,9 @@
                                 "language": "SPANISH",
                                 "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
                             },
-                            "original_word_text": "red",
+                            "original_word_text": "red,",
                             "original_word_index": 17,
-                            "translated_word_text": "rojo",
+                            "translated_word_text": "rojo,",
                             "translated_word_romanized_text": null,
                             "translated_word_index": 16
                         },
@@ -1033,7 +1033,7 @@
                             "original_word_index": 17,
                             "translated_word_text": "红色",
                             "translated_word_romanized_text": "hóngsè",
-                            "translated_word_index": 28
+                            "translated_word_index": 33
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -1044,8 +1044,8 @@
                             "original_word_text": "red",
                             "original_word_index": 17,
                             "translated_word_text": "أحمر",
-                            "translated_word_romanized_text": "ʾaḥmar",
-                            "translated_word_index": 14
+                            "translated_word_romanized_text": "aḥmar",
+                            "translated_word_index": 13
                         }
                     }
                 },
@@ -1088,7 +1088,7 @@
                             "original_word_index": 18,
                             "translated_word_text": "狗",
                             "translated_word_romanized_text": "gǒu",
-                            "translated_word_index": 30
+                            "translated_word_index": 35
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -1096,11 +1096,11 @@
                                 "language": "ARABIC_LEVANTINE",
                                 "romanization_method": "ALA-LC"
                             },
-                            "original_word_text": "dog,",
+                            "original_word_text": "dog",
                             "original_word_index": 18,
-                            "translated_word_text": "كلب،",
-                            "translated_word_romanized_text": "kalb,",
-                            "translated_word_index": 15
+                            "translated_word_text": "كلب",
+                            "translated_word_romanized_text": "kalb",
+                            "translated_word_index": 14
                         }
                     }
                 },
@@ -1143,19 +1143,19 @@
                             "original_word_index": 19,
                             "translated_word_text": "猫",
                             "translated_word_romanized_text": "māo",
-                            "translated_word_index": 32
+                            "translated_word_index": 37
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
                             "target_language_pair": {
                                 "language": "ARABIC_LEVANTINE",
-                                "romanization_method": "ALA-LC"
+                                "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts."
                             },
                             "original_word_text": "cat",
                             "original_word_index": 19,
                             "translated_word_text": "قطة",
                             "translated_word_romanized_text": "qiṭṭa",
-                            "translated_word_index": 16
+                            "translated_word_index": 15
                         }
                     }
                 },
@@ -1198,7 +1198,7 @@
                             "original_word_index": 20,
                             "translated_word_text": "牛",
                             "translated_word_romanized_text": "niú",
-                            "translated_word_index": 34
+                            "translated_word_index": 39
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -1209,8 +1209,8 @@
                             "original_word_text": "cow",
                             "original_word_index": 20,
                             "translated_word_text": "بقرة",
-                            "translated_word_romanized_text": "baqarah",
-                            "translated_word_index": 17
+                            "translated_word_romanized_text": "baqara",
+                            "translated_word_index": 16
                         }
                     }
                 },
@@ -1253,7 +1253,7 @@
                             "original_word_index": 21,
                             "translated_word_text": "鸟",
                             "translated_word_romanized_text": "niǎo",
-                            "translated_word_index": 36
+                            "translated_word_index": 41
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -1264,8 +1264,8 @@
                             "original_word_text": "bird.",
                             "original_word_index": 21,
                             "translated_word_text": "طائر.",
-                            "translated_word_romanized_text": "ṭā'ir.",
-                            "translated_word_index": 18
+                            "translated_word_romanized_text": "ṭāʾir.",
+                            "translated_word_index": 17
                         }
                     }
                 },
@@ -1308,7 +1308,7 @@
                             "original_word_index": 22,
                             "translated_word_text": "谢谢",
                             "translated_word_romanized_text": "xièxiè",
-                            "translated_word_index": 38
+                            "translated_word_index": 43
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -1318,9 +1318,9 @@
                             },
                             "original_word_text": "Thank",
                             "original_word_index": 22,
-                            "translated_word_text": "شكرا",
+                            "translated_word_text": "شكرًا",
                             "translated_word_romanized_text": "shukran",
-                            "translated_word_index": 19
+                            "translated_word_index": 18
                         }
                     }
                 },
@@ -1349,9 +1349,9 @@
                             },
                             "original_word_text": "you",
                             "original_word_index": 23,
-                            "translated_word_text": "y",
+                            "translated_word_text": "tú",
                             "translated_word_romanized_text": null,
-                            "translated_word_index": 22
+                            "translated_word_index": 23
                         },
                         "CHINESE_MANDARIN_SIMPLIFIED": {
                             "original_language": "ENGLISH",
@@ -1363,7 +1363,7 @@
                             "original_word_index": 23,
                             "translated_word_text": "你",
                             "translated_word_romanized_text": "nǐ",
-                            "translated_word_index": 12
+                            "translated_word_index": 13
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -1373,9 +1373,9 @@
                             },
                             "original_word_text": "you",
                             "original_word_index": 23,
-                            "translated_word_text": "ووداعا.",
-                            "translated_word_romanized_text": "wawda'a.",
-                            "translated_word_index": 20
+                            "translated_word_text": "بلقائك.",
+                            "translated_word_romanized_text": "bilqā'ika",
+                            "translated_word_index": 5
                         }
                     }
                 },
@@ -1430,7 +1430,7 @@
                             "original_word_index": 24,
                             "translated_word_text": "و",
                             "translated_word_romanized_text": "wa",
-                            "translated_word_index": 20
+                            "translated_word_index": 19
                         }
                     }
                 },
@@ -1473,7 +1473,7 @@
                             "original_word_index": 25,
                             "translated_word_text": "再见",
                             "translated_word_romanized_text": "zàijiàn",
-                            "translated_word_index": 40
+                            "translated_word_index": 45
                         },
                         "ARABIC_LEVANTINE": {
                             "original_language": "ENGLISH",
@@ -1483,9 +1483,9 @@
                             },
                             "original_word_text": "goodbye.",
                             "original_word_index": 25,
-                            "translated_word_text": "وداعا.",
-                            "translated_word_romanized_text": "wada'a",
-                            "translated_word_index": 20
+                            "translated_word_text": "وداعًا.",
+                            "translated_word_romanized_text": "wada‘an.",
+                            "translated_word_index": 19
                         }
                     }
                 }
