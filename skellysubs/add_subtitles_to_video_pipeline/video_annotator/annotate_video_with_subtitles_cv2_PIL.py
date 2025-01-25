@@ -119,32 +119,33 @@ def annotate_video_with_subtitles(video_path: str,
                     ]
                     highlighted_segment_text['text'] = reshaped_words
 
-                # Prepare multiline text
-                if language_name.lower() == LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-                    multiline_text = create_multiline_text_chinese(
-                        " ".join(word for word, _ in highlighted_segment_text['text']),
-                        config.language_font,
-                        video_width,
-                        config.buffer_size
-                    )
-                else:
-                    multiline_text = create_multiline_text(
-                        " ".join(word for word, _ in highlighted_segment_text['text']),
-                        config.language_font,
-                        video_width,
-                        config.buffer_size
-                    )
-
-
-                romanized_multiline_text = None
-                if highlighted_segment_text.get('romanized'):
-                    romanized_segment_text = " ".join(word for word, _ in highlighted_segment_text['romanized'])
-                    romanized_multiline_text = create_multiline_text(
-                        romanized_segment_text,
-                        config.language_font,
-                        video_width,
-                        config.buffer_size
-                    )
+                # # Prepare multiline text
+                # if language_name.lower() == LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
+                #     multiline_text = create_multiline_text_chinese(
+                #         " ".join(word for word, _ in highlighted_segment_text['text']),
+                #         config.language_font,
+                #         video_width,
+                #         config.buffer_size
+                #     )
+                #
+                # else:
+                #     multiline_text = create_multiline_text(
+                #         " ".join(word for word, _ in highlighted_segment_text['text']),
+                #         config.language_font,
+                #         video_width,
+                #         config.buffer_size
+                #     )
+                #
+                #
+                # romanized_multiline_text = None
+                # if highlighted_segment_text.get('romanized'):
+                #     romanized_segment_text = " ".join(word for word, _ in highlighted_segment_text['romanized'])
+                #     romanized_multiline_text = create_multiline_text(
+                #         romanized_segment_text,
+                #         config.language_font,
+                #         video_width,
+                #         config.buffer_size
+                #     )
 
                 # Convert multiline text to list of tuples for annotation
                 multiline_text_tuples = [
@@ -212,7 +213,7 @@ def highlight_current_word_in_segment_texts(current_segment: TranslatedTranscrip
 
     for segment_word in segment_words:
         if stripped_current_word_text and stripped_current_word_text in strip_punctuation(
-                segment_word) or strip_punctuation(current_word_text) in strip_punctuation(segment_word):
+                segment_word) or strip_punctuation(segment_word) in stripped_current_word_text:
             highlighted_words.append((segment_word, True))
         else:
             highlighted_words.append((segment_word, False))
@@ -232,6 +233,7 @@ def highlight_current_word_in_segment_texts(current_segment: TranslatedTranscrip
             else:
                 highlighted_romanized_words.append((romanized_word, False))
 
+        highlighted_segments['romanized'] = highlighted_romanized_words
     return highlighted_segments
 
 
@@ -244,15 +246,17 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                   romanized_multiline_text_tuples: list[tuple[str, bool]] = None) -> None:
     current_y = multiline_y_start
     current_x = config.buffer_size
-
     for word, is_highlighted in multiline_text_tuples:
 
         _, _, text_width, text_height = config.language_font.getbbox(word)
         if is_highlighted:
             image_annotator.rectangle(
-                [current_x, current_y, current_x + text_width, current_y + text_height],
+                [current_x,
+                 current_y,
+                 current_x + text_width,
+                 current_y + text_height],
                 fill=(255,0,255),  # Add transparency
-                outline=config.color
+                outline=(0, 0, 0)
             )
         image_annotator.text(xy=(current_x, current_y),
                              text=word,
@@ -270,13 +274,26 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
 
     if romanized_multiline_text_tuples is not None:
         current_y += config.language_font.size * 1.5
+        current_x = config.buffer_size
         for word, is_highlighted in romanized_multiline_text_tuples:
-            text_width, text_height = image_annotator.textsize(word, font=config.language_font)
+            _, _, text_width, text_height = config.language_font.getbbox(word)
             if is_highlighted:
                 image_annotator.rectangle(
-                    [config.buffer_size, current_y, config.buffer_size + text_width, current_y + text_height],
-                    fill=config.color + (50,),  # Add transparency
+                    [current_x, current_y, current_x + text_width, current_y + text_height],
+                    fill=(255, 0, 255),
                     outline=config.color
                 )
-            image_annotator.text((config.buffer_size, current_y), word, fill=config.color, font=config.language_font)
-            current_y += text_height + 5  # Add some space between lines
+            image_annotator.text((current_x, current_y),
+                                 text = word,
+                                 fill=config.color,
+                                 font=config.language_font,
+                                 stroke_width=2,
+                                 stroke_fill=(0, 0, 0),
+                                 align="left"
+                                 )
+
+            if current_x + text_width > video_width - config.buffer_size:
+                current_y += text_height + 5
+                current_x = config.buffer_size
+            else:
+                current_x += text_width + 5
