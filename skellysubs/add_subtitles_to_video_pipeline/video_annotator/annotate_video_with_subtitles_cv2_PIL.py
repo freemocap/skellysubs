@@ -13,7 +13,7 @@ from skellysubs.add_subtitles_to_video_pipeline.video_annotator.video_reader_wri
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
 from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
 from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import \
-    TranslatedTranscription, MatchedTranslatedSegment, MatchedTranslatedWord, TranslatedTranscriptSegmentWithWords
+    TranslatedTranscription, MatchedTranslatedWord, TranscriptSegment
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +148,7 @@ def annotate_video_with_subtitles(video_path: str,
 
 def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                   image_annotator: ImageDraw,
-                                  current_segment: TranslatedTranscriptSegmentWithWords,
+                                  current_segment: TranscriptSegment,
                                   current_matched_word: MatchedTranslatedWord,
                                   multiline_y_start: int,
                                   video_width: int,
@@ -169,27 +169,17 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
     for word_type, words_list in zip(('translated', 'romanized'), [translated_words_list, romanized_words_list]):
         if not words_list:
             continue
-        if  word_type == 'romanized':
-            right_to_left = False
+
         for word_number, word in enumerate(words_list):
 
             _, _, text_width, text_height = config.language_font.getbbox(word + " ")
+
+            if word_type == 'romanized' and word_number == 0:
+                right_to_left = False
+                current_x = config.buffer_size
+                current_y += text_height
+
             if word_number == current_matched_word.translated_word_index:
-                # if right_to_left and not romanized:
-                #     rectangle_l_b_w_h = [current_x - text_width - 5,
-                #                          current_y - 5,
-                #                          current_x + 5,
-                #                          current_y + text_height + 5]
-                # else:
-                #     rectangle_l_b_w_h = [current_x - 5,
-                #                          current_y - 5,
-                #                          current_x + text_width + 5,
-                #                          current_y + text_height + 5]
-                # image_annotator.rectangle(
-                #     rectangle_l_b_w_h,
-                #     fill=(255, 0, 255, 155),  # Add transparency
-                #     outline=(0, 0, 0)
-                # )
 
                 image_annotator.text((current_x if not right_to_left  else current_x - text_width,
                                       current_y),

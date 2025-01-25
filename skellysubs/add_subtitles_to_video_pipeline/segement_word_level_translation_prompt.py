@@ -4,7 +4,7 @@ from skellysubs.translate_transcript_pipeline.models.translated_transcript_model
     TranslatedTranscription
 
 logger = logging.getLogger(__name__)
-SEGMENT_WORD_LEVEL_TASK_INSTRUCTIONS = """
+WORD_LEVEL_TRANSLATION_MATCHING_TASK_INSTRUCTIONS = """
 You are an expert translator. 
 
 You will be given the result of a Whisper transcription of an audio recording in {original_language} which has already
@@ -91,7 +91,7 @@ def format_segment_word_level_transcript_translation_system_prompts(
     for language in initialized_translated_transcript.og_text_and_translations.keys():
         prompts_by_segment_by_language[language] = {}
         for segment_number, segment in enumerate(initialized_translated_transcript.segments):
-            prompts_by_segment_by_language[language][segment_number] = SEGMENT_WORD_LEVEL_TASK_INSTRUCTIONS.format(
+            prompts_by_segment_by_language[language][segment_number] = WORD_LEVEL_TRANSLATION_MATCHING_TASK_INSTRUCTIONS.format(
                 original_language=initialized_translated_transcript.original_language,
                 target_language_with_their_romanization_methods=initialized_translated_transcript.language_pair_by_language(
                     language).model_dump_json(indent=2),

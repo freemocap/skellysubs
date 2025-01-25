@@ -1,86 +1,73 @@
 import json
 import logging
 
-from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import TranslatedTranscriptionWithoutWords
+from torch.utils.benchmark import Language
 
+from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
+from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import TranslatedTranscription
 
 logger = logging.getLogger(__name__)
 
-BASE_TRANSLATION_PROMPT = """
-You are an expert translator. You are trained in audio transcription and translation, and have been trained in the 
-proper way to romanize languages that do not use the Latin alphabet (such as Chinese or Arabic).
 
-You are fluent and trained in the following languages (and their romanization methods): 
 
-{languages}
 
-"""
+FULL_TEXT_TRANSLATION_SYSTEM_PROMPT = """
 
-SEGMENT_TRANSLATION_INSTRUCTIONS = """
-You will be given the result of a Whisper transcription of an audio recording in {original_language}, and asked to 
-provide a translation of the full text and a list of the timestamped segments that make up the full transcript. Your 
-job is to translate the original text into each of the target lanauages defined in the initialized 
-TranslatedTranscription object.
+You are an expert translator. 
 
-You will be provided a JSON schema and a partially initialized TranslatedTranscription object that contains the 
-original text and the target languages you are expected to translate the text into (including any romanization
- requirements).
+You will be given the result of a Whisper transcription of an audio recording in {original_language} which has already
+ been translated into the following language:  
 
-You should begin by translating the entire text, and then break it up into segments to match the original transcription 
-(Keep the original timestamps!)
+{target_language_with_their_romanization_methods}
 
-Make sure that all requested languages are translated accurately and that any romanizations are correct. Make sure that 
-all languages cover the full meaning of the original transcribed text. 
-
-When Translating numbers, prefer to use the same number in the target language such as in Arabic, instead of 
-1, 2, 3 use ١, ٢, ٣.
+You will be provided with a transcript of the original language, and your task is to translate the text into the target
+language and provide the romanization method specified (if applicable).
 
 Remember, this is an audio transcription, so the text may contain errors. Please do your best to provide an accurate 
 translation of the transcription and attempt to match the speaker's meaning and intention as closely as possible.
 
-Here is the initialized TranslatedTranscription object that you will be working with, which contains the original text 
-and the target languages you are expected to translate the text into (including any romanization requirements)
- - Fill in the sections that say "NOT YET TRANSLATED" with your translations/romanizations
+
+-------
+ORIGINAL LANGUAGE TRANSCRIPT:
+
+
+{original_language_transcript}
+
+END OF ORIGINAL LANGUAGE TRANSCRIPT
+
+
+-------
+
+REMEMBER! Your task is to translate the text into the target
+language and provide the romanization method specified (if applicable).
+
+Remember, this is an audio transcription, so the text may contain errors. Please do your best to provide an accurate 
+translation of the transcription and attempt to match the speaker's meaning and intention as closely as possible.
+
+If the Target language is the same as the original language, simply copy the text as is.
 """
 
 
-TRANSCRIPT_TRANSLATION_SYSTEM_PROMPT = """
-
-{base_translation_prompt}
-
-Your task is: 
-
-{translation_task_instructions}
-
--------
-{initialized_translated_transcription_object}
--------
-
-REMEMBER! Your task is: 
-
-{translation_task_instructions_repeated}
-
-"""
-
-
-def format_full_segement_level_transcript_translation_system_prompt(
-        initialized_translated_transcript_without_words: TranslatedTranscriptionWithoutWords) -> str:
-    full_text_segment_level_prompt = TRANSCRIPT_TRANSLATION_SYSTEM_PROMPT.format(
-        base_translation_prompt=BASE_TRANSLATION_PROMPT,
-        translation_task_instructions=SEGMENT_TRANSLATION_INSTRUCTIONS,
-        languages=initialized_translated_transcript_without_words.target_languages_as_string,
-        original_language=initialized_translated_transcript_without_words.original_language,
-        initialized_translated_transcription_object=json.dumps(initialized_translated_transcript_without_words.model_dump(), indent=2),
-        translation_task_instructions_repeated=SEGMENT_TRANSLATION_INSTRUCTIONS,
-    )
+def format_full_text_translation_system_prompt(
+        initialized_translated_transcript_without_words: TranslatedTranscription) -> dict[str, str]:
+    full_text_translation_prompts_by_language = {}
+    for language in initialized_translated_transcript_without_words.translated_languagues:
+        if language.lower() in LanguageNames.ENGLISH.value.lower():
+            continue
+        full_text_translation_prompts_by_language[language] = FULL_TEXT_TRANSLATION_SYSTEM_PROMPT.format(
+            original_language=initialized_translated_transcript_without_words.original_language,
+            target_language_with_their_romanization_methods=initialized_translated_transcript_without_words.language_pair_by_language(
+                    language).model_dump_json(indent=2),
+            original_language_transcript=initialized_translated_transcript_without_words.original_text
+        )
 
     logger.debug(
         "==================================\n\n"
         f"Formatted system prompts: \n\n"
         f" FULL TEXT/SEGMENT LEVEL SYSTEM PROMPT: \n"
-        f"{full_text_segment_level_prompt}\n\n"
+        f"{full_text_translation_prompts_by_language}\n\n"
         "==================================\n\n"
     )
 
-    return full_text_segment_level_prompt
+    return full_text_translation_prompts_by_language
 
