@@ -7,7 +7,8 @@ from skellysubs.translate_transcript_pipeline.models.translated_transcript_model
 logger = logging.getLogger(__name__)
 
 BASE_TRANSLATION_PROMPT = """
-You are an expert translator. You are trained in audio transcription and translation, and have been trained in the proper way to romanize languages that do not use the Latin alphabet (such as Chinese or Arabic).
+You are an expert translator. You are trained in audio transcription and translation, and have been trained in the 
+proper way to romanize languages that do not use the Latin alphabet (such as Chinese or Arabic).
 
 You are fluent and trained in the following languages (and their romanization methods): 
 
@@ -16,17 +17,30 @@ You are fluent and trained in the following languages (and their romanization me
 """
 
 SEGMENT_TRANSLATION_INSTRUCTIONS = """
-You will be given the result of a Whisper transcription of an audio recording in {original_language}, and asked to provide a translation of the full text and a list of the timestamped segments that make up the full transcript. Your job is to translate the original text into each of the target lanauages defined in the initialized TranslatedTranscription object.
+You will be given the result of a Whisper transcription of an audio recording in {original_language}, and asked to 
+provide a translation of the full text and a list of the timestamped segments that make up the full transcript. Your 
+job is to translate the original text into each of the target lanauages defined in the initialized 
+TranslatedTranscription object.
 
-You will be provided a JSON schema and a partially initialized TranslatedTranscription object that contains the original text and the target languages you are expected to translate the text into (including any romanization requirements).
+You will be provided a JSON schema and a partially initialized TranslatedTranscription object that contains the 
+original text and the target languages you are expected to translate the text into (including any romanization
+ requirements).
 
-You should begin by translating the entire text, and then break it up into segments to match the original transcription (Keep the original timestamps!)
+You should begin by translating the entire text, and then break it up into segments to match the original transcription 
+(Keep the original timestamps!)
 
-Make sure that all requested languages are translated accurately and that any romanizations are correct. Make sure that all languages cover the full meaning of the original transcribed text. 
+Make sure that all requested languages are translated accurately and that any romanizations are correct. Make sure that 
+all languages cover the full meaning of the original transcribed text. 
 
-Remember, this is an audio transcription, so the text may contain errors. Please do your best to provide an accurate translation of the transcription and attempt to match the speaker's meaning and intention as closely as possible.
+When Translating numbers, prefer to use the same number in the target language such as in Arabic, instead of 
+1, 2, 3 use ١, ٢, ٣.
 
-Here is the initialized TranslatedTranscription object that you will be working with, which contains the original text and the target languages you are expected to translate the text into (including any romanization requirements) - Fill in the sections that say "NOT YET TRANSLATED" with your translations/romanizations:
+Remember, this is an audio transcription, so the text may contain errors. Please do your best to provide an accurate 
+translation of the transcription and attempt to match the speaker's meaning and intention as closely as possible.
+
+Here is the initialized TranslatedTranscription object that you will be working with, which contains the original text 
+and the target languages you are expected to translate the text into (including any romanization requirements)
+ - Fill in the sections that say "NOT YET TRANSLATED" with your translations/romanizations
 """
 
 

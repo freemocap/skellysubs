@@ -1,24 +1,19 @@
 import logging
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
 import cv2
-import jieba
 from PIL import Image, ImageFont, ImageDraw
-from PIL.ImageFont import truetype
 from arabic_reshaper import arabic_reshaper
 from bidi.algorithm import get_display
 from tqdm import tqdm
 
-from skellysubs.add_subtitles_to_video_pipeline.video_annotator.create_multi_line_text import \
-    create_multiline_text_chinese, create_multiline_text
 from skellysubs.add_subtitles_to_video_pipeline.video_annotator.video_reader_writer_methods import \
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
 from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
 from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import \
-    TranslatedTranscription, TranslatedTranscriptSegmentWithWords, TranslatedWhisperWordTimestamp
+    TranslatedTranscription, MatchedTranslatedSegment, MatchedTranslatedWord, TranslatedTranscriptSegmentWithWords
 
 logger = logging.getLogger(__name__)
 
@@ -100,47 +95,31 @@ def annotate_video_with_subtitles(video_path: str,
             pil_image = Image.fromarray(image)
             image_annotator = ImageDraw.Draw(pil_image)
 
-            current_segment, current_word = translated_transcript.get_segment_and_word_at_timestamp(frame_timestamp)
+            current_segment_and_matched_word = translated_transcript.get_matched_segment_and_word_at_timestamp(
+                frame_timestamp)
+            current_segment = current_segment_and_matched_word.current_segment
             for language_name, config in LANGUAGE_ANNOTATION_CONFIGS.items():
-
-                highlighted_segment_text = highlight_current_word_in_segment_texts(
-                    current_segment=current_segment,
-                    current_word=current_word,
-                    language_name=language_name)
+                current_matched_word = current_segment_and_matched_word.matched_word_by_language[language_name]
 
                 multiline_y_start = config.language_start_y(video_height)
 
-
-                # Arabic text reshaping and display
-                if language_name.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
-                    reshaped_words = [
-                        (get_display(arabic_reshaper.reshape(word)), is_highlighted)
-                        for word, is_highlighted in highlighted_segment_text['text']
-                    ]
-                    # reversed for correct display
-                    highlighted_segment_text['text'] = reshaped_words
-
-
-                # Convert multiline text to list of tuples for annotation
-                multiline_text_tuples = [
-                    (word, is_highlighted) for word, is_highlighted in highlighted_segment_text['text']
-                ]
-                romanized_text_tuples = [
-                    (word, is_highlighted) for word, is_highlighted in highlighted_segment_text['romanized']
-                ] if highlighted_segment_text.get('romanized') else None
-
-                # Reverse lines for Arabic text to render correctly
-                if language_name.lower() == LanguageNames.ARABIC_LEVANTINE.value.lower():
-                    multiline_text_tuples = list(reversed(multiline_text_tuples))
-
+                #
+                #
+                # # Convert multiline text to list of tuples for annotation
+                # multiline_text_tuples = [
+                #     (word, is_highlighted) for word, is_highlighted in highlighted_segment_text['text']
+                # ]
+                # romanized_text_tuples = [
+                #     (word, is_highlighted) for word, is_highlighted in highlighted_segment_text['romanized']
+                # ] if highlighted_segment_text.get('romanized') else None
 
                 annotate_image_with_subtitles(config=config,
                                               image_annotator=image_annotator,
-                                                multiline_text_tuples=multiline_text_tuples,
                                               multiline_y_start=multiline_y_start,
-                                              romanized_multiline_text_tuples=romanized_text_tuples,
-                                                video_width=video_width,
-                                                video_height=video_height)
+                                              current_segment=current_segment,
+                                              current_matched_word=current_matched_word,
+                                              video_width=video_width,
+                                              video_height=video_height)
 
             image = write_frame_to_video_file(pil_image=pil_image,
                                               video_writer=video_writer)
@@ -155,6 +134,9 @@ def annotate_video_with_subtitles(video_path: str,
                 cv2.imshow(str(Path(video_path).stem), display_image)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
+    except Exception as e:
+        logger.error(f"Error while annotating video: {e}")
+        raise e
     finally:
         video_reader.release()
         video_writer.release()
@@ -164,103 +146,85 @@ def annotate_video_with_subtitles(video_path: str,
         cv2.destroyAllWindows()
 
 
-def highlight_current_word_in_segment_texts(current_segment: TranslatedTranscriptSegmentWithWords,
-                                            current_word: TranslatedWhisperWordTimestamp,
-                                            language_name: LanguageNames) -> dict[str, list[tuple[str, bool]]]:
-    """Highlight the current word in the segment text, ignoring punctuation."""
-
-
-    highlighted_segments = {}
-
-    segment_text, romanized_text = current_segment.get_text_by_language(language_name)
-
-    segment_words = current_segment.get_word_list_by_language(language_name)
-
-    highlighted_words = []
-
-    for segment_word_number, segment_word in enumerate(segment_words):
-        if current_word.matched_words[language_name].translated_word_index == segment_word_number:
-            highlighted_words.append((segment_word, True))
-        else:
-            highlighted_words.append((segment_word, False))
-
-    highlighted_segments['text'] = highlighted_words
-
-    if romanized_text is not None:
-        romanized_words = romanized_text.split()
-
-        highlighted_romanized_words = []
-        for romanized_word_number, romanized_word in enumerate(romanized_words):
-            try:
-                if current_word.matched_words[language_name].translated_word_index == romanized_word_number:
-                    highlighted_romanized_words.append((romanized_word, True))
-                else:
-                    highlighted_romanized_words.append((romanized_word, False))
-            except Exception as e:
-                logger.error(f"Error highlighting romanized word: {e}")
-
-        highlighted_segments['romanized'] = highlighted_romanized_words
-    return highlighted_segments
-
-
 def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                   image_annotator: ImageDraw,
-                                  multiline_text_tuples: list[tuple[str, bool]],
+                                  current_segment: TranslatedTranscriptSegmentWithWords,
+                                  current_matched_word: MatchedTranslatedWord,
                                   multiline_y_start: int,
                                   video_width: int,
                                   video_height: int,
-                                  romanized_multiline_text_tuples: list[tuple[str, bool]] = None) -> None:
-    current_y = multiline_y_start
-    current_x = config.buffer_size
+                                  ) -> None:
+    right_to_left: bool = config.language_name.lower() in LanguageNames.ARABIC_LEVANTINE.value.lower()
+    current_y =  multiline_y_start
+    if right_to_left:
+        current_x = video_width - config.buffer_size*2
+    else:
+        current_x  = config.buffer_size
 
-    for word, is_highlighted in multiline_text_tuples:
+    translated_words_list, romanized_words_list = current_segment.get_word_list_by_language(config.language_name)
 
-        _, _, text_width, text_height = config.language_font.getbbox(word)
-        if is_highlighted:
-            image_annotator.rectangle(
-                [current_x,
-                 current_y,
-                 current_x + text_width,
-                 current_y + text_height],
-                fill=(255,0,255),  # Add transparency
-                outline=(0, 0, 0)
-            )
-        image_annotator.text(xy=(current_x, current_y),
-                             text=word,
-                             fill=config.color,
-                             font=config.language_font,
-                             stroke_width=2,
-                             stroke_fill=(0, 0, 0),
-                             align="left", # if config.language_name != LanguageNames.ARABIC_LEVANTINE else "right"
-                             )
-        if current_x + text_width > video_width - config.buffer_size:
-            current_y += text_height + 5  # Add some space between lines
-            current_x = config.buffer_size
-        else:
-            current_x += text_width + 5  # Add some space between words
+    if config.language_name.lower() in LanguageNames.ARABIC_LEVANTINE.value.lower():
+        translated_words_list = [get_display(arabic_reshaper.reshape(word)) for word in translated_words_list]
 
-    if romanized_multiline_text_tuples is not None:
-        current_y += config.language_font.size * 1.5
-        current_x = config.buffer_size
-        for word, is_highlighted in romanized_multiline_text_tuples:
-            _, _, text_width, text_height = config.language_font.getbbox(word)
-            if is_highlighted:
-                image_annotator.rectangle(
-                    [current_x, current_y, current_x + text_width, current_y + text_height],
-                    fill=(255, 0, 255),
-                    outline=config.color
-                )
-            image_annotator.text((current_x, current_y),
-                                 text = word,
-                                 fill=config.color,
-                                 font=config.language_font,
-                                 stroke_width=2,
-                                 stroke_fill=(0, 0, 0),
-                                 align="left"
-                                 )
+    for word_type, words_list in zip(('translated', 'romanized'), [translated_words_list, romanized_words_list]):
+        if not words_list:
+            continue
+        romanized= word_type == 'romanized'
+        for word_number, word in enumerate(words_list):
 
-            if current_x + text_width > video_width - config.buffer_size:
-                current_y += text_height + 5
-                current_x = config.buffer_size
+            _, _, text_width, text_height = config.language_font.getbbox(word + " ")
+            if word_number == current_matched_word.translated_word_index:
+                # if right_to_left and not romanized:
+                #     rectangle_l_b_w_h = [current_x - text_width - 5,
+                #                          current_y - 5,
+                #                          current_x + 5,
+                #                          current_y + text_height + 5]
+                # else:
+                #     rectangle_l_b_w_h = [current_x - 5,
+                #                          current_y - 5,
+                #                          current_x + text_width + 5,
+                #                          current_y + text_height + 5]
+                # image_annotator.rectangle(
+                #     rectangle_l_b_w_h,
+                #     fill=(255, 0, 255, 155),  # Add transparency
+                #     outline=(0, 0, 0)
+                # )
+
+                image_annotator.text((current_x if not right_to_left and not romanized else current_x - text_width,
+                                      current_y),
+                                     text=word,
+                                     fill=config.color,
+                                     font=config.language_font,
+                                     stroke_width=8,
+                                     stroke_fill=(0, 0, 255),
+                                     align="left"
+                                     )
+
+
+            #annotate the word regardless of whether it is the matches
+            image_annotator.text((current_x if not right_to_left and not romanized else current_x - text_width,
+                                  current_y),
+                                     text=word,
+                                     fill=config.color,
+                                     font=config.language_font,
+                                     stroke_width=2,
+                                     stroke_fill=(0, 0, 0),
+                                     align="left"
+                                     )
+
+
+            if right_to_left and not romanized:
+                if current_x - text_width < config.buffer_size:
+                    current_y += text_height
+                    current_x = video_width - config.buffer_size*2
+                else:
+                    current_x -= text_width
+
             else:
-                current_x += text_width + 5
+                if current_x + text_width > video_width - config.buffer_size:
+                    current_y += text_height
+                    current_x = config.buffer_size
+                else:
+                    current_x += text_width
+
+
