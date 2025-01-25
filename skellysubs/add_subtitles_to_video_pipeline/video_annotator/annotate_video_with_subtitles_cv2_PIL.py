@@ -169,7 +169,8 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
     for word_type, words_list in zip(('translated', 'romanized'), [translated_words_list, romanized_words_list]):
         if not words_list:
             continue
-        romanized= word_type == 'romanized'
+        if  word_type == 'romanized':
+            right_to_left = False
         for word_number, word in enumerate(words_list):
 
             _, _, text_width, text_height = config.language_font.getbbox(word + " ")
@@ -190,7 +191,7 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                 #     outline=(0, 0, 0)
                 # )
 
-                image_annotator.text((current_x if not right_to_left and not romanized else current_x - text_width,
+                image_annotator.text((current_x if not right_to_left  else current_x - text_width,
                                       current_y),
                                      text=word,
                                      fill=config.color,
@@ -202,7 +203,7 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
 
 
             #annotate the word regardless of whether it is the matches
-            image_annotator.text((current_x if not right_to_left and not romanized else current_x - text_width,
+            image_annotator.text((current_x if not right_to_left else current_x - text_width,
                                   current_y),
                                      text=word,
                                      fill=config.color,
@@ -213,7 +214,7 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                      )
 
 
-            if right_to_left and not romanized:
+            if right_to_left:
                 if current_x - text_width < config.buffer_size:
                     current_y += text_height
                     current_x = video_width - config.buffer_size*2
