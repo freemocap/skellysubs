@@ -21,16 +21,21 @@ def validate_audio_path(audio_path: str) -> None:
 def transcribe_audio(audio_path: str, model_name: str = "large") -> WhisperTranscriptionResult:
     import whisper
     import torch
-    logger.info(f"Transcribing audio: {audio_path} with whisper model: {model_name} - import torch; torch.cuda_is_available(): {torch.cuda.is_available()}")
+    logger.info(
+        f"Transcribing audio: {audio_path} with whisper model: {model_name} - import torch; torch.cuda_is_available(): {torch.cuda.is_available()}")
 
     validate_audio_path(audio_path)
     model = whisper.load_model(model_name)
     result = model.transcribe(audio_path,
-                              word_timestamps=True,)
+                              word_timestamps=True,
+                              no_speech_threshold=0.5,
+                              hallucination_silence_threshold=0.5,
+                              )
     return WhisperTranscriptionResult(**result)
 
+
 def transcribe_audio_detailed(audio_path: str,
-                                model_name: str = "turbo",
+                              model_name: str = "turbo",
                               ):
     import whisper
 
@@ -64,5 +69,3 @@ def save_spectrogram_image(audio_path, mel):
     mel_image_scaled = cv2.normalize(mel_image, None, 0, 255, cv2.NORM_MINMAX)
     mel_image_heatmapped = cv2.applyColorMap(mel_image_scaled.astype('uint8'), cv2.COLORMAP_PLASMA)
     cv2.imwrite(str(Path(audio_path).with_suffix(".log_mel_spectrogram.png")), mel_image_heatmapped)
-
-

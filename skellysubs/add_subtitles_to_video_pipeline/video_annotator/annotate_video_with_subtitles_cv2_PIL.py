@@ -119,33 +119,6 @@ def annotate_video_with_subtitles(video_path: str,
                     ]
                     highlighted_segment_text['text'] = reshaped_words
 
-                # # Prepare multiline text
-                # if language_name.lower() == LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-                #     multiline_text = create_multiline_text_chinese(
-                #         " ".join(word for word, _ in highlighted_segment_text['text']),
-                #         config.language_font,
-                #         video_width,
-                #         config.buffer_size
-                #     )
-                #
-                # else:
-                #     multiline_text = create_multiline_text(
-                #         " ".join(word for word, _ in highlighted_segment_text['text']),
-                #         config.language_font,
-                #         video_width,
-                #         config.buffer_size
-                #     )
-                #
-                #
-                # romanized_multiline_text = None
-                # if highlighted_segment_text.get('romanized'):
-                #     romanized_segment_text = " ".join(word for word, _ in highlighted_segment_text['romanized'])
-                #     romanized_multiline_text = create_multiline_text(
-                #         romanized_segment_text,
-                #         config.language_font,
-                #         video_width,
-                #         config.buffer_size
-                #     )
 
                 # Convert multiline text to list of tuples for annotation
                 multiline_text_tuples = [
@@ -195,25 +168,19 @@ def highlight_current_word_in_segment_texts(current_segment: TranslatedTranscrip
                                             language_name: LanguageNames) -> dict[str, list[tuple[str, bool]]]:
     """Highlight the current word in the segment text, ignoring punctuation."""
 
-    def strip_punctuation(text: str) -> str:
-        return re.sub(r'[^\w\s]', '', text)
 
     highlighted_segments = {}
 
     segment_text, romanized_text = current_segment.get_text_by_language(language_name)
-    current_word_text, romanized_current_word_text = current_word.get_word_by_language(language_name)
+    # current_word_text, romanized_current_word_text = current_word.get_word_by_language(language_name)
 
-    stripped_current_word_text = strip_punctuation(current_word_text)
-    if language_name.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-        segment_words = list(jieba.cut(segment_text))
-    else:
-        segment_words = segment_text.split()
+    # stripped_current_word_text = strip_punctuation(current_word_text)
+    segment_words = current_segment.get_word_list_by_language(language_name)
 
     highlighted_words = []
 
-    for segment_word in segment_words:
-        if stripped_current_word_text and stripped_current_word_text in strip_punctuation(
-                segment_word) or strip_punctuation(segment_word) in stripped_current_word_text:
+    for segment_word_number, segment_word in enumerate(segment_words):
+        if current_word.matched_words[language_name].translated_word_index == segment_word_number:
             highlighted_words.append((segment_word, True))
         else:
             highlighted_words.append((segment_word, False))
@@ -221,17 +188,17 @@ def highlight_current_word_in_segment_texts(current_segment: TranslatedTranscrip
     highlighted_segments['text'] = highlighted_words
 
     if romanized_text is not None:
-        stripped_romanized_word_text = strip_punctuation(romanized_current_word_text)
         romanized_words = romanized_text.split()
 
         highlighted_romanized_words = []
-        for romanized_word in romanized_words:
-            if stripped_romanized_word_text and stripped_romanized_word_text in strip_punctuation(
-                    romanized_word) or strip_punctuation(romanized_current_word_text) in strip_punctuation(
-                    romanized_word):
-                highlighted_romanized_words.append((romanized_word, True))
-            else:
-                highlighted_romanized_words.append((romanized_word, False))
+        for romanized_word_number, romanized_word in enumerate(romanized_words):
+            try:
+                if current_word.matched_words[language_name].translated_word_index == romanized_word_number:
+                    highlighted_romanized_words.append((romanized_word, True))
+                else:
+                    highlighted_romanized_words.append((romanized_word, False))
+            except Exception as e:
+                logger.error(f"Error highlighting romanized word: {e}")
 
         highlighted_segments['romanized'] = highlighted_romanized_words
     return highlighted_segments

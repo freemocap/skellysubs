@@ -15,16 +15,16 @@
             "romanized_text": ""
         },
         "chinese": {
-            "translated_text": " 你好，我叫约翰·马西斯。很高兴见到你。1，2，3，4，5，蓝色，绿色，红色，狗，猫，牛，鸟。谢谢，再见。",
+            "translated_text": " 你好，我叫约翰·马蒂斯。很高兴认识你。1，2，3，4，5，蓝色，绿色，红色，狗，猫，牛，鸟。谢谢，再见。",
             "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
             "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-            "romanized_text": " Nǐ hǎo, wǒ jiào Yuēhàn Mǎxīsī. Hěn gāoxìng jiàn dào nǐ. 1, 2, 3, 4, 5, lánsè, lǜsè, hóngsè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
+            "romanized_text": "Nǐ hǎo, wǒ jiào Yuēhàn Mǎdǐsī. Hěn gāoxìng rènshì nǐ. 1, 2, 3, 4, 5, lán sè, lǜ sè, hóng sè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
         },
         "arabic": {
-            "translated_text": " مرحبا، اسمي جون ماثيس. سعيد بلقائك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرا وإلى اللقاء.",
+            "translated_text": " مرحبا، اسمي جون ماثيس. من الجيد مقابلتك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرا ووداعا.",
             "translated_language": "ARABIC_LEVANTINE",
             "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-            "romanized_text": " Marḥabā, ismī Jūn Māthīs. Saʿīd bilqāʾak. 1, 2, 3, 4, 5, azraq, akhḍar, aḥmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukrān wa ilā al-liqā'."
+            "romanized_text": "Marḥabā, ismī Jūn Māthīs. Min al-jayyid muqābalatak. 1, 2, 3, 4, 5, azraq, akhḍar, ahmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukran wa-wadā'."
         }
     },
     "segments": [
@@ -35,58 +35,82 @@
                     "translated_text": " Hello, my name is John Mathis. Nice to meet you. 1, 2, 3, 4, 5, blue, green, red, dog, cat, cow, bird. Thank you and goodbye.",
                     "translated_language": "ENGLISH",
                     "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                    "romanized_text": " Hello, my name is John Mathis. Nice to meet you. 1, 2, 3, 4, 5, blue, green, red, dog, cat, cow, bird. Thank you and goodbye."
+                    "romanized_text": ""
                 },
                 "spanish": {
                     "translated_text": " Hola, mi nombre es John Mathis. Encantado de conocerte. 1, 2, 3, 4, 5, azul, verde, rojo, perro, gato, vaca, pájaro. Gracias y adiós.",
                     "translated_language": "SPANISH",
                     "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                    "romanized_text": " Hola, mi nombre es John Mathis. Encantado de conocerte. 1, 2, 3, 4, 5, azul, verde, rojo, perro, gato, vaca, pájaro. Gracias y adiós."
+                    "romanized_text": ""
                 },
                 "chinese": {
-                    "translated_text": " 你好，我叫约翰·马西斯。很高兴见到你。1，2，3，4，5，蓝色，绿色，红色，狗，猫，牛，鸟。谢谢，再见。",
+                    "translated_text": " 你好，我叫约翰·马蒂斯。很高兴认识你。1，2，3，4，5，蓝色，绿色，红色，狗，猫，牛，鸟。谢谢，再见。",
                     "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
                     "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                    "romanized_text": " Nǐ hǎo, wǒ jiào Yuēhàn Mǎxīsī. Hěn gāoxìng jiàn dào nǐ. 1, 2, 3, 4, 5, lánsè, lǜsè, hóngsè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
+                    "romanized_text": "Nǐ hǎo, wǒ jiào Yuēhàn Mǎdǐsī. Hěn gāoxìng rènshì nǐ. 1, 2, 3, 4, 5, lán sè, lǜ sè, hóng sè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
                 },
                 "arabic": {
-                    "translated_text": " مرحبا، اسمي جون ماثيس. سعيد بلقائك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرا وإلى اللقاء.",
+                    "translated_text": " مرحبا، اسمي جون ماثيس. من الجيد مقابلتك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرا ووداعا.",
                     "translated_language": "ARABIC_LEVANTINE",
                     "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                    "romanized_text": " Marḥabā, ismī Jūn Māthīs. Saʿīd bilqāʾak. 1, 2, 3, 4, 5, azraq, akhḍar, aḥmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukrān wa ilā al-liqā'."
+                    "romanized_text": "Marḥabā, ismī Jūn Māthīs. Min al-jayyid muqābalatak. 1, 2, 3, 4, 5, azraq, akhḍar, ahmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukran wa-wadā'."
                 }
             },
             "start": 0.0,
-            "end": 8.32,
+            "end": 8.58,
             "words": [
                 {
                     "start": 0.0,
                     "end": 0.42,
                     "original_word": " Hello,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " Hello,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Hello,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "Hello,",
+                            "original_word_index": 0,
+                            "translated_word_text": "Hello,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 0
                         },
-                        "spanish": {
-                            "translated_text": " Hola,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Hola,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "Hello,",
+                            "original_word_index": 0,
+                            "translated_word_text": "Hola,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 0
                         },
-                        "chinese": {
-                            "translated_text": " 你好，",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Nǐ hǎo,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "Hello,",
+                            "original_word_index": 0,
+                            "translated_word_text": "你好",
+                            "translated_word_romanized_text": "nǐ hǎo",
+                            "translated_word_index": 1
                         },
-                        "arabic": {
-                            "translated_text": " مرحبا،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Marḥabā,"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "Hello,",
+                            "original_word_index": 0,
+                            "translated_word_text": "مرحبا،",
+                            "translated_word_romanized_text": "marhaban,",
+                            "translated_word_index": 0
                         }
                     }
                 },
@@ -94,30 +118,54 @@
                     "start": 0.46,
                     "end": 0.58,
                     "original_word": " my",
-                    "translations": {
-                        "english": {
-                            "translated_text": " my",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " my"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "my",
+                            "original_word_index": 1,
+                            "translated_word_text": "my",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 1
                         },
-                        "spanish": {
-                            "translated_text": " mi",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " mi"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "my",
+                            "original_word_index": 1,
+                            "translated_word_text": "mi",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 1
                         },
-                        "chinese": {
-                            "translated_text": " 我的",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Wǒ de"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "my",
+                            "original_word_index": 1,
+                            "translated_word_text": "我",
+                            "translated_word_romanized_text": "wǒ",
+                            "translated_word_index": 3
                         },
-                        "arabic": {
-                            "translated_text": " لي",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " lī"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "my",
+                            "original_word_index": 1,
+                            "translated_word_text": "اسمي",
+                            "translated_word_romanized_text": "ismī",
+                            "translated_word_index": 1
                         }
                     }
                 },
@@ -125,30 +173,54 @@
                     "start": 0.58,
                     "end": 0.78,
                     "original_word": " name",
-                    "translations": {
-                        "english": {
-                            "translated_text": " name",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " name"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "name",
+                            "original_word_index": 2,
+                            "translated_word_text": "name",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 2
                         },
-                        "spanish": {
-                            "translated_text": " nombre",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " nombre"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "name",
+                            "original_word_index": 2,
+                            "translated_word_text": "nombre",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 2
                         },
-                        "chinese": {
-                            "translated_text": " 名字",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Míngzì"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "name",
+                            "original_word_index": 2,
+                            "translated_word_text": "叫",
+                            "translated_word_romanized_text": "jiào",
+                            "translated_word_index": 4
                         },
-                        "arabic": {
-                            "translated_text": " اسم",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " ism"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "name",
+                            "original_word_index": 2,
+                            "translated_word_text": "اسمي",
+                            "translated_word_romanized_text": "ismī",
+                            "translated_word_index": 1
                         }
                     }
                 },
@@ -156,30 +228,54 @@
                     "start": 0.78,
                     "end": 0.96,
                     "original_word": " is",
-                    "translations": {
-                        "english": {
-                            "translated_text": " is",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " is"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "is",
+                            "original_word_index": 3,
+                            "translated_word_text": "is",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 3
                         },
-                        "spanish": {
-                            "translated_text": " es",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " es"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "is",
+                            "original_word_index": 3,
+                            "translated_word_text": "es",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 3
                         },
-                        "chinese": {
-                            "translated_text": " 是",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Shì"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "is",
+                            "original_word_index": 3,
+                            "translated_word_text": "叫",
+                            "translated_word_romanized_text": "jiào",
+                            "translated_word_index": 4
                         },
-                        "arabic": {
-                            "translated_text": " هو",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " huwa"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "is",
+                            "original_word_index": 3,
+                            "translated_word_text": "ماثيس.",
+                            "translated_word_romanized_text": "Mathis.",
+                            "translated_word_index": 3
                         }
                     }
                 },
@@ -187,30 +283,54 @@
                     "start": 0.96,
                     "end": 1.14,
                     "original_word": " John",
-                    "translations": {
-                        "english": {
-                            "translated_text": " John",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " John"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "John",
+                            "original_word_index": 4,
+                            "translated_word_text": "John",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 4
                         },
-                        "spanish": {
-                            "translated_text": " Juan",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Juan"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "John",
+                            "original_word_index": 4,
+                            "translated_word_text": "John",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 4
                         },
-                        "chinese": {
-                            "translated_text": " 约翰",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Yuēhàn"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN"
+                            },
+                            "original_word_text": "John",
+                            "original_word_index": 4,
+                            "translated_word_text": "约翰",
+                            "translated_word_romanized_text": "Yuēhàn",
+                            "translated_word_index": 5
                         },
-                        "arabic": {
-                            "translated_text": " جون",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Jūn"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "John",
+                            "original_word_index": 4,
+                            "translated_word_text": "جون",
+                            "translated_word_romanized_text": "Jun",
+                            "translated_word_index": 2
                         }
                     }
                 },
@@ -218,30 +338,54 @@
                     "start": 1.14,
                     "end": 1.6,
                     "original_word": " Mathis.",
-                    "translations": {
-                        "english": {
-                            "translated_text": " Mathis.",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Mathis."
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "Mathis.",
+                            "original_word_index": 5,
+                            "translated_word_text": "Mathis.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 5
                         },
-                        "spanish": {
-                            "translated_text": " Matis.",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Matis."
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "Mathis.",
+                            "original_word_index": 5,
+                            "translated_word_text": "Mathis.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 5
                         },
-                        "chinese": {
-                            "translated_text": " 马西斯。",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Mǎxīsī."
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "Mathis.",
+                            "original_word_index": 5,
+                            "translated_word_text": "马蒂斯",
+                            "translated_word_romanized_text": "Mǎdìsī",
+                            "translated_word_index": 7
                         },
-                        "arabic": {
-                            "translated_text": " ماثيس.",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Māthīs."
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "Mathis.",
+                            "original_word_index": 5,
+                            "translated_word_text": "ماثيس.",
+                            "translated_word_romanized_text": "Māthīs.",
+                            "translated_word_index": 3
                         }
                     }
                 },
@@ -249,30 +393,54 @@
                     "start": 1.6,
                     "end": 1.78,
                     "original_word": " Nice",
-                    "translations": {
-                        "english": {
-                            "translated_text": " Nice",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Nice"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "Nice",
+                            "original_word_index": 6,
+                            "translated_word_text": "Nice",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 6
                         },
-                        "spanish": {
-                            "translated_text": " Encantado",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Encantado"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "Nice",
+                            "original_word_index": 6,
+                            "translated_word_text": "Encantado",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 6
                         },
-                        "chinese": {
-                            "translated_text": " 很高兴",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Hěn gāoxìng"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "Nice",
+                            "original_word_index": 6,
+                            "translated_word_text": "很",
+                            "translated_word_romanized_text": "hěn",
+                            "translated_word_index": 9
                         },
-                        "arabic": {
-                            "translated_text": " سعيد",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Saʿīd"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "Nice",
+                            "original_word_index": 6,
+                            "translated_word_text": "الجيد",
+                            "translated_word_romanized_text": "al-jayyid",
+                            "translated_word_index": 5
                         }
                     }
                 },
@@ -280,30 +448,54 @@
                     "start": 1.78,
                     "end": 1.98,
                     "original_word": " to",
-                    "translations": {
-                        "english": {
-                            "translated_text": " to",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " to"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "to",
+                            "original_word_index": 7,
+                            "translated_word_text": "to",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 7
                         },
-                        "spanish": {
-                            "translated_text": " a",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " a"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "to",
+                            "original_word_index": 7,
+                            "translated_word_text": "de",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 7
                         },
-                        "chinese": {
-                            "translated_text": " 见",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Jiàn"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "to",
+                            "original_word_index": 7,
+                            "translated_word_text": "认识",
+                            "translated_word_romanized_text": "rènshì",
+                            "translated_word_index": 11
                         },
-                        "arabic": {
-                            "translated_text": " لـ",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " li-"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "to",
+                            "original_word_index": 7,
+                            "translated_word_text": "المقابلة",
+                            "translated_word_romanized_text": "al-muqābala",
+                            "translated_word_index": 6
                         }
                     }
                 },
@@ -311,30 +503,54 @@
                     "start": 1.98,
                     "end": 2.16,
                     "original_word": " meet",
-                    "translations": {
-                        "english": {
-                            "translated_text": " meet",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " meet"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "meet",
+                            "original_word_index": 8,
+                            "translated_word_text": "meet",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 8
                         },
-                        "spanish": {
-                            "translated_text": " conocerte",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " conocerte"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "meet",
+                            "original_word_index": 8,
+                            "translated_word_text": "conocerte.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 8
                         },
-                        "chinese": {
-                            "translated_text": " 见到",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Jiàn dào"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "meet",
+                            "original_word_index": 8,
+                            "translated_word_text": "认识",
+                            "translated_word_romanized_text": "rènshì",
+                            "translated_word_index": 11
                         },
-                        "arabic": {
-                            "translated_text": " اللقائك",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " al-liqā'ak"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "meet",
+                            "original_word_index": 8,
+                            "translated_word_text": "مقابلتك.",
+                            "translated_word_romanized_text": "muqābalatik.",
+                            "translated_word_index": 6
                         }
                     }
                 },
@@ -342,30 +558,54 @@
                     "start": 2.16,
                     "end": 2.4,
                     "original_word": " you.",
-                    "translations": {
-                        "english": {
-                            "translated_text": " you.",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " you."
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "you.",
+                            "original_word_index": 9,
+                            "translated_word_text": "you.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 9
                         },
-                        "spanish": {
-                            "translated_text": " tú.",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " tú."
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "you.",
+                            "original_word_index": 9,
+                            "translated_word_text": "conocerte.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 8
                         },
-                        "chinese": {
-                            "translated_text": " 你。",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Nǐ."
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "you.",
+                            "original_word_index": 9,
+                            "translated_word_text": "你",
+                            "translated_word_romanized_text": "nǐ",
+                            "translated_word_index": 12
                         },
-                        "arabic": {
-                            "translated_text": " أنت.",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " anta."
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "you.",
+                            "original_word_index": 9,
+                            "translated_word_text": "مقابلتك.",
+                            "translated_word_romanized_text": "muqābalatak.",
+                            "translated_word_index": 6
                         }
                     }
                 },
@@ -373,30 +613,54 @@
                     "start": 2.46,
                     "end": 2.64,
                     "original_word": " 1,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " 1,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 1,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "1,",
+                            "original_word_index": 10,
+                            "translated_word_text": "1,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 10
                         },
-                        "spanish": {
-                            "translated_text": " 1,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 1,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "1,",
+                            "original_word_index": 10,
+                            "translated_word_text": "1,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 9
                         },
-                        "chinese": {
-                            "translated_text": " 1,",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " 1,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "1,",
+                            "original_word_index": 10,
+                            "translated_word_text": "1",
+                            "translated_word_romanized_text": "1",
+                            "translated_word_index": 14
                         },
-                        "arabic": {
-                            "translated_text": " 1،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " 1،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "1,",
+                            "original_word_index": 10,
+                            "translated_word_text": "1،",
+                            "translated_word_romanized_text": "1,",
+                            "translated_word_index": 7
                         }
                     }
                 },
@@ -404,30 +668,54 @@
                     "start": 2.76,
                     "end": 2.94,
                     "original_word": " 2,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " 2,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 2,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "2,",
+                            "original_word_index": 11,
+                            "translated_word_text": "2,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 11
                         },
-                        "spanish": {
-                            "translated_text": " 2,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 2,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "2,",
+                            "original_word_index": 11,
+                            "translated_word_text": "2,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 10
                         },
-                        "chinese": {
-                            "translated_text": " 2,",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " 2,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "2,",
+                            "original_word_index": 11,
+                            "translated_word_text": "2",
+                            "translated_word_romanized_text": "2",
+                            "translated_word_index": 16
                         },
-                        "arabic": {
-                            "translated_text": " 2،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " 2،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "2,",
+                            "original_word_index": 11,
+                            "translated_word_text": "2،",
+                            "translated_word_romanized_text": "2,",
+                            "translated_word_index": 8
                         }
                     }
                 },
@@ -435,30 +723,54 @@
                     "start": 2.96,
                     "end": 3.16,
                     "original_word": " 3,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " 3,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 3,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "3,",
+                            "original_word_index": 12,
+                            "translated_word_text": "3,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 12
                         },
-                        "spanish": {
-                            "translated_text": " 3,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 3,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "3,",
+                            "original_word_index": 12,
+                            "translated_word_text": "3,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 11
                         },
-                        "chinese": {
-                            "translated_text": " 3,",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " 3,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "3,",
+                            "original_word_index": 12,
+                            "translated_word_text": "3",
+                            "translated_word_romanized_text": "3",
+                            "translated_word_index": 18
                         },
-                        "arabic": {
-                            "translated_text": " 3،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " 3،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "3,",
+                            "original_word_index": 12,
+                            "translated_word_text": "3،",
+                            "translated_word_romanized_text": "3,",
+                            "translated_word_index": 9
                         }
                     }
                 },
@@ -466,30 +778,54 @@
                     "start": 3.24,
                     "end": 3.38,
                     "original_word": " 4,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " 4,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 4,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "4,",
+                            "original_word_index": 13,
+                            "translated_word_text": "4,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 13
                         },
-                        "spanish": {
-                            "translated_text": " 4,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 4,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "4,",
+                            "original_word_index": 13,
+                            "translated_word_text": "4,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 12
                         },
-                        "chinese": {
-                            "translated_text": " 4,",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " 4,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN"
+                            },
+                            "original_word_text": "4,",
+                            "original_word_index": 13,
+                            "translated_word_text": "4",
+                            "translated_word_romanized_text": "4",
+                            "translated_word_index": 20
                         },
-                        "arabic": {
-                            "translated_text": " 4،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " 4،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "4,",
+                            "original_word_index": 13,
+                            "translated_word_text": "4،",
+                            "translated_word_romanized_text": "4,",
+                            "translated_word_index": 10
                         }
                     }
                 },
@@ -497,30 +833,54 @@
                     "start": 3.52,
                     "end": 3.74,
                     "original_word": " 5,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " 5,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 5,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "5,",
+                            "original_word_index": 14,
+                            "translated_word_text": "5,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 14
                         },
-                        "spanish": {
-                            "translated_text": " 5,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " 5,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "5,",
+                            "original_word_index": 14,
+                            "translated_word_text": "5,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 13
                         },
-                        "chinese": {
-                            "translated_text": " 5,",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " 5,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "5,",
+                            "original_word_index": 14,
+                            "translated_word_text": "5",
+                            "translated_word_romanized_text": "5",
+                            "translated_word_index": 22
                         },
-                        "arabic": {
-                            "translated_text": " 5،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " 5،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "5,",
+                            "original_word_index": 14,
+                            "translated_word_text": "5،",
+                            "translated_word_romanized_text": "5,",
+                            "translated_word_index": 11
                         }
                     }
                 },
@@ -528,30 +888,54 @@
                     "start": 3.94,
                     "end": 4.26,
                     "original_word": " blue,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " blue,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " blue,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "blue,",
+                            "original_word_index": 15,
+                            "translated_word_text": "blue,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 15
                         },
-                        "spanish": {
-                            "translated_text": " azul,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " azul,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "blue,",
+                            "original_word_index": 15,
+                            "translated_word_text": "azul,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 14
                         },
-                        "chinese": {
-                            "translated_text": " 蓝色，",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Lánsè,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "blue,",
+                            "original_word_index": 15,
+                            "translated_word_text": "蓝色",
+                            "translated_word_romanized_text": "lánsè",
+                            "translated_word_index": 24
                         },
-                        "arabic": {
-                            "translated_text": " أزرق،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Azraq،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "blue,",
+                            "original_word_index": 15,
+                            "translated_word_text": "أزرق،",
+                            "translated_word_romanized_text": "azraq,",
+                            "translated_word_index": 12
                         }
                     }
                 },
@@ -559,30 +943,54 @@
                     "start": 4.42,
                     "end": 4.72,
                     "original_word": " green,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " green,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " green,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "green,",
+                            "original_word_index": 16,
+                            "translated_word_text": "green",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 16
                         },
-                        "spanish": {
-                            "translated_text": " verde,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " verde,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "green,",
+                            "original_word_index": 16,
+                            "translated_word_text": "verde,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 15
                         },
-                        "chinese": {
-                            "translated_text": " 绿色，",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Lǜsè,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "green",
+                            "original_word_index": 16,
+                            "translated_word_text": "绿色",
+                            "translated_word_romanized_text": "lǜsè",
+                            "translated_word_index": 26
                         },
-                        "arabic": {
-                            "translated_text": " أخضر،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Akhḍar،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "green",
+                            "original_word_index": 16,
+                            "translated_word_text": "أخضر،",
+                            "translated_word_romanized_text": "akhḍar,",
+                            "translated_word_index": 13
                         }
                     }
                 },
@@ -590,30 +998,54 @@
                     "start": 4.9,
                     "end": 5.16,
                     "original_word": " red,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " red,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " red,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "red",
+                            "original_word_index": 17,
+                            "translated_word_text": "red",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 17
                         },
-                        "spanish": {
-                            "translated_text": " rojo,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " rojo,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "red",
+                            "original_word_index": 17,
+                            "translated_word_text": "rojo",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 16
                         },
-                        "chinese": {
-                            "translated_text": " 红色，",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Hóngsè,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "red",
+                            "original_word_index": 17,
+                            "translated_word_text": "红色",
+                            "translated_word_romanized_text": "hóngsè",
+                            "translated_word_index": 28
                         },
-                        "arabic": {
-                            "translated_text": " أحمر،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Aḥmar،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "red",
+                            "original_word_index": 17,
+                            "translated_word_text": "أحمر",
+                            "translated_word_romanized_text": "ʾaḥmar",
+                            "translated_word_index": 14
                         }
                     }
                 },
@@ -621,30 +1053,54 @@
                     "start": 5.28,
                     "end": 5.98,
                     "original_word": " dog,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " dog,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " dog,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "dog,",
+                            "original_word_index": 18,
+                            "translated_word_text": "dog,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 18
                         },
-                        "spanish": {
-                            "translated_text": " perro,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " perro,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "dog,",
+                            "original_word_index": 18,
+                            "translated_word_text": "perro,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 17
                         },
-                        "chinese": {
-                            "translated_text": " 狗，",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Gǒu,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "dog",
+                            "original_word_index": 18,
+                            "translated_word_text": "狗",
+                            "translated_word_romanized_text": "gǒu",
+                            "translated_word_index": 30
                         },
-                        "arabic": {
-                            "translated_text": " كلب،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Kalb،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "dog,",
+                            "original_word_index": 18,
+                            "translated_word_text": "كلب،",
+                            "translated_word_romanized_text": "kalb,",
+                            "translated_word_index": 15
                         }
                     }
                 },
@@ -652,30 +1108,54 @@
                     "start": 6.1,
                     "end": 6.4,
                     "original_word": " cat,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " cat,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " cat,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "cat",
+                            "original_word_index": 19,
+                            "translated_word_text": "cat",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 19
                         },
-                        "spanish": {
-                            "translated_text": " gato,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " gato,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "cat",
+                            "original_word_index": 19,
+                            "translated_word_text": "gato",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 18
                         },
-                        "chinese": {
-                            "translated_text": " 猫，",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Māo,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "cat",
+                            "original_word_index": 19,
+                            "translated_word_text": "猫",
+                            "translated_word_romanized_text": "māo",
+                            "translated_word_index": 32
                         },
-                        "arabic": {
-                            "translated_text": " قطة،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Qiṭṭa،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "cat",
+                            "original_word_index": 19,
+                            "translated_word_text": "قطة",
+                            "translated_word_romanized_text": "qiṭṭa",
+                            "translated_word_index": 16
                         }
                     }
                 },
@@ -683,30 +1163,54 @@
                     "start": 6.5,
                     "end": 6.7,
                     "original_word": " cow,",
-                    "translations": {
-                        "english": {
-                            "translated_text": " cow,",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " cow,"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "cow",
+                            "original_word_index": 20,
+                            "translated_word_text": "cow",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 20
                         },
-                        "spanish": {
-                            "translated_text": " vaca,",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " vaca,"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "cow,",
+                            "original_word_index": 20,
+                            "translated_word_text": "vaca,",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 19
                         },
-                        "chinese": {
-                            "translated_text": " 牛，",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Niú,"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "cow",
+                            "original_word_index": 20,
+                            "translated_word_text": "牛",
+                            "translated_word_romanized_text": "niú",
+                            "translated_word_index": 34
                         },
-                        "arabic": {
-                            "translated_text": " بقرة،",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Baqara،"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "cow",
+                            "original_word_index": 20,
+                            "translated_word_text": "بقرة",
+                            "translated_word_romanized_text": "baqarah",
+                            "translated_word_index": 17
                         }
                     }
                 },
@@ -714,30 +1218,54 @@
                     "start": 6.98,
                     "end": 7.3,
                     "original_word": " bird.",
-                    "translations": {
-                        "english": {
-                            "translated_text": " bird.",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " bird."
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "bird.",
+                            "original_word_index": 21,
+                            "translated_word_text": "bird.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 21
                         },
-                        "spanish": {
-                            "translated_text": " pájaro.",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " pájaro."
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "bird.",
+                            "original_word_index": 21,
+                            "translated_word_text": "pájaro.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 20
                         },
-                        "chinese": {
-                            "translated_text": " 鸟。",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Niǎo."
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "bird.",
+                            "original_word_index": 21,
+                            "translated_word_text": "鸟",
+                            "translated_word_romanized_text": "niǎo",
+                            "translated_word_index": 36
                         },
-                        "arabic": {
-                            "translated_text": " طائر.",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " ṭā'ir."
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "bird.",
+                            "original_word_index": 21,
+                            "translated_word_text": "طائر.",
+                            "translated_word_romanized_text": "ṭā'ir.",
+                            "translated_word_index": 18
                         }
                     }
                 },
@@ -745,30 +1273,54 @@
                     "start": 7.58,
                     "end": 7.94,
                     "original_word": " Thank",
-                    "translations": {
-                        "english": {
-                            "translated_text": " Thank",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Thank"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "Thank",
+                            "original_word_index": 22,
+                            "translated_word_text": "Thank",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 22
                         },
-                        "spanish": {
-                            "translated_text": " Gracias",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " Gracias"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "Thank",
+                            "original_word_index": 22,
+                            "translated_word_text": "Gracias",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 21
                         },
-                        "chinese": {
-                            "translated_text": " 谢谢",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Xièxiè"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "Thank",
+                            "original_word_index": 22,
+                            "translated_word_text": "谢谢",
+                            "translated_word_romanized_text": "xièxiè",
+                            "translated_word_index": 38
                         },
-                        "arabic": {
-                            "translated_text": " شكرا",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Shukrān"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "Thank",
+                            "original_word_index": 22,
+                            "translated_word_text": "شكرا",
+                            "translated_word_romanized_text": "shukran",
+                            "translated_word_index": 19
                         }
                     }
                 },
@@ -776,30 +1328,54 @@
                     "start": 7.94,
                     "end": 8.14,
                     "original_word": " you",
-                    "translations": {
-                        "english": {
-                            "translated_text": " you",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " you"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "you",
+                            "original_word_index": 23,
+                            "translated_word_text": "you",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 9
                         },
-                        "spanish": {
-                            "translated_text": " tú",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " tú"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "you",
+                            "original_word_index": 23,
+                            "translated_word_text": "y",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 22
                         },
-                        "chinese": {
-                            "translated_text": " 你",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Nǐ"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "you",
+                            "original_word_index": 23,
+                            "translated_word_text": "你",
+                            "translated_word_romanized_text": "nǐ",
+                            "translated_word_index": 12
                         },
-                        "arabic": {
-                            "translated_text": " أنت",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Anta"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "you",
+                            "original_word_index": 23,
+                            "translated_word_text": "ووداعا.",
+                            "translated_word_romanized_text": "wawda'a.",
+                            "translated_word_index": 20
                         }
                     }
                 },
@@ -807,30 +1383,54 @@
                     "start": 8.14,
                     "end": 8.32,
                     "original_word": " and",
-                    "translations": {
-                        "english": {
-                            "translated_text": " and",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " and"
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "and",
+                            "original_word_index": 24,
+                            "translated_word_text": "and",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 24
                         },
-                        "spanish": {
-                            "translated_text": " y",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " y"
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "and",
+                            "original_word_index": 24,
+                            "translated_word_text": "y",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 22
                         },
-                        "chinese": {
-                            "translated_text": " 和",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Hé"
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "and",
+                            "original_word_index": 24,
+                            "translated_word_text": "和",
+                            "translated_word_romanized_text": "hé",
+                            "translated_word_index": 0
                         },
-                        "arabic": {
-                            "translated_text": " و",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " wa"
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "and",
+                            "original_word_index": 24,
+                            "translated_word_text": "و",
+                            "translated_word_romanized_text": "wa",
+                            "translated_word_index": 20
                         }
                     }
                 },
@@ -838,30 +1438,54 @@
                     "start": 8.32,
                     "end": 8.58,
                     "original_word": " goodbye.",
-                    "translations": {
-                        "english": {
-                            "translated_text": " goodbye.",
-                            "translated_language": "ENGLISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " goodbye."
+                    "matched_words": {
+                        "ENGLISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ENGLISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "goodbye.",
+                            "original_word_index": 25,
+                            "translated_word_text": "goodbye.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 25
                         },
-                        "spanish": {
-                            "translated_text": " adiós.",
-                            "translated_language": "SPANISH",
-                            "romanization_method": "NONE - Do not apply any romanization method. Retain the original script.",
-                            "romanized_text": " adiós."
+                        "SPANISH": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "SPANISH",
+                                "romanization_method": "NONE - Do not apply any romanization method. Retain the original script."
+                            },
+                            "original_word_text": "goodbye.",
+                            "original_word_index": 25,
+                            "translated_word_text": "adiós.",
+                            "translated_word_romanized_text": null,
+                            "translated_word_index": 23
                         },
-                        "chinese": {
-                            "translated_text": " 再见。",
-                            "translated_language": "CHINESE_MANDARIN_SIMPLIFIED",
-                            "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation.",
-                            "romanized_text": " Zàijiàn."
+                        "CHINESE_MANDARIN_SIMPLIFIED": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "CHINESE_MANDARIN_SIMPLIFIED",
+                                "romanization_method": "PINYIN - Convert the text from Simplified Chinese to Pinyin, including tone markers. Maintain accuracy in reflecting the original Mandarin pronunciation."
+                            },
+                            "original_word_text": "goodbye.",
+                            "original_word_index": 25,
+                            "translated_word_text": "再见",
+                            "translated_word_romanized_text": "zàijiàn",
+                            "translated_word_index": 40
                         },
-                        "arabic": {
-                            "translated_text": " وداعا.",
-                            "translated_language": "ARABIC_LEVANTINE",
-                            "romanization_method": "ALA-LC -  Use the American Library Association — Library of Congress (ALA-LC) romanization system for Arabic. Utilize full UTF-8 characters for diacritics and special characters to ensure precise representation. Adhere to standardized conventions for transliterating non-Latin scripts.",
-                            "romanized_text": " Wadāʿan."
+                        "ARABIC_LEVANTINE": {
+                            "original_language": "ENGLISH",
+                            "target_language_pair": {
+                                "language": "ARABIC_LEVANTINE",
+                                "romanization_method": "ALA-LC"
+                            },
+                            "original_word_text": "goodbye.",
+                            "original_word_index": 25,
+                            "translated_word_text": "وداعا.",
+                            "translated_word_romanized_text": "wada'a",
+                            "translated_word_index": 20
                         }
                     }
                 }

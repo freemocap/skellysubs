@@ -15,6 +15,7 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("openai").setLevel(logging.WARNING)
 logging.getLogger("numba").setLevel(logging.WARNING)
+logging.getLogger("jieba").setLevel(logging.WARNING)
 
 
 # Add custom log levels
