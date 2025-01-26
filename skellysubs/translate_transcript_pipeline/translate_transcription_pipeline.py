@@ -18,10 +18,10 @@ from skellysubs.translate_transcript_pipeline.models.translated_transcript_model
 logger = logging.getLogger(__name__)
 
 
-async def translate_transcription_pipeline(og_transcription: WhisperTranscriptionResult,
-                                           verbose: bool = True
+async def translate_transcription_pipeline(og_transcription: WhisperTranscriptionResult
                                            ) -> TranslatedTranscription:
-    full_text_translated_transcript = await full_text_translation(og_transcription=og_transcription)
+    initialized_transcription = TranslatedTranscription.initialize(og_transcription=og_transcription)
+    full_text_translated_transcript = await full_text_translation(initialized_transcription=initialized_transcription)
 
     segment_level_translated_transcript = await segment_level_translation(
         full_text_translated_transcript=full_text_translated_transcript)
@@ -57,9 +57,9 @@ async def word_level_translation_and_matching(segment_level_translated_transcrip
 
     # Run all tasks concurrently
 
-    logger.info(f"Running {len(tasks)} segment-level translation tasks concurrently")
+    logger.info(f"Running {len(tasks)} word-level translation tasks concurrently")
     results = await asyncio.gather(*[task for task in tasks], return_exceptions=True)
-    logger.info(f"Finished running {len(tasks)} segment-level translation tasks")
+    logger.info(f"Finished running {len(tasks)} word-level translation tasks")
     # Handle the results and exceptions
     for result, address in zip(results, result_addresses):
         try:
@@ -92,9 +92,9 @@ async def segment_level_translation(
                                                                               )
                                              )
                          )
-        logger.info(f"Running {len(tasks)} segment-level translation tasks concurrently for {language}")
-
+    logger.info(f"Running {len(tasks)} segment-level translation tasks concurrently")
     results = await asyncio.gather(*[task for task in tasks], return_exceptions=True)
+    logger.info(f"Finished running {len(tasks)} segment-level translation tasks")
     for result, address in zip(results, addresses):
         try:
             target_language = address['language']
@@ -108,22 +108,28 @@ async def segment_level_translation(
     return full_text_translated_transcript
 
 
-async def full_text_translation(og_transcription: WhisperTranscriptionResult) -> TranslatedTranscription:
-    # Full-text & segment level translation
-    initialized_transcription = TranslatedTranscription.initialize(og_transcription=og_transcription)
+async def full_text_translation(initialized_transcription:TranslatedTranscription) -> TranslatedTranscription:
+    # Full-text translation
+
     full_text_system_prompts_by_language = format_full_text_translation_system_prompt(
         initialized_translated_transcript_without_words=initialized_transcription)
 
     full_text_tasks = []
+    results = []
     for language, system_prompt in full_text_system_prompts_by_language.items():
-        full_text_tasks.append(asyncio.create_task(make_openai_json_mode_ai_request(client=OPENAI_CLIENT,
-                                                                                    system_prompt=system_prompt,
-                                                                                    llm_model=DEFAULT_LLM,
-                                                                                    user_input=None,
-                                                                                    prompt_model=TranslatedText,
-                                                                                    )))
-
-    results: list[TranslatedText] = await asyncio.gather(*[task for task in full_text_tasks], return_exceptions=True)
+        # full_text_tasks.append(asyncio.create_task(make_openai_json_mode_ai_request(client=OPENAI_CLIENT,
+        #                                                                             system_prompt=system_prompt,
+        #                                                                             llm_model=DEFAULT_LLM,
+        #                                                                             user_input=None,
+        #                                                                             prompt_model=TranslatedText,
+        #                                                                             )))
+        results.append(await make_openai_json_mode_ai_request(client=OPENAI_CLIENT,
+                                         system_prompt=system_prompt,
+                                         llm_model=DEFAULT_LLM,
+                                         user_input=None,
+                                         prompt_model=TranslatedText,
+                                         ))
+    # results: list[TranslatedText] = await asyncio.gather(*[task for task in full_text_tasks], return_exceptions=True)
     for result in results:
         if result.translated_language.lower() in LanguageNames.SPANISH.value.lower():
             initialized_transcription.translations.spanish = result

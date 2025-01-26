@@ -6,7 +6,8 @@ from typing import Type
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
-
+import logging
+logger = logging.getLogger(__name__)
 
 async def make_openai_json_mode_ai_request(client: AsyncOpenAI,
                                            system_prompt: str,
@@ -14,6 +15,7 @@ async def make_openai_json_mode_ai_request(client: AsyncOpenAI,
                                            llm_model: str,
                                            user_input: str | None = None,
                                            results_list: list | None = None):
+    logger.trace(f"make_openai_json_mode_ai_request: prompt_model={prompt_model.__class__.__name__}, llm_model={llm_model}")
     messages = [
         {
             "role": "system",
@@ -35,6 +37,7 @@ async def make_openai_json_mode_ai_request(client: AsyncOpenAI,
     output = prompt_model(**json.loads(response.choices[0].message.content))
     if results_list is not None:
         results_list.append(output)
+    logger.trace(f"make_openai_json_mode_ai_request: output={output.__class__.__name__}")
     return output
 
 

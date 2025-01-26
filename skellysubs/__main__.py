@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from skellysubs.add_subtitles_to_video_pipeline.add_subtitles_to_video_pipeline import get_video_and_output_paths
-from skellysubs.add_subtitles_to_video_pipeline.video_annotator.annotate_video_with_subtitles_cv2_PIL import \
+from skellysubs.add_subtitles_to_video_pipeline.video_annotator.annotate_video_with_subtitles import \
     annotate_video_with_subtitles
 from skellysubs.translate_transcript_pipeline.translate_video import translate_video
 from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import TranslatedTranscription
@@ -30,8 +30,8 @@ async def run_video_subtitle_pipeline(video_name: str) -> None:
 
 if __name__ == '__main__':
     import asyncio
-    # outer_video_name = str(Path("../sample_data/sample_video_short/sample_video_short").resolve())
+    outer_video_name = str(Path("../sample_data/sample_video_short/sample_video_short").resolve())
     # outer_video_name = str(Path("../sample_data/sample_video_long/sample_video_long").resolve())
-    outer_video_name = str(Path("../sample_data/start-here-1/start-here-1").resolve())
+    # outer_video_name = str(Path("../sample_data/start-here-1/start-here-1").resolve())
     asyncio.run(run_video_subtitle_pipeline(video_name=outer_video_name))
 
