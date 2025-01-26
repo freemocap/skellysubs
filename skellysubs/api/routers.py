@@ -1,8 +1,7 @@
-
-
 from skellysubs.api.http.app.health import health_router
 from skellysubs.api.http.app.shutdown import app_shutdown_router
 from skellysubs.api.http.app.state import state_router
+from skellysubs.api.http.subtitle_endpoint import subtitle_router
 from skellysubs.api.http.ui.ui_router import ui_router
 from skellysubs.api.websocket.websocket_connect import skellysubs_websocket_router
 
@@ -19,6 +18,9 @@ SKELLYSUBS_ROUTERS = {
     },
     "/websocket": {
         "connect": skellysubs_websocket_router
+    },
+    "/subtitles": {
+        "subtitle_video": subtitle_router
     },
 
     **OTHER_ROUTERS

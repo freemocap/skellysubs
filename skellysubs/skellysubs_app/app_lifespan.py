@@ -19,9 +19,9 @@ async def lifespan(app: FastAPI):
     logger.info(f"SkellySubs API base folder path: {get_skellysubs_data_folder_path()}")
     Path(get_skellysubs_data_folder_path()).mkdir(parents=True, exist_ok=True)
 
-
+    localhost_url = APP_URL.replace('0.0.0.0', 'localhost')
     logger.success(f"SkellySubs API (version:{skellysubs.__version__}) started successfully 💀🤖💬")
-    logger.api(f"SkellySubs API  running on: \n\t\t\tSwagger API docs - {APP_URL} \n\t\t\tTest UI: {APP_URL}/ui 👈[click to open backend UI in your browser]")
+    logger.api(f"SkellySubs API  running on: \n\t\t\tSwagger API docs - {localhost_url} \n\t\t\tTest UI: {localhost_url}/ui 👈[click to open backend UI in your browser]")
 
     # Let the app do its thing
     yield

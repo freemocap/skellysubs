@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 async def get_video_and_output_paths(video_name: str) -> tuple[str, str, str]:
-    video_path = f'{video_name}.mp4'
+    video_path = f'{video_name}.mp4' if not video_name.endswith('.mp4') else video_name
     subtitled_video_path = video_path.replace('.mp4', '_subtitled.mp4')
     translation_path = video_path.replace('.mp4', '_translation.json')
     if not Path(video_path).exists():
