@@ -23,7 +23,7 @@ async def make_openai_text_generation_ai_request(client: AsyncOpenAI,
 
 
 if __name__ == "__main__":
-    from skellybot_analysis.ai.clients.openai_client.openai_client import OPENAI_CLIENT, DEFAULT_LLM
+    from skellysubs.ai.clients.openai_client.openai_client import OPENAI_CLIENT, DEFAULT_LLM
 
     system_prompt = "Translate this statement into spanish, french, arabic (both in arabic script and ALA-LC romanization), and chinese (both simplified mandarin characters and pinyin romanization): 'The quick brown fox jumps over the lazy dog.'"
 

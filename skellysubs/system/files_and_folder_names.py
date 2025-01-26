@@ -3,8 +3,8 @@ from pathlib import Path
 from time import time
 
 
-def get_skellybot_analysis_data_folder_path() -> str:
-    path  =  Path().home() / "Sync" / "skellybot-data" / "skellybot-analysis"
+def get_skellysubs_data_folder_path() -> str:
+    path  =  Path().home() / "Sync" / "skellybot-data" / "skellysubs"
     path.mkdir(parents=True, exist_ok=True)
     return str(path)
 
@@ -35,10 +35,10 @@ def create_new_default_recording_name():
 
 
 def create_log_file_name():
-    return "skellybot_analysis_" + time.strftime("%Y-%m-%d_%H_%M_%S") + ".log"
+    return "skellysubs_" + time.strftime("%Y-%m-%d_%H_%M_%S") + ".log"
 
 def get_log_file_path():
-    log_folder_path = Path(get_skellybot_analysis_data_folder_path()) / 'logs'
+    log_folder_path = Path(get_skellysubs_data_folder_path()) / 'logs'
     log_folder_path.mkdir(exist_ok=True, parents=True)
     log_file_path = log_folder_path / create_log_file_name()
     return str(log_file_path)

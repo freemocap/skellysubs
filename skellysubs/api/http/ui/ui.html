@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>SkellySubs UI</title>
+    <style>
+        .image {
+            width: 1000px;
+            height: auto;
+        }
+
+        div {
+            background-color: #654a7b;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        button {
+            margin-right: 10px;
+            padding: 10px;
+            font-size: small;
+        }
+
+        #threejs-container {
+            width: 40%;
+            height: 400px;
+        }
+
+        #content-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #images-container {
+            width: 60%;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+
+        let ws;
+        let isConnected = false;
+        const websocket_url = 'ws://localhost:8101/websocket/connect';
+        const imageElements = {};
+
+        function updateStatus() {
+            document.getElementById('ws-status').innerText = isConnected ? 'Connected' : 'Disconnected';
+        }
+
+        function connectWebSocket() {
+            ws = new WebSocket(websocket_url);
+
+            // websocket helpers
+            const decoder = new TextDecoder('utf-8');
+
+            ws.onopen = () => {
+                isConnected = true;
+                updateStatus();
+            };
+            ws.onclose = () => {
+                isConnected = false;
+                updateStatus();
+            };
+            ws.onmessage = async (event) => {
+                // Ensure the event.data is a Blob
+                if (event.data instanceof Blob) {
+                    // Convert the incoming data to an ArrayBuffer
+                    const arrayBuffer = await event.data.arrayBuffer();
+
+                    // Convert ArrayBuffer to a string
+                    const jsonString = decoder.decode(arrayBuffer);
+
+                    // Parse the JSON string to a JavaScript object
+                    const data = JSON.parse(jsonString);
+                    addLogEntry(`Received message with length: ${jsonString.length} from mf_payload# ${data.multi_frame_number}`);
+
+                    // Now you can use the data object to update your UI
+                    updateImages(data.jpeg_images);
+                    // updateSpheres(data.object_points);
+                } else {
+                    console.log("Received data: ", event.data);
+                }
+            };
+        }
+
+        function updateCharucoSpheres(objectPoints) {
+            // Remove existing spheres
+            while (scene.children.length > 2) { // Keep the axes and grid helpers
+                scene.remove(scene.children[2]);
+            }
+
+            // Add new spheres
+            objectPoints.forEach(point => {
+                const geometry = new THREE.SphereGeometry(0.1, 10, 10);
+                const material = new THREE.MeshBasicMaterial({color: 0xff0000});
+                const sphere = new THREE.Mesh(geometry, material);
+                sphere.position.set(point.x, point.y, point.z);
+                scene.add(sphere);
+            });
+        }
+
+        function sendMessage(message) {
+            if (isConnected) {
+                ws.send(message);
+            } else {
+                alert('WebSocket is not connected.');
+            }
+        }
+
+        function updateImages(images) {
+            const container = document.getElementById('images-container');
+            for (const cameraId in images) {
+                if (!imageElements[cameraId]) {
+                    const imgBox = document.createElement('div');
+                    imgBox.className = 'image-box';
+                    const img = document.createElement('img');
+                    img.className = 'image';
+                    imgBox.appendChild(img);
+                    container.appendChild(imgBox);
+                    imageElements[cameraId] = img;
+                }
+                if (images[cameraId]) {
+                    imageElements[cameraId].src = 'data:image/jpeg;base64,' + images[cameraId];
+                }
+            }
+        }
+
+        function addLogEntry(entry) {
+            const logContainer = document.getElementById('log-container');
+            const logEntry = document.createElement('div');
+            logEntry.innerText = entry;
+            logContainer.prepend(logEntry);
+
+            // Limit the number of log entries to 30
+            if (logContainer.children.length > 30) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        async function callApi(endpoint, method = 'GET') {
+            try {
+                const response = await fetch(endpoint, {method});
+                const data = await response.json();
+                document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+                addLogEntry(`Success: ${endpoint} - ${JSON.stringify(data)}`);
+
+            } catch (error) {
+                document.getElementById('result').innerText = `Error: ${error.message}`;
+                addLogEntry(`Error: ${endpoint} - ${error.message}`);
+            }
+        }
+
+        function initThreeJS() {
+            const container = document.getElementById('threejs-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+
+            const axesHelper = new THREE.AxesHelper(5);
+            scene.add(axesHelper);
+
+            const gridHelper = new THREE.GridHelper(10, 10);
+            scene.add(gridHelper);
+
+            camera.position.y = 5;
+            camera.position.z = 15;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+
+        window.onload = initThreeJS;
+    </script>
+</head>
+<body>
+<!-- Header Section -->
+<h1>FreeMoCap Test UI</h1>
+<p> WebSocket status: <span id="ws-status">Disconnected</span></p>
+
+<!-- WebSocket Section -->
+<button onclick="connectWebSocket()">Connect WebSocket</button>
+
+<!-- API Calls Section -->
+<!-- Camera Connection API Calls -->
+<button onclick="callApi('http://localhost:8101/app/health')">Hello</button>
+<button onclick="callApi('http://localhost:8101/app/state')">App State</button>
+
+<div>
+
+</div>
+<!-- Content Container -->
+<div id="content-container">
+    <!-- Images Section -->
+    <div id="images-container"></div>
+    <!-- Three.js Viewer Section -->
+    <div id="threejs-container"></div>
+</div>
+
+<h3>Loggs</h3>
+<div id="log-container"></div>
+</body>
+</html>

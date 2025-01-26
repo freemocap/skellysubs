@@ -27,10 +27,10 @@ class TranslatedText(BaseModel):
                    romanization_method=language.romanization_method,
                    romanized_text=NOT_TRANSLATED_YET_TEXT)
 
-    def get_word_list(self) -> list[str]:
+    def get_word_list(self) -> tuple[list[str], list[str] | None]:
         if self.translated_language.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-            return self.split_chinese()
-        return self.translated_text.split()
+            return self.split_chinese(), self.romanized_text.split()
+        return self.translated_text.split(), self.romanized_text.split()
 
     def split_chinese(self) -> list[str]:
         if not self.translated_language.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
@@ -68,7 +68,7 @@ class TranslationsCollection(BaseModel):
                 LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value: self.chinese.romanization_method,
                 LanguageNames.ARABIC_LEVANTINE.value: self.arabic.romanization_method}
 
-    def get_word_list_by_language(self, language: LanguageNameString) -> list[str]:
+    def get_word_list_by_language(self, language: LanguageNameString) -> tuple[list[str], list[str] | None]:
         if language.lower() in LanguageNames.ENGLISH.value.lower():
             return self.english.get_word_list()
         if language.lower() in LanguageNames.SPANISH.value.lower():
@@ -245,12 +245,11 @@ class TranscriptSegment(BaseModel):
                                                                                                   "original"}:
                 return [word.original_word for word in self.words], None
             case _ if language_lower in LanguageNames.SPANISH.value.lower():
-                return self.translations.get_word_list_by_language(language=language_lower), None
+                return self.translations.get_word_list_by_language(language=language_lower)
             case _ if language_lower in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-                return self.translations.get_word_list_by_language(language=language_lower), self.translations.chinese.romanized_text.split()
-
+                return self.translations.get_word_list_by_language(language=language_lower)
             case _ if language_lower in LanguageNames.ARABIC_LEVANTINE.value.lower():
-                return self.translations.get_word_list_by_language(language=language_lower), self.translations.arabic.romanized_text.split()
+                return self.translations.get_word_list_by_language(language=language_lower)
             case _:
                 raise ValueError(f"Language {language} not found in the translations collection.")
 

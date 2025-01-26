@@ -6,12 +6,15 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "arabic-reshaper>=3.0.0",
+    "fastapi[standard]>=0.115.7",
     "jieba>=0.42.1",
     "moviepy>=2.1.2",
     "ollama>=0.4.7",
     "openai>=1.60.1",
     "opencv-contrib-python>=4.11.0.86",
+    "psutil>=6.1.1",
     "pydantic>=2.10.6",
     "python-bidi>=0.6.3",
+    "uvicorn>=0.34.0",
     "whisper>=1.1.10",
 ]

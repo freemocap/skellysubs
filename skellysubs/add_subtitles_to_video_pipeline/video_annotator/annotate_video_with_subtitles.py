@@ -116,12 +116,18 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
         for word_number, word in enumerate(words_list):
 
             _, _, text_width, text_height = language_font.getbbox(word + " ")
+            if  word_number == 0:
+                # image_annotator.rectangle([config.buffer_size,
+                #                            current_y,
+                #                            video_width - config.buffer_size,
+                #                            current_y + text_height],
+                #                           fill=(155, 155, 155, 55))
 
-            if word_type == 'romanized' and word_number == 0:
-                language_font = DEFAULT_FONT
-                right_to_left = False
-                current_x = config.buffer_size
-                current_y += text_height + config.buffer_size // 4
+                if word_type == 'romanized' :
+                    language_font = DEFAULT_FONT
+                    right_to_left = False
+                    current_x = config.buffer_size
+                    current_y += text_height + config.buffer_size // 4
 
             if word_number == current_matched_word.translated_word_index:
                 image_annotator.text((current_x if not right_to_left else current_x - text_width,
@@ -129,8 +135,17 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                      text=word,
                                      fill=config.color,
                                      font=language_font,
+                                     stroke_width=14,
+                                     stroke_fill=(0, 255, 0),
+                                     align="left"
+                                     )
+                image_annotator.text((current_x if not right_to_left else current_x - text_width,
+                                      current_y),
+                                     text=word,
+                                     fill=config.color,
+                                     font=language_font,
                                      stroke_width=10,
-                                     stroke_fill=(0, 255, 255),
+                                     stroke_fill=(0, 0, 255),
                                      align="left"
                                      )
 
@@ -140,21 +155,46 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                  text=word,
                                  fill=config.color,
                                  font=language_font,
-                                 stroke_width=4,
+                                 stroke_width=5,
                                  stroke_fill=(33, 33, 33),
+                                 align="left"
+                                 )
+            image_annotator.text((current_x if not right_to_left else current_x - text_width,
+                                  current_y),
+                                 text=word,
+                                 fill=config.color,
+                                 font=language_font,
+                                 stroke_width=1,
+                                 stroke_fill=config.color,
                                  align="left"
                                  )
 
             if right_to_left:
-                if current_x - text_width < config.buffer_size//2:
+                if current_x - text_width < config.buffer_size // 2:
                     current_y += text_height
                     current_x = video_width - config.buffer_size
+                    # #draw a rectangle around the text to be displayed on the new line to make it more readable
+                    # image_annotator.rectangle([config.buffer_size,
+                    #                            current_y,
+                    #                            video_width - config.buffer_size,
+                    #                               current_y + text_height],
+                    #                             outline=config.color,
+                    #                           fill=(155,155,155, 155),
+                    #                             width=5)
                 else:
                     current_x -= text_width
 
             else:
-                if current_x + text_width > video_width - config.buffer_size *2:
+                if current_x + text_width > video_width - config.buffer_size * 2:
                     current_y += text_height
                     current_x = config.buffer_size
+                    # #draw a rectangle around the text to be displayed on the new line to make it more readable
+                    # image_annotator.rectangle([config.buffer_size,
+                    #                            current_y,
+                    #                            video_width - config.buffer_size,
+                    #                               current_y + text_height],
+                    #                             outline=config.color,
+                    #                           fill=(155,155,155, 155),
+                    #                             width=5)
                 else:
                     current_x += text_width
