@@ -9,8 +9,9 @@ from skellysubs.audio_transcription.whisper_transcription import transcribe_audi
 
 async def get_or_compute_video_transcription(video_path: str,
                                              re_transcribe: bool = False) -> WhisperTranscriptionResult:
-    audio_path = video_path.replace(".mp4", ".wav")
-    transcript_path = video_path.replace(".mp4", "_transcription.json")
+    extension = Path(video_path).suffix
+    audio_path = video_path.replace(f"{extension}", ".wav")
+    transcript_path = video_path.replace(f"{extension}", "_transcription.json")
     if Path(transcript_path).exists() and not re_transcribe:
         with open(transcript_path, 'r') as f:
             transcription_json = json.load(f)

@@ -17,7 +17,7 @@ SKELLYSUBS_ROUTERS = {
         "shutdown": app_shutdown_router
     },
     "/websocket": {
-        "connect": skellysubs_websocket_router
+        "/connect/{session_id}": skellysubs_websocket_router
     },
     "/subtitles": {
         "subtitle_video": subtitle_router

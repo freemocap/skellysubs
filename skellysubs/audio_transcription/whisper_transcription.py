@@ -28,6 +28,7 @@ def transcribe_audio(audio_path: str, model_name: str = "large") -> WhisperTrans
     model = whisper.load_model(model_name)
     result = model.transcribe(audio_path,
                               word_timestamps=True,
+                              temperature=0.0,
                               no_speech_threshold=0.5,
                               hallucination_silence_threshold=0.5,
                               initial_prompt="Words you may hear, with their correct spelling: `Jon Matthis`, `FreeMoCap`",

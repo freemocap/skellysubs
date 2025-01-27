@@ -3,9 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Video File</title>
+    <title>SkellySubs UI</title>
+    <!-- Include the uuid library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/uuid@latest/dist/umd/uuidv4.min.js"></script>
 </head>
 <body>
+    <button id="connectBtn">Connect to WebSocket</button>
+    <div id="messages"></div>
+
+    <script>
+        function connectWebSocket(sessionId) {
+            // print the last 5 characters of the session ID
+            console.log('Connecting to WebSocket with session ID[-5:]:', sessionId.slice(-5));
+            const wsUrl = `ws://72.74.213.168:8101/websocket/connect/${sessionId}`;
+            const ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log('Connected to WebSocket');
+                ws.send('Hello server!');
+                // change the button text
+                document.getElementById('connectBtn').textContent = 'WebSocket: connected';
+            };
+
+            ws.onmessage = function(event) {
+                const messagesDiv = document.getElementById('messages');
+                const messageElem = document.createElement('div');
+                messageElem.textContent = `Received: ${event.data}`;
+                messagesDiv.appendChild(messageElem);
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket connection closed');
+                // change the button text
+                document.getElementById('connectBtn').textContent = 'Connect to WebSocket';
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                // print the error message
+                const messagesDiv = document.getElementById('messages');
+                const messageElem = document.createElement('div');
+                messageElem.textContent = `WebSocket error: ${error.message}`;
+                messagesDiv.appendChild(messageElem);
+
+            };
+        }
+
+        document.getElementById('connectBtn').onclick = function() {
+            let sessionId = localStorage.getItem('sessionId');
+            if (!sessionId) {
+                // Use the uuid library to generate a new UUID
+                sessionId = uuidv4();
+                localStorage.setItem('sessionId', sessionId);
+            }
+            console.log('Using session ID:', sessionId);
+            connectWebSocket(sessionId);
+        };
+    </script>
     <h1>Upload Video to Server</h1>
     <input type="file" id="videoInput" accept="video/*">
     <button id="uploadButton">Upload Video</button>
@@ -23,7 +77,7 @@
             formData.append('file', videoFile); // The key 'file' should match the parameter name in your FastAPI endpoint
 
             try {
-                const response = await fetch('http://localhost:8101/subtitles/subtitle_video', { // Adjust the URL to match your FastAPI endpoint
+                const response = await fetch('http://72.74.213.168:8101/subtitles/subtitle_video', { // Adjust the URL to match your FastAPI endpoint
                     method: 'POST',
                     body: formData
                 });

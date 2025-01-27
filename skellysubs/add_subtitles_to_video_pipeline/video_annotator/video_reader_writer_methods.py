@@ -2,21 +2,35 @@ import os
 from pathlib import Path
 
 import cv2
+import ffmpeg
 import numpy as np
 from PIL.Image import Image
 
 from skellysubs.audio_transcription.transcribe_video import scrape_and_save_audio_from_video
 
 
+def get_video_properties(video_path):
+    try:
+        if not Path(video_path).exists() or not Path(video_path).is_file():
+            raise FileNotFoundError(f"File not found: {video_path}")
+        probe = ffmpeg.probe(video_path)
+        video_stream = next(stream for stream in probe['streams'] if stream['codec_type'] == 'video')
+        width = int(video_stream['width'])
+        height = int(video_stream['height'])
+        framerate = eval(video_stream['r_frame_rate'])
+        return width, height, framerate
+    except ffmpeg.Error as e:
+        logger.error(f"ffprobe error output: {e.stderr.decode('utf8')}")
+        raise RuntimeError(f"Failed to get video properties: {e}")
+
 def create_video_reader_and_writer(subtitled_video_path, video_path):
     # Load the video
     if not Path(video_path).exists() or not Path(video_path).is_file():
         raise FileNotFoundError(f"File not found: {video_path}")
     video_reader = cv2.VideoCapture(video_path)
-    video_width = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
-    video_height = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    video_width, video_height, video_framerate = get_video_properties(video_path)
     video_resolution = (video_width, video_height)
-    video_framerate = video_reader.get(cv2.CAP_PROP_FPS)
     Path(subtitled_video_path).parent.mkdir(parents=True, exist_ok=True)
     if not subtitled_video_path.endswith('.mp4'):
         raise ValueError(f"Output path must end with .mp4: {subtitled_video_path}")
