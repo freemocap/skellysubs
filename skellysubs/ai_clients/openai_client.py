@@ -48,7 +48,7 @@ class OpenaiClient(AiClientABC):
                 AiUserMessage(role="user", content=user_input).model_dump()
             )
         response = await self.client.beta.chat.completions.parse(
-            model=self.config.default_llm if llm_model is None else llm_model,
+            model=self.config.model_name if llm_model is None else llm_model,
             messages=messages,
             response_format=prompt_model,
             temperature=self.config.temperature if temperature is None else temperature,

@@ -8,7 +8,7 @@ from bidi.algorithm import get_display
 from tqdm import tqdm
 
 from skellysubs.add_subtitles_to_video_pipeline.video_annotator.language_annotation_configs import \
-    LanguageAnnotationConfig, LANGUAGE_ANNOTATION_CONFIGS, DEFAULT_FONT
+    LanguageAnnotationConfig, LANGUAGE_ANNOTATION_CONFIGS, DEFAULT_FONT, DEFAULT_FONT_SIZE
 from skellysubs.add_subtitles_to_video_pipeline.video_annotator.video_reader_writer_methods import \
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
 from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
@@ -39,6 +39,8 @@ def annotate_video_with_subtitles(video_path: str,
                 raise ValueError(f"Video reader is not open: {video_path}")
 
             read_success, image = video_reader.read()
+
+            image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE    )
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             if not read_success or not video_reader.isOpened():
                 break
@@ -127,7 +129,7 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                     language_font = DEFAULT_FONT
                     right_to_left = False
                     current_x = config.buffer_size
-                    current_y += text_height + config.buffer_size // 4
+                    current_y += int(text_height *1.25)
 
             if word_number == current_matched_word.translated_word_index:
                 image_annotator.text((current_x if not right_to_left else current_x - text_width,
@@ -155,8 +157,8 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                  text=word,
                                  fill=config.color,
                                  font=language_font,
-                                 stroke_width=5,
-                                 stroke_fill=(33, 33, 33),
+                                 stroke_width=6,
+                                 stroke_fill=(11, 11, 11),
                                  align="left"
                                  )
             image_annotator.text((current_x if not right_to_left else current_x - text_width,
@@ -170,31 +172,17 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                  )
 
             if right_to_left:
-                if current_x - text_width < config.buffer_size // 2:
+                if current_x - text_width < config.buffer_size * 3:
                     current_y += text_height
                     current_x = video_width - config.buffer_size
-                    # #draw a rectangle around the text to be displayed on the new line to make it more readable
-                    # image_annotator.rectangle([config.buffer_size,
-                    #                            current_y,
-                    #                            video_width - config.buffer_size,
-                    #                               current_y + text_height],
-                    #                             outline=config.color,
-                    #                           fill=(155,155,155, 155),
-                    #                             width=5)
+
                 else:
                     current_x -= text_width
 
             else:
-                if current_x + text_width > video_width - config.buffer_size * 2:
+                if current_x + text_width > video_width - (config.buffer_size * 3):
                     current_y += text_height
                     current_x = config.buffer_size
-                    # #draw a rectangle around the text to be displayed on the new line to make it more readable
-                    # image_annotator.rectangle([config.buffer_size,
-                    #                            current_y,
-                    #                            video_width - config.buffer_size,
-                    #                               current_y + text_height],
-                    #                             outline=config.color,
-                    #                           fill=(155,155,155, 155),
-                    #                             width=5)
+
                 else:
                     current_x += text_width

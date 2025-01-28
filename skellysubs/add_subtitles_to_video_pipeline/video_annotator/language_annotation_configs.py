@@ -41,9 +41,9 @@ LANGUAGE_ANNOTATION_CONFIGS = {
     LanguageNames.CHINESE_MANDARIN_SIMPLIFIED: LanguageAnnotationConfig(
         language_name=LanguageNames.CHINESE_MANDARIN_SIMPLIFIED,
         font_path=str(FONT_BASE_PATH / "NotoSerifCJKsc-VF-Simplified-Chinese.ttf"),
-        font_size=int(DEFAULT_FONT_SIZE * 1.15),
+        font_size=int(DEFAULT_FONT_SIZE * 1.2),
         color=(157, 152, 219),
-        language_start_y=lambda video_height: int(video_height // 3),
+        language_start_y=lambda video_height: int(video_height //2),
         buffer_size=100),
     LanguageNames.ARABIC_LEVANTINE: LanguageAnnotationConfig(language_name=LanguageNames.ARABIC_LEVANTINE,
                                                              font_path=str(FONT_BASE_PATH / "ARIAL.TTF"),

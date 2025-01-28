@@ -29,7 +29,7 @@ def create_video_reader_and_writer(subtitled_video_path, video_path):
         raise FileNotFoundError(f"File not found: {video_path}")
     video_reader = cv2.VideoCapture(video_path)
 
-    video_width, video_height, video_framerate = get_video_properties(video_path)
+    video_height, video_width, video_framerate = get_video_properties(video_path) #trying to get the orientation right
     video_resolution = (video_width, video_height)
     Path(subtitled_video_path).parent.mkdir(parents=True, exist_ok=True)
     if not subtitled_video_path.endswith('.mp4'):
