@@ -172,3 +172,5 @@ cython_debug/
 *.mp4
 *.wav
 *.mp3
+
+node_modules/
