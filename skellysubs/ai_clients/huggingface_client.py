@@ -17,7 +17,6 @@ messages = [
 completion = client.chat.completions.create(
     model="deepseek-ai/DeepSeek-R1", 
 	messages=messages, 
-	max_tokens=500
 )
 
 print(completion.choices[0].message.content)
