@@ -8,7 +8,7 @@ from bidi.algorithm import get_display
 from tqdm import tqdm
 
 from skellysubs.add_subtitles_to_video_pipeline.video_annotator.language_annotation_configs import \
-    LanguageAnnotationConfig, LANGUAGE_ANNOTATION_CONFIGS, DEFAULT_FONT, DEFAULT_FONT_SIZE
+    LanguageAnnotationConfig, LANGUAGE_ANNOTATION_CONFIGS, get_default_font
 from skellysubs.add_subtitles_to_video_pipeline.video_annotator.video_reader_writer_methods import \
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
 from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
@@ -21,14 +21,18 @@ logger = logging.getLogger(__name__)
 def annotate_video_with_subtitles(video_path: str,
                                   translated_transcript: TranslatedTranscription,
                                   subtitled_video_path: str,
-                                  show_while_annotating: bool = True
+                                  show_while_annotating: bool = True,
+                                  transpose_for_vertical_video: bool = True
                                   ) -> None:
     (no_audio_video_path,
      video_height,
      video_reader,
      video_width,
      video_writer) = create_video_reader_and_writer(
-        subtitled_video_path, video_path)
+        og_video_path=video_path,
+        subtitled_video_output_path=subtitled_video_path,
+        transpose_for_vertical_video=transpose_for_vertical_video
+    )
 
     video_number_of_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
     try:
@@ -40,10 +44,10 @@ def annotate_video_with_subtitles(video_path: str,
 
             read_success, image = video_reader.read()
 
-            image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE    )
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            # image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE    )
             if not read_success or not video_reader.isOpened():
                 break
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             frame_number += 1
             frame_timestamp = video_reader.get(
                 cv2.CAP_PROP_POS_MSEC) / 1000  # seconds - internally based on frame# * presumed frame duration based on specified framerate
@@ -57,14 +61,14 @@ def annotate_video_with_subtitles(video_path: str,
                 current_matched_word = current_segment_and_matched_word.matched_word_by_language[language_name]
 
                 multiline_y_start = config.language_start_y(video_height)
-                # multiline_y_start = (multiline_y_start//2) + video_height//2 #squish to bottom of screen
 
                 annotate_image_with_subtitles(config=config,
                                               image_annotator=image_annotator,
                                               multiline_y_start=multiline_y_start,
                                               current_segment=current_segment,
                                               current_matched_word=current_matched_word,
-                                              video_width=video_width)
+                                              video_width=video_width,
+                                              video_height=video_height)
 
             image = write_frame_to_video_file(pil_image=pil_image,
                                               video_writer=video_writer)
@@ -97,6 +101,7 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
                                   current_matched_word: MatchedTranslatedWord,
                                   multiline_y_start: int,
                                   video_width: int,
+                                  video_height: int,
                                   ) -> None:
     right_to_left: bool = config.language_name.lower() in LanguageNames.ARABIC_LEVANTINE.value.lower()
     current_y = multiline_y_start
@@ -110,7 +115,7 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
     if config.language_name.lower() in LanguageNames.ARABIC_LEVANTINE.value.lower():
         translated_words_list = [get_display(arabic_reshaper.reshape(word)) for word in translated_words_list]
 
-    language_font = config.language_font
+    language_font = config.get_font(image_height=video_height)
     for word_type, words_list in zip(('translated', 'romanized'), [translated_words_list, romanized_words_list]):
         if not words_list:
             continue
@@ -118,18 +123,18 @@ def annotate_image_with_subtitles(config: LanguageAnnotationConfig,
         for word_number, word in enumerate(words_list):
 
             _, _, text_width, text_height = language_font.getbbox(word + " ")
-            if  word_number == 0:
+            if word_number == 0:
                 # image_annotator.rectangle([config.buffer_size,
                 #                            current_y,
                 #                            video_width - config.buffer_size,
                 #                            current_y + text_height],
                 #                           fill=(155, 155, 155, 55))
 
-                if word_type == 'romanized' :
-                    language_font = DEFAULT_FONT
+                if word_type == 'romanized':
+                    language_font = get_default_font(image_height=video_height)
                     right_to_left = False
                     current_x = config.buffer_size
-                    current_y += int(text_height *1.25)
+                    current_y += int(text_height * 1.25)
 
             if word_number == current_matched_word.translated_word_index:
                 image_annotator.text((current_x if not right_to_left else current_x - text_width,

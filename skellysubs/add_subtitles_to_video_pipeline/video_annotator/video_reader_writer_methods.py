@@ -23,22 +23,32 @@ def get_video_properties(video_path):
         logger.error(f"ffprobe error output: {e.stderr.decode('utf8')}")
         raise RuntimeError(f"Failed to get video properties: {e}")
 
-def create_video_reader_and_writer(subtitled_video_path, video_path):
-    # Load the video
-    if not Path(video_path).exists() or not Path(video_path).is_file():
-        raise FileNotFoundError(f"File not found: {video_path}")
-    video_reader = cv2.VideoCapture(video_path)
 
-    video_height, video_width, video_framerate = get_video_properties(video_path) #trying to get the orientation right
+def create_video_reader_and_writer(og_video_path: str,
+                                   subtitled_video_output_path: str,
+                                   transpose_for_vertical_video: bool = False,
+                                   ) -> tuple[str, int, cv2.VideoCapture, int, cv2.VideoWriter]:
+    # Load the video
+    if not Path(og_video_path).exists() or not Path(og_video_path).is_file():
+        raise FileNotFoundError(f"File not found: {og_video_path}")
+    video_reader = cv2.VideoCapture(og_video_path)
+
+    video_height, video_width, video_framerate = get_video_properties(
+        og_video_path)
+
+    if transpose_for_vertical_video:
+        video_height, video_width = video_width, video_height
+
     video_resolution = (video_width, video_height)
-    Path(subtitled_video_path).parent.mkdir(parents=True, exist_ok=True)
-    if not subtitled_video_path.endswith('.mp4'):
-        raise ValueError(f"Output path must end with .mp4: {subtitled_video_path}")
-    no_audio_video_path = subtitled_video_path.replace('.mp4', '_no_audio.mp4')
+
+    Path(subtitled_video_output_path).parent.mkdir(parents=True, exist_ok=True)
+    if not subtitled_video_output_path.endswith('.mp4'):
+        raise ValueError(f"Output path must end with .mp4: {subtitled_video_output_path}")
+    no_audio_video_path = subtitled_video_output_path.replace('.mp4', '_no_audio.mp4')
     video_writer = cv2.VideoWriter(no_audio_video_path, cv2.VideoWriter_fourcc(*'x264'), video_framerate,
                                    video_resolution)
     if not video_writer.isOpened():
-        raise ValueError(f"Failed to open video writer: {subtitled_video_path}")
+        raise ValueError(f"Failed to open video writer: {subtitled_video_output_path}")
     return no_audio_video_path, video_height, video_reader, video_width, video_writer
 
 
@@ -53,8 +63,11 @@ def write_frame_to_video_file(pil_image: Image,
         raise ValueError(f"Video writer is not open after writing frame!")
     return image
 
+
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 def finish_video_and_attach_audio_from_original(original_video_path: str,
                                                 no_audio_video_path: str,
