@@ -2,8 +2,14 @@
 Multi-lingual translation and subtitling 
 
 > WORK IN PROGRESS - Not yet open to external contributions (hopefully we can do that before the end of Feb '25)
+> It runs from the `skellysubs/__main__.py` file but expect bugs, crashes, and loopdidoopty tech debty nonsense!
 
-https://github.com/user-attachments/assets/0bc27df0-9614-4716-8638-f0b130ef791d
+
+
+https://github.com/user-attachments/assets/c7a3d9b4-f8d7-4728-a67e-fd7954c0e174
+
+
+Original demo video - [https://github.com/user-attachments/assets/0bc27df0-9614-4716-8638-f0b130ef791d](https://github.com/user-attachments/assets/0bc27df0-9614-4716-8638-f0b130ef791d)
 
 
 ## Installation
@@ -19,4 +25,4 @@ https://github.com/user-attachments/assets/0bc27df0-9614-4716-8638-f0b130ef791d
 - Change video path in `__main__.py`
 - run with `python skellysubs/__main__.py`
 
-(FYI - its all busted up atm - expect bugs, crashes, and loopdidoopty tech debty nonsense!) 
+
