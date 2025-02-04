@@ -34,6 +34,7 @@ if __name__ == '__main__':
     # outer_video_name = str(Path("../sample_data/sample_video_long/sample_video_long").resolve())
     # outer_video_name = str(Path("../sample_data/start-here-1/start-here-1").resolve())
     # outer_video_name = str(Path("../sample_data/2025-01-27-jsm-video/2025-01-27-jsm-video.mp4").resolve())
-    outer_video_name = str(Path(r"D:\videos\obs-recordings\2025-02-01\2025-02-01T17-50gmt-0500\2025-02-01T17-50gmt-0500-3840x2160-30fps-NV12_vertical.mp4").resolve())
+    # outer_video_name = str(Path(r"D:\videos\obs-recordings\2025-02-01\2025-02-01T17-50gmt-0500\2025-02-01T17-50gmt-0500-3840x2160-30fps-NV12_vertical.mp4").resolve())
+    outer_video_name = str(Path(r"C:\Users\jonma\Sync\videos\social-media-posts\2025-02-04-skellysubs-3min\2025-02-04-skellysubs-3min-raw.mp4").resolve())
     asyncio.run(run_video_subtitle_pipeline(video_name=outer_video_name))
 
