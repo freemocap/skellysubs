@@ -2,6 +2,7 @@
 Multi-lingual translation and subtitling 
 
 > WORK IN PROGRESS - Not yet open to external contributions (hopefully we can do that before the end of Feb '25)
+>
 > It runs from the `skellysubs/__main__.py` file but expect bugs, crashes, and loopdidoopty tech debty nonsense!
 
 
