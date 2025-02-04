@@ -1,15 +1,36 @@
 import json
+import urllib
 from pathlib import Path
 
+import requests
+
 from skellysubs.add_subtitles_to_video_pipeline.get_video_and_output_paths import get_video_and_output_paths
-from skellysubs.add_subtitles_to_video_pipeline.video_annotator.annotate_video_with_subtitles import \
-    annotate_video_with_subtitles
 from skellysubs.translate_transcript_pipeline.translate_video import translate_video
 from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.video_annotator.annotate_video_with_subtitles import annotate_video_with_subtitles
 
+def is_url(video_name: str) -> bool:
+    # Check whether the given string is a URL
+    try:
+        result = urllib.parse.urlparse(video_name)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
+
+async def download_video(url: str, download_path: str) -> str:
+    # Download video from URL and save it to a local file
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+    with open(download_path, 'wb') as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
+    return download_path
 
 async def run_video_subtitle_pipeline(video_name: str) -> None:
-
+    if is_url(video_name):
+        # If it's a URL, download the video temporarily
+        temp_video_path = "./temp_video.mp4"
+        video_name = await download_video(video_name, temp_video_path)
     (subtitled_video_path,
      video_path,
      translation_path) = await get_video_and_output_paths(video_path=video_name)
@@ -35,6 +56,9 @@ if __name__ == '__main__':
     # outer_video_name = str(Path("../sample_data/start-here-1/start-here-1").resolve())
     # outer_video_name = str(Path("../sample_data/2025-01-27-jsm-video/2025-01-27-jsm-video.mp4").resolve())
     # outer_video_name = str(Path(r"D:\videos\obs-recordings\2025-02-01\2025-02-01T17-50gmt-0500\2025-02-01T17-50gmt-0500-3840x2160-30fps-NV12_vertical.mp4").resolve())
-    outer_video_name = str(Path(r"C:\Users\jonma\Sync\videos\social-media-posts\2025-02-04-skellysubs-3min\2025-02-04-skellysubs-3min-raw.mp4").resolve())
+    # outer_video_name = str(Path(r"C:\Users\jonma\Sync\videos\social-media-posts\2025-02-04-skellysubs-3min\2025-02-04-skellysubs-3min-raw.mp4").resolve())
+    outer_video_name = "https://github.com/user-attachments/assets/0bc27df0-9614-4716-8638-f0b130ef791d"
+
+
     asyncio.run(run_video_subtitle_pipeline(video_name=outer_video_name))
 
