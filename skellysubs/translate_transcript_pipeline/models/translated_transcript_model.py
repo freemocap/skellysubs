@@ -99,10 +99,6 @@ class MatchedTranslatedWord(BaseModel):
     translated_word_index: int = Field(
         description="The index of the translated word in the translated segment that match the word in the original segment")
 
-    @property
-    def language_name(self) -> str:
-        return self.target_language_pair.language
-
 
 class MatchedTranslatedSegment(BaseModel):
     start: StartingTimestamp = Field(
@@ -129,10 +125,6 @@ class MatchedTranslatedSegment(BaseModel):
     matched_translated_words: list[MatchedTranslatedWord] = Field(
         description="The translated words in the segment, with their romanizations if applicable - must be the same length as the original_words_list")
 
-    @property
-    def target_languages(self) -> dict[LanguageNameString, RomanizationMethodString]:
-        return self.translations.languages_and_romanizations()
-
 
 class TranslatedWhisperWordTimestamp(BaseModel):
     start: StartingTimestamp = Field(
@@ -158,17 +150,6 @@ class TranslatedWhisperWordTimestamp(BaseModel):
                    )
         # word_type=WordTypeSchemas.NOT_PROCESSED.name)
 
-    def get_word_by_language(self, language: LanguageNameString) -> tuple[str, str | None]:
-        if language.lower() in LanguageNames.ENGLISH.value.lower() or language.lower() in "original_text" or language.lower() in "original_word" or language.lower() in "original":
-            return self.original_word, None
-        if language.lower() in LanguageNames.SPANISH.value.lower():
-            return self.translations.spanish.translated_text, None
-        if language.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-            return self.translations.chinese.translated_text, self.translations.chinese.romanized_text
-        if language.lower() in LanguageNames.ARABIC_LEVANTINE.value.lower():
-            return self.translations.arabic.translated_text, self.translations.arabic.romanized_text
-        else:
-            raise ValueError(f"Language {language} not found in the translations collection.")
 
 
 class TranscriptSegment(BaseModel):
@@ -186,36 +167,6 @@ class TranscriptSegment(BaseModel):
     words: list[TranslatedWhisperWordTimestamp] = Field(
         description="The words in the segment, with their start and end times in the recording")
 
-    @property
-    def target_languages(self) -> dict[LanguageNameString, RomanizationMethodString]:
-        return self.translations.languages_and_romanizations()
-
-    @property
-    def og_text_and_translations(self) -> dict[str, dict[str, str]]:
-        return {LanguageNames.ENGLISH.value: {'text': self.original_segment_text, 'romanization': None},
-                LanguageNames.SPANISH.value: {'text': self.translations.spanish.translated_text,
-                                              'romanization': None},
-                LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value: {'text': self.translations.chinese.translated_text,
-                                                                  'romanziation': self.translations.chinese.romanized_text},
-                LanguageNames.ARABIC_LEVANTINE.value: {'text': self.translations.arabic.translated_text,
-                                                       'romanziation': self.translations.arabic.romanized_text}}
-
-    def get_text_by_language(self, language: LanguageNameString) -> tuple[str, str | None]:
-        language_lower = language.lower()
-        match language_lower:
-            case _ if language_lower in LanguageNames.ENGLISH.value.lower() or language_lower in {"original_text",
-                                                                                                  "original_word",
-                                                                                                  "original"}:
-                return self.original_segment_text, None
-            case _ if language_lower in LanguageNames.SPANISH.value.lower():
-                return self.translations.spanish.translated_text, None
-            case _ if language_lower in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-                return self.translations.chinese.translated_text, self.translations.chinese.romanized_text
-            case _ if language_lower in LanguageNames.ARABIC_LEVANTINE.value.lower():
-                return self.translations.arabic.translated_text, self.translations.arabic.romanized_text
-            case _:
-                raise ValueError(f"Language {language} not found in the translations collection.")
-
     def set_translation_by_language(self, language: LanguageNameString,
                                     translation: TranslatedText):
         language_lower = language.lower()
@@ -232,10 +183,6 @@ class TranscriptSegment(BaseModel):
                 self.translations.arabic = translation
             case _:
                 raise ValueError(f"Language {language} not found in the translations collection.")
-
-    @property
-    def original_words(self) -> str:
-        return ', \n'.join([word.model_dump_json(indent=2) for word in self.words])
 
     def get_word_list_by_language(self, language: LanguageNameString) -> tuple[list[str], list[str] | None]:
         language_lower = language.lower()
@@ -262,10 +209,6 @@ class TranscriptSegment(BaseModel):
         return [f"([translated-language-index-{index}]{word.strip()})" for index, word in enumerate(word_list)]
 
     @property
-    def original_segment_text_with_words_indexed(self) -> str:
-        return ' '.join([f" ([{index}]{word.original_word}) " for index, word in enumerate(self.words)])
-
-    @property
     def original_segment_text_with_words_indexed_and_timestamped(self) -> str:
         return ' '.join([
             f" ([orginal-language-index-{index}]{word} [starting_timestamp: {word.start}, ending_timestamp: {word.end}])\n"
@@ -289,17 +232,8 @@ class TranslatedTranscription(BaseModel):
         description="Timestamped segments of the original text, with translations and romanizations (excluding word-level timestamps)")
 
     @property
-    def translated_languagues(self) -> list[LanguageNameString]:
+    def translated_languages(self) -> list[LanguageNameString]:
         return [language for language in self.translations.languages_and_romanizations().keys()]
-
-    @property
-    def target_languages_as_string(self) -> str:
-        return ', '.join([f"Language: {language} (Romanization method: {romanization})" for language, romanization in
-                          self.translations.languages_and_romanizations().items()])
-
-    @property
-    def has_translations(self) -> bool:
-        return self.translations.has_translations
 
     @property
     def og_text_and_translations(self) -> dict[str, dict[str, str]]:
@@ -351,29 +285,7 @@ class TranslatedTranscription(BaseModel):
 
     @property
     def target_laguage_pairs(self) -> dict[LanguageNameString, LanguagePair]:
-        return {language: self.language_pair_by_language(language) for language in self.translated_languagues}
-
-    # @classmethod
-    # def from_segment_level_translation(cls,
-    #                                    og_transcription: WhisperTranscriptionResult,
-    #                                    segment_level_translated_transcript: TranslatedText):
-    #     segments = []
-    #     for og_segment, translated_segment in zip(og_transcription.segments,
-    #                                               segment_level_translated_transcript.segments):
-    #         segments.append(SegmentWithWords(original_segment_text=og_segment.text,
-    #                                          translations=translated_segment.translations,
-    #                                          start=og_segment.start,
-    #                                          end=og_segment.end,
-    #                                          words=[
-    #                                                                  TranslatedWhisperWordTimestamp.from_whisper_result(
-    #                                                                      word) for word in
-    #                                                                  og_segment.words]
-    #                                          )
-    #                         )
-    #     return cls(original_text=og_transcription.text,
-    #                original_language=og_transcription.language,
-    #                translations=segment_level_translated_transcript.translations,
-    #                segments=segments)
+        return {language: self.language_pair_by_language(language) for language in self.translated_languages}
 
     def get_matched_segment_and_word_at_timestamp(self, timestamp: float) -> CurrentSegmentAndMatchedWord:
         """

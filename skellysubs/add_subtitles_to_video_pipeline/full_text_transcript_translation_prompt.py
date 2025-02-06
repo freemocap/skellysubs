@@ -51,7 +51,7 @@ If the Target language is the same as the original language, simply copy the tex
 def format_full_text_translation_system_prompt(
         initialized_translated_transcript_without_words: TranslatedTranscription) -> dict[str, str]:
     full_text_translation_prompts_by_language = {}
-    for language in initialized_translated_transcript_without_words.translated_languagues:
+    for language in initialized_translated_transcript_without_words.translated_languages:
         if language.lower() in LanguageNames.ENGLISH.value.lower():
             continue
         full_text_translation_prompts_by_language[language] = FULL_TEXT_TRANSLATION_SYSTEM_PROMPT.format(
