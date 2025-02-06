@@ -3,18 +3,11 @@ import logging
 from typing import Type
 
 from openai import AsyncOpenAI, BaseModel
+from openai.types.audio import TranscriptionVerbose
 
 from skellysubs.ai_clients.ai_client_abc import AiClientConfigABC, AiClientABC, AiSystemMessage, AiUserMessage
 from skellysubs.utilities.load_env_variables import OPENAI_API_KEY
 
-_OPENAI_CLIENT: AsyncOpenAI | None = None
-
-
-def get_or_create_openai_client() -> AsyncOpenAI:
-    global _OPENAI_CLIENT
-    if _OPENAI_CLIENT is None:
-        _OPENAI_CLIENT = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    return _OPENAI_CLIENT
 
 
 
@@ -28,7 +21,7 @@ class OpenAIClientConfig(AiClientConfigABC):
 
 class OpenaiClient(AiClientABC):
     config: OpenAIClientConfig = OpenAIClientConfig()
-    client: AsyncOpenAI = get_or_create_openai_client()
+    client: AsyncOpenAI = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 
 
@@ -73,3 +66,24 @@ class OpenaiClient(AiClientABC):
         )
         output = response.choices[0].message.content
         return output
+
+    async def make_whisper_transcription_request(self,
+                                                 prompt: str,
+                                                 audio_file_path: str) -> TranscriptionVerbose:
+        audio_file = open(audio_file_path, "rb")
+        transcript_response = await self.client.audio.transcriptions.create(
+            file=audio_file,
+            model="whisper-1",
+            response_format="verbose_json",
+            timestamp_granularities=["segment", "word"]
+        )
+        return transcript_response
+
+_OPENAI_CLIENT: OpenaiClient | None = None
+
+
+def get_or_create_openai_client() -> OpenaiClient:
+    global _OPENAI_CLIENT
+    if _OPENAI_CLIENT is None:
+        _OPENAI_CLIENT = OpenaiClient()
+    return _OPENAI_CLIENT

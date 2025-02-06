@@ -8,6 +8,7 @@ from skellysubs.audio_transcription.whisper_transcription import transcribe_audi
 
 
 async def get_or_compute_video_transcription(video_path: str,
+                                             local_whisper:bool = False,
                                              re_transcribe: bool = False) -> WhisperTranscriptionResult:
     extension = Path(video_path).suffix
     audio_path = video_path.replace(f"{extension}", ".wav")
@@ -18,7 +19,7 @@ async def get_or_compute_video_transcription(video_path: str,
         transcription_result = WhisperTranscriptionResult(**transcription_json)
     else:
         scrape_and_save_audio_from_video(audio_path, video_path)
-        transcription_result = transcribe_audio(audio_path)
+        transcription_result = await transcribe_audio(audio_path=audio_path, local_whisper=local_whisper)
         Path(transcript_path).write_text(json.dumps(transcription_result.model_dump(), indent=4))
     return transcription_result
 

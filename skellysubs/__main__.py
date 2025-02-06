@@ -29,8 +29,12 @@ async def download_video(url: str, download_path: str) -> str:
 async def run_video_subtitle_pipeline(video_name: str) -> None:
     if is_url(video_name):
         # If it's a URL, download the video temporarily
-        temp_video_path = "./temp_video.mp4"
-        video_name = await download_video(video_name, temp_video_path)
+        video_url = video_name
+        video_name = f"video_url_ending_with_{video_name.split("/")[-1][:-20]}".replace('/', '_')
+        video_path = f"../sample_data/{video_name}/{video_name}.mp4"
+        Path(video_path).resolve().parent.mkdir(parents=True, exist_ok=True)
+        video_name = await download_video(url=video_url,
+                                          download_path=video_path)
     (subtitled_video_path,
      video_path,
      translation_path) = await get_video_and_output_paths(video_path=video_name)
@@ -43,6 +47,8 @@ async def run_video_subtitle_pipeline(video_name: str) -> None:
         translation_result = await translate_video(video_path=video_path)
         # Save the translation result
         Path(video_path.replace('.mp4', '_translation.json')).write_text(translation_result.model_dump_json(indent=4), encoding='utf-8')
+        translation_result.generate_srt_files(file_basename=video_path.replace('.mp4', ''),
+                                              save_directory=str(Path(video_path).parent))
 
     # Annotate the video with the translated words
     annotate_video_with_subtitles(video_path = video_path,

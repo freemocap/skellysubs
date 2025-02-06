@@ -4,6 +4,9 @@ from abc import ABC
 from pydantic import BaseModel, Field
 
 
+# TODO - The word type matching thing is not functional/implemented, but i think its probably pretty close?
+
+
 class WordTypeABC(BaseModel, ABC):
     word_string: str = Field(description="The text of the word in question")
     word_romanization: str | None = Field(default=None, description="The romanization of the word, if applicable")

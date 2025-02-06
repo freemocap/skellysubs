@@ -3,11 +3,13 @@ from pathlib import Path
 
 import cv2
 
+from skellysubs.ai_clients.openai_client import get_or_create_openai_client
 from skellysubs.audio_transcription.whisper_transcript_result_full_model import WhisperTranscriptionResult
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+TRANSCRIPTION_BASE_PROMPT ="Words you may hear, with their correct spelling: `Jon Matthis`, `Jonathan Samir Matthis`, `FreeMoCap`"
 
 def validate_audio_path(audio_path: str) -> None:
     if not Path(audio_path).exists():
@@ -18,7 +20,23 @@ def validate_audio_path(audio_path: str) -> None:
         raise ValueError(f"Unsupported file format: {audio_path}")
 
 
-def transcribe_audio(audio_path: str, model_name: str = "large") -> WhisperTranscriptionResult:
+async def transcribe_audio(audio_path: str, local_whisper: bool = True, model_name: str = "large") -> WhisperTranscriptionResult:
+    if local_whisper:
+        return transcribe_audio_with_local_whisper(audio_path, model_name)
+    else:
+        return await transcribe_audio_openai(audio_path, model_name)
+
+async def transcribe_audio_openai(audio_path: str, model_name: str = "large") -> WhisperTranscriptionResult:
+    import openai
+    import torch
+    logger.info(
+        f"Transcribing audio: {audio_path} with openai model: {model_name} - import torch; torch.cuda_is_available(): {torch.cuda.is_available()}")
+
+    validate_audio_path(audio_path)
+    result = await get_or_create_openai_client().make_whisper_transcription_request(audio_file_path=audio_path, prompt=TRANSCRIPTION_BASE_PROMPT)
+    return WhisperTranscriptionResult.from_from_verbose_transcript(result)
+
+def transcribe_audio_with_local_whisper(audio_path: str, model_name: str = "large") -> WhisperTranscriptionResult:
     import whisper
     import torch
     logger.info(
@@ -31,7 +49,7 @@ def transcribe_audio(audio_path: str, model_name: str = "large") -> WhisperTrans
                               temperature=0.0,
                               no_speech_threshold=0.5,
                               hallucination_silence_threshold=0.5,
-                              initial_prompt="Words you may hear, with their correct spelling: `Jon Matthis`, `FreeMoCap`",
+                              initial_prompt=TRANSCRIPTION_BASE_PROMPT,
                               )
     return WhisperTranscriptionResult(**result)
 

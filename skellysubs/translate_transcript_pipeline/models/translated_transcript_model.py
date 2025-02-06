@@ -1,3 +1,6 @@
+from datetime import timedelta
+from pathlib import Path
+
 import jieba
 from pydantic import BaseModel, Field
 
@@ -133,11 +136,10 @@ class TranslatedWhisperWordTimestamp(BaseModel):
         description="The end time of the period in the recording when the word was spoken, in seconds since the start of the recording. Should match the start time of the next word in the segment or the end time of the segment for the last word.")
     original_word: OriginalTextString = Field(
         description="The original word spoken in the segment, in its original language")
-    # translations: TranslationsCollection = Field(
-    #     description="The translations of the original word into the target languages with their romanizations")
     matched_words: dict[LanguageNameString, MatchedTranslatedWord] = Field(
         description="The translated words in each target language, with their romanizations")
 
+    # TODO - would be cool to also extract linguistic features of the word, such as part of speech, tense, etc.
     # word_type: WordTypeSchemas|str = Field(default=WordTypeSchemas.OTHER.name,
     #                                    description="Linguistic features of the word, such as part of speech, tense, etc.")
 
@@ -148,7 +150,7 @@ class TranslatedWhisperWordTimestamp(BaseModel):
                    original_word=word.word,
                    matched_words={},
                    )
-        # word_type=WordTypeSchemas.NOT_PROCESSED.name)
+
 
 
 
@@ -171,9 +173,7 @@ class TranscriptSegment(BaseModel):
                                     translation: TranslatedText):
         language_lower = language.lower()
         match language_lower:
-            case _ if language_lower in LanguageNames.ENGLISH.value.lower() or language_lower in {"original_text",
-                                                                                                  "original_word",
-                                                                                                  "original"}:
+            case _ if language_lower in LanguageNames.ENGLISH.value.lower():
                 self.translations.english = translation
             case _ if language_lower in LanguageNames.SPANISH.value.lower():
                 self.translations.spanish = translation
@@ -187,9 +187,7 @@ class TranscriptSegment(BaseModel):
     def get_word_list_by_language(self, language: LanguageNameString) -> tuple[list[str], list[str] | None]:
         language_lower = language.lower()
         match language_lower:
-            case _ if language_lower in LanguageNames.ENGLISH.value.lower() or language_lower in {"original_text",
-                                                                                                  "original_word",
-                                                                                                  "original"}:
+            case _ if language_lower in LanguageNames.ENGLISH.value.lower():
                 return [word.original_word for word in self.words], None
             case _ if language_lower in LanguageNames.SPANISH.value.lower():
                 return self.translations.get_word_list_by_language(language=language_lower)
@@ -234,6 +232,10 @@ class TranslatedTranscription(BaseModel):
     @property
     def translated_languages(self) -> list[LanguageNameString]:
         return [language for language in self.translations.languages_and_romanizations().keys()]
+
+    @property
+    def language_pairs(self) -> dict[LanguageNameString, LanguagePair]:
+        return {language: self.language_pair_by_language(language) for language in self.translated_languages}
 
     @property
     def og_text_and_translations(self) -> dict[str, dict[str, str]]:
@@ -337,6 +339,40 @@ class TranslatedTranscription(BaseModel):
                                             matched_segment_by_language=matched_translated_segments,
                                             matched_word_by_language=matched_translated_words)
 
+
+
+
+    def generate_srt_files(self, file_basename: str, save_directory:str) -> str:
+        """Generate SRT file content from a TranslatedTranscription object."""
+        save_directory =  Path(save_directory)
+        save_directory.mkdir(parents=True, exist_ok=True)
+
+        def format_srt_time(seconds: float) -> str:
+            """Convert seconds to SRT timestamp format."""
+            td = timedelta(seconds=seconds)
+            return str(td)[:-3].replace('.', ',')
+
+        srt_by_language = {}
+        for language_pair in self.language_pairs.values():
+            language = language_pair.language
+            romanization_method = language_pair.romanization_method #TODO - save out a version with and without romanization
+
+            srt_content = []
+
+            for index, segment in enumerate(self.segments, start=1):
+                start_time = format_srt_time(segment.start)
+                end_time = format_srt_time(segment.end)
+
+                # Retrieve the translated text for the provided language
+                segment_word_list = segment.translations.get_word_list_by_language(language)
+
+                # Format a single SRT block
+                srt_block = f"{index}\n{start_time} --> {end_time}\n{' '.join(segment_word_list)}\n"
+                srt_content.append(srt_block)
+
+            srt_filename = save_directory / f"{file_basename}_{language}.srt"
+            with open(srt_filename, 'w') as f:
+                f.write('\n'.join(srt_content))
 
 if __name__ == '__main__':
     from pprint import pprint
