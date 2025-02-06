@@ -92,6 +92,7 @@ async def segment_level_translation(
         try:
             target_language = address['language']
             index = address['index']
+            #TODO - skip English and just copy the original text into the relevant whosit
             full_text_translated_transcript.segments[index].set_translation_by_language(language=target_language,
                                                                                         translation=result)
         except Exception as e:

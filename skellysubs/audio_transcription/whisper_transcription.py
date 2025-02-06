@@ -24,14 +24,9 @@ async def transcribe_audio(audio_path: str, local_whisper: bool = True, model_na
     if local_whisper:
         return transcribe_audio_with_local_whisper(audio_path, model_name)
     else:
-        return await transcribe_audio_openai(audio_path, model_name)
+        return await transcribe_audio_openai(audio_path)
 
-async def transcribe_audio_openai(audio_path: str, model_name: str = "large") -> WhisperTranscriptionResult:
-    import openai
-    import torch
-    logger.info(
-        f"Transcribing audio: {audio_path} with openai model: {model_name} - import torch; torch.cuda_is_available(): {torch.cuda.is_available()}")
-
+async def transcribe_audio_openai(audio_path: str) -> WhisperTranscriptionResult:
     validate_audio_path(audio_path)
     result = await get_or_create_openai_client().make_whisper_transcription_request(audio_file_path=audio_path, prompt=TRANSCRIPTION_BASE_PROMPT)
     return WhisperTranscriptionResult.from_from_verbose_transcript(result)
@@ -44,7 +39,7 @@ def transcribe_audio_with_local_whisper(audio_path: str, model_name: str = "larg
 
     validate_audio_path(audio_path)
     model = whisper.load_model(model_name)
-    result = model.transcribe(audio_path,
+    result = model.transcribe(audio = audio_path,
                               word_timestamps=True,
                               temperature=0.0,
                               no_speech_threshold=0.5,

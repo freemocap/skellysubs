@@ -1,22 +1,22 @@
 {
-    "text": " Hello, my name is Jon Matthis. Nice to meet you. 1, 2, 3, 4, 5, blue, green, red, dog, cat, cow, bird. Thank you and goodbye.",
+    "text": "Hello, my name is Jon Mathis. Nice to meet you. 1, 2, 3, 4, 5, blue, green, red, dog, cat, cow, bird. Thank you and goodbye.",
     "segments": [
         {
             "id": 0,
             "seek": 0.0,
             "start": 0.0,
-            "end": 8.58,
-            "text": " Hello, my name is Jon Matthis. Nice to meet you. 1, 2, 3, 4, 5, blue, green, red, dog, cat, cow, bird. Thank you and goodbye.",
+            "end": 7.519999980926514,
+            "text": " Hello, my name is Jon Mathis. Nice to meet you. 1, 2, 3, 4, 5, blue, green, red, dog, cat, cow, bird.",
             "tokens": [
-                50365,
+                50364,
                 2425,
                 11,
                 452,
                 1315,
                 307,
                 7745,
-                6789,
-                11176,
+                15776,
+                271,
                 13,
                 5490,
                 281,
@@ -47,176 +47,245 @@
                 11,
                 5255,
                 13,
+                50732
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.31633660197257996,
+            "compression_ratio": 1.117117166519165,
+            "no_speech_prob": 0.02369576133787632,
+            "words": [
+                {
+                    "start": 0.0,
+                    "end": 0.5,
+                    "word": "Hello",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 0,
+                    "probability": null
+                },
+                {
+                    "start": 0.6000000238418579,
+                    "end": 0.699999988079071,
+                    "word": "my",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 1,
+                    "probability": null
+                },
+                {
+                    "start": 0.699999988079071,
+                    "end": 0.8999999761581421,
+                    "word": "name",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 2,
+                    "probability": null
+                },
+                {
+                    "start": 0.8999999761581421,
+                    "end": 1.100000023841858,
+                    "word": "is",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 3,
+                    "probability": null
+                },
+                {
+                    "start": 1.100000023841858,
+                    "end": 1.2999999523162842,
+                    "word": "Jon",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 4,
+                    "probability": null
+                },
+                {
+                    "start": 1.2999999523162842,
+                    "end": 1.7000000476837158,
+                    "word": "Mathis",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 5,
+                    "probability": null
+                },
+                {
+                    "start": 1.9600000381469727,
+                    "end": 1.9600000381469727,
+                    "word": "Nice",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 6,
+                    "probability": null
+                },
+                {
+                    "start": 1.9600000381469727,
+                    "end": 2.1600000858306885,
+                    "word": "to",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 7,
+                    "probability": null
+                },
+                {
+                    "start": 2.1600000858306885,
+                    "end": 2.319999933242798,
+                    "word": "meet",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 8,
+                    "probability": null
+                },
+                {
+                    "start": 2.319999933242798,
+                    "end": 2.5999999046325684,
+                    "word": "you",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 9,
+                    "probability": null
+                },
+                {
+                    "start": 2.819999933242798,
+                    "end": 2.859999895095825,
+                    "word": "1",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 10,
+                    "probability": null
+                },
+                {
+                    "start": 3.059999942779541,
+                    "end": 3.059999942779541,
+                    "word": "2",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 11,
+                    "probability": null
+                },
+                {
+                    "start": 3.059999942779541,
+                    "end": 3.359999895095825,
+                    "word": "3",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 12,
+                    "probability": null
+                },
+                {
+                    "start": 3.4200000762939453,
+                    "end": 3.640000104904175,
+                    "word": "4",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 13,
+                    "probability": null
+                },
+                {
+                    "start": 3.680000066757202,
+                    "end": 4.079999923706055,
+                    "word": "5",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 14,
+                    "probability": null
+                },
+                {
+                    "start": 4.239999771118164,
+                    "end": 4.519999980926514,
+                    "word": "blue",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 15,
+                    "probability": null
+                },
+                {
+                    "start": 4.659999847412109,
+                    "end": 4.960000038146973,
+                    "word": "green",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 16,
+                    "probability": null
+                },
+                {
+                    "start": 5.340000152587891,
+                    "end": 5.400000095367432,
+                    "word": "red",
+                    "index_in_segment": 18,
+                    "index_in_transcript": 17,
+                    "probability": null
+                },
+                {
+                    "start": 6.039999961853027,
+                    "end": 6.179999828338623,
+                    "word": "dog",
+                    "index_in_segment": 19,
+                    "index_in_transcript": 18,
+                    "probability": null
+                },
+                {
+                    "start": 6.28000020980835,
+                    "end": 6.579999923706055,
+                    "word": "cat",
+                    "index_in_segment": 20,
+                    "index_in_transcript": 19,
+                    "probability": null
+                },
+                {
+                    "start": 6.980000019073486,
+                    "end": 7.039999961853027,
+                    "word": "cow",
+                    "index_in_segment": 21,
+                    "index_in_transcript": 20,
+                    "probability": null
+                },
+                {
+                    "start": 7.5,
+                    "end": 7.519999980926514,
+                    "word": "bird",
+                    "index_in_segment": 22,
+                    "index_in_transcript": 21,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "seek": 0.0,
+            "start": 8.0600004196167,
+            "end": 8.800000190734863,
+            "text": " Thank you and goodbye.",
+            "tokens": [
+                50740,
                 1044,
                 291,
                 293,
                 12084,
                 13,
-                50815
+                50840
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.2354354236436927,
-            "compression_ratio": 1.1160714285714286,
-            "no_speech_prob": 0.017126651480793953,
+            "avg_logprob": -0.31633660197257996,
+            "compression_ratio": 1.117117166519165,
+            "no_speech_prob": 0.02369576133787632,
             "words": [
                 {
-                    "start": 0.0,
-                    "end": 0.42,
-                    "word": " Hello,",
-                    "probability": 0.9554513692855835
+                    "start": 8.0600004196167,
+                    "end": 8.119999885559082,
+                    "word": "Thank",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 22,
+                    "probability": null
                 },
                 {
-                    "start": 0.46,
-                    "end": 0.58,
-                    "word": " my",
-                    "probability": 0.9916506409645081
+                    "start": 8.119999885559082,
+                    "end": 8.260000228881836,
+                    "word": "you",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 23,
+                    "probability": null
                 },
                 {
-                    "start": 0.58,
-                    "end": 0.78,
-                    "word": " name",
-                    "probability": 0.9996141195297241
+                    "start": 8.260000228881836,
+                    "end": 8.520000457763672,
+                    "word": "and",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 24,
+                    "probability": null
                 },
                 {
-                    "start": 0.78,
-                    "end": 0.96,
-                    "word": " is",
-                    "probability": 0.9988059997558594
-                },
-                {
-                    "start": 0.96,
-                    "end": 1.14,
-                    "word": " Jon",
-                    "probability": 0.07973317801952362
-                },
-                {
-                    "start": 1.14,
-                    "end": 1.54,
-                    "word": " Matthis.",
-                    "probability": 0.12742461077868938
-                },
-                {
-                    "start": 1.62,
-                    "end": 1.8,
-                    "word": " Nice",
-                    "probability": 0.9754626154899597
-                },
-                {
-                    "start": 1.8,
-                    "end": 1.98,
-                    "word": " to",
-                    "probability": 0.9983421564102173
-                },
-                {
-                    "start": 1.98,
-                    "end": 2.16,
-                    "word": " meet",
-                    "probability": 0.9985387325286865
-                },
-                {
-                    "start": 2.16,
-                    "end": 2.38,
-                    "word": " you.",
-                    "probability": 0.9977954626083374
-                },
-                {
-                    "start": 2.48,
-                    "end": 2.64,
-                    "word": " 1,",
-                    "probability": 0.5808238387107849
-                },
-                {
-                    "start": 2.76,
-                    "end": 2.94,
-                    "word": " 2,",
-                    "probability": 0.9131730198860168
-                },
-                {
-                    "start": 2.96,
-                    "end": 3.16,
-                    "word": " 3,",
-                    "probability": 0.999002993106842
-                },
-                {
-                    "start": 3.24,
-                    "end": 3.38,
-                    "word": " 4,",
-                    "probability": 0.9990059733390808
-                },
-                {
-                    "start": 3.52,
-                    "end": 3.74,
-                    "word": " 5,",
-                    "probability": 0.9976111650466919
-                },
-                {
-                    "start": 3.94,
-                    "end": 4.26,
-                    "word": " blue,",
-                    "probability": 0.6971954703330994
-                },
-                {
-                    "start": 4.42,
-                    "end": 4.72,
-                    "word": " green,",
-                    "probability": 0.9989529848098755
-                },
-                {
-                    "start": 4.9,
-                    "end": 5.16,
-                    "word": " red,",
-                    "probability": 0.9985124468803406
-                },
-                {
-                    "start": 5.28,
-                    "end": 5.98,
-                    "word": " dog,",
-                    "probability": 0.9925981760025024
-                },
-                {
-                    "start": 6.1,
-                    "end": 6.4,
-                    "word": " cat,",
-                    "probability": 0.9990917444229126
-                },
-                {
-                    "start": 6.5,
-                    "end": 6.7,
-                    "word": " cow,",
-                    "probability": 0.9993205070495605
-                },
-                {
-                    "start": 6.98,
-                    "end": 7.3,
-                    "word": " bird.",
-                    "probability": 0.9994434714317322
-                },
-                {
-                    "start": 7.58,
-                    "end": 7.94,
-                    "word": " Thank",
-                    "probability": 0.9989863038063049
-                },
-                {
-                    "start": 7.94,
-                    "end": 8.14,
-                    "word": " you",
-                    "probability": 0.9996185302734375
-                },
-                {
-                    "start": 8.14,
-                    "end": 8.32,
-                    "word": " and",
-                    "probability": 0.9596405029296875
-                },
-                {
-                    "start": 8.32,
-                    "end": 8.58,
-                    "word": " goodbye.",
-                    "probability": 0.9940284490585327
+                    "start": 8.520000457763672,
+                    "end": 8.800000190734863,
+                    "word": "goodbye",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 25,
+                    "probability": null
                 }
             ]
         }
     ],
-    "language": "en"
+    "language": "english"
 }

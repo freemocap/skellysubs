@@ -1,0 +1,8 @@
+1
+0:00:00,100 --> 0:00:07,520
+Hello my name is Jon Mathis Nice to meet you 1 2 3 4 5 blue green red dog cat cow bird
+
+
+2
+0:00:08,060 --> 0:00:08,800
+Thank you and goodbye

@@ -1,7 +1,6 @@
 import json
 import logging
 
-from torch.utils.benchmark import Language
 
 from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
 from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import TranslatedTranscription

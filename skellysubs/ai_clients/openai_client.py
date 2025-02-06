@@ -75,6 +75,7 @@ class OpenaiClient(AiClientABC):
             file=audio_file,
             model="whisper-1",
             response_format="verbose_json",
+            prompt=prompt,
             timestamp_granularities=["segment", "word"]
         )
         return transcript_response
