@@ -4,7 +4,7 @@ from typing import Callable
 from PIL import ImageFont
 from pydantic import BaseModel
 
-from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
+from skellysubs.translation_pipeline.models.language_models import LanguageNames
 
 
 class LanguageAnnotationConfig(BaseModel):
@@ -22,7 +22,7 @@ class LanguageAnnotationConfig(BaseModel):
         return ImageFont.truetype(self.font_path, self.get_font_size(image_height))
 
 
-SUBTITLES_TOP_BUFFER_RATIO = 0.55
+SUBTITLES_TOP_BUFFER_RATIO = 0.5
 SUBTITLES_BOTTOM_BUFFER_RATIO = 0.1
 DEFAULT_FONT_SIZE_RATIO = 0.016
 
@@ -64,5 +64,12 @@ LANGUAGE_ANNOTATION_CONFIGS = {
         font_size_ratio=DEFAULT_FONT_SIZE_RATIO * 1.05,
         color=(157, 152, 219),
         language_start_y=lambda video_height: int(video_height * SUBTITLES_TOP_BUFFER_RATIO) + int(video_height * 0.26),
+        buffer_size=100),
+    LanguageNames.HINDI: LanguageAnnotationConfig(
+        language_name=LanguageNames.HINDI,
+        font_path=str(FONT_BASE_PATH / "NotoSansDevanagari-VariableFont.ttf"),
+        font_size_ratio=DEFAULT_FONT_SIZE_RATIO,
+        color=(257, 152, 219),
+        language_start_y=lambda video_height: int(video_height * SUBTITLES_TOP_BUFFER_RATIO) + int(video_height * 0.36),
         buffer_size=100),
 }

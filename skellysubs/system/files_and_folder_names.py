@@ -4,7 +4,7 @@ from time import time
 
 
 def get_skellysubs_data_folder_path() -> str:
-    path  =  Path().home() / "Sync" / "skellybot-data" / "skellysubs"
+    path  =  Path().home() / "Sync" / "skellysubs-data"
     path.mkdir(parents=True, exist_ok=True)
     return str(path)
 

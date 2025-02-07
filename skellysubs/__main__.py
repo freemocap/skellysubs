@@ -4,9 +4,9 @@ from pathlib import Path
 
 import requests
 
-from skellysubs.add_subtitles_to_video_pipeline.get_video_and_output_paths import get_video_and_output_paths
-from skellysubs.translate_transcript_pipeline.translate_video import translate_video
-from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.translation_pipeline.get_video_and_output_paths import get_video_and_output_paths
+from skellysubs.translation_pipeline.translate_video import translate_video
+from skellysubs.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
 from skellysubs.video_annotator.annotate_video_with_subtitles import annotate_video_with_subtitles
 
 def is_url(video_name: str) -> bool:

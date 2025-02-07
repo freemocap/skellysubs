@@ -11,8 +11,8 @@ from skellysubs.video_annotator.language_annotation_configs import \
     LanguageAnnotationConfig, LANGUAGE_ANNOTATION_CONFIGS, get_default_font
 from skellysubs.video_annotator.video_reader_writer_methods import \
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
-from skellysubs.translate_transcript_pipeline.models.language_models import LanguageNames
-from skellysubs.translate_transcript_pipeline.models.translated_transcript_model import \
+from skellysubs.translation_pipeline.models.language_models import LanguageNames
+from skellysubs.translation_pipeline.models.translated_transcript_model import \
     TranslatedTranscription, MatchedTranslatedWord, TranscriptSegment
 
 logger = logging.getLogger(__name__)
