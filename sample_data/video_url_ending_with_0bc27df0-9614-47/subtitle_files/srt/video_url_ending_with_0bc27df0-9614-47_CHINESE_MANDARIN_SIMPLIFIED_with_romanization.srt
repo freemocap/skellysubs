@@ -1,0 +1,70 @@
+1
+0:00:00,100 --> 0:00:04,180
+你好 我 的 名字 是 乔纳森 萨米尔 马蒂斯 我 是 美国 马萨诸塞州 波士顿 的 一名 神经科学 教授
+Nǐ hǎo, wǒ de míngzì shì Qiáonàsēn·Sàmǐěr·Mǎtìs, wǒ shì Měiguó Mǎsàzhōu Bōshìdùn de yī míng shénjīng kēxué jiàoshòu.
+
+
+2
+0:00:04,260 --> 0:00:09,260
+马萨诸塞州 美国 现在 这是 一个 相当 长 的 故事 但 这些 天 我 大部分 时间 都 在 构建
+Mǎsàzhūsāi zhōu, měiguó. Xiànzài zhè shì yīgè xiāngdāng cháng de gùshì, dàn zhèxiē tiān wǒ dà bùfèn shíjiān dōu zài gòujiàn
+
+
+3
+0:00:09,260 --> 0:00:14,100
+基于 我 熟悉 的 技术 构建 的 自由 开源 软件 作为 我 科学研究 的 结果
+jīyú wǒ shúxī de jìshù gòujiàn de zìyóu kāiyuán ruǎnjiàn, zuòwéi wǒ kēxué yánjiū de jiéguǒ.
+
+
+4
+0:00:14,100 --> 0:00:19,820
+科学研究 这是 其中 之一 所以 你 应该 看到 的 是 我 所说 的 英文 的 文字 转录 然后 下面 是 这些 文字 翻译成 几种 其他 语言 的 内容
+kēxué yánjiū. zhè shì qízhōng zhī yī. suǒyǐ nǐ yīnggāi kàn dào de shì wǒ suǒ shuō de yīngwén de wénzì zhuǎnlù, ránhòu xiàmiàn shì zhèxiē wénzì fānyì chéng jǐ zhǒng qítā yǔyán de nèiróng.
+
+
+5
+0:00:19,820 --> 0:00:23,920
+我 说 的 英语单词 然后 将 这些 单词 翻译成 几种 其他 语言
+wǒ shuō de yīngyǔ dān cí, rán hòu jiāng zhèxiē dān cí fānyì chéng jǐ zhǒng qítā yǔyán
+
+
+6
+0:00:23,920 --> 0:00:28,260
+下面 的 语言 如果 您 在 任何 时候 暂停 视频 它 应该 会 突出 显示 我 当前 所说 的 单词
+xiàmiàn de yǔyán. Rúguǒ nín zài rènhé shíhòu zàntíng shìpín, tā yīnggāi huì tūchū xiǎnshì wǒ dāngqián suǒ shuō de dān cí.
+
+
+7
+0:00:28,260 --> 0:00:32,860
+我 目前 正在 用 英语 说话 然后 下面 的 翻译 中是 最 接近 的 匹配 词
+Wǒ mùqián zhèngzài yòng Yīngyǔ shuōhuà, ránhòu xiàmiàn de fānyì zhōng shì zuì jiējìn de pǐpèi cí.
+
+
+8
+0:00:33,380 --> 0:00:40,439
+让 我们 快速 测试 一下 1 2 3 4 5 红色 蓝色 绿色 黄色 粉色 我 的 爸爸 来自 德克萨斯州
+Ràng wǒmen kuàisù cèshì yīxià. 1, 2, 3, 4, 5. Hóngsè, lánsè, lǜsè, huángsè, fěnsè. Wǒ de bàba láizì Dékèsàsī zhōu,
+
+
+9
+0:00:40,520 --> 0:00:44,740
+我 妈妈 来自 叙利亚 我 的 兄弟 叫 保罗 我 有 两只 猫 分别 叫普 和 奥利
+wǒ māmā láizì xùlìyǎ, wǒ de xiōngdì jiào bǎoluó, wǒ yǒu liǎng zhī māo, fēnbié jiào pǔ hé àolì.
+
+
+10
+0:00:44,740 --> 0:00:50,340
+图书馆 在 哪里 好 的 谢谢 很 高兴 见到 你 这 就是 基本 的 想法 如果 你 会 说 这些 语言 中 的 任何 一种 请 告诉 我 情况 如何 特别 是 在 单词 高亮 匹配 的 方面
+Túshūguǎn zài nǎlǐ? Hǎo de, xièxiè, hěn gāoxìng jiàn dào nǐ. Zhè jiùshì jīběn de xiǎngfǎ. Rúguǒ nǐ huì shuō zhèxiē yǔyán zhōng de rènhé yī zhǒng, qǐng gàosù wǒ qíngkuàng rúhé, tèbié shì zài dān cí gāoliàng pèihé de fāngmiàn.
+
+
+11
+0:00:50,340 --> 0:00:54,820
+这些 语言 请 告诉 我 进展 如何 特别 是 在 单词 高亮 匹配 的 方面
+zhèxiē yǔyán, qǐng gàosù wǒ jìnzhǎn rúhé, tèbié shì zài dān cí gāoliàng pǐpèi de fāngmiàn.
+
+
+12
+0:00:54,820 --> 0:00:59,080
+如果 你 对 这个 项目 感兴趣 我 很 想 开发 它 所以 请 告诉 我
+Rúguǒ nǐ duì zhège xiàngmù gǎn xìngqù, wǒ hěn xiǎng kāifā tā, suǒyǐ qǐng gàosù wǒ.
