@@ -3,8 +3,8 @@ from pathlib import Path
 
 from moviepy import VideoFileClip
 
-from skellysubs.audio_transcription.whisper_transcript_result_full_model import WhisperTranscriptionResult
-from skellysubs.audio_transcription.whisper_transcription import transcribe_audio
+from skellysubs.skellysubs_core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
+from skellysubs.skellysubs_core.audio_transcription.whisper_audio_transcription import transcribe_audio
 
 
 async def get_or_compute_video_transcription(video_path: str,
@@ -31,3 +31,8 @@ def scrape_and_save_audio_from_video(audio_path: str, video_path: str) -> None:
     audio = video.audio
     Path(audio_path).parent.mkdir(parents=True, exist_ok=True)
     audio.write_audiofile(audio_path)
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(get_or_compute_video_transcription(video_path="../sample_data/short_video_short/short_video_short.mp4"))

@@ -21,10 +21,10 @@
             "romanized_text": "Nǐ hǎo, wǒ de míngzì shì Qiáo ēn·Mǎ xī sī. Hěn gāoxìng jiàn dào nǐ. 1, 2, 3, 4, 5, lánsè, lǜsè, hóngsè, gǒu, māo, niú, niǎo. Xièxiè, zàijiàn."
         },
         "arabic": {
-            "translated_text": "مرحبًا، اسمي جون ماثيس. سعيد بلقائك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرًا ووداعًا.",
+            "translated_text": "مرحبًا، اسمي جون ماثيس. سعيد بلقائك. 1، 2، 3، 4، 5، أزرق، أخضر، أحمر، كلب، قطة، بقرة، طائر. شكرًا وإلى اللقاء.",
             "translated_language": "ARABIC_LEVANTINE",
             "romanization_method": "ALA-LC",
-            "romanized_text": "Marhaban, ismī Jūn Māthīs. Saʿīd biliqā'ik. 1, 2, 3, 4, 5, azraq, akhḍar, aḥmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukran wa wadāʿan."
+            "romanized_text": "Marhaban, ismī Jūn Māthīs. Saʿīd biliqā'ik. 1, 2, 3, 4, 5, azraq, akhḍar, aḥmar, kalb, qiṭṭa, baqara, ṭā'ir. Shukran wa ilā al-liqā'."
         },
         "hindi": {
             "translated_text": "नमस्ते, मेरा नाम जॉन मैथिस है। आपसे मिलकर अच्छा लगा। 1, 2, 3, 4, 5, नीला, हरा, लाल, कुत्ता, बिल्ली, गाय, पक्षी। धन्यवाद और अलविदा।",
@@ -1763,7 +1763,7 @@
                             "original_word_index": 7,
                             "translated_word_text": "मिलकर",
                             "translated_word_romanized_text": "milkar",
-                            "translated_word_index": 6
+                            "translated_word_index": 7
                         },
                         {
                             "original_language": "ENGLISH",
@@ -1777,7 +1777,7 @@
                             "original_word_index": 8,
                             "translated_word_text": "अच्छा",
                             "translated_word_romanized_text": "acchā",
-                            "translated_word_index": 7
+                            "translated_word_index": 8
                         },
                         {
                             "original_language": "ENGLISH",
@@ -2266,9 +2266,9 @@
                             },
                             "original_word_text": "you",
                             "original_word_index": 1,
-                            "translated_word_text": "Gracias",
+                            "translated_word_text": "y",
                             "translated_word_romanized_text": null,
-                            "translated_word_index": 0
+                            "translated_word_index": 1
                         },
                         {
                             "original_language": "ENGLISH",
@@ -2401,14 +2401,10 @@
                     ],
                     "translated_words_list": [
                         "شكراً",
-                        "شكراً",
-                        "ووداعاً",
                         "ووداعاً"
                     ],
                     "romanized_translated_words_list": [
                         "shukran",
-                        "shukran",
-                        "w wada'an",
                         "w wada'an"
                     ],
                     "matched_translated_words": [

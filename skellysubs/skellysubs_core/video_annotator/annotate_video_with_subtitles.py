@@ -7,13 +7,15 @@ from arabic_reshaper import arabic_reshaper
 from bidi.algorithm import get_display
 from tqdm import tqdm
 
-from skellysubs.video_annotator.language_annotation_configs import \
+from skellysubs.skellysubs_core.video_annotator.language_annotation_configs import \
     LanguageAnnotationConfig, LANGUAGE_ANNOTATION_CONFIGS, get_default_font
-from skellysubs.video_annotator.video_reader_writer_methods import \
+from skellysubs.skellysubs_core.video_annotator.video_reader_writer_methods import \
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
-from skellysubs.translation_pipeline.models.language_models import LanguageNames
-from skellysubs.translation_pipeline.models.translated_transcript_model import \
-    TranslatedTranscription, MatchedTranslatedWord, TranscriptSegment
+from skellysubs.skellysubs_core.translation_pipeline.models.language_models import LanguageNames
+from skellysubs.skellysubs_core.translation_pipeline.models.translated_transcript_model import \
+    TranslatedTranscription
+from skellysubs.skellysubs_core.translation_pipeline.models.translated_segment_models import MatchedTranslatedWord, \
+    TranscriptSegment
 
 logger = logging.getLogger(__name__)
 

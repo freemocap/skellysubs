@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 
 from skellysubs.ai_clients.openai_client import get_or_create_openai_client
-from skellysubs.audio_transcription.whisper_transcript_result_full_model import WhisperTranscriptionResult
+from skellysubs.skellysubs_core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

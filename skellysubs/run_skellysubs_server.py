@@ -3,8 +3,8 @@ import multiprocessing
 import time
 
 import skellysubs
-from skellysubs.server.api import create_server_manager
-from skellysubs.server.skellysubs_app.skellysubs_app_state import create_skellysubs_app_state
+from skellysubs.skellysubs_app.api import create_server_manager
+from skellysubs.skellysubs_app.skellysubs_app_state import create_skellysubs_app_state
 from skellysubs.system.logging_configuration.configure_logging import configure_logging
 from skellysubs.system.logging_configuration.log_test_messages import print_log_level_messages
 from skellysubs.system.logging_configuration.logger_builder import LogLevels

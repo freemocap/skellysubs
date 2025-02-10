@@ -1,18 +1,19 @@
 import asyncio
 import logging
 
-from skellysubs.translation_pipeline.translation_prompts.full_text_transcript_translation_prompt import \
+from skellysubs.skellysubs_core.translation_pipeline.translation_prompts.full_text_transcript_translation_prompt import \
     format_full_text_translation_system_prompt
-from skellysubs.translation_pipeline.translation_prompts.segement_word_level_translation_prompt import \
+from skellysubs.skellysubs_core.translation_pipeline.translation_prompts.segement_word_level_translation_prompt import \
     format_segment_word_level_transcript_translation_system_prompts
 
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
 
-from skellysubs.audio_transcription.whisper_transcript_result_full_model import WhisperTranscriptionResult
-from skellysubs.translation_pipeline.models.language_models import LanguageNames
-from skellysubs.translation_pipeline.models.translated_transcript_model import TranslatedTranscription, \
-    MatchedTranslatedSegment, TranslatedText
-from skellysubs.translation_pipeline.translation_prompts.segment_level_transcript_translation_prompt import \
+from skellysubs.skellysubs_core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
+from skellysubs.skellysubs_core.translation_pipeline.models.language_models import LanguageNames
+from skellysubs.skellysubs_core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.skellysubs_core.translation_pipeline.models.translated_segment_models import MatchedTranslatedSegment
+from skellysubs.skellysubs_core.translation_pipeline.models.translated_text_models import TranslatedText
+from skellysubs.skellysubs_core.translation_pipeline.translation_prompts.segment_level_transcript_translation_prompt import \
     format_segment_level_translation_system_prompts
 
 logger = logging.getLogger(__name__)

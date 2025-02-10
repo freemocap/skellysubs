@@ -7,8 +7,8 @@ from typing import Optional
 import uvicorn
 from uvicorn import Server
 
-from skellysubs.server.api.server.server_constants import HOSTNAME, PORT
-from skellysubs.server.skellysubs_app.create_app import create_app
+from skellysubs.skellysubs_app.api.server.server_constants import HOSTNAME, PORT
+from skellysubs.skellysubs_app.create_app import create_app
 from skellysubs.utilities.kill_process_on_port import kill_process_on_port
 
 logger = logging.getLogger(__name__)

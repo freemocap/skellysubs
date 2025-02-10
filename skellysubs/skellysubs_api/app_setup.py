@@ -5,7 +5,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import RedirectResponse
 
 import skellysubs
-from skellysubs.server.api.routers import SKELLYSUBS_ROUTERS
+from skellysubs.skellysubs_app.api.routers import SKELLYSUBS_ROUTERS
 
 logger = logging.getLogger(__name__)
 

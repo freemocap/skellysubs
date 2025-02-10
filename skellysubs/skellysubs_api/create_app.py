@@ -2,10 +2,10 @@ import logging
 
 from fastapi import FastAPI
 
-from skellysubs.server.api.middleware.add_middleware import add_middleware
-from skellysubs.server.api.middleware.cors import cors
-from skellysubs.server.skellysubs_app.app_lifespan import lifespan
-from skellysubs.server.skellysubs_app.app_setup import register_routes, customize_swagger_ui
+from skellysubs.skellysubs_app.api.middleware.add_middleware import add_middleware
+from skellysubs.skellysubs_app.api.middleware.cors import cors
+from skellysubs.skellysubs_app.app_lifespan import lifespan
+from skellysubs.skellysubs_app.app_setup import register_routes, customize_swagger_ui
 
 logger = logging.getLogger(__name__)
 

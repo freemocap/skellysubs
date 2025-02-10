@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from skellysubs.translation_pipeline.translate_transcription_pipeline import translate_transcription_pipeline
-from skellysubs.audio_transcription.transcribe_video import get_or_compute_video_transcription
-from skellysubs.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.skellysubs_core.translation_pipeline.translate_transcription_pipeline import translate_transcription_pipeline
+from skellysubs.skellysubs_core.audio_transcription.get_or_compute_video_transcription import get_or_compute_video_transcription
+from skellysubs.skellysubs_core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
 
 
 async def translate_video(video_path: str, re_transcribe: bool = False) -> TranslatedTranscription:

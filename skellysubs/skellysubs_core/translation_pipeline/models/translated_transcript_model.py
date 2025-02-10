@@ -2,221 +2,19 @@ import logging
 from datetime import timedelta
 from pathlib import Path
 
-import jieba
 from pydantic import BaseModel, Field
 
-from skellysubs.audio_transcription.whisper_transcript_result_full_model import \
-    WhisperTranscriptionResult, WhisperWordTimestamp
-from skellysubs.translation_pipeline.models.language_models import LanguageNames, LanguagePairs, \
+from skellysubs.skellysubs_core.audio_transcription.whisper_transcript_result_model import \
+    WhisperTranscriptionResult
+from skellysubs.skellysubs_core.translation_pipeline.models.language_models import LanguageNames, LanguagePairs, \
     LanguagePair
-from skellysubs.translation_pipeline.models.translation_typehints import NOT_TRANSLATED_YET_TEXT, \
-    LanguageNameString, RomanizationMethodString, RomanizedTextString, TranslatedTextString, OriginalTextString, \
-    StartingTimestamp, EndingTimestamp
-from skellysubs.utilities.strip_punctuation_and_whitespace import strip_punctuation_and_whitespace
+from skellysubs.skellysubs_core.translation_pipeline.models.translated_segment_models import MatchedTranslatedWord, \
+    MatchedTranslatedSegment, TranslatedWhisperWordTimestamp, TranscriptSegment, CurrentSegmentAndMatchedWord
+from skellysubs.skellysubs_core.translation_pipeline.models.translated_text_models import TranslationsCollection
+from skellysubs.skellysubs_core.translation_pipeline.models.translation_typehints import LanguageNameString, \
+    OriginalTextString
 
 logger = logging.getLogger(__name__)
-
-
-class TranslatedText(BaseModel):
-    translated_text: TranslatedTextString = Field(
-        description="The translated text in the target language, using the target language's script, characters, and/or alphabet")
-    translated_language: LanguageNameString = Field(description="The name of the target language")
-    romanization_method: RomanizationMethodString = Field(
-        description="The method used to romanize the translated text, if applicable")
-    romanized_text: RomanizedTextString = Field(
-        description="The romanized version of the translated text, if applicable")
-
-    @classmethod
-    def initialize(cls, language: LanguagePair):
-        return cls(translated_text=NOT_TRANSLATED_YET_TEXT,
-                   translated_language=language.language,
-                   romanization_method=language.romanization_method,
-                   romanized_text=NOT_TRANSLATED_YET_TEXT)
-
-    def get_word_list(self) -> tuple[list[str], list[str] | None]:
-        if self.translated_language.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-            return self.split_chinese(), self.romanized_text.split()
-        return self.translated_text.split(), self.romanized_text.split()
-
-    def split_chinese(self) -> list[str]:
-        if not self.translated_language.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-            raise ValueError(f"Cannot split Chinese text for language {self.translated_language}")
-        # the docs refer to 'cut_all=False' as 'Accrurate Mode', so I guess we should use it?
-        split_characters_og = [character for character in jieba.cut(self.translated_text, cut_all=False)]
-
-        stripped_characters = [strip_punctuation_and_whitespace(character) for character in split_characters_og]
-        cleaned_characters = [character for character in stripped_characters if character != ""]
-
-        return cleaned_characters
-
-
-class TranslationsCollection(BaseModel):
-    english: TranslatedText = Field(description="The original text in English")
-    spanish: TranslatedText = Field(description="The translation of the original text into Spanish")
-    chinese: TranslatedText = Field(description="The translation of the original text into Chinese Mandarin Simplified")
-    arabic: TranslatedText = Field(description="The translation of the original text into Arabic Levantine")
-    hindi: TranslatedText = Field(description="The translation of the original text into Hindi")
-
-    @property
-    def has_translations(self) -> bool:
-        return not any([translation['translated_text'] == NOT_TRANSLATED_YET_TEXT
-                        for translation in self.model_dump().values()])
-
-    @classmethod
-    def create(cls):
-        return cls(english=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.ENGLISH)),
-                   spanish=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.SPANISH)),
-                   chinese=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.CHINESE_MANDARIN_SIMPLIFIED)),
-                   arabic=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.ARABIC_LEVANTINE)),
-                   hindi=TranslatedText.initialize(LanguagePair.from_enum(LanguagePairs.HINDI)))
-
-    def languages_and_romanizations(self) -> dict[LanguageNameString, RomanizationMethodString]:
-        return {LanguageNames.ENGLISH.value: self.english.romanization_method,
-                LanguageNames.SPANISH.value: self.spanish.romanization_method,
-                LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value: self.chinese.romanization_method,
-                LanguageNames.ARABIC_LEVANTINE.value: self.arabic.romanization_method,
-                LanguageNames.HINDI.value: self.hindi.romanization_method}
-
-    def get_word_list_by_language(self, language: LanguageNameString) -> tuple[list[str], list[str] | None]:
-        if language.lower() in LanguageNames.ENGLISH.value.lower():
-            return self.english.get_word_list()
-        if language.lower() in LanguageNames.SPANISH.value.lower():
-            return self.spanish.get_word_list()
-        if language.lower() in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-            return self.chinese.get_word_list()
-        if language.lower() in LanguageNames.ARABIC_LEVANTINE.value.lower():
-            return self.arabic.get_word_list()
-        if language.lower() in LanguageNames.HINDI.value.lower():
-            return self.hindi.get_word_list()
-        else:
-            raise ValueError(f"Language {language} not found in the translations collection.")
-
-
-class MatchedTranslatedWord(BaseModel):
-    original_language: LanguageNames = Field(description="The original language of the word from the original segment")
-    start_time: StartingTimestamp = Field(
-        description="The start time of the period in the segment when the word was spoken, in seconds since the start of the recording. Should match the end time of the previous word in the segment or the start time of the segment for the first word.")
-    end_time: EndingTimestamp = Field(
-        description="The end time of the period in the recording when the word was spoken, in seconds since the start of the recording. Should match the start time of the next word in the segment or the end time of the segment for the last word.")
-    target_language_pair: LanguagePair = Field(
-        description="The target language pair for the translation, including any romanization methods if applicable")
-    original_word_text: str = Field(description="The original word from the original segment")
-    original_word_index: int = Field(description="The index of the original word in the original segment")
-
-    translated_word_text: str = Field(
-        description="The translated word from the target language translation that match the original word")
-    translated_word_romanized_text: str | None = Field(default=None,
-                                                       description="If this is a non-latin alphabet languages, this holds the translated word from the target language translation that match the original word")
-    translated_word_index: int = Field(
-        description="The index of the translated word in the translated segment that match the word in the original segment")
-
-
-class MatchedTranslatedSegment(BaseModel):
-    start: StartingTimestamp = Field(
-        description="The start time of the period in the recording when the segment was spoken in seconds since the start of the recording. Should match the end time of the previous segment or the start time of the recording for the first segment.")
-    end: EndingTimestamp = Field(
-        description="The end time of the segment in the recording when the segment was spoken in seconds since the start of the recording. Should match the start time of the next segment or the end time of the recording for the last segment.")
-
-    target_language_pair: LanguagePair = Field(
-        description="The target language pair for the translation, including any romanization methods if applicable")
-
-    original_segment_text: OriginalTextString = Field(
-        description="The original text of the segment in its original language")
-    translated_segment_text: TranslatedTextString = Field(
-        description="The translated text of the segment in the target language, using the target language's script, characters, and/or alphabet")
-    romanized_translated_text: RomanizedTextString | None = Field(default=None,
-                                                                  description="The romanized version of the translated text, if applicable")
-
-    original_words_list: list[str] = Field(
-        description="The original words in the segment, with the index in the list matching the index of the word in the segment string")
-    translated_words_list: list[str] = Field(
-        description="The words or characters in the translated segment that match the original words in the segment - may or may not be the same length as the original_words_list (because of differences between the  languages)")
-    romanized_translated_words_list: list[str] | None = Field(default=None,
-                                                              description="The romanized versions of the translated words in the segment, if applicable - must be the same length as the translated_words_list")
-    matched_translated_words: list[MatchedTranslatedWord] = Field(
-        description="The translated words in the segment, with their romanizations if applicable - must be the same length as the original_words_list")
-
-
-class TranslatedWhisperWordTimestamp(BaseModel):
-    start: StartingTimestamp = Field(
-        description="The start time of the period in the segment when the word was spoken, in seconds since the start of the recording. Should match the end time of the previous word in the segment or the start time of the segment for the first word.")
-    end: EndingTimestamp = Field(
-        description="The end time of the period in the recording when the word was spoken, in seconds since the start of the recording. Should match the start time of the next word in the segment or the end time of the segment for the last word.")
-    original_word: OriginalTextString = Field(
-        description="The original word spoken in the segment, in its original language")
-    matched_words: dict[LanguageNameString, MatchedTranslatedWord] = Field(
-        description="The translated words in each target language, with their romanizations")
-
-    # TODO - would be cool to also extract linguistic features of the word, such as part of speech, tense, etc.
-    # word_type: WordTypeSchemas|str = Field(default=WordTypeSchemas.OTHER.name,
-    #                                    description="Linguistic features of the word, such as part of speech, tense, etc.")
-
-    @classmethod
-    def from_whisper_result(cls, word: WhisperWordTimestamp):
-        return cls(start=word.start,
-                   end=word.end,
-                   original_word=word.word,
-                   matched_words={},
-                   )
-
-
-class TranscriptSegment(BaseModel):
-    original_segment_text: OriginalTextString = Field(
-        description="The original text of the segment in its original language")
-    original_language: LanguageNameString = Field(description="The name of the original language of the segment")
-    translations: TranslationsCollection = Field(
-        description="The translations of the original text into the target languages with their romanizations")
-    start: StartingTimestamp = Field(
-        description="The start time of the period in the recording when the segment was spoken in seconds since the start of the recording. Should match the end time of the previous segment or the start time of the recording for the first segment.")
-    end: EndingTimestamp = Field(
-        description="The end time of the segment in the recording when the segment was spoken in seconds since the start of the recording. Should match the start time of the next segment or the end time of the recording for the last segment.")
-    matched_translated_segment_by_language: dict[str, MatchedTranslatedSegment] | None = Field(default=None,
-                                                                                               description="The matched translated segment with the original segment")
-    words: list[TranslatedWhisperWordTimestamp] = Field(
-        description="The words in the segment, with their start and end times in the recording")
-
-    def set_translation_by_language(self, language: LanguageNameString,
-                                    translation: TranslatedText):
-        language_lower = language.lower()
-        match language_lower:
-            case _ if language_lower in LanguageNames.ENGLISH.value.lower():
-                self.translations.english = translation
-            case _ if language_lower in LanguageNames.SPANISH.value.lower():
-                self.translations.spanish = translation
-            case _ if language_lower in LanguageNames.CHINESE_MANDARIN_SIMPLIFIED.value.lower():
-                self.translations.chinese = translation
-            case _ if language_lower in LanguageNames.ARABIC_LEVANTINE.value.lower():
-                self.translations.arabic = translation
-            case _ if language_lower in LanguageNames.HINDI.value.lower():
-                self.translations.hindi = translation
-            case _:
-                raise ValueError(f"Language {language} not found in the translations collection.")
-
-    def get_word_list_by_language(self, language: LanguageNameString) -> tuple[list[str], list[str] | None]:
-        if language.lower() in LanguageNames.ENGLISH.value.lower():
-            return [word.original_word for word in self.words], None
-        return self.translations.get_word_list_by_language(language=language.lower())
-
-    def get_indexed_word_list_by_language(self, language: LanguageNameString, strip_punctuation: bool = True) -> list[
-        str]:
-        word_list, _ = self.get_word_list_by_language(language)
-        if strip_punctuation:
-            word_list = [strip_punctuation_and_whitespace(word) for word in word_list]
-
-        return [f"([translated-language-index-{index}]{word.strip()})" for index, word in enumerate(word_list)]
-
-    @property
-    def original_segment_text_with_words_indexed_and_timestamped(self) -> str:
-        return ' '.join([
-            f" ([orginal-language-index-{index}]{word} [starting_timestamp: {word.start}, ending_timestamp: {word.end}])\n"
-            for index, word in enumerate(self.words)])
-
-
-class CurrentSegmentAndMatchedWord(BaseModel):
-    current_segment: TranscriptSegment | None = None
-    current_word: TranslatedWhisperWordTimestamp | None = None
-    matched_segment_by_language: dict[LanguageNames, MatchedTranslatedSegment] | None = None
-    matched_word_by_language: dict[str, MatchedTranslatedWord] | None = None
 
 
 class TranslatedTranscription(BaseModel):
@@ -232,9 +30,6 @@ class TranslatedTranscription(BaseModel):
     def translated_languages(self) -> list[LanguageNameString]:
         return [language for language in self.translations.languages_and_romanizations().keys()]
 
-    @property
-    def language_pairs(self) -> dict[LanguageNameString, LanguagePair]:
-        return {language: self.language_pair_by_language(language) for language in self.translated_languages}
 
     @property
     def og_text_and_translations(self) -> dict[str, dict[str, str]]:

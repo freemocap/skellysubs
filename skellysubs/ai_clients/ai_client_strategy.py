@@ -10,4 +10,5 @@ def get_ai_client(ai_client_strategy: str="openai") -> AiClientABC:
 
 class AiClientStrategies(enum.Enum):
     OPENAI = get_or_create_openai_client()
-    OLLAMA = OllamaClient()
+    # OLLAMA = OllamaClient() #TODO - Add Ollama client
+    # HUGGINGFACE = HuggingFaceClient() #TODO - Add HuggingFace client

@@ -6,7 +6,7 @@ from typing import Optional
 from pydantic import BaseModel
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
-from skellysubs.server.skellysubs_app.skellysubs_app_state import get_skellysubs_app_state, \
+from skellysubs.skellysubs_app.skellysubs_app_state import get_skellysubs_app_state, \
     SkellySubsAppState
 
 logger = logging.getLogger(__name__)
