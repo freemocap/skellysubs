@@ -73,7 +73,7 @@ def finish_video_and_attach_audio_from_original(original_video_path: str,
                                                 no_audio_video_path: str,
                                                 subtitled_video_path: str) -> None:
     # Save the audio from the original video to a wav file (if it doesn't already exist)
-    original_audio_path = original_video_path.replace('.mp4', '.wav')
+    original_audio_path = original_video_path.replace('.mp4', '.mp3')
     if not Path(original_audio_path).exists():
         scrape_and_save_audio_from_video(original_video_path, original_audio_path)
 

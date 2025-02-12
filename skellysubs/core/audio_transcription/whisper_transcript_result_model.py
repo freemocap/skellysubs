@@ -22,7 +22,7 @@ class WhisperTranscriptSegment(BaseModel):
     avg_logprob: float
     compression_ratio: float
     no_speech_prob: float
-    words: list[WhisperWordTimestamp] | None = None
+    words: list[WhisperWordTimestamp]
 
 
 class WhisperTranscriptionResult(BaseModel):

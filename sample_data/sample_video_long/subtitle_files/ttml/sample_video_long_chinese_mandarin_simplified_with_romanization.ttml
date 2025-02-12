@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml">
+<head>
+<layout>
+<region xml:id="bottomHalf" tts:origin="0% 50%" tts:extent="100% 50%"/>
+</layout>
+</head>
+<body><div>
+<p begin="00:00:00.100" end="00:00:08.680">你好 我 在 对 着 麦克风 说话 我 的 名字 是 乔恩 马 提斯 马 提斯 没有 h 两个 t<br/>Nǐ hǎo, wǒ zài duìzhe màikèfēng shuōhuà. Wǒ de míngzì shì Qiáo ēn·Mǎtí sī, Mǎtí sī méiyǒu h, liǎng gè t.</p>
+<p begin="00:00:10.300" end="00:00:19.360">一 二 三 四 五 六 七 八 九 我 有 一只 叫 Poo 的 猫 还有 一只 叫 Ollie 的 猫<br/>Yī, èr, sān, sì, wǔ, liù, qī, bā, jiǔ. Wǒ yǒu yī zhī jiào Poo de māo, hái yǒu yī zhī jiào Ollie de māo.</p>
+<p begin="00:00:19.920" end="00:00:30.059">狗 很 好 马 很 高 谢谢 你 的 倾听 谢谢 你 来到 这里<br/>Gǒu hěn hǎo, mǎ hěn gāo. Xièxiè nǐ de qīngtīng. Xièxiè nǐ lái dào zhèlǐ.</p>
+<p begin="00:00:30.219" end="00:00:40.279">这个 美好 的 日子 我 希望 未来 一切 都 会 好 克 苏鲁<br/>zhège měihǎo de rìzi. Wǒ xīwàng wèilái yīqiè dōu huì hǎo. Kè sū lǔ,</p>
+<p begin="00:00:40.279" end="00:00:52.980">恐龙 生动 六边形 气泡 水 杂耍 球<br/>kǒnglóng, shēngdòng, liùbiānxíng, qìpào shuǐ, záshuǎ qiú.</p>
+</div></body></tt>

@@ -11,7 +11,7 @@ async def get_or_compute_video_transcription(video_path: str,
                                              local_whisper:bool = False,
                                              re_transcribe: bool = False) -> WhisperTranscriptionResult:
     extension = Path(video_path).suffix
-    audio_path = video_path.replace(f"{extension}", ".wav")
+    audio_path = video_path.replace(f"{extension}", ".mp3")
     transcript_path = video_path.replace(f"{extension}", "_transcription.json")
     if Path(transcript_path).exists() and not re_transcribe:
         with open(transcript_path, 'r') as f:

@@ -1,3 +1,7 @@
+video eventually posted here - https://youtube.com/shorts/XOjwVxCT24Q
+
+NOTES (pre-recording)
+
 - hello my name is JSM
 - Professor of neuroscience in Boston MA USA
 - Now - its a rather long story that I'd love to tell yo usome time, but these days

@@ -1,7 +1,7 @@
 import jieba
 from pydantic import BaseModel, Field
 
-from skellysubs.core.translation_pipeline.models.load_language_models import LanguageConfig, \
+from skellysubs.core.translation_pipeline.models.load_language_configs import LanguageConfig, \
     get_language_configs
 from skellysubs.core.translation_pipeline.models.translation_typehints import TranslatedTextString, \
     LanguageNameString, RomanizationMethodString, RomanizedTextString, NOT_TRANSLATED_YET_TEXT

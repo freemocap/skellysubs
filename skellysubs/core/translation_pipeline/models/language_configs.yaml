@@ -49,46 +49,44 @@ language_configs:
       sample_text: "एक तेज़ भूरी लोमड़ी आलसी कुत्ते के ऊपर कूदती है।"
       sample_romanized_text: "Ēka tēza bhūrī lōmaṛī ālasī kutē kē ūpara kūdatī hai."
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  FRENCH:
+    language_name: "French"
+    language_code: "fr"
+    romanization_method: NONE
+    background:
+      family_tree: [ "Indo-European", "Italic", "Romance" ]
+      alphabet: "Latin"
+      sample_text: "Le vif renard brun saute par-dessus le chien paresseux."
+      sample_romanized_text: NONE
 
 
 annotation_configs:
   ENGLISH:
     font_file: "ARIAL.TTF"
-    font_size_ratio: 0.016
     buffer_size: 100
     color: [ 27, 158, 119 ]
   SPANISH:
     font_file: "ARIAL.TTF"
-    font_size_ratio: 0.016
     buffer_size: 100
     color: [ 217, 95, 2 ]
   ARABIC_LEVANTINE:
     font_file: "ARIAL.TTF"
-    font_size_ratio: 0.0184
+    font_size_ratio: 1.15
     buffer_size: 100
     color: [ 231, 41, 138 ]
   CHINESE_MANDARIN_SIMPLIFIED:
     font_file: "NotoSerifCJKsc-VF-Simplified-Chinese.ttf"
-    font_size_ratio: 0.0168
+    font_size_ratio: 1.1
     buffer_size: 100
     color: [ 157, 152, 219 ]
   HINDI:
     font_file: "NotoSansDevanagari-VariableFont.ttf"
-    font_size_ratio: 0.016
     buffer_size: 100
     color: [ 255, 152, 219 ]
+
+  FRENCH:
+    font_file: "ARIAL.TTF"
+    buffer_size: 100
+    color: [ 102, 166, 30 ]
+
 

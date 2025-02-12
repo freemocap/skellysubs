@@ -7,7 +7,7 @@ from arabic_reshaper import arabic_reshaper
 from bidi.algorithm import get_display
 from tqdm import tqdm
 
-from skellysubs.core.translation_pipeline.models.load_language_models import LanguageAnnotationConfig, \
+from skellysubs.core.translation_pipeline.models.load_language_configs import LanguageAnnotationConfig, \
     get_annotation_configs, get_default_font, get_default_text_height
 from skellysubs.core.translation_pipeline.models.translated_segment_models import TranscriptSegment
 from skellysubs.core.translation_pipeline.models.translated_transcript_model import \
@@ -18,9 +18,9 @@ from skellysubs.core.video_annotator.video_reader_writer_methods import \
 
 logger = logging.getLogger(__name__)
 
-SUBTITLES_TOP_BUFFER_RATIO = 0.5
-SUBTITLES_BOTTOM_BUFFER_RATIO = 0.1
-
+SUBTITLES_TOP_BUFFER_RATIO = 0.1
+SUBTITLES_BOTTOM_BUFFER_RATIO = 0.2
+SUBTITLES_SIDE_BUFFER_RATIO = 0.15
 
 
 def annotate_video_with_subtitles(video_path: str,
@@ -119,10 +119,11 @@ def annotate_image_with_subtitles(language_name: LanguageNameString,
     current_y = multiline_y_start
     text_height = get_default_text_height(image_height=video_height)
     newline_ratio = 1.5
+    horizontal_buffer = int(video_width * SUBTITLES_SIDE_BUFFER_RATIO)
     if right_to_left:
-        current_x = video_width - config.buffer_size
+        current_x = video_width - horizontal_buffer
     else:
-        current_x = config.buffer_size
+        current_x = horizontal_buffer
 
     translated_words_list, romanized_words_list = current_segment.get_word_list_by_language(language_name)
 
@@ -142,7 +143,7 @@ def annotate_image_with_subtitles(language_name: LanguageNameString,
             if word_index == 0 and word_type == 'romanized':
                 language_font = get_default_font(image_height=video_height)
                 right_to_left = False
-                current_x = config.buffer_size
+                current_x = horizontal_buffer
                 current_y += int(text_height * newline_ratio)
 
             # check if should highlight this word
@@ -193,13 +194,13 @@ def annotate_image_with_subtitles(language_name: LanguageNameString,
                 current_x += text_width
             # Check if should bump to next line
             if right_to_left:
-                if current_x - text_width < config.buffer_size:
+                if current_x - text_width < horizontal_buffer:
                     current_y += text_height
-                    current_x = video_width - config.buffer_size
+                    current_x = video_width - horizontal_buffer
 
             else:
-                if current_x + text_width > video_width - (config.buffer_size):
+                if current_x + text_width > video_width - (horizontal_buffer):
                     current_y += text_height
-                    current_x = config.buffer_size
+                    current_x = horizontal_buffer
 
     return current_y + text_height*newline_ratio* 2

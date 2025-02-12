@@ -3,7 +3,7 @@ from typing import Self
 from pydantic import BaseModel, Field, model_validator
 
 from skellysubs.core.audio_transcription.whisper_transcript_result_model import WhisperWordTimestamp
-from skellysubs.core.translation_pipeline.models.load_language_models import LanguageConfig
+from skellysubs.core.translation_pipeline.models.load_language_configs import LanguageConfig
 from skellysubs.core.translation_pipeline.models.translated_text_models import TranslationsCollection, \
     TranslatedText
 from skellysubs.core.translation_pipeline.models.translation_typehints import StartingTimestamp, \
