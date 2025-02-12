@@ -4,10 +4,10 @@ from pathlib import Path
 
 import requests
 
-from skellysubs.skellysubs_core.translation_pipeline.get_video_and_output_paths import get_video_and_output_paths
-from skellysubs.skellysubs_core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
-from skellysubs.skellysubs_core.translation_pipeline.translate_video import translate_video
-from skellysubs.skellysubs_core.video_annotator.annotate_video_with_subtitles import annotate_video_with_subtitles
+from skellysubs.core.translation_pipeline.get_video_and_output_paths import get_video_and_output_paths
+from skellysubs.core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.core.translation_pipeline.translate_video import translate_video
+from skellysubs.core.video_annotator.annotate_video_with_subtitles import annotate_video_with_subtitles
 
 
 def is_url(video_name: str) -> bool:

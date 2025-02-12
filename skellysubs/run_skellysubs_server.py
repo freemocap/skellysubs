@@ -3,8 +3,8 @@ import multiprocessing
 import time
 
 import skellysubs
-from skellysubs.skellysubs_app.api import create_server_manager
-from skellysubs.skellysubs_app.skellysubs_app_state import create_skellysubs_app_state
+from skellysubs.app.api.server.server_singleton import create_server_manager
+from skellysubs.app.skellysubs_app_state import create_skellysubs_app_state
 from skellysubs.system.logging_configuration.configure_logging import configure_logging
 from skellysubs.system.logging_configuration.log_test_messages import print_log_level_messages
 from skellysubs.system.logging_configuration.logger_builder import LogLevels
@@ -34,7 +34,13 @@ if __name__ == "__main__":
 
     multiprocessing.freeze_support()
     outer_global_kill_flag = multiprocessing.Value("b", False)
-    create_skellysubs_app_state(global_kill_flag=outer_global_kill_flag)
-    run_skellysubs_server(outer_global_kill_flag)
-    outer_global_kill_flag.value = True
+    try:
+        create_skellysubs_app_state(global_kill_flag=outer_global_kill_flag)
+        run_skellysubs_server(outer_global_kill_flag)
+        outer_global_kill_flag.value = True
+    except Exception as e:
+        logger.error(f"Server main process ended with error: {e}")
+        raise
+    finally:
+        outer_global_kill_flag.value = True
     print("Done!")
