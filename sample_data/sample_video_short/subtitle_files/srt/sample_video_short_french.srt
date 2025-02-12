@@ -1,0 +1,8 @@
+1
+0:00:00,100 --> 0:00:07,520
+Bonjour, je m'appelle Jon Mathis. Enchanté de vous rencontrer. 1, 2, 3, 4, 5, bleu, vert, rouge, chien, chat, vache, oiseau.
+
+
+2
+0:00:08,060 --> 0:00:08,800
+Merci et au revoir.

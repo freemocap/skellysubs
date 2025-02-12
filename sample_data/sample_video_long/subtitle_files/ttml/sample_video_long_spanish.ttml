@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml">
+<head>
+<layout>
+<region xml:id="bottomHalf" tts:origin="0% 50%" tts:extent="100% 50%"/>
+</layout>
+</head>
+<body><div>
+<p begin="00:00:00.100" end="00:00:08.680">Hola, estoy diciendo palabras al micrófono. Mi nombre es Jon Matthis, sin h y con dos t's en Matthis.</p>
+<p begin="00:00:10.300" end="00:00:19.360">1, 2, 3, 4, 5, 6, 7, 8, 9. Y tengo un gato llamado Poo y otro llamado Ollie.</p>
+<p begin="00:00:19.920" end="00:00:30.059">Y los perros son buenos y los caballos son altos. Gracias por escuchar. Gracias por venir a</p>
+<p begin="00:00:30.219" end="00:00:40.279">este maravilloso día. Y espero que todo esté bien en el futuro también. Cthulhu,</p>
+<p begin="00:00:40.279" end="00:00:52.980">Dinosaurio, vibrante, hexágono, agua con gas, pelotas de malabarismo.</p>
+</div></body></tt>

@@ -50,9 +50,9 @@
                 50732
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.31633660197257996,
+            "avg_logprob": -0.31796422600746155,
             "compression_ratio": 1.117117166519165,
-            "no_speech_prob": 0.02369576133787632,
+            "no_speech_prob": 0.023874342441558838,
             "words": [
                 {
                     "start": 0.0,
@@ -63,7 +63,7 @@
                     "probability": null
                 },
                 {
-                    "start": 0.6000000238418579,
+                    "start": 0.6399999856948853,
                     "end": 0.699999988079071,
                     "word": "my",
                     "index_in_segment": 2,
@@ -191,7 +191,7 @@
                     "probability": null
                 },
                 {
-                    "start": 5.340000152587891,
+                    "start": 5.360000133514404,
                     "end": 5.400000095367432,
                     "word": "red",
                     "index_in_segment": 18,
@@ -248,9 +248,9 @@
                 50840
             ],
             "temperature": 0.0,
-            "avg_logprob": -0.31633660197257996,
+            "avg_logprob": -0.31796422600746155,
             "compression_ratio": 1.117117166519165,
-            "no_speech_prob": 0.02369576133787632,
+            "no_speech_prob": 0.023874342441558838,
             "words": [
                 {
                     "start": 8.0600004196167,
@@ -262,14 +262,14 @@
                 },
                 {
                     "start": 8.119999885559082,
-                    "end": 8.260000228881836,
+                    "end": 8.279999732971191,
                     "word": "you",
                     "index_in_segment": 2,
                     "index_in_transcript": 23,
                     "probability": null
                 },
                 {
-                    "start": 8.260000228881836,
+                    "start": 8.279999732971191,
                     "end": 8.520000457763672,
                     "word": "and",
                     "index_in_segment": 3,
