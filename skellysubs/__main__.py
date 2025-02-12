@@ -76,6 +76,7 @@ async def run_video_subtitle_pipeline(video_name: str) -> None:
 if __name__ == '__main__':
     import asyncio
     video_paths = [
+        "../sample_data/2025-02-12-jsm-video/2025-02-12-jsm-video.mp4",
         "../sample_data/sample_video_short/sample_video_short.mp4",
         "../sample_data/sample_video_long/sample_video_long.mp4",
         "../sample_data/start-here-1/start-here-1.mp4",
@@ -83,7 +84,7 @@ if __name__ == '__main__':
         "https://github.com/user-attachments/assets/0bc27df0-9614-4716-8638-f0b130ef791d",
         "../sample_data/this-is-freemocap/this-is-freemocap.mp4",  # https://www.youtube.com/watch?v=WW_WpMcbzns
     ]
-    only_process_first_video = False
+    only_process_first_video = True
     fail_on_error = False
     for video_name in video_paths:
         try:
