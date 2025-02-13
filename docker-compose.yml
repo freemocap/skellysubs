@@ -1,9 +1,0 @@
-   version: '3.8'
-
-   services:
-     skellysubs:
-       build:
-         context: .
-         dockerfile: Dockerfile
-       ports:
-        - '8100:8100'

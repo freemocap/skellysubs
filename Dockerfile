@@ -10,5 +10,8 @@ WORKDIR /app
 RUN uv sync --frozen
 ENV PYTHONPATH="${PYTHONPATH}:/app"
 
+# Ensure the application listens on the port defined by the PORT environment variable
+ENV PORT 8101
 
-CMD ["uv", "run" ,  "skellysubs/__main__.py"]
+# Update the command to ensure it listens on the PORT environment variable
+CMD ["uv", "run", "--port", "8080", "skellysubs/run_skellysubs_server.py"]
