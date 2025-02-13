@@ -85,7 +85,7 @@ if __name__ == '__main__':
         "../sample_data/this-is-freemocap/this-is-freemocap.mp4",  # https://www.youtube.com/watch?v=WW_WpMcbzns
     ]
     only_process_first_video = True
-    fail_on_error = False
+    fail_on_error = True
     for video_name in video_paths:
         try:
             if not Path(video_name).exists():

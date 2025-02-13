@@ -83,7 +83,6 @@ annotation_configs:
     font_file: "NotoSansDevanagari-VariableFont.ttf"
     buffer_size: 100
     color: [ 255, 152, 219 ]
-
   FRENCH:
     font_file: "ARIAL.TTF"
     buffer_size: 100

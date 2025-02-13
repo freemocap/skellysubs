@@ -1,0 +1,83 @@
+1
+0:00:00,100 --> 0:00:05,020
+Bonjour. Toutes les traductions ci-dessous ont été générées automatiquement avec un logiciel gratuit que j'ai créé,
+
+
+2
+0:00:05,540 --> 0:00:10,460
+et j'ai fait un rapide refactoring de cela. La différence la plus importante est que
+
+
+3
+0:00:10,960 --> 0:00:15,180
+J'ai supprimé une partie du codage dur des langues impliquées, donc maintenant
+
+
+4
+0:00:15,720 --> 0:00:19,540
+vous pouvez, nous pouvons simplement ajouter de nouvelles langues à la liste de traduction
+
+
+5
+0:00:20,379 --> 0:00:25,680
+très facilement. Donc, j'ai ajouté l'hindi et le français à celui-ci, donc cela devrait apparaître quelque part en dessous,
+
+
+6
+0:00:26,299 --> 0:00:31,639
+et je suis vraiment excité de commencer à essayer d'utiliser cela pour des langues moins courantes.
+
+
+7
+0:00:33,060 --> 0:00:37,139
+Donc, vous savez, les langues autochtones, les langues en danger, les langues anciennes.
+
+
+8
+0:00:37,700 --> 0:00:42,180
+Je pense que c'est configuré de manière à ce que vous puissiez facilement ajuster les invites pour pouvoir
+
+
+9
+0:00:42,180 --> 0:00:49,860
+gérer ce genre de choses. Voici un chat. Et oui, ce sera vraiment intéressant de voir ce que
+
+
+10
+0:00:49,860 --> 0:00:54,459
+se passe. Pour les langues de base, comme celles que nous examinons, cela devrait bien fonctionner avec
+
+
+11
+0:00:54,459 --> 0:01:01,860
+son entraînement de ses poids, mais pour des langues moins courantes comme le cherokee ou l'igbo,
+
+
+12
+0:01 --> 0:01:08,580
+il ne fera probablement pas très bien avec son entraînement seul, et je ne pourrai certainement pas évaluer
+
+
+13
+0:01:08,580 --> 0:01:14,980
+sa sortie, mais je pense que nous pouvons commencer à essayer d'incorporer des outils qui recherchent comme,
+
+
+14
+0:01:15,019 --> 0:01:18,199
+des dictionnaires de grammaire et des choses comme ça pour obtenir de meilleurs résultats, et puis évidemment
+
+
+15
+0:01:18,199 --> 0:01:23,800
+Je peux commencer à demander aux gens qui parlent ces langues moins courantes d'évaluer comment ça se passe.
+
+
+16
+0:01:23,800 --> 0:01:27,220
+De toute façon, si cela vous intéresse, suivez-moi. Si vous voulez trouver le code, c'est
+
+
+17
+0:01:27,760 --> 0:01:39,699
+sur GitHub, premocap slash skellysubs. C'est, vous savez, encore les débuts. Toujours un chat. Et ouais. Au revoir.

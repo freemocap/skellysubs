@@ -1,6 +1,6 @@
 import logging
 
-from skellysubs.core.translation_pipeline.models.load_language_configs import get_language_configs
+from skellysubs.core.translation_pipeline.language_configs.language_configs import get_language_configs
 from skellysubs.core.translation_pipeline.models.translated_transcript_model import \
     TranslatedTranscription
 from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString

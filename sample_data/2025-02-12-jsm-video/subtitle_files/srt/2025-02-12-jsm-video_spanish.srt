@@ -1,0 +1,83 @@
+1
+0:00:00,100 --> 0:00:05,020
+Hola. Todas las traducciones debajo de mí fueron generadas automáticamente con un software gratuito que hice,
+
+
+2
+0:00:05,540 --> 0:00:10,460
+y he hecho una rápida reestructuración de esto. La diferencia más importante es que
+
+
+3
+0:00:10,960 --> 0:00:15,180
+eliminé parte del código duro de los idiomas que estaban involucrados, así que ahora
+
+
+4
+0:00:15,720 --> 0:00:19,540
+podemos, simplemente podemos agregar nuevos idiomas a la lista de traducción
+
+
+5
+0:00:20,379 --> 0:00:25,680
+muy fácilmente. Así que añadí hindi y francés a este, que deberían aparecer abajo en algún lugar,
+
+
+6
+0:00:26,299 --> 0:00:31,639
+y estoy muy emocionado de empezar a intentar usar esto para algunos idiomas menos comunes.
+
+
+7
+0:00:33,060 --> 0:00:37,139
+Así que, ya sabes, lenguas indígenas, lenguas en peligro de extinción, lenguas antiguas.
+
+
+8
+0:00:37,700 --> 0:00:42,180
+Creo que está configurado de tal manera que puedes ajustar bastante fácilmente los mensajes para poder
+
+
+9
+0:00:42,180 --> 0:00:49,860
+manejar ese tipo de cosas. Aquí hay un gato. Y sí, será realmente interesante ver qué
+
+
+10
+0:00:49,860 --> 0:00:54,459
+sucede. Para los idiomas básicos, como los que estamos viendo, debería funcionar bastante bien con
+
+
+11
+0:00:54,459 --> 0:01:01,860
+su, ya sabes, el entrenamiento de sus pesos, pero para lenguas menos comunes como el cherokee o el igbo,
+
+
+12
+0:01 --> 0:01:08,580
+probablemente no lo hará muy bien solo con su entrenamiento, y ciertamente no podré evaluarlo
+
+
+13
+0:01:08,580 --> 0:01:14,980
+su salida, pero creo que podemos empezar a intentar incorporar herramientas que busquen como,
+
+
+14
+0:01:15,019 --> 0:01:18,199
+diccionarios de gramática y cosas así para obtener mejores resultados, y luego, obviamente
+
+
+15
+0:01:18,199 --> 0:01:23,800
+Puedo empezar a pedirle a las personas que hablan esos idiomas menos comunes que evalúen cómo lo está haciendo.
+
+
+16
+0:01:23,800 --> 0:01:27,220
+De todos modos, si estás interesado, sigue adelante. Si quieres encontrar el código, está
+
+
+17
+0:01:27,760 --> 0:01:39,699
+en GitHub, premocap barra skellysubs. Es, ya sabes, todavía son días tempranos. Sigue siendo un gato. Y sí. Adiós.

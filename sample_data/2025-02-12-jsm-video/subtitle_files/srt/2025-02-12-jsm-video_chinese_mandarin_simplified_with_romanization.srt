@@ -1,0 +1,100 @@
+1
+0:00:00,100 --> 0:00:05,020
+你好 下面 的 所有 翻译 都 是 我 用 免费 的 软件 自动 生成 的
+Nǐ hǎo. Xiàmiàn de suǒyǒu fānyì dōu shì wǒ yòng miǎnfèi de ruǎnjiàn zìdòng shēngchéng de,
+
+
+2
+0:00:05,540 --> 0:00:10,460
+我 对 它 进行 了 快速 重构 最 重要 的 区别 是
+Wǒ duì tā jìnxíngle kuàisù zhònggòu. Zuì zhòngyào de qūbié shì
+
+
+3
+0:00:10,960 --> 0:00:15,180
+我 去掉 了 一些 涉及 的 语言 的 硬 编码 所以 现在
+Wǒ qùdiào le yīxiē shèjí de yǔyán de yìng biānmǎ, suǒyǐ xiànzài
+
+
+4
+0:00:15,720 --> 0:00:19,540
+我们 可以 轻松 地 将 新 语言 添加 到 翻译 列表 中
+wǒmen kěyǐ qīngsōng de jiāng xīn yǔyán tiānjiā dào fānyì lièbiǎo zhōng
+
+
+5
+0:00:20,379 --> 0:00:25,680
+非常简单 所以 我 在 这个 中 添加 了 印地语 和 法语 所以 它们 应该 会 在 下面 某个 地方 显示 出来
+fēicháng jiǎndān. suǒyǐ wǒ zài zhège zhōng tiānjiāle yìndìyǔ hé fǎyǔ, suǒyǐ tāmen yīnggāi huì zài xiàmiàn mǒu gè dìfāng xiǎnshì chūlái,
+
+
+6
+0:00:26,299 --> 0:00:31,639
+我 真的 很 兴奋 开始 尝试 使用 这个 来 处理 一些 更 少见 的 语言
+Wǒ zhēn de hěn xīngfèn kāishǐ chángshì shǐyòng zhège lái chǔlǐ yīxiē gèng shǎojiàn de yǔyán.
+
+
+7
+0:00:33,060 --> 0:00:37,139
+所以 像 你 知道 土著 语言 濒危 语言 古老 语言
+Suǒyǐ xiàng, nǐ zhīdào, tǔzhù yǔyán, bīn wēi yǔyán, gǔlǎo yǔyán.
+
+
+8
+0:00:37,700 --> 0:00:42,180
+我 认为 它 的 设置 方式 使得 你 可以 相对 容易 地 调整 提示 以便 能够
+Wǒ rènwéi tā de shèzhì fāngshì shǐdé nǐ kěyǐ xiāngduì róngyì de tiáozhěng tíshì, yǐbiàn nénggòu
+
+
+9
+0:00:42,180 --> 0:00:49,860
+管理 那种 事情 这里 有 一只 猫 嗯 看看 会 发生 什么 会 很 有趣
+Guǎnlǐ nà zhǒng shìqíng. Zhèlǐ yǒu yī zhī māo. Ń, kàn kàn huì fāshēng shénme huì hěn yǒuqù.
+
+
+10
+0:00:49,860 --> 0:00:54,459
+对于 基本 语言 比如 我们 正在 研究 的 这些 它 应该 表现 得 相当 不错
+Duìyú jīběn yǔyán, bǐrú wǒmen zhèngzài yánjiū de zhèxiē, tā yīnggāi biǎoxiàn dé xiāngdāng bùcuò.
+
+
+11
+0:00:54,459 --> 0:01:01,860
+它 的 您 知道 的 它 的 权重 训练 但 对于 像 切罗基语 或 伊博语 这样 的 少数 语言
+tā de, nín zhīdào de, tā de quánzhòng xùnliàn, dàn duìyú xiàng qiēluōjī yǔ huò yī bó yǔ zhèyàng de shǎoshù yǔyán,
+
+
+12
+0:01 --> 0:01:08,580
+它 可能 仅凭 训练 效果 不佳 我 当然 无法 评估
+tā kěnéng jǐn píng xùnliàn xiàoguǒ bù jiā, wǒ dāngrán wúfǎ pínggū.
+
+
+13
+0:01:08,580 --> 0:01:14,980
+它 的 输出 但 我 认为 我们 可以 开始 尝试 整合 一些 查找 工具 比如说
+tā de shūchū, dàn wǒ rènwéi wǒmen kěyǐ kāishǐ chángshì zhěnghé yīxiē cházhǎo gōngjù, bǐrú shuō,
+
+
+14
+0:01:15,019 --> 0:01:18,199
+语法 词典 和 类似 的 东西 以 获得 更好 的 结果 然后 显然
+yǔfǎ cídiǎn hé lèisì de dōngxī, yǐ huòqǔ gèng hǎo de jiéguǒ, ránhòu xiǎnrán
+
+
+15
+0:01:18,199 --> 0:01:23,800
+我 可以 开始 请 说 这些 不太 常见 语言 的 人来 评估 它 的 表现
+Wǒ kěyǐ kāishǐ qǐng shuō zhèxiē bùtài chángjiàn yǔyán de rén lái pínggū tā de biǎoxiàn.
+
+
+16
+0:01:23,800 --> 0:01:27,220
+无论如何 如果 你 感兴趣 请 继续 关注 如果 你 想 找到 代码 它 在
+Wúlùn rúhé, rúguǒ nǐ gǎn xìngqù, qǐng jìxù guānzhù. Rúguǒ nǐ xiǎng zhǎodào dàimǎ, tā zài
+
+
+17
+0:01:27,760 --> 0:01:39,699
+在 GitHub 上 premocap 斜杠 skellysubs 你 知道 的 仍然 是 早期 阶段 仍然 是 一只 猫 嗯 再见
+Zài GitHub shàng, premocap xiéguǎng skellysubs. Nǐ zhīdào de, réngrán shì zǎoqī jiēduàn. Réngrán shì yī zhī māo. Ń. Zàijiàn.

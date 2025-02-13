@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml">
+<head>
+<layout>
+<region xml:id="bottomHalf" tts:origin="0% 50%" tts:extent="100% 50%"/>
+</layout>
+</head>
+<body><div>
+<p begin="00:00:00.100" end="00:00:05.020">Hola. Todas las traducciones debajo de mí fueron generadas automáticamente con un software gratuito que hice,</p>
+<p begin="00:00:05.540" end="00:00:10.460">y he hecho una rápida reestructuración de esto. La diferencia más importante es que</p>
+<p begin="00:00:10.960" end="00:00:15.180">eliminé parte del código duro de los idiomas que estaban involucrados, así que ahora</p>
+<p begin="00:00:15.720" end="00:00:19.540">podemos, simplemente podemos agregar nuevos idiomas a la lista de traducción</p>
+<p begin="00:00:20.379" end="00:00:25.680">muy fácilmente. Así que añadí hindi y francés a este, que deberían aparecer abajo en algún lugar,</p>
+<p begin="00:00:26.299" end="00:00:31.639">y estoy muy emocionado de empezar a intentar usar esto para algunos idiomas menos comunes.</p>
+<p begin="00:00:33.060" end="00:00:37.139">Así que, ya sabes, lenguas indígenas, lenguas en peligro de extinción, lenguas antiguas.</p>
+<p begin="00:00:37.700" end="00:00:42.180">Creo que está configurado de tal manera que puedes ajustar bastante fácilmente los mensajes para poder</p>
+<p begin="00:00:42.180" end="00:00:49.860">manejar ese tipo de cosas. Aquí hay un gato. Y sí, será realmente interesante ver qué</p>
+<p begin="00:00:49.860" end="00:00:54.459">sucede. Para los idiomas básicos, como los que estamos viendo, debería funcionar bastante bien con</p>
+<p begin="00:00:54.459" end="00:01:01.860">su, ya sabes, el entrenamiento de sus pesos, pero para lenguas menos comunes como el cherokee o el igbo,</p>
+<p begin="00:01:03.000" end="00:01:08.580">probablemente no lo hará muy bien solo con su entrenamiento, y ciertamente no podré evaluarlo</p>
+<p begin="00:01:08.580" end="00:01:14.980">su salida, pero creo que podemos empezar a intentar incorporar herramientas que busquen como,</p>
+<p begin="00:01:15.019" end="00:01:18.199">diccionarios de gramática y cosas así para obtener mejores resultados, y luego, obviamente</p>
+<p begin="00:01:18.199" end="00:01:23.800">Puedo empezar a pedirle a las personas que hablan esos idiomas menos comunes que evalúen cómo lo está haciendo.</p>
+<p begin="00:01:23.800" end="00:01:27.220">De todos modos, si estás interesado, sigue adelante. Si quieres encontrar el código, está</p>
+<p begin="00:01:27.760" end="00:01:39.699">en GitHub, premocap barra skellysubs. Es, ya sabes, todavía son días tempranos. Sigue siendo un gato. Y sí. Adiós.</p>
+</div></body></tt>

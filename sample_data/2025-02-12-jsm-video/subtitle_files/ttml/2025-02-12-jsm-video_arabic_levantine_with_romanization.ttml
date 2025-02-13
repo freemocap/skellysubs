@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml">
+<head>
+<layout>
+<region xml:id="bottomHalf" tts:origin="0% 50%" tts:extent="100% 50%"/>
+</layout>
+</head>
+<body><div>
+<p begin="00:00:00.100" end="00:00:05.020">مرحبًا. جميع الترجمات أدناه تم إنشاؤها تلقائيًا باستخدام برنامج مجاني قمت بإنشائه،<br/>Marhaban. Jamee' al-tarajim adna tam insha'u talaqaiyan bi-istikhdam barnamaj majani qumt bi-insha'ih,</p>
+<p begin="00:00:05.540" end="00:00:10.460">وقد قمت بإعادة هيكلة سريعة له. الفرق الأكثر أهمية هو أن<br/>waqad qumt bi'i'adat haykalat sari'ah lahu. al-farq al-akthar ahmiyyatan huwa anna</p>
+<p begin="00:00:10.960" end="00:00:15.180">أزلت بعض من الترميز الثابت للغات التي كانت متضمنة، لذلك الآن<br/>Azalt ba'd min al-tarmiz al-thabit lil-lughat allati kanat mutadammina, lidhak al-an</p>
+<p begin="00:00:15.720" end="00:00:19.540">ممكن، نحن ممكن نضيف لغات جديدة لقائمة الترجمة<br/>mumkin, naḥnu mumkin naḍīf lughāt jadīda liqā'imat al-tarjama</p>
+<p begin="00:00:20.379" end="00:00:25.680">أضفت الهندية والفرنسية إلى هذا، والتي يجب أن تظهر في الأسفل في مكان ما،<br/>'Aḍaftu al-hindiyyah wal-faransiyyah ilā hādhā, allatī yajibu an tuẓhir fī al-asfal fī makān mā,</p>
+<p begin="00:00:26.299" end="00:00:31.639">وأنا متحمس جدًا لبدء تجربة استخدام هذا لبعض اللغات الأقل شيوعًا.<br/>wa-ana mutaḥammis jiddan li-bidāyat tajribat istiʿmāl hādhā li-baʿḍ al-lughāt al-aqall shuyūʿan.</p>
+<p begin="00:00:33.060" end="00:00:37.139">مثل، تعرف، اللغات الأصلية، اللغات المهددة، اللغات القديمة.<br/>mithl, taʿrif, al-lughat al-ʾaṣliyya, al-lughat al-mahdada, al-lughat al-qadīma.</p>
+<p begin="00:00:37.700" end="00:00:42.180">أعتقد أنه مُعد بطريقة تتيح لك تعديل التعليمات بسهولة.<br/>A'taqid annahu mu'add bi-tariqa tu'tiḥ laka ta'dīl al-ta'limāt bi-suhūla.</p>
+<p begin="00:00:42.180" end="00:00:49.860">إدارة هذا النوع من الأشياء. ها هي قطة. ونعم، سيكون من المثير حقًا أن نرى ماذا<br/>Idarat hadha al-naw' min al-ashya'. Ha hiya qitta. Wa na'am, sayakoon min al-muthir haqan an naraa mada</p>
+<p begin="00:00:49.860" end="00:00:54.459">يجب أن يعمل بشكل جيد مع اللغات الأساسية، مثل اللغات التي ننظر إليها،<br/>yajibu an ya'mala bishakl jayyid ma'a al-lughat al-asasiyya, mithl al-lughat allati nanthuru ilayha,</p>
+<p begin="00:00:54.459" end="00:01:01.860">تدريب أوزانه، لكن بالنسبة للغات الأقل شيوعًا مثل الشيروكي أو الإيغبو،<br/>tadrīb awzānih, lakin binisbah lil-lughāt al-aqall shuyūʿan mithl al-shirūki aw al-īghbū,</p>
+<p begin="00:01:03.000" end="00:01:08.580">من المحتمل أنه لن يؤدي بشكل جيد فقط من خلال تدريبه، وبالتأكيد لن أكون قادرًا على تقييمه.<br/>min almuhtamal annahu lan yu'adi bishakl jayyid faqat min khilal tadreebih, wabittakid lan akuna qadiran 'ala taqyeemih.</p>
+<p begin="00:01:08.580" end="00:01:14.980">ناتجها، لكن أعتقد أنه يمكننا أن نبدأ بمحاولة دمج أدوات تبحث مثل،<br/>nātijuhā, lakin aʿtaqid annahu yumkinunā an nabda'a bimuḥāwalat damj ʾadwāt tabḥath miṯl,</p>
+<p begin="00:01:15.019" end="00:01:18.199">قواميس القواعد وأشياء من هذا القبيل للحصول على نتائج أفضل، ومن الواضح أن<br/>qawamis al-qawa'id wa ashya' min hadha al-qabil li-husul 'ala natayij afdal, wa min al-wadih ann</p>
+<p begin="00:01:18.199" end="00:01:23.800">ممكن أبدأ أسأل الناس اللي بتحكي هاللغات الأقل شيوعًا عشان يقيموا كيف عم تشتغل.<br/>mumkin abda as'al al-nas illi bit-haki hal-lughat al-aqall shuyuan 'ashan yuqayimu kayfa 'am tishtaghil.</p>
+<p begin="00:01:23.800" end="00:01:27.220">على أي حال، إذا كنت مهتمًا، تابعني. إذا كنت تريد العثور على الكود، فهو<br/>ʿalā ayyi ḥāl, idhā kunt muhtamman, tābaʿnī. Idhā kunt turīd al-ʿithūr ʿalā al-kūd, fahuwa</p>
+<p begin="00:01:27.760" end="00:01:39.699">على GitHub، premocap slash skellysubs. لا يزال، كما تعلم، الأيام الأولى. لا يزال قطة. وأيوا. مع السلامة.<br/>ʿalā GitHub, premocap slash skellysubs. lā yazāl, kamā taʿlam, al-ayyām al-ʾūlā. lā yazāl qiṭṭa. wa aywa. maʿ as-salāma.</p>
+</div></body></tt>

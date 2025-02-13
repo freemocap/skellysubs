@@ -1,0 +1,83 @@
+1
+0:00:00,100 --> 0:00:05,020
+Hello. All the translations below me were generated automatically with free software that I made,
+
+
+2
+0:00:05,540 --> 0:00:10,460
+y he hecho una rápida reestructuración de esto. La diferencia más importante es que
+
+
+3
+0:00:10,960 --> 0:00:15,180
+I removed some of the hard coding of the languages that were involved, so now
+
+
+4
+0:00:15,720 --> 0:00:19,540
+you can, we can just like add new languages to the translation list
+
+
+5
+0:00:20,379 --> 0:00:25,680
+非常简单 所以 我 在 这个 中 添加 了 印地语 和 法语 所以 它 应该 在 下面 的 某个 地方 显示
+
+
+6
+0:00:26,299 --> 0:00:31,639
+y estoy muy emocionado de comenzar a intentar usar esto para algunos idiomas menos comunes.
+
+
+7
+0:00:33,060 --> 0:00:37,139
+So like, you know, indigenous languages, endangered languages, ancient languages.
+
+
+8
+0:00:37,700 --> 0:00:42,180
+I think it's set up in such a way that you can pretty easily tweak the prompts to be able to
+
+
+9
+0:00:42,180 --> 0:00:49,860
+gerenciar esse tipo de coisa. Aqui está um gato. E sim, será realmente interessante ver o que
+
+
+10
+0:00:49,860 --> 0:00:54,459
+happens. For the basic languages, like the ones we're looking at, it should do pretty well with
+
+
+11
+0:00:54,459 --> 0:01:01,860
+its, you know, the training of its weights, but for less common languages like Cherokee or Igbo,
+
+
+12
+0:01 --> 0:01:08,580
+probablemente no lo hará muy bien solo con su entrenamiento, y ciertamente no podré evaluarlo
+
+
+13
+0:01:08,580 --> 0:01:14,980
+su salida, pero creo que podemos comenzar a intentar incorporar herramientas que busquen como,
+
+
+14
+0:01:15,019 --> 0:01:18,199
+grammatical dictionaries and things like that to achieve better results, and then obviously
+
+
+15
+0:01:18,199 --> 0:01:23,800
+Puedo empezar a preguntar a personas que hablan esos idiomas menos comunes para evaluar cómo lo está haciendo.
+
+
+16
+0:01:23,800 --> 0:01:27,220
+Anyways, if you're interested, follow along. If you want to find the code, it's
+
+
+17
+0:01:27,760 --> 0:01:39,699
+on GitHub, premocap slash skellysubs. It's, you know, still early days. Still a cat. And yeah. Bye.

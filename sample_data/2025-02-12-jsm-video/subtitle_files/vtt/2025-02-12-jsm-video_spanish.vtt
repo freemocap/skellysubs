@@ -1,0 +1,52 @@
+WEBVTT
+
+0:00:00.100.000 --> 0:00:05.020.000 line:50%
+Hola. Todas las traducciones debajo de mí fueron generadas automáticamente con un software gratuito que hice,
+
+0:00:05.540.000 --> 0:00:10.460.000 line:50%
+y he hecho una rápida reestructuración de esto. La diferencia más importante es que
+
+0:00:10.960.000 --> 0:00:15.180.000 line:50%
+eliminé parte del código duro de los idiomas que estaban involucrados, así que ahora
+
+0:00:15.720.000 --> 0:00:19.540.000 line:50%
+podemos, simplemente podemos agregar nuevos idiomas a la lista de traducción
+
+0:00:20.379.000 --> 0:00:25.680.000 line:50%
+muy fácilmente. Así que añadí hindi y francés a este, que deberían aparecer abajo en algún lugar,
+
+0:00:26.299.000 --> 0:00:31.639.000 line:50%
+y estoy muy emocionado de empezar a intentar usar esto para algunos idiomas menos comunes.
+
+0:00:33.060.000 --> 0:00:37.139.000 line:50%
+Así que, ya sabes, lenguas indígenas, lenguas en peligro de extinción, lenguas antiguas.
+
+0:00:37.700.000 --> 0:00:42.180.000 line:50%
+Creo que está configurado de tal manera que puedes ajustar bastante fácilmente los mensajes para poder
+
+0:00:42.180.000 --> 0:00:49.860.000 line:50%
+manejar ese tipo de cosas. Aquí hay un gato. Y sí, será realmente interesante ver qué
+
+0:00:49.860.000 --> 0:00:54.459.000 line:50%
+sucede. Para los idiomas básicos, como los que estamos viendo, debería funcionar bastante bien con
+
+0:00:54.459.000 --> 0:01:01.860.000 line:50%
+su, ya sabes, el entrenamiento de sus pesos, pero para lenguas menos comunes como el cherokee o el igbo,
+
+0:01.000 --> 0:01:08.580.000 line:50%
+probablemente no lo hará muy bien solo con su entrenamiento, y ciertamente no podré evaluarlo
+
+0:01:08.580.000 --> 0:01:14.980.000 line:50%
+su salida, pero creo que podemos empezar a intentar incorporar herramientas que busquen como,
+
+0:01:15.019.000 --> 0:01:18.199.000 line:50%
+diccionarios de gramática y cosas así para obtener mejores resultados, y luego, obviamente
+
+0:01:18.199.000 --> 0:01:23.800.000 line:50%
+Puedo empezar a pedirle a las personas que hablan esos idiomas menos comunes que evalúen cómo lo está haciendo.
+
+0:01:23.800.000 --> 0:01:27.220.000 line:50%
+De todos modos, si estás interesado, sigue adelante. Si quieres encontrar el código, está
+
+0:01:27.760.000 --> 0:01:39.699.000 line:50%
+en GitHub, premocap barra skellysubs. Es, ya sabes, todavía son días tempranos. Sigue siendo un gato. Y sí. Adiós.

@@ -1,0 +1,4 @@
+5
+0:00:20,379 --> 0:00:25,680
+非常简单 所以 我 在 这个 中 添加 了 印地语 和 法语 所以 它 应该 在 下面 的 某个 地方 显示
+Fēicháng jiǎndān. Suǒyǐ wǒ zài zhège zhōng tiānjiāle yìndìyǔ hé fǎyǔ, suǒyǐ tā yīnggāi zài xiàmiàn de mǒu gè dìfāng xiǎnshì.

@@ -1,0 +1,2832 @@
+{
+    "text": "Hello. All the translations below me were generated automatically with free software that I made, and I have done a quick refactor of it. The most sort of important difference is that I removed some of the hard coding of the languages that were involved, so now you can, we can just like add new languages to the translation list very easily. So I added Hindi and French to this one, so which should show up below somewhere, and I'm really excited to start trying to use this for some more like less common languages. So like, you know, indigenous languages, endangered languages, ancient languages. I think it's set up in such a way that you can pretty easily tweak the prompts to be able to manage that type of thing. Here's a cat. And yeah, it'll be really interesting to see what happens. For the basic languages, like the ones we're looking at, it should do pretty well with its, you know, the training of its weights, but for less common languages like Cherokee or Igbo, it probably won't do very well by its training alone, and I certainly won't be able to evaluate its output, but I think we can start like trying to bake in tools that look up like, you know, grammar dictionaries and stuff like that to get better results, and then obviously I can start asking people who speak those less common languages to evaluate how it's doing. Anyways, if you're interested, follow along. If you want to find the code, it's on GitHub, premocap slash skellysubs. It's, you know, still early days. Still a cat. And yeah. Bye.",
+    "segments": [
+        {
+            "id": 0,
+            "seek": 0.0,
+            "start": 0.0,
+            "end": 5.019999980926514,
+            "text": " Hello. All the translations below me were generated automatically with free software that I made,",
+            "tokens": [
+                50380,
+                2425,
+                13,
+                1057,
+                264,
+                37578,
+                2507,
+                385,
+                645,
+                10833,
+                6772,
+                365,
+                1737,
+                4722,
+                300,
+                286,
+                1027,
+                11,
+                50620
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.24891702830791473,
+            "compression_ratio": 1.6370656490325928,
+            "no_speech_prob": 0.4861099123954773,
+            "words": [
+                {
+                    "start": 0.0,
+                    "end": 0.7200000286102295,
+                    "word": "Hello",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 0,
+                    "probability": null
+                },
+                {
+                    "start": 0.8999999761581421,
+                    "end": 1.4199999570846558,
+                    "word": "All",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 1,
+                    "probability": null
+                },
+                {
+                    "start": 1.4199999570846558,
+                    "end": 1.559999942779541,
+                    "word": "the",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 2,
+                    "probability": null
+                },
+                {
+                    "start": 1.559999942779541,
+                    "end": 1.899999976158142,
+                    "word": "translations",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 3,
+                    "probability": null
+                },
+                {
+                    "start": 1.899999976158142,
+                    "end": 2.1600000858306885,
+                    "word": "below",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 4,
+                    "probability": null
+                },
+                {
+                    "start": 2.1600000858306885,
+                    "end": 2.319999933242798,
+                    "word": "me",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 5,
+                    "probability": null
+                },
+                {
+                    "start": 2.319999933242798,
+                    "end": 2.5399999618530273,
+                    "word": "were",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 6,
+                    "probability": null
+                },
+                {
+                    "start": 2.5399999618530273,
+                    "end": 2.799999952316284,
+                    "word": "generated",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 7,
+                    "probability": null
+                },
+                {
+                    "start": 2.799999952316284,
+                    "end": 3.4600000381469727,
+                    "word": "automatically",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 8,
+                    "probability": null
+                },
+                {
+                    "start": 3.4600000381469727,
+                    "end": 3.880000114440918,
+                    "word": "with",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 9,
+                    "probability": null
+                },
+                {
+                    "start": 3.880000114440918,
+                    "end": 4.21999979019165,
+                    "word": "free",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 10,
+                    "probability": null
+                },
+                {
+                    "start": 4.21999979019165,
+                    "end": 4.480000019073486,
+                    "word": "software",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 11,
+                    "probability": null
+                },
+                {
+                    "start": 4.480000019073486,
+                    "end": 4.679999828338623,
+                    "word": "that",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 12,
+                    "probability": null
+                },
+                {
+                    "start": 4.679999828338623,
+                    "end": 4.860000133514404,
+                    "word": "I",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 13,
+                    "probability": null
+                },
+                {
+                    "start": 4.860000133514404,
+                    "end": 5.019999980926514,
+                    "word": "made",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 14,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "seek": 0.0,
+            "start": 5.539999961853027,
+            "end": 10.460000038146973,
+            "text": " and I have done a quick refactor of it. The most sort of important difference is that",
+            "tokens": [
+                50620,
+                293,
+                286,
+                362,
+                1096,
+                257,
+                1702,
+                1895,
+                15104,
+                295,
+                309,
+                13,
+                440,
+                881,
+                1333,
+                295,
+                1021,
+                2649,
+                307,
+                300,
+                50876
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.24891702830791473,
+            "compression_ratio": 1.6370656490325928,
+            "no_speech_prob": 0.4861099123954773,
+            "words": [
+                {
+                    "start": 5.539999961853027,
+                    "end": 5.539999961853027,
+                    "word": "and",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 15,
+                    "probability": null
+                },
+                {
+                    "start": 5.539999961853027,
+                    "end": 6.199999809265137,
+                    "word": "I",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 16,
+                    "probability": null
+                },
+                {
+                    "start": 6.199999809265137,
+                    "end": 6.380000114440918,
+                    "word": "have",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 17,
+                    "probability": null
+                },
+                {
+                    "start": 6.380000114440918,
+                    "end": 6.5,
+                    "word": "done",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 18,
+                    "probability": null
+                },
+                {
+                    "start": 6.5,
+                    "end": 6.71999979019165,
+                    "word": "a",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 19,
+                    "probability": null
+                },
+                {
+                    "start": 6.71999979019165,
+                    "end": 6.940000057220459,
+                    "word": "quick",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 20,
+                    "probability": null
+                },
+                {
+                    "start": 6.940000057220459,
+                    "end": 7.360000133514404,
+                    "word": "refactor",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 21,
+                    "probability": null
+                },
+                {
+                    "start": 7.360000133514404,
+                    "end": 7.679999828338623,
+                    "word": "of",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 22,
+                    "probability": null
+                },
+                {
+                    "start": 7.679999828338623,
+                    "end": 7.739999771118164,
+                    "word": "it",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 23,
+                    "probability": null
+                },
+                {
+                    "start": 7.800000190734863,
+                    "end": 7.900000095367432,
+                    "word": "The",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 24,
+                    "probability": null
+                },
+                {
+                    "start": 7.900000095367432,
+                    "end": 8.5600004196167,
+                    "word": "most",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 25,
+                    "probability": null
+                },
+                {
+                    "start": 8.5600004196167,
+                    "end": 9.199999809265137,
+                    "word": "sort",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 26,
+                    "probability": null
+                },
+                {
+                    "start": 9.199999809265137,
+                    "end": 9.359999656677246,
+                    "word": "of",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 27,
+                    "probability": null
+                },
+                {
+                    "start": 9.359999656677246,
+                    "end": 9.359999656677246,
+                    "word": "important",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 28,
+                    "probability": null
+                },
+                {
+                    "start": 9.359999656677246,
+                    "end": 9.800000190734863,
+                    "word": "difference",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 29,
+                    "probability": null
+                },
+                {
+                    "start": 9.800000190734863,
+                    "end": 10.0600004196167,
+                    "word": "is",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 30,
+                    "probability": null
+                },
+                {
+                    "start": 10.0600004196167,
+                    "end": 10.460000038146973,
+                    "word": "that",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 31,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "seek": 0.0,
+            "start": 10.960000038146973,
+            "end": 15.180000305175781,
+            "text": " I removed some of the hard coding of the languages that were involved, so now",
+            "tokens": [
+                50924,
+                286,
+                7261,
+                512,
+                295,
+                264,
+                1152,
+                17720,
+                295,
+                264,
+                8650,
+                300,
+                645,
+                3288,
+                11,
+                370,
+                586,
+                51112
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.24891702830791473,
+            "compression_ratio": 1.6370656490325928,
+            "no_speech_prob": 0.4861099123954773,
+            "words": [
+                {
+                    "start": 10.960000038146973,
+                    "end": 11.479999542236328,
+                    "word": "I",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 32,
+                    "probability": null
+                },
+                {
+                    "start": 11.479999542236328,
+                    "end": 11.739999771118164,
+                    "word": "removed",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 33,
+                    "probability": null
+                },
+                {
+                    "start": 11.739999771118164,
+                    "end": 11.9399995803833,
+                    "word": "some",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 34,
+                    "probability": null
+                },
+                {
+                    "start": 11.9399995803833,
+                    "end": 12.140000343322754,
+                    "word": "of",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 35,
+                    "probability": null
+                },
+                {
+                    "start": 12.140000343322754,
+                    "end": 12.140000343322754,
+                    "word": "the",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 36,
+                    "probability": null
+                },
+                {
+                    "start": 12.140000343322754,
+                    "end": 12.399999618530273,
+                    "word": "hard",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 37,
+                    "probability": null
+                },
+                {
+                    "start": 12.399999618530273,
+                    "end": 12.699999809265137,
+                    "word": "coding",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 38,
+                    "probability": null
+                },
+                {
+                    "start": 12.699999809265137,
+                    "end": 13.260000228881836,
+                    "word": "of",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 39,
+                    "probability": null
+                },
+                {
+                    "start": 13.260000228881836,
+                    "end": 13.880000114440918,
+                    "word": "the",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 40,
+                    "probability": null
+                },
+                {
+                    "start": 13.880000114440918,
+                    "end": 13.880000114440918,
+                    "word": "languages",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 41,
+                    "probability": null
+                },
+                {
+                    "start": 13.880000114440918,
+                    "end": 14.119999885559082,
+                    "word": "that",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 42,
+                    "probability": null
+                },
+                {
+                    "start": 14.119999885559082,
+                    "end": 14.319999694824219,
+                    "word": "were",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 43,
+                    "probability": null
+                },
+                {
+                    "start": 14.319999694824219,
+                    "end": 14.5,
+                    "word": "involved",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 44,
+                    "probability": null
+                },
+                {
+                    "start": 14.640000343322754,
+                    "end": 14.739999771118164,
+                    "word": "so",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 45,
+                    "probability": null
+                },
+                {
+                    "start": 14.739999771118164,
+                    "end": 15.180000305175781,
+                    "word": "now",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 46,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "seek": 0.0,
+            "start": 15.720000267028809,
+            "end": 19.540000915527344,
+            "text": " you can, we can just like add new languages to the translation list",
+            "tokens": [
+                51164,
+                291,
+                393,
+                11,
+                321,
+                393,
+                445,
+                411,
+                909,
+                777,
+                8650,
+                281,
+                264,
+                12853,
+                1329,
+                51336
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.24891702830791473,
+            "compression_ratio": 1.6370656490325928,
+            "no_speech_prob": 0.4861099123954773,
+            "words": [
+                {
+                    "start": 15.720000267028809,
+                    "end": 16.239999771118164,
+                    "word": "you",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 47,
+                    "probability": null
+                },
+                {
+                    "start": 16.239999771118164,
+                    "end": 16.479999542236328,
+                    "word": "can",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 48,
+                    "probability": null
+                },
+                {
+                    "start": 16.739999771118164,
+                    "end": 16.760000228881836,
+                    "word": "we",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 49,
+                    "probability": null
+                },
+                {
+                    "start": 16.760000228881836,
+                    "end": 16.860000610351562,
+                    "word": "can",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 50,
+                    "probability": null
+                },
+                {
+                    "start": 16.860000610351562,
+                    "end": 17.040000915527344,
+                    "word": "just",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 51,
+                    "probability": null
+                },
+                {
+                    "start": 17.040000915527344,
+                    "end": 17.420000076293945,
+                    "word": "like",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 52,
+                    "probability": null
+                },
+                {
+                    "start": 17.420000076293945,
+                    "end": 17.700000762939453,
+                    "word": "add",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 53,
+                    "probability": null
+                },
+                {
+                    "start": 17.700000762939453,
+                    "end": 18.18000030517578,
+                    "word": "new",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 54,
+                    "probability": null
+                },
+                {
+                    "start": 18.18000030517578,
+                    "end": 18.3799991607666,
+                    "word": "languages",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 55,
+                    "probability": null
+                },
+                {
+                    "start": 18.3799991607666,
+                    "end": 18.65999984741211,
+                    "word": "to",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 56,
+                    "probability": null
+                },
+                {
+                    "start": 18.65999984741211,
+                    "end": 19.1200008392334,
+                    "word": "the",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 57,
+                    "probability": null
+                },
+                {
+                    "start": 19.1200008392334,
+                    "end": 19.1200008392334,
+                    "word": "translation",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 58,
+                    "probability": null
+                },
+                {
+                    "start": 19.1200008392334,
+                    "end": 19.540000915527344,
+                    "word": "list",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 59,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "seek": 0.0,
+            "start": 20.3799991607666,
+            "end": 25.68000030517578,
+            "text": " very easily. So I added Hindi and French to this one, so which should show up below somewhere,",
+            "tokens": [
+                51392,
+                588,
+                3612,
+                13,
+                407,
+                286,
+                3869,
+                36225,
+                293,
+                5522,
+                281,
+                341,
+                472,
+                11,
+                370,
+                597,
+                820,
+                855,
+                493,
+                2507,
+                4079,
+                11,
+                51648
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.24891702830791473,
+            "compression_ratio": 1.6370656490325928,
+            "no_speech_prob": 0.4861099123954773,
+            "words": [
+                {
+                    "start": 20.3799991607666,
+                    "end": 20.899999618530273,
+                    "word": "very",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 60,
+                    "probability": null
+                },
+                {
+                    "start": 20.899999618530273,
+                    "end": 21.280000686645508,
+                    "word": "easily",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 61,
+                    "probability": null
+                },
+                {
+                    "start": 21.479999542236328,
+                    "end": 21.81999969482422,
+                    "word": "So",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 62,
+                    "probability": null
+                },
+                {
+                    "start": 21.81999969482422,
+                    "end": 21.959999084472656,
+                    "word": "I",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 63,
+                    "probability": null
+                },
+                {
+                    "start": 21.959999084472656,
+                    "end": 22.1200008392334,
+                    "word": "added",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 64,
+                    "probability": null
+                },
+                {
+                    "start": 22.1200008392334,
+                    "end": 22.559999465942383,
+                    "word": "Hindi",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 65,
+                    "probability": null
+                },
+                {
+                    "start": 22.559999465942383,
+                    "end": 23.059999465942383,
+                    "word": "and",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 66,
+                    "probability": null
+                },
+                {
+                    "start": 23.059999465942383,
+                    "end": 23.260000228881836,
+                    "word": "French",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 67,
+                    "probability": null
+                },
+                {
+                    "start": 23.260000228881836,
+                    "end": 23.6200008392334,
+                    "word": "to",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 68,
+                    "probability": null
+                },
+                {
+                    "start": 23.6200008392334,
+                    "end": 23.799999237060547,
+                    "word": "this",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 69,
+                    "probability": null
+                },
+                {
+                    "start": 23.799999237060547,
+                    "end": 24.0,
+                    "word": "one",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 70,
+                    "probability": null
+                },
+                {
+                    "start": 24.0,
+                    "end": 24.18000030517578,
+                    "word": "so",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 71,
+                    "probability": null
+                },
+                {
+                    "start": 24.18000030517578,
+                    "end": 24.360000610351562,
+                    "word": "which",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 72,
+                    "probability": null
+                },
+                {
+                    "start": 24.360000610351562,
+                    "end": 24.700000762939453,
+                    "word": "should",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 73,
+                    "probability": null
+                },
+                {
+                    "start": 24.700000762939453,
+                    "end": 24.8799991607666,
+                    "word": "show",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 74,
+                    "probability": null
+                },
+                {
+                    "start": 24.8799991607666,
+                    "end": 25.18000030517578,
+                    "word": "up",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 75,
+                    "probability": null
+                },
+                {
+                    "start": 25.18000030517578,
+                    "end": 25.31999969482422,
+                    "word": "below",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 76,
+                    "probability": null
+                },
+                {
+                    "start": 25.31999969482422,
+                    "end": 25.68000030517578,
+                    "word": "somewhere",
+                    "index_in_segment": 18,
+                    "index_in_transcript": 77,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "seek": 2568.0,
+            "start": 26.299999237060547,
+            "end": 31.639999389648438,
+            "text": " and I'm really excited to start trying to use this for some more like less common languages.",
+            "tokens": [
+                50392,
+                293,
+                286,
+                478,
+                534,
+                2919,
+                281,
+                722,
+                1382,
+                281,
+                764,
+                341,
+                337,
+                512,
+                544,
+                411,
+                1570,
+                2689,
+                8650,
+                13,
+                50664
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1836993247270584,
+            "compression_ratio": 1.7003744840621948,
+            "no_speech_prob": 0.2475251704454422,
+            "words": [
+                {
+                    "start": 26.299999237060547,
+                    "end": 26.780000686645508,
+                    "word": "and",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 78,
+                    "probability": null
+                },
+                {
+                    "start": 26.780000686645508,
+                    "end": 27.100000381469727,
+                    "word": "I'm",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 79,
+                    "probability": null
+                },
+                {
+                    "start": 27.100000381469727,
+                    "end": 27.34000015258789,
+                    "word": "really",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 80,
+                    "probability": null
+                },
+                {
+                    "start": 27.34000015258789,
+                    "end": 27.5,
+                    "word": "excited",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 81,
+                    "probability": null
+                },
+                {
+                    "start": 27.5,
+                    "end": 27.719999313354492,
+                    "word": "to",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 82,
+                    "probability": null
+                },
+                {
+                    "start": 27.719999313354492,
+                    "end": 28.0,
+                    "word": "start",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 83,
+                    "probability": null
+                },
+                {
+                    "start": 28.0,
+                    "end": 28.65999984741211,
+                    "word": "trying",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 84,
+                    "probability": null
+                },
+                {
+                    "start": 28.65999984741211,
+                    "end": 28.860000610351562,
+                    "word": "to",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 85,
+                    "probability": null
+                },
+                {
+                    "start": 28.860000610351562,
+                    "end": 28.940000534057617,
+                    "word": "use",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 86,
+                    "probability": null
+                },
+                {
+                    "start": 28.940000534057617,
+                    "end": 29.1200008392334,
+                    "word": "this",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 87,
+                    "probability": null
+                },
+                {
+                    "start": 29.1200008392334,
+                    "end": 29.280000686645508,
+                    "word": "for",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 88,
+                    "probability": null
+                },
+                {
+                    "start": 29.280000686645508,
+                    "end": 29.5,
+                    "word": "some",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 89,
+                    "probability": null
+                },
+                {
+                    "start": 29.5,
+                    "end": 29.68000030517578,
+                    "word": "more",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 90,
+                    "probability": null
+                },
+                {
+                    "start": 29.68000030517578,
+                    "end": 30.780000686645508,
+                    "word": "like",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 91,
+                    "probability": null
+                },
+                {
+                    "start": 30.780000686645508,
+                    "end": 30.920000076293945,
+                    "word": "less",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 92,
+                    "probability": null
+                },
+                {
+                    "start": 30.920000076293945,
+                    "end": 31.260000228881836,
+                    "word": "common",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 93,
+                    "probability": null
+                },
+                {
+                    "start": 31.260000228881836,
+                    "end": 31.639999389648438,
+                    "word": "languages",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 94,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "seek": 2568.0,
+            "start": 33.060001373291016,
+            "end": 37.13999938964844,
+            "text": " So like, you know, indigenous languages, endangered languages, ancient languages.",
+            "tokens": [
+                50720,
+                407,
+                411,
+                11,
+                291,
+                458,
+                11,
+                15511,
+                8650,
+                11,
+                37539,
+                8650,
+                11,
+                7832,
+                8650,
+                13,
+                50940
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1836993247270584,
+            "compression_ratio": 1.7003744840621948,
+            "no_speech_prob": 0.2475251704454422,
+            "words": [
+                {
+                    "start": 33.060001373291016,
+                    "end": 33.119998931884766,
+                    "word": "So",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 95,
+                    "probability": null
+                },
+                {
+                    "start": 33.119998931884766,
+                    "end": 33.5,
+                    "word": "like",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 96,
+                    "probability": null
+                },
+                {
+                    "start": 33.97999954223633,
+                    "end": 34.70000076293945,
+                    "word": "you",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 97,
+                    "probability": null
+                },
+                {
+                    "start": 34.70000076293945,
+                    "end": 34.70000076293945,
+                    "word": "know",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 98,
+                    "probability": null
+                },
+                {
+                    "start": 34.70000076293945,
+                    "end": 34.7599983215332,
+                    "word": "indigenous",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 99,
+                    "probability": null
+                },
+                {
+                    "start": 34.7599983215332,
+                    "end": 35.2400016784668,
+                    "word": "languages",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 100,
+                    "probability": null
+                },
+                {
+                    "start": 35.41999816894531,
+                    "end": 35.779998779296875,
+                    "word": "endangered",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 101,
+                    "probability": null
+                },
+                {
+                    "start": 35.779998779296875,
+                    "end": 36.29999923706055,
+                    "word": "languages",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 102,
+                    "probability": null
+                },
+                {
+                    "start": 36.70000076293945,
+                    "end": 36.7400016784668,
+                    "word": "ancient",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 103,
+                    "probability": null
+                },
+                {
+                    "start": 36.7400016784668,
+                    "end": 37.13999938964844,
+                    "word": "languages",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 104,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "seek": 2568.0,
+            "start": 37.70000076293945,
+            "end": 42.18000030517578,
+            "text": " I think it's set up in such a way that you can pretty easily tweak the prompts to be able to",
+            "tokens": [
+                50972,
+                286,
+                519,
+                309,
+                311,
+                992,
+                493,
+                294,
+                1270,
+                257,
+                636,
+                300,
+                291,
+                393,
+                1238,
+                3612,
+                29879,
+                264,
+                41095,
+                281,
+                312,
+                1075,
+                281,
+                51164
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1836993247270584,
+            "compression_ratio": 1.7003744840621948,
+            "no_speech_prob": 0.2475251704454422,
+            "words": [
+                {
+                    "start": 37.70000076293945,
+                    "end": 38.18000030517578,
+                    "word": "I",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 105,
+                    "probability": null
+                },
+                {
+                    "start": 38.18000030517578,
+                    "end": 38.29999923706055,
+                    "word": "think",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 106,
+                    "probability": null
+                },
+                {
+                    "start": 38.29999923706055,
+                    "end": 38.560001373291016,
+                    "word": "it's",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 107,
+                    "probability": null
+                },
+                {
+                    "start": 38.560001373291016,
+                    "end": 38.63999938964844,
+                    "word": "set",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 108,
+                    "probability": null
+                },
+                {
+                    "start": 38.63999938964844,
+                    "end": 38.7400016784668,
+                    "word": "up",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 109,
+                    "probability": null
+                },
+                {
+                    "start": 38.7400016784668,
+                    "end": 38.91999816894531,
+                    "word": "in",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 110,
+                    "probability": null
+                },
+                {
+                    "start": 38.91999816894531,
+                    "end": 39.0,
+                    "word": "such",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 111,
+                    "probability": null
+                },
+                {
+                    "start": 39.0,
+                    "end": 39.2400016784668,
+                    "word": "a",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 112,
+                    "probability": null
+                },
+                {
+                    "start": 39.2400016784668,
+                    "end": 39.2599983215332,
+                    "word": "way",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 113,
+                    "probability": null
+                },
+                {
+                    "start": 39.2599983215332,
+                    "end": 39.47999954223633,
+                    "word": "that",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 114,
+                    "probability": null
+                },
+                {
+                    "start": 39.47999954223633,
+                    "end": 39.619998931884766,
+                    "word": "you",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 115,
+                    "probability": null
+                },
+                {
+                    "start": 39.619998931884766,
+                    "end": 40.099998474121094,
+                    "word": "can",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 116,
+                    "probability": null
+                },
+                {
+                    "start": 40.099998474121094,
+                    "end": 40.31999969482422,
+                    "word": "pretty",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 117,
+                    "probability": null
+                },
+                {
+                    "start": 40.31999969482422,
+                    "end": 40.560001373291016,
+                    "word": "easily",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 118,
+                    "probability": null
+                },
+                {
+                    "start": 40.560001373291016,
+                    "end": 40.81999969482422,
+                    "word": "tweak",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 119,
+                    "probability": null
+                },
+                {
+                    "start": 40.81999969482422,
+                    "end": 41.220001220703125,
+                    "word": "the",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 120,
+                    "probability": null
+                },
+                {
+                    "start": 41.220001220703125,
+                    "end": 41.220001220703125,
+                    "word": "prompts",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 121,
+                    "probability": null
+                },
+                {
+                    "start": 41.220001220703125,
+                    "end": 41.41999816894531,
+                    "word": "to",
+                    "index_in_segment": 18,
+                    "index_in_transcript": 122,
+                    "probability": null
+                },
+                {
+                    "start": 41.41999816894531,
+                    "end": 41.599998474121094,
+                    "word": "be",
+                    "index_in_segment": 19,
+                    "index_in_transcript": 123,
+                    "probability": null
+                },
+                {
+                    "start": 41.599998474121094,
+                    "end": 41.68000030517578,
+                    "word": "able",
+                    "index_in_segment": 20,
+                    "index_in_transcript": 124,
+                    "probability": null
+                },
+                {
+                    "start": 41.68000030517578,
+                    "end": 42.18000030517578,
+                    "word": "to",
+                    "index_in_segment": 21,
+                    "index_in_transcript": 125,
+                    "probability": null
+                },
+                {
+                    "start": 42.18000030517578,
+                    "end": 42.18000030517578,
+                    "word": "manage",
+                    "index_in_segment": 22,
+                    "index_in_transcript": 126,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "seek": 2568.0,
+            "start": 42.18000030517578,
+            "end": 49.86000061035156,
+            "text": " manage that type of thing. Here's a cat. And yeah, it'll be really interesting to see what",
+            "tokens": [
+                51164,
+                3067,
+                300,
+                2010,
+                295,
+                551,
+                13,
+                1692,
+                311,
+                257,
+                3857,
+                13,
+                400,
+                1338,
+                11,
+                309,
+                603,
+                312,
+                534,
+                1880,
+                281,
+                536,
+                437,
+                51560
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1836993247270584,
+            "compression_ratio": 1.7003744840621948,
+            "no_speech_prob": 0.2475251704454422,
+            "words": [
+                {
+                    "start": 42.18000030517578,
+                    "end": 42.939998626708984,
+                    "word": "that",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 127,
+                    "probability": null
+                },
+                {
+                    "start": 42.939998626708984,
+                    "end": 43.099998474121094,
+                    "word": "type",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 128,
+                    "probability": null
+                },
+                {
+                    "start": 43.099998474121094,
+                    "end": 43.459999084472656,
+                    "word": "of",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 129,
+                    "probability": null
+                },
+                {
+                    "start": 43.459999084472656,
+                    "end": 43.459999084472656,
+                    "word": "thing",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 130,
+                    "probability": null
+                },
+                {
+                    "start": 44.18000030517578,
+                    "end": 44.52000045776367,
+                    "word": "Here's",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 131,
+                    "probability": null
+                },
+                {
+                    "start": 44.52000045776367,
+                    "end": 44.63999938964844,
+                    "word": "a",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 132,
+                    "probability": null
+                },
+                {
+                    "start": 44.63999938964844,
+                    "end": 45.15999984741211,
+                    "word": "cat",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 133,
+                    "probability": null
+                },
+                {
+                    "start": 47.439998626708984,
+                    "end": 47.91999816894531,
+                    "word": "And",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 134,
+                    "probability": null
+                },
+                {
+                    "start": 47.91999816894531,
+                    "end": 48.68000030517578,
+                    "word": "yeah",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 135,
+                    "probability": null
+                },
+                {
+                    "start": 48.68000030517578,
+                    "end": 48.84000015258789,
+                    "word": "it'll",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 136,
+                    "probability": null
+                },
+                {
+                    "start": 48.84000015258789,
+                    "end": 48.880001068115234,
+                    "word": "be",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 137,
+                    "probability": null
+                },
+                {
+                    "start": 48.880001068115234,
+                    "end": 49.099998474121094,
+                    "word": "really",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 138,
+                    "probability": null
+                },
+                {
+                    "start": 49.099998474121094,
+                    "end": 49.2400016784668,
+                    "word": "interesting",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 139,
+                    "probability": null
+                },
+                {
+                    "start": 49.2400016784668,
+                    "end": 49.5,
+                    "word": "to",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 140,
+                    "probability": null
+                },
+                {
+                    "start": 49.5,
+                    "end": 49.560001373291016,
+                    "word": "see",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 141,
+                    "probability": null
+                },
+                {
+                    "start": 49.560001373291016,
+                    "end": 49.86000061035156,
+                    "word": "what",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 142,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "seek": 2568.0,
+            "start": 49.86000061035156,
+            "end": 54.459999084472656,
+            "text": " happens. For the basic languages, like the ones we're looking at, it should do pretty well with",
+            "tokens": [
+                51560,
+                2314,
+                13,
+                1171,
+                264,
+                3875,
+                8650,
+                11,
+                411,
+                264,
+                2306,
+                321,
+                434,
+                1237,
+                412,
+                11,
+                309,
+                820,
+                360,
+                1238,
+                731,
+                365,
+                51800
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1836993247270584,
+            "compression_ratio": 1.7003744840621948,
+            "no_speech_prob": 0.2475251704454422,
+            "words": [
+                {
+                    "start": 49.86000061035156,
+                    "end": 50.0,
+                    "word": "happens",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 143,
+                    "probability": null
+                },
+                {
+                    "start": 50.13999938964844,
+                    "end": 50.380001068115234,
+                    "word": "For",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 144,
+                    "probability": null
+                },
+                {
+                    "start": 50.380001068115234,
+                    "end": 50.560001373291016,
+                    "word": "the",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 145,
+                    "probability": null
+                },
+                {
+                    "start": 50.560001373291016,
+                    "end": 50.86000061035156,
+                    "word": "basic",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 146,
+                    "probability": null
+                },
+                {
+                    "start": 50.86000061035156,
+                    "end": 51.18000030517578,
+                    "word": "languages",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 147,
+                    "probability": null
+                },
+                {
+                    "start": 51.20000076293945,
+                    "end": 51.41999816894531,
+                    "word": "like",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 148,
+                    "probability": null
+                },
+                {
+                    "start": 51.41999816894531,
+                    "end": 51.540000915527344,
+                    "word": "the",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 149,
+                    "probability": null
+                },
+                {
+                    "start": 51.540000915527344,
+                    "end": 51.63999938964844,
+                    "word": "ones",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 150,
+                    "probability": null
+                },
+                {
+                    "start": 51.63999938964844,
+                    "end": 51.81999969482422,
+                    "word": "we're",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 151,
+                    "probability": null
+                },
+                {
+                    "start": 51.81999969482422,
+                    "end": 52.0,
+                    "word": "looking",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 152,
+                    "probability": null
+                },
+                {
+                    "start": 52.0,
+                    "end": 52.36000061035156,
+                    "word": "at",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 153,
+                    "probability": null
+                },
+                {
+                    "start": 52.36000061035156,
+                    "end": 52.97999954223633,
+                    "word": "it",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 154,
+                    "probability": null
+                },
+                {
+                    "start": 52.97999954223633,
+                    "end": 53.13999938964844,
+                    "word": "should",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 155,
+                    "probability": null
+                },
+                {
+                    "start": 53.13999938964844,
+                    "end": 53.41999816894531,
+                    "word": "do",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 156,
+                    "probability": null
+                },
+                {
+                    "start": 53.41999816894531,
+                    "end": 53.7400016784668,
+                    "word": "pretty",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 157,
+                    "probability": null
+                },
+                {
+                    "start": 53.7400016784668,
+                    "end": 54.099998474121094,
+                    "word": "well",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 158,
+                    "probability": null
+                },
+                {
+                    "start": 54.099998474121094,
+                    "end": 54.459999084472656,
+                    "word": "with",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 159,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "seek": 5446.0,
+            "start": 54.459999084472656,
+            "end": 61.86000061035156,
+            "text": " its, you know, the training of its weights, but for less common languages like Cherokee or Igbo,",
+            "tokens": [
+                50364,
+                1080,
+                11,
+                291,
+                458,
+                11,
+                264,
+                3097,
+                295,
+                1080,
+                17443,
+                11,
+                457,
+                337,
+                1570,
+                2689,
+                8650,
+                411,
+                14825,
+                49319,
+                420,
+                19271,
+                1763,
+                11,
+                50732
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1820591539144516,
+            "compression_ratio": 1.7701148986816406,
+            "no_speech_prob": 0.0035374192520976067,
+            "words": [
+                {
+                    "start": 54.459999084472656,
+                    "end": 54.84000015258789,
+                    "word": "its",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 160,
+                    "probability": null
+                },
+                {
+                    "start": 54.84000015258789,
+                    "end": 56.040000915527344,
+                    "word": "you",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 161,
+                    "probability": null
+                },
+                {
+                    "start": 56.040000915527344,
+                    "end": 56.040000915527344,
+                    "word": "know",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 162,
+                    "probability": null
+                },
+                {
+                    "start": 56.060001373291016,
+                    "end": 56.18000030517578,
+                    "word": "the",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 163,
+                    "probability": null
+                },
+                {
+                    "start": 56.18000030517578,
+                    "end": 56.41999816894531,
+                    "word": "training",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 164,
+                    "probability": null
+                },
+                {
+                    "start": 56.41999816894531,
+                    "end": 56.68000030517578,
+                    "word": "of",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 165,
+                    "probability": null
+                },
+                {
+                    "start": 56.68000030517578,
+                    "end": 56.79999923706055,
+                    "word": "its",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 166,
+                    "probability": null
+                },
+                {
+                    "start": 56.79999923706055,
+                    "end": 57.040000915527344,
+                    "word": "weights",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 167,
+                    "probability": null
+                },
+                {
+                    "start": 57.52000045776367,
+                    "end": 57.900001525878906,
+                    "word": "but",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 168,
+                    "probability": null
+                },
+                {
+                    "start": 57.900001525878906,
+                    "end": 58.13999938964844,
+                    "word": "for",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 169,
+                    "probability": null
+                },
+                {
+                    "start": 58.13999938964844,
+                    "end": 58.34000015258789,
+                    "word": "less",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 170,
+                    "probability": null
+                },
+                {
+                    "start": 58.34000015258789,
+                    "end": 58.619998931884766,
+                    "word": "common",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 171,
+                    "probability": null
+                },
+                {
+                    "start": 58.619998931884766,
+                    "end": 58.97999954223633,
+                    "word": "languages",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 172,
+                    "probability": null
+                },
+                {
+                    "start": 58.97999954223633,
+                    "end": 59.779998779296875,
+                    "word": "like",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 173,
+                    "probability": null
+                },
+                {
+                    "start": 59.779998779296875,
+                    "end": 60.15999984741211,
+                    "word": "Cherokee",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 174,
+                    "probability": null
+                },
+                {
+                    "start": 60.15999984741211,
+                    "end": 61.060001373291016,
+                    "word": "or",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 175,
+                    "probability": null
+                },
+                {
+                    "start": 61.060001373291016,
+                    "end": 61.86000061035156,
+                    "word": "Igbo",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 176,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "seek": 5446.0,
+            "start": 63.0,
+            "end": 68.58000183105469,
+            "text": " it probably won't do very well by its training alone, and I certainly won't be able to evaluate",
+            "tokens": [
+                50800,
+                309,
+                1391,
+                1582,
+                380,
+                360,
+                588,
+                731,
+                538,
+                1080,
+                3097,
+                3312,
+                11,
+                293,
+                286,
+                3297,
+                1582,
+                380,
+                312,
+                1075,
+                281,
+                13059,
+                51068
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1820591539144516,
+            "compression_ratio": 1.7701148986816406,
+            "no_speech_prob": 0.0035374192520976067,
+            "words": [
+                {
+                    "start": 63.0,
+                    "end": 63.47999954223633,
+                    "word": "it",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 177,
+                    "probability": null
+                },
+                {
+                    "start": 63.47999954223633,
+                    "end": 63.779998779296875,
+                    "word": "probably",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 178,
+                    "probability": null
+                },
+                {
+                    "start": 63.779998779296875,
+                    "end": 64.0199966430664,
+                    "word": "won't",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 179,
+                    "probability": null
+                },
+                {
+                    "start": 64.0199966430664,
+                    "end": 64.22000122070312,
+                    "word": "do",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 180,
+                    "probability": null
+                },
+                {
+                    "start": 64.22000122070312,
+                    "end": 64.55999755859375,
+                    "word": "very",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 181,
+                    "probability": null
+                },
+                {
+                    "start": 64.55999755859375,
+                    "end": 64.72000122070312,
+                    "word": "well",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 182,
+                    "probability": null
+                },
+                {
+                    "start": 64.72000122070312,
+                    "end": 65.18000030517578,
+                    "word": "by",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 183,
+                    "probability": null
+                },
+                {
+                    "start": 65.18000030517578,
+                    "end": 66.16000366210938,
+                    "word": "its",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 184,
+                    "probability": null
+                },
+                {
+                    "start": 66.16000366210938,
+                    "end": 66.37999725341797,
+                    "word": "training",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 185,
+                    "probability": null
+                },
+                {
+                    "start": 66.37999725341797,
+                    "end": 66.80000305175781,
+                    "word": "alone",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 186,
+                    "probability": null
+                },
+                {
+                    "start": 66.81999969482422,
+                    "end": 67.13999938964844,
+                    "word": "and",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 187,
+                    "probability": null
+                },
+                {
+                    "start": 67.13999938964844,
+                    "end": 67.31999969482422,
+                    "word": "I",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 188,
+                    "probability": null
+                },
+                {
+                    "start": 67.31999969482422,
+                    "end": 67.58000183105469,
+                    "word": "certainly",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 189,
+                    "probability": null
+                },
+                {
+                    "start": 67.58000183105469,
+                    "end": 67.77999877929688,
+                    "word": "won't",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 190,
+                    "probability": null
+                },
+                {
+                    "start": 67.77999877929688,
+                    "end": 67.94000244140625,
+                    "word": "be",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 191,
+                    "probability": null
+                },
+                {
+                    "start": 67.94000244140625,
+                    "end": 68.05999755859375,
+                    "word": "able",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 192,
+                    "probability": null
+                },
+                {
+                    "start": 68.05999755859375,
+                    "end": 68.58000183105469,
+                    "word": "to",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 193,
+                    "probability": null
+                },
+                {
+                    "start": 68.58000183105469,
+                    "end": 68.58000183105469,
+                    "word": "evaluate",
+                    "index_in_segment": 18,
+                    "index_in_transcript": 194,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "seek": 5446.0,
+            "start": 68.58000183105469,
+            "end": 74.9800033569336,
+            "text": " its output, but I think we can start like trying to bake in tools that look up like,",
+            "tokens": [
+                51068,
+                1080,
+                5598,
+                11,
+                457,
+                286,
+                519,
+                321,
+                393,
+                722,
+                411,
+                1382,
+                281,
+                16562,
+                294,
+                3873,
+                300,
+                574,
+                493,
+                411,
+                11,
+                51380
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1820591539144516,
+            "compression_ratio": 1.7701148986816406,
+            "no_speech_prob": 0.0035374192520976067,
+            "words": [
+                {
+                    "start": 68.58000183105469,
+                    "end": 68.9000015258789,
+                    "word": "its",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 195,
+                    "probability": null
+                },
+                {
+                    "start": 68.9000015258789,
+                    "end": 69.05999755859375,
+                    "word": "output",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 196,
+                    "probability": null
+                },
+                {
+                    "start": 69.19999694824219,
+                    "end": 69.27999877929688,
+                    "word": "but",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 197,
+                    "probability": null
+                },
+                {
+                    "start": 69.27999877929688,
+                    "end": 69.41999816894531,
+                    "word": "I",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 198,
+                    "probability": null
+                },
+                {
+                    "start": 69.41999816894531,
+                    "end": 69.5,
+                    "word": "think",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 199,
+                    "probability": null
+                },
+                {
+                    "start": 69.5,
+                    "end": 69.63999938964844,
+                    "word": "we",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 200,
+                    "probability": null
+                },
+                {
+                    "start": 69.63999938964844,
+                    "end": 69.80000305175781,
+                    "word": "can",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 201,
+                    "probability": null
+                },
+                {
+                    "start": 69.80000305175781,
+                    "end": 69.9800033569336,
+                    "word": "start",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 202,
+                    "probability": null
+                },
+                {
+                    "start": 69.9800033569336,
+                    "end": 70.68000030517578,
+                    "word": "like",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 203,
+                    "probability": null
+                },
+                {
+                    "start": 70.68000030517578,
+                    "end": 70.80000305175781,
+                    "word": "trying",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 204,
+                    "probability": null
+                },
+                {
+                    "start": 70.80000305175781,
+                    "end": 71.08000183105469,
+                    "word": "to",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 205,
+                    "probability": null
+                },
+                {
+                    "start": 71.08000183105469,
+                    "end": 71.0999984741211,
+                    "word": "bake",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 206,
+                    "probability": null
+                },
+                {
+                    "start": 71.0999984741211,
+                    "end": 72.04000091552734,
+                    "word": "in",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 207,
+                    "probability": null
+                },
+                {
+                    "start": 72.04000091552734,
+                    "end": 73.5999984741211,
+                    "word": "tools",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 208,
+                    "probability": null
+                },
+                {
+                    "start": 73.5999984741211,
+                    "end": 73.87999725341797,
+                    "word": "that",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 209,
+                    "probability": null
+                },
+                {
+                    "start": 73.87999725341797,
+                    "end": 74.12000274658203,
+                    "word": "look",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 210,
+                    "probability": null
+                },
+                {
+                    "start": 74.12000274658203,
+                    "end": 74.4000015258789,
+                    "word": "up",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 211,
+                    "probability": null
+                },
+                {
+                    "start": 74.4000015258789,
+                    "end": 74.9800033569336,
+                    "word": "like",
+                    "index_in_segment": 18,
+                    "index_in_transcript": 212,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 13,
+            "seek": 5446.0,
+            "start": 75.0199966430664,
+            "end": 78.19999694824219,
+            "text": " you know, grammar dictionaries and stuff like that to get better results, and then obviously",
+            "tokens": [
+                51380,
+                291,
+                458,
+                11,
+                22317,
+                22352,
+                4889,
+                293,
+                1507,
+                411,
+                300,
+                281,
+                483,
+                1101,
+                3542,
+                11,
+                293,
+                550,
+                2745,
+                51548
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1820591539144516,
+            "compression_ratio": 1.7701148986816406,
+            "no_speech_prob": 0.0035374192520976067,
+            "words": [
+                {
+                    "start": 75.0199966430664,
+                    "end": 75.5,
+                    "word": "you",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 213,
+                    "probability": null
+                },
+                {
+                    "start": 75.5,
+                    "end": 75.5,
+                    "word": "know",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 214,
+                    "probability": null
+                },
+                {
+                    "start": 75.5,
+                    "end": 75.5199966430664,
+                    "word": "grammar",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 215,
+                    "probability": null
+                },
+                {
+                    "start": 75.5199966430664,
+                    "end": 76.0199966430664,
+                    "word": "dictionaries",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 216,
+                    "probability": null
+                },
+                {
+                    "start": 76.0199966430664,
+                    "end": 76.26000213623047,
+                    "word": "and",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 217,
+                    "probability": null
+                },
+                {
+                    "start": 76.26000213623047,
+                    "end": 76.33999633789062,
+                    "word": "stuff",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 218,
+                    "probability": null
+                },
+                {
+                    "start": 76.33999633789062,
+                    "end": 76.54000091552734,
+                    "word": "like",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 219,
+                    "probability": null
+                },
+                {
+                    "start": 76.54000091552734,
+                    "end": 76.69999694824219,
+                    "word": "that",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 220,
+                    "probability": null
+                },
+                {
+                    "start": 76.69999694824219,
+                    "end": 76.81999969482422,
+                    "word": "to",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 221,
+                    "probability": null
+                },
+                {
+                    "start": 76.81999969482422,
+                    "end": 76.9800033569336,
+                    "word": "get",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 222,
+                    "probability": null
+                },
+                {
+                    "start": 76.9800033569336,
+                    "end": 77.19999694824219,
+                    "word": "better",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 223,
+                    "probability": null
+                },
+                {
+                    "start": 77.19999694824219,
+                    "end": 77.5199966430664,
+                    "word": "results",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 224,
+                    "probability": null
+                },
+                {
+                    "start": 77.5999984741211,
+                    "end": 77.80000305175781,
+                    "word": "and",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 225,
+                    "probability": null
+                },
+                {
+                    "start": 77.80000305175781,
+                    "end": 77.94000244140625,
+                    "word": "then",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 226,
+                    "probability": null
+                },
+                {
+                    "start": 77.94000244140625,
+                    "end": 78.19999694824219,
+                    "word": "obviously",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 227,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 14,
+            "seek": 5446.0,
+            "start": 78.19999694824219,
+            "end": 83.80000305175781,
+            "text": " I can start asking people who speak those less common languages to evaluate how it's doing.",
+            "tokens": [
+                51548,
+                286,
+                393,
+                722,
+                3365,
+                561,
+                567,
+                1710,
+                729,
+                1570,
+                2689,
+                8650,
+                281,
+                13059,
+                577,
+                309,
+                311,
+                884,
+                13,
+                51848
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.1820591539144516,
+            "compression_ratio": 1.7701148986816406,
+            "no_speech_prob": 0.0035374192520976067,
+            "words": [
+                {
+                    "start": 78.19999694824219,
+                    "end": 78.33999633789062,
+                    "word": "I",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 228,
+                    "probability": null
+                },
+                {
+                    "start": 78.33999633789062,
+                    "end": 78.45999908447266,
+                    "word": "can",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 229,
+                    "probability": null
+                },
+                {
+                    "start": 78.45999908447266,
+                    "end": 78.80000305175781,
+                    "word": "start",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 230,
+                    "probability": null
+                },
+                {
+                    "start": 78.80000305175781,
+                    "end": 79.23999786376953,
+                    "word": "asking",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 231,
+                    "probability": null
+                },
+                {
+                    "start": 79.23999786376953,
+                    "end": 80.36000061035156,
+                    "word": "people",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 232,
+                    "probability": null
+                },
+                {
+                    "start": 80.36000061035156,
+                    "end": 80.55999755859375,
+                    "word": "who",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 233,
+                    "probability": null
+                },
+                {
+                    "start": 80.55999755859375,
+                    "end": 80.77999877929688,
+                    "word": "speak",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 234,
+                    "probability": null
+                },
+                {
+                    "start": 80.77999877929688,
+                    "end": 81.36000061035156,
+                    "word": "those",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 235,
+                    "probability": null
+                },
+                {
+                    "start": 81.36000061035156,
+                    "end": 81.62000274658203,
+                    "word": "less",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 236,
+                    "probability": null
+                },
+                {
+                    "start": 81.62000274658203,
+                    "end": 81.83999633789062,
+                    "word": "common",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 237,
+                    "probability": null
+                },
+                {
+                    "start": 81.83999633789062,
+                    "end": 82.18000030517578,
+                    "word": "languages",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 238,
+                    "probability": null
+                },
+                {
+                    "start": 82.18000030517578,
+                    "end": 82.9800033569336,
+                    "word": "to",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 239,
+                    "probability": null
+                },
+                {
+                    "start": 82.9800033569336,
+                    "end": 83.16000366210938,
+                    "word": "evaluate",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 240,
+                    "probability": null
+                },
+                {
+                    "start": 83.16000366210938,
+                    "end": 83.45999908447266,
+                    "word": "how",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 241,
+                    "probability": null
+                },
+                {
+                    "start": 83.45999908447266,
+                    "end": 83.66000366210938,
+                    "word": "it's",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 242,
+                    "probability": null
+                },
+                {
+                    "start": 83.66000366210938,
+                    "end": 83.80000305175781,
+                    "word": "doing",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 243,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 15,
+            "seek": 8380.0,
+            "start": 83.80000305175781,
+            "end": 87.22000122070312,
+            "text": " Anyways, if you're interested, follow along. If you want to find the code, it's",
+            "tokens": [
+                50376,
+                15585,
+                11,
+                498,
+                291,
+                434,
+                3102,
+                11,
+                1524,
+                2051,
+                13,
+                759,
+                291,
+                528,
+                281,
+                915,
+                264,
+                3089,
+                11,
+                309,
+                311,
+                50524
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.2651018798351288,
+            "compression_ratio": 1.2785714864730835,
+            "no_speech_prob": 0.003883591154590249,
+            "words": [
+                {
+                    "start": 83.80000305175781,
+                    "end": 84.54000091552734,
+                    "word": "Anyways",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 244,
+                    "probability": null
+                },
+                {
+                    "start": 84.68000030517578,
+                    "end": 84.76000213623047,
+                    "word": "if",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 245,
+                    "probability": null
+                },
+                {
+                    "start": 84.76000213623047,
+                    "end": 85.13999938964844,
+                    "word": "you're",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 246,
+                    "probability": null
+                },
+                {
+                    "start": 85.13999938964844,
+                    "end": 85.13999938964844,
+                    "word": "interested",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 247,
+                    "probability": null
+                },
+                {
+                    "start": 85.37999725341797,
+                    "end": 85.44000244140625,
+                    "word": "follow",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 248,
+                    "probability": null
+                },
+                {
+                    "start": 85.44000244140625,
+                    "end": 85.77999877929688,
+                    "word": "along",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 249,
+                    "probability": null
+                },
+                {
+                    "start": 86.0999984741211,
+                    "end": 86.12000274658203,
+                    "word": "If",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 250,
+                    "probability": null
+                },
+                {
+                    "start": 86.12000274658203,
+                    "end": 86.19999694824219,
+                    "word": "you",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 251,
+                    "probability": null
+                },
+                {
+                    "start": 86.19999694824219,
+                    "end": 86.27999877929688,
+                    "word": "want",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 252,
+                    "probability": null
+                },
+                {
+                    "start": 86.27999877929688,
+                    "end": 86.31999969482422,
+                    "word": "to",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 253,
+                    "probability": null
+                },
+                {
+                    "start": 86.31999969482422,
+                    "end": 86.5199966430664,
+                    "word": "find",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 254,
+                    "probability": null
+                },
+                {
+                    "start": 86.5199966430664,
+                    "end": 86.69999694824219,
+                    "word": "the",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 255,
+                    "probability": null
+                },
+                {
+                    "start": 86.69999694824219,
+                    "end": 86.9000015258789,
+                    "word": "code",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 256,
+                    "probability": null
+                },
+                {
+                    "start": 87.08000183105469,
+                    "end": 87.22000122070312,
+                    "word": "it's",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 257,
+                    "probability": null
+                }
+            ]
+        },
+        {
+            "id": 16,
+            "seek": 8380.0,
+            "start": 87.76000213623047,
+            "end": 99.69999694824219,
+            "text": " on GitHub, premocap slash skellysubs. It's, you know, still early days. Still a cat. And yeah. Bye.",
+            "tokens": [
+                50572,
+                322,
+                23331,
+                11,
+                5624,
+                905,
+                569,
+                17330,
+                8756,
+                285,
+                749,
+                5432,
+                13,
+                467,
+                311,
+                11,
+                291,
+                458,
+                11,
+                920,
+                2440,
+                1708,
+                13,
+                8291,
+                257,
+                3857,
+                13,
+                400,
+                1338,
+                13,
+                4621,
+                13,
+                51192
+            ],
+            "temperature": 0.0,
+            "avg_logprob": -0.2651018798351288,
+            "compression_ratio": 1.2785714864730835,
+            "no_speech_prob": 0.003883591154590249,
+            "words": [
+                {
+                    "start": 87.76000213623047,
+                    "end": 88.33999633789062,
+                    "word": "on",
+                    "index_in_segment": 1,
+                    "index_in_transcript": 258,
+                    "probability": null
+                },
+                {
+                    "start": 88.33999633789062,
+                    "end": 88.69999694824219,
+                    "word": "GitHub",
+                    "index_in_segment": 2,
+                    "index_in_transcript": 259,
+                    "probability": null
+                },
+                {
+                    "start": 89.0,
+                    "end": 89.4000015258789,
+                    "word": "premocap",
+                    "index_in_segment": 3,
+                    "index_in_transcript": 260,
+                    "probability": null
+                },
+                {
+                    "start": 89.4000015258789,
+                    "end": 89.68000030517578,
+                    "word": "slash",
+                    "index_in_segment": 4,
+                    "index_in_transcript": 261,
+                    "probability": null
+                },
+                {
+                    "start": 89.68000030517578,
+                    "end": 90.18000030517578,
+                    "word": "skellysubs",
+                    "index_in_segment": 5,
+                    "index_in_transcript": 262,
+                    "probability": null
+                },
+                {
+                    "start": 90.94000244140625,
+                    "end": 91.22000122070312,
+                    "word": "It's",
+                    "index_in_segment": 6,
+                    "index_in_transcript": 263,
+                    "probability": null
+                },
+                {
+                    "start": 91.22000122070312,
+                    "end": 91.72000122070312,
+                    "word": "you",
+                    "index_in_segment": 7,
+                    "index_in_transcript": 264,
+                    "probability": null
+                },
+                {
+                    "start": 91.72000122070312,
+                    "end": 92.04000091552734,
+                    "word": "know",
+                    "index_in_segment": 8,
+                    "index_in_transcript": 265,
+                    "probability": null
+                },
+                {
+                    "start": 92.04000091552734,
+                    "end": 92.41999816894531,
+                    "word": "still",
+                    "index_in_segment": 9,
+                    "index_in_transcript": 266,
+                    "probability": null
+                },
+                {
+                    "start": 92.41999816894531,
+                    "end": 92.63999938964844,
+                    "word": "early",
+                    "index_in_segment": 10,
+                    "index_in_transcript": 267,
+                    "probability": null
+                },
+                {
+                    "start": 92.63999938964844,
+                    "end": 92.95999908447266,
+                    "word": "days",
+                    "index_in_segment": 11,
+                    "index_in_transcript": 268,
+                    "probability": null
+                },
+                {
+                    "start": 95.18000030517578,
+                    "end": 95.45999908447266,
+                    "word": "Still",
+                    "index_in_segment": 12,
+                    "index_in_transcript": 269,
+                    "probability": null
+                },
+                {
+                    "start": 95.45999908447266,
+                    "end": 95.76000213623047,
+                    "word": "a",
+                    "index_in_segment": 13,
+                    "index_in_transcript": 270,
+                    "probability": null
+                },
+                {
+                    "start": 95.76000213623047,
+                    "end": 95.77999877929688,
+                    "word": "cat",
+                    "index_in_segment": 14,
+                    "index_in_transcript": 271,
+                    "probability": null
+                },
+                {
+                    "start": 97.33999633789062,
+                    "end": 97.91999816894531,
+                    "word": "And",
+                    "index_in_segment": 15,
+                    "index_in_transcript": 272,
+                    "probability": null
+                },
+                {
+                    "start": 97.91999816894531,
+                    "end": 98.91999816894531,
+                    "word": "yeah",
+                    "index_in_segment": 16,
+                    "index_in_transcript": 273,
+                    "probability": null
+                },
+                {
+                    "start": 99.12000274658203,
+                    "end": 99.69999694824219,
+                    "word": "Bye",
+                    "index_in_segment": 17,
+                    "index_in_transcript": 274,
+                    "probability": null
+                }
+            ]
+        }
+    ],
+    "language": "english"
+}

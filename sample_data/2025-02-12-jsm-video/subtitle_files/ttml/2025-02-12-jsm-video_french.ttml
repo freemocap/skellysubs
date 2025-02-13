@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml">
+<head>
+<layout>
+<region xml:id="bottomHalf" tts:origin="0% 50%" tts:extent="100% 50%"/>
+</layout>
+</head>
+<body><div>
+<p begin="00:00:00.100" end="00:00:05.020">Bonjour. Toutes les traductions ci-dessous ont été générées automatiquement avec un logiciel gratuit que j'ai créé,</p>
+<p begin="00:00:05.540" end="00:00:10.460">et j'ai fait un rapide refactoring de cela. La différence la plus importante est que</p>
+<p begin="00:00:10.960" end="00:00:15.180">J'ai supprimé une partie du codage dur des langues impliquées, donc maintenant</p>
+<p begin="00:00:15.720" end="00:00:19.540">vous pouvez, nous pouvons simplement ajouter de nouvelles langues à la liste de traduction</p>
+<p begin="00:00:20.379" end="00:00:25.680">très facilement. Donc, j'ai ajouté l'hindi et le français à celui-ci, donc cela devrait apparaître quelque part en dessous,</p>
+<p begin="00:00:26.299" end="00:00:31.639">et je suis vraiment excité de commencer à essayer d'utiliser cela pour des langues moins courantes.</p>
+<p begin="00:00:33.060" end="00:00:37.139">Donc, vous savez, les langues autochtones, les langues en danger, les langues anciennes.</p>
+<p begin="00:00:37.700" end="00:00:42.180">Je pense que c'est configuré de manière à ce que vous puissiez facilement ajuster les invites pour pouvoir</p>
+<p begin="00:00:42.180" end="00:00:49.860">gérer ce genre de choses. Voici un chat. Et oui, ce sera vraiment intéressant de voir ce que</p>
+<p begin="00:00:49.860" end="00:00:54.459">se passe. Pour les langues de base, comme celles que nous examinons, cela devrait bien fonctionner avec</p>
+<p begin="00:00:54.459" end="00:01:01.860">son entraînement de ses poids, mais pour des langues moins courantes comme le cherokee ou l'igbo,</p>
+<p begin="00:01:03.000" end="00:01:08.580">il ne fera probablement pas très bien avec son entraînement seul, et je ne pourrai certainement pas évaluer</p>
+<p begin="00:01:08.580" end="00:01:14.980">sa sortie, mais je pense que nous pouvons commencer à essayer d'incorporer des outils qui recherchent comme,</p>
+<p begin="00:01:15.019" end="00:01:18.199">des dictionnaires de grammaire et des choses comme ça pour obtenir de meilleurs résultats, et puis évidemment</p>
+<p begin="00:01:18.199" end="00:01:23.800">Je peux commencer à demander aux gens qui parlent ces langues moins courantes d'évaluer comment ça se passe.</p>
+<p begin="00:01:23.800" end="00:01:27.220">De toute façon, si cela vous intéresse, suivez-moi. Si vous voulez trouver le code, c'est</p>
+<p begin="00:01:27.760" end="00:01:39.699">sur GitHub, premocap slash skellysubs. C'est, vous savez, encore les débuts. Toujours un chat. Et ouais. Au revoir.</p>
+</div></body></tt>
