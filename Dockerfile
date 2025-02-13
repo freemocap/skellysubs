@@ -14,4 +14,4 @@ ENV PYTHONPATH="${PYTHONPATH}:/app"
 ENV PORT 8101
 
 # Update the command to ensure it listens on the PORT environment variable
-CMD ["uv", "run", "--port", "8080", "skellysubs/run_skellysubs_server.py"]
+CMD ["uv", "run", "skellysubs/run_skellysubs_server.py"]
