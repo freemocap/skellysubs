@@ -1,14 +1,11 @@
-import yaml
-from typing import Dict, List
-
-from PIL import ImageFont
-from pydantic import BaseModel, ConfigDict
 from pathlib import Path
+from typing import Dict
 
-from skellysubs.core.translation_pipeline.language_configs.language_configs import FrozenModel, _load_language_configs
+import yaml
+from PIL import ImageFont
+
+from skellysubs.utilities.frozen_model import FrozenModel
 from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
-
-
 
 FONT_BASE_PATH = Path(__file__).parent.parent.parent.parent.parent / 'fonts'
 if not FONT_BASE_PATH.exists():
@@ -48,13 +45,20 @@ class LanguageAnnotationConfig(FrozenModel):
 
 
 
+def get_annotation_configs(yaml_path: str | None=None) ->dict[LanguageNameString, LanguageAnnotationConfig]:
+    if not yaml_path:
+        yaml_path = Path(__file__).parent / 'language_configs.yaml'
+    with open(yaml_path, 'r', encoding="utf-8") as file:
+        config_data = yaml.safe_load(file)
+        language_configs = {name.lower(): LanguageAnnotationConfig(**config) for name, config in config_data['language_configs'].items()}
+        annotation_configs = {name.lower(): LanguageAnnotationConfig(**config) for name, config in config_data['annotation_configs'].items()}
+    if not language_configs or not annotation_configs:
+        raise ValueError("No language configs found in the yaml file")
+    if not language_configs.keys() == annotation_configs.keys():
+        raise ValueError("Language configs and annotation configs do not match")
+    return  annotation_configs
 
-def get_annotation_configs() -> Dict[LanguageNameString, LanguageAnnotationConfig]:
-    global LANGUAGE_CONFIGS
-    global LANGUAGE_ANNOTATION_CONFIGS
-    if LANGUAGE_CONFIGS is None:
-        _, LANGUAGE_ANNOTATION_CONFIGS = _load_language_configs()
-    return LANGUAGE_ANNOTATION_CONFIGS
+
 
 if __name__ == "__main__":
     import json
