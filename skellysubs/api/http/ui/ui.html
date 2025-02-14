@@ -15,7 +15,7 @@
         function connectWebSocket(sessionId) {
             // print the last 5 characters of the session ID
             console.log('Connecting to WebSocket with session ID[-5:]:', sessionId.slice(-5));
-            const wsUrl = `ws://72.74.213.168:8101/websocket/connect/${sessionId}`;
+            const wsUrl = `wss://skellysubs-740414332371.us-central1.run.app:8101/websocket/connect/${sessionId}`;
             const ws = new WebSocket(wsUrl);
 
             ws.onopen = function() {
