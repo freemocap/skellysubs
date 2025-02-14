@@ -10,10 +10,6 @@ from skellysubs.__main__ import run_video_subtitle_pipeline
 logger = logging.getLogger(__name__)
 subtitle_router = APIRouter()
 
-SAMPLE_VIDEO_PATH = "../sample_data/sample_video_short/sample_video_short.mp4"
-if not Path(SAMPLE_VIDEO_PATH).resolve().exists():
-    raise FileNotFoundError(f"Sample video not found at path: {Path(SAMPLE_VIDEO_PATH)}")
-
 
 async def background_video_task(video_path: Path):
     try:

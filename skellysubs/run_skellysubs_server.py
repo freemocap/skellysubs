@@ -3,7 +3,7 @@ import multiprocessing
 import time
 
 import skellysubs
-from skellysubs.app.api.server.server_singleton import create_server_manager
+from skellysubs.api.server.server_singleton import create_server_manager
 from skellysubs.app.skellysubs_app_state import create_skellysubs_app_state
 from skellysubs.system.logging_configuration.configure_logging import configure_logging
 from skellysubs.system.logging_configuration.log_test_messages import print_log_level_messages

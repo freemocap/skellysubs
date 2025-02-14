@@ -2,8 +2,8 @@ import logging
 
 from fastapi import FastAPI
 
-from skellysubs.app.api.middleware.add_middleware import add_middleware
-from skellysubs.app.api.middleware.cors import cors
+from skellysubs.api.middleware.add_middleware import add_middleware
+from skellysubs.api.middleware.cors import cors
 from skellysubs.app.app_lifespan import lifespan
 from skellysubs.app.app_setup import register_routes, customize_swagger_ui
 

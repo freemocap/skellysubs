@@ -20,5 +20,5 @@ def kill_process_on_port(port: int):
 
 
 if __name__ == "__main__":
-    from skellysubs.app.api import PORT
+    from skellysubs.api import PORT
     kill_process_on_port(PORT)

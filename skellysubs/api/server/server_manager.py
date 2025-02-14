@@ -7,7 +7,7 @@ from typing import Optional
 import uvicorn
 from uvicorn import Server
 
-from skellysubs.app.api.server.server_constants import HOSTNAME, PORT
+from skellysubs.api.server.server_constants import HOSTNAME, PORT
 from skellysubs.app.create_app import create_app
 from skellysubs.utilities.kill_process_on_port import kill_process_on_port
 

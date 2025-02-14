@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, WebSocket
 
-from skellysubs.app.api.websocket.websocket_server import SkellySubsWebsocketServer
+from skellysubs.api.websocket.websocket_server import SkellySubsWebsocketServer
 
 logger = logging.getLogger(__name__)
 

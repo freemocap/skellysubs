@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI
 
 import skellysubs
-from skellysubs.app.api.server.server_constants import APP_URL
+from skellysubs.api.server.server_constants import APP_URL
 from skellysubs.system.files_and_folder_names import get_skellysubs_data_folder_path
 
 logger = logging.getLogger(__name__)
