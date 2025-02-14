@@ -27,3 +27,9 @@ Original demo video - [https://github.com/user-attachments/assets/0bc27df0-9614-
 - run with `python skellysubs/__main__.py`
 
 
+## Docker 
+
+```
+docker build -t skellysubs . && docker run -p 8101:8101 --name skellysubs-docker skellysubs
+```
+
