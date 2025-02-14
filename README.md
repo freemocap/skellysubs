@@ -30,6 +30,6 @@ Original demo video - [https://github.com/user-attachments/assets/0bc27df0-9614-
 ## Docker 
 
 ```
-docker build -t skellysubs . && docker run -p 8101:8101 --name skellysubs-docker skellysubs
+docker build -t skellysubs . && docker run -p 8080:8080 --name skellysubs-docker skellysubs
 ```
 
