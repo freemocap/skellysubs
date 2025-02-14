@@ -16,12 +16,12 @@ SKELLYSUBS_ROUTERS = {
         "state": state_router,
         # "shutdown": app_shutdown_router
     },
-    "/websocket": {
-        "/connect/{session_id}": skellysubs_websocket_router
-    },
-    "/subtitles": {
-        "subtitle_video": subtitle_router
-    },
+    # "/websocket": {
+    #     "/connect/{session_id}": skellysubs_websocket_router
+    # },
+    # "/subtitles": {
+    #     "subtitle_video": subtitle_router
+    # },
 
     **OTHER_ROUTERS
 }
