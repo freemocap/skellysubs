@@ -13,7 +13,7 @@ ui_router = APIRouter()
 def serve_ui():
     logger.info("Serving UI HTML to `/ui`")
     file_path = os.path.join(os.path.dirname(__file__), 'ui.html')
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r',encoding='utf-8') as file:
         ui_html_string = file.read()
     return HTMLResponse(content=ui_html_string, status_code=200)
 
