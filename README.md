@@ -26,6 +26,7 @@ Original demo video - [https://github.com/user-attachments/assets/0bc27df0-9614-
 - Change video path in `__main__.py`
 - run with `python skellysubs/__main__.py`
 
+- or run the server with `python skellysubs/run_skellysubs_server.py` and visit `http://localhost:8080/docs` to see the API documentation
 
 ## Docker 
 
