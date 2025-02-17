@@ -1,4 +1,0 @@
-gcloud artifacts repositories create skellysubs \
-  --repository-format=docker \
-  --location=us-central1 \
-  --project=skellysubs

@@ -15,10 +15,6 @@ def register_routes(app: FastAPI):
     async def read_root():
         return RedirectResponse("/docs")
 
-    # @app.get('/favicon.ico', include_in_schema=False)
-    # async def favicon():
-    #     return FileResponse(SKELLYCAM_FAVICON_ICO_PATH)
-
     for prefix, routers in SKELLYSUBS_ROUTERS.items():
         for name, router in routers.items():
             logger.api(f"Registering route: `{prefix}/{name}`")
