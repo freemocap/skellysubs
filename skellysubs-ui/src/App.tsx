@@ -1,5 +1,5 @@
 import "./App.css"
-import logo from "../../shared/skellysubs-logo.png"
+import logo from "./assets/skellysubs-logo.png"
 
 const App = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
