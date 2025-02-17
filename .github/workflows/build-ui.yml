@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'skellysubs-ui/**'
+
 
 jobs:
   build:
@@ -19,7 +18,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16' # Use the Node.js version your project requires
+        node-version: '23' # Use the Node.js version your project requires
 
     - name: Install pnpm
       run: npm install -g pnpm
