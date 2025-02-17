@@ -30,8 +30,20 @@ jobs:
         pnpm install
         pnpm build
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: skellysubs-ui-dist
-        path: skellysubs-ui/dist
+    - name: Switch to new branch
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git checkout -b deployed
+
+    - name: Copy built files
+      run: |
+        cp -r skellysubs-ui/dist/* .
+
+    - name: Commit changes
+      run: |
+        git add .
+        git commit -m "Deploy build to deployed branch"
+
+    - name: Push to deployed branch
+      run: git push origin deployed --force
