@@ -27,6 +27,7 @@ RUN pnpm install && pnpm build
 
 # Create the final stage to run the application
 FROM base
+WORKDIR /app
 
 # Copy built UI files to the final image
 COPY --from=build-ui /app/skellysubs-ui/dist /app/skellysubs-ui/dist
