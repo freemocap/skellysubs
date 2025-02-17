@@ -174,3 +174,8 @@ cython_debug/
 *.mp3
 
 node_modules/
+
+# make an exception for skellycam-ui/dist
+!skellycam-ui/dist
+
+
