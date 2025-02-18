@@ -6,9 +6,14 @@
 }
 
 .App-logo {
+    width: 40vmin;
     height: 40vmin;
     pointer-events: none;
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: all 0.3s ease-in-out; /* Use 'all' to transition all properties */
 }
+
 
 @media (prefers-reduced-motion: no-preference) {
     .App-logo {

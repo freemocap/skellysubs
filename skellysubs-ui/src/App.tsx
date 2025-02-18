@@ -9,10 +9,17 @@ const App = () => {
     }
   }
 
+  const handleButtonClick = () => {
+    console.log("Transcribe and Translate button clicked, wow")
+  }
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <div
+          className="App-logo"
+          style={{ backgroundImage: `url(${logo})` }}
+        ></div>
         <h1>Welcome to SkellySubs!</h1>
         <p>Upload a video or audio file to get started.</p>
         <input
@@ -22,7 +29,11 @@ const App = () => {
           style={{ display: "block", margin: "20px 0" }}
         />
 
-        <button type="submit" className="App-button">
+        <button
+          onClick={handleButtonClick}
+          type="submit"
+          className="App-button"
+        >
           Transcribe and Translate
         </button>
         <p className="App-hint">
