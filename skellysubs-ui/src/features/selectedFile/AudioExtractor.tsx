@@ -12,7 +12,11 @@ const AudioExtractor: React.FC = () => {
 
   const load = async () => {
     // load ffmpeg-core.js, ffmpeg-core.wasm, and ffmpeg-core.worker.js from the src/public folder
-    const ffmpegFilesBaseFolder = `${window.location.origin}${window.location.pathname}ffmpeg.wasm@0.12.9`
+    const ffmpegFilesBaseFolder =
+      `${window.location.origin}${window.location.pathname}ffmpeg.wasm@0.12.9`.replace(
+        "/ui/",
+        "/public/",
+      )
     const ffmpegCorePath = `${ffmpegFilesBaseFolder}/ffmpeg-core.js`
     const ffmpegWasmPath = `${ffmpegFilesBaseFolder}/ffmpeg-core.wasm`
     const ffmpegWorkerPath = `${ffmpegFilesBaseFolder}/ffmpeg-core.worker.js`
