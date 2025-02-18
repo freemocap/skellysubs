@@ -20,6 +20,9 @@ const AudioExtractor: React.FC = () => {
     const ffmpegCorePath = `${ffmpegFilesBaseFolder}/ffmpeg-core.js`
     const ffmpegWasmPath = `${ffmpegFilesBaseFolder}/ffmpeg-core.wasm`
     const ffmpegWorkerPath = `${ffmpegFilesBaseFolder}/ffmpeg-core.worker.js`
+    console.log(`ffmpegCorePath: ${ffmpegCorePath}`)
+    console.log(`ffmpegWasmPath: ${ffmpegWasmPath}`)
+    console.log(`ffmpegWorkerPath: ${ffmpegWorkerPath}`)
 
     const ffmpeg = ffmpegRef.current
     ffmpeg.on("log", ({ message }) => {
