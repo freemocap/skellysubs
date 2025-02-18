@@ -24,6 +24,7 @@ const AudioExtractor: React.FC = () => {
     ffmpeg.on("log", ({ message }) => {
       setMessage(message)
     })
+
     try {
       await ffmpeg.load({
         coreURL: await toBlobURL(ffmpegCorePath, "text/javascript"),
@@ -31,6 +32,7 @@ const AudioExtractor: React.FC = () => {
         workerURL: await toBlobURL(ffmpegWorkerPath, "text/javascript"),
       })
       setLoaded(true)
+      console.log("FFmpeg loaded")
     } catch (error) {
       console.error(error)
       setMessage("Failed to load FFmpeg")
@@ -42,27 +44,87 @@ const AudioExtractor: React.FC = () => {
       alert("Please select an MP4 file first")
       return
     }
+    const inputPath = "input.mp4"
+    const outputPath = "output.mp3"
+    const downloadPath = "extracted_audio.mp3"
     const ffmpeg = ffmpegRef.current
-    await ffmpeg.writeFile("input.mp4", await fetchFile(videoFile))
-    await ffmpeg.exec([
-      "-i",
-      "input.mp4",
-      "-vn",
-      "-acodec",
-      "libmp3lame",
-      "-q:a",
-      "2",
-      "output.mp3",
-    ])
-    const data = await ffmpeg.readFile("output.mp3")
-    const audioBlob = new Blob([data], { type: "audio/mp3" })
-    const audioUrl = URL.createObjectURL(audioBlob)
-    const link = document.createElement("a")
-    link.href = audioUrl
-    link.download = "extracted_audio.mp3"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+
+    try {
+      console.log("=== STARTING PROCESS ===")
+
+      // 1. Clean previous files
+      console.log("Cleaning previous files...")
+      await ffmpeg
+        .deleteFile(inputPath)
+        .catch(e => console.log("Clean input error:", e.message))
+      await ffmpeg
+        .deleteFile(outputPath)
+        .catch(e => console.log("Clean output error:", e.message))
+
+      // 2. Write input file
+      console.log("Writing input file...")
+      const videoData = await fetchFile(videoFile)
+      console.log("Video data size:", videoData.byteLength, "bytes")
+      await ffmpeg.writeFile(inputPath, videoData)
+      console.log("Input file written successfully")
+
+      // 3. Verify input exists
+      const inputExists = await ffmpeg
+        .listDir("/")
+        .then(files => files.some(f => f.name === inputPath))
+      console.log("Input file exists in FS:", inputExists)
+
+      // 4. Execute FFmpeg command
+      console.log("Executing FFmpeg command...")
+      await ffmpeg.exec([
+        "-i",
+        inputPath,
+        "-vn",
+        "-acodec",
+        "libmp3lame",
+        "-q:a",
+        "2",
+        outputPath,
+      ])
+      console.log("FFmpeg command completed")
+
+      // 5. List all files in FS
+      console.log("Listing all files in FS:")
+      const files = await ffmpeg.listDir("/")
+      console.log(
+        "FS Contents:",
+        files.map(f => `${f.name} (${f.isDir ? "dir" : "file"})`),
+      )
+
+      // 6. Verify output exists
+      const outputExists = files.some(f => f.name === outputPath)
+      console.log("Output file exists:", outputExists)
+
+      if (!outputExists) {
+        throw new Error("Output file not found after conversion")
+      }
+
+      // 7. Read output file
+      console.log("Reading output file...")
+      const data = await ffmpeg.readFile(outputPath)
+      console.log("Output file:", data)
+      const audioBlob = new Blob([data], { type: "audio/mp3" })
+      const audioUrl = URL.createObjectURL(audioBlob)
+      const link = document.createElement("a")
+      link.href = audioUrl
+      link.download = downloadPath
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      // Cleanup files
+      ffmpeg.deleteFile(inputPath).catch(() => {})
+      ffmpeg.deleteFile(outputPath).catch(() => {})
+    } catch (error) {
+      console.error("Processing error:", error)
+      setMessage(
+        `Error: ${error instanceof Error ? error.message : "Conversion failed"}`,
+      )
+    }
   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
