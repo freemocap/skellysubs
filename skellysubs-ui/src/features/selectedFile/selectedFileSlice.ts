@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../app/createAppSlice"
 import type { RootState } from "../../app/store"
-import AudioVideoFileHandler from "./AudioVideoFileHandler"
 
 interface UploadedFileState {
   fileType: "video" | "audio" | null
@@ -27,14 +26,13 @@ export const processFile = createAsyncThunk(
     let audioBlobUrl: string | null = null
     let fileType: "video" | "audio" | null = null
     console.log(`Processing file: ${selectedFile.name}`)
-    const fileHandler = new AudioVideoFileHandler()
     if (selectedFile.type.startsWith("video")) {
       fileType = "video"
       videoBlobUrl = URL.createObjectURL(selectedFile)
 
       // Extract audio from video
-      const audioBlob = await fileHandler.extractAudio(selectedFile)
-      audioBlobUrl = URL.createObjectURL(audioBlob)
+      // const audioBlob = await fileHandler.extractAudio(selectedFile)
+      // audioBlobUrl = URL.createObjectURL(audioBlob)
     } else if (selectedFile.type.startsWith("audio")) {
       fileType = "audio"
       audioBlobUrl = URL.createObjectURL(selectedFile)

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FFmpeg.wasm Fix</title>
+</head>
+<body>
+<button id="loadBtn">Load FFmpeg</button>
+<button id="convertBtn" hidden>Convert</button>
+<p id="status"></p>
+<video id="output" controls></video>
+
+<script type="module">
+    import { FFmpeg } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/esm/index.js';
+    import { fetchFile, toBlobURL } from 'https://unpkg.com/@ffmpeg/util@0.12.6/dist/esm/index.js';
+
+    const ffmpeg = new FFmpeg();
+    const loadBtn = document.getElementById('loadBtn');
+    const convertBtn = document.getElementById('convertBtn');
+
+    loadBtn.addEventListener('click', async () => {
+        try {
+            document.getElementById('status').textContent = 'Loading (~31MB)...';
+
+            // Correct core paths using unpkg
+            const coreURL = await toBlobURL(
+                'https://unpkg.com/@ffmpeg/[email protected]/dist/umd/ffmpeg-core.js',
+                'text/javascript'
+            );
+            const wasmURL = await toBlobURL(
+                'https://unpkg.com/@ffmpeg/[email protected]/dist/umd/ffmpeg-core.wasm',
+                'application/wasm'
+            );
+
+            await ffmpeg.load({ coreURL, wasmURL });
+
+            loadBtn.hidden = true;
+            convertBtn.hidden = false;
+            document.getElementById('status').textContent = 'Ready!';
+        } catch (err) {
+            document.getElementById('status').textContent = `Error: ${err.message}`;
+        }
+    });
+
+    convertBtn.addEventListener('click', async () => {
+        try {
+            document.getElementById('status').textContent = 'Converting...';
+
+            // Test conversion with sample video
+            await ffmpeg.writeFile(
+                'input.webm',
+                await fetchFile('https://raw.githubusercontent.com/ffmpegwasm/testdata/master/Big_Buck_Bunny_180_10s.webm')
+            );
+
+            await ffmpeg.exec(['-i', 'input.webm', 'output.mp4']);
+
+            const data = await ffmpeg.readFile('output.mp4');
+            document.getElementById('output').src = URL.createObjectURL(
+                new Blob([data.buffer], { type: 'video/mp4' })
+            );
+            document.getElementById('status').textContent = 'Done!';
+        } catch (err) {
+            document.getElementById('status').textContent = `Error: ${err.message}`;
+        }
+    });
+</script>
+</body>
+</html>
