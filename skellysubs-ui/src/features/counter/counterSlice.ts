@@ -1,6 +1,6 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../app/createAppSlice"
-import type { AppThunk } from "../../app/store"
+import type { AppThunk, RootState } from "../../app/store"
 import { fetchCount } from "./counterAPI"
 
 export interface CounterSliceState {
@@ -81,7 +81,7 @@ export const { selectCount, selectStatus } = counterSlice.selectors
 export const incrementIfOdd =
   (amount: number): AppThunk =>
   (dispatch, getState) => {
-    const currentValue = selectCount(getState())
+    const currentValue = selectCount(getState() as RootState)
 
     if (currentValue % 2 === 1 || currentValue % 2 === -1) {
       dispatch(incrementByAmount(amount))

@@ -31,7 +31,7 @@ async def skellysubs_websocket_server_connect(websocket: WebSocket, session_id: 
         return
     await websocket.accept()
     logger.success(f"SkellySubs Websocket connection established for session_id[-5:]: {session_id[-5:]}")
-
+    await websocket.send_json({"message": "Hello from SkellySubs Websocket Server!"})
     async with SkellySubsWebsocketServer(websocket=websocket) as runner:
         await runner.run()
     logger.info("Websocket closed")
