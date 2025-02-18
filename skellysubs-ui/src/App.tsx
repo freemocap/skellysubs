@@ -1,5 +1,7 @@
 import "./App.css"
-import logo from "./assets/skellysubs-logo.png"
+
+const logoUrl =
+  "https://media.githubusercontent.com/media/freemocap/skellysubs/3b64fa9bb6843529df050c5373c2773f4bb0e2f4/skellysubs-ui/src/assets/skellysubs-logo.png"
 
 const App = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,7 +20,7 @@ const App = () => {
       <header className="App-header">
         <div
           className="App-logo"
-          style={{ backgroundImage: `url(${logo})` }}
+          style={{ backgroundImage: `url(${logoUrl})` }}
         ></div>
         <h1>Welcome to SkellySubs!</h1>
         <p>Upload a video or audio file to get started.</p>

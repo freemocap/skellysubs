@@ -15,8 +15,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_23.x | bash - && \
 
 # Copy the app to the container
 ADD . /app
-# Ensure assets are copied into the Docker image
-ADD ./skellysubs-ui/src/assets /app/skellysubs-ui/src/assets
 
 # Set the working directory for building the UI
 WORKDIR /app/skellysubs-ui
