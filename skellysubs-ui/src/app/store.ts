@@ -3,17 +3,10 @@ import { combineSlices, configureStore } from "@reduxjs/toolkit"
 import { setupListeners } from "@reduxjs/toolkit/query"
 import { counterSlice } from "../features/counter/counterSlice"
 import { quotesApiSlice } from "../features/quotes/quotesApiSlice"
-import { websocketDataSlice } from "../features/websocket/websocketDataSlice"
-import { selectedFileSlice } from "../features/selectedFile/selectedFileSlice"
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.
-const rootReducer = combineSlices(
-  counterSlice,
-  quotesApiSlice,
-  websocketDataSlice,
-  selectedFileSlice,
-)
+const rootReducer = combineSlices(counterSlice, quotesApiSlice)
 // Infer the `RootState` type from the root reducer
 export type RootState = ReturnType<typeof rootReducer>
 

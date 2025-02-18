@@ -15,11 +15,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ffmpeg/ffmpeg": "^0.12.15",
-    "@ffmpeg/types": "^0.12.4",
-    "@ffmpeg/util": "^0.12.2",
     "@reduxjs/toolkit": "^2.0.1",
-    "lamejs": "^1.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^9.1.0"
