@@ -11,7 +11,6 @@ from skellysubs.app.app_setup import register_routes, customize_swagger_ui
 
 logger = logging.getLogger(__name__)
 
-
 def create_app() -> FastAPI:
     logger.api("Creating FastAPI app")
     app = FastAPI(lifespan=lifespan)
