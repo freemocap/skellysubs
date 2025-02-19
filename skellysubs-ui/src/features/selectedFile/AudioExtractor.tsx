@@ -141,7 +141,7 @@ const AudioExtractor: React.FC = () => {
 
   return (
     <div className="my-8 rounded-lg border bg-gray-50 p-6">
-      <h2 className="mb-4 text-2xl font-semibold">Audio Extractor</h2>
+      {/*<h2 className="mb-4 text-2xl font-semibold">Audio Extractor</h2>*/}
       {!loaded ? (
         <button
           onClick={load}

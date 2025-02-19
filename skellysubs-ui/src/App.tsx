@@ -35,25 +35,26 @@ const App = () => {
         ></div>
         <h1>Welcome to SkellySubs!</h1>
         <p>Upload a video or audio file to get started.</p>
-        <input
-          type="file"
-          accept="audio/*,video/*"
-          onChange={handleFileSelection}
-          style={{ display: "block", margin: "20px 0" }}
-        />
-
-        <button
-          onClick={handleButtonClick}
-          type="submit"
-          className="App-button"
-        >
-          Transcribe and Translate
-        </button>
+        [NOTE - Doesn't do anything yet, functionality coming soon!].
+        <AudioExtractor />
+        {/*<input*/}
+        {/*  type="file"*/}
+        {/*  accept="audio/*"*/}
+        {/*  onChange={handleFileSelection}*/}
+        {/*  style={{ display: "block", margin: "20px 0" }}*/}
+        {/*/>*/}
+        {/*<button*/}
+        {/*  onClick={handleButtonClick}*/}
+        {/*  disabled={!selectedFile}*/}
+        {/*  type="submit"*/}
+        {/*  className="App-button"*/}
+        {/*>*/}
+        {/*  Transcribe and Translate (Coming Soon!)*/}
+        {/*</button>*/}
         <p className="App-hint">
           (Hint: Open the browser tools with F12 (Windows) or Cmd+Option+I
           (macOS) and check the console for progress)
         </p>
-        <AudioExtractor />
       </header>
     </div>
   )
