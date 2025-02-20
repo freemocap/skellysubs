@@ -19,7 +19,7 @@ class FfmpegService {
     const ffmpegWorkerPath = `${ffmpegFilesBaseFolder}/ffmpeg-core.worker.js`
 
     this.ffmpeg.on("log", ({ message }) => {
-      console.log(`${message}`)
+      console.log(`ffmpeg: ${message}`)
     })
 
     await this.ffmpeg.load({
