@@ -1,0 +1,56 @@
+import type React from "react"
+import { Box, Typography } from "@mui/material"
+import AudioExtractor from "./AudioExtractor"
+
+const logoUrl =
+  "https://media.githubusercontent.com/media/freemocap/skellysubs/3b64fa9bb6843529df050c5373c2773f4bb0e2f4/skellysubs-ui/src/assets/skellysubs-logo.png"
+
+const WelcomeContent: React.FC = () => {
+  return (
+    <>
+      <Box
+        sx={{
+          width: "40vmin",
+          height: "40vmin",
+          pointerEvents: "none",
+          backgroundSize: "contain",
+          backgroundRepeat: "no-repeat",
+          backgroundImage: `url(${logoUrl})`,
+          transition: "all 0.3s ease-in-out",
+          animation: "App-logo-float infinite 3s ease-in-out",
+          "@keyframes App-logo-float": {
+            "0%": {
+              transform: "translateY(0)",
+            },
+            "50%": {
+              transform: "translateY(10px)",
+            },
+            "100%": {
+              transform: "translateY(0px)",
+            },
+          },
+        }}
+      />
+      <Typography variant="h1">Welcome to SkellySubs!</Typography>
+      <Typography variant="h4">
+        Upload a video or audio file to get started.
+      </Typography>
+      <Typography>
+        [NOTE - Doesn't do anything yet, functionality coming soon!].
+      </Typography>
+      <AudioExtractor />
+      <Typography
+        variant="body2"
+        sx={{
+          fontSize: "0.75em",
+          color: "#666",
+        }}
+      >
+        (Hint: Open the browser tools with F12 (Windows) or Cmd+Option+I (macOS)
+        and check the console for progress)
+      </Typography>
+    </>
+  )
+}
+
+export default WelcomeContent
