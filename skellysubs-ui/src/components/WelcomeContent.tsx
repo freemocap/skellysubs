@@ -3,7 +3,7 @@ import { Box, Typography } from "@mui/material"
 import AudioExtractor from "./AudioExtractor"
 
 const logoUrl =
-  "https://media.githubusercontent.com/media/freemocap/skellysubs/3b64fa9bb6843529df050c5373c2773f4bb0e2f4/skellysubs-ui/src/assets/skellysubs-logo.png"
+  "https://media.githubusercontent.com/media/freemocap/skellysubs/156ec99cc45c99a9388889aa21f7844a65f464ca/skellysubs-ui/src/assets/skellysubs-logo.png"
 
 const WelcomeContent: React.FC = () => {
   return (
