@@ -38,8 +38,15 @@ export const BasePanelLayout = ({
           }}
         />
 
-        <Panel collapsible defaultSize={20} minSize={10} collapsedSize={4}>
-          <Box>hihihihi</Box>
+        <Panel collapsible defaultSize={4} minSize={10} collapsedSize={4}>
+          <Box
+            sx={{
+              backgroundColor: extendedPaperbaseTheme.palette.primary.light,
+              height: "100%",
+            }}
+          >
+            - TODO: Put like logs and status updates and whatnot here
+          </Box>
         </Panel>
       </PanelGroup>
     </Box>

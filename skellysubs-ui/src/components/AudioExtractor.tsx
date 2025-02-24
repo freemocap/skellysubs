@@ -1,41 +1,43 @@
-import { Button, Container } from "@mui/material"
-import { ffmpegService } from "../services/FfmpegService"
+import { Button, CircularProgress, Container, Alert } from "@mui/material"
 import FileInput from "./FileInput"
 import { useEffect, useState } from "react"
+import { useFfmpegContext } from "../services/FfmpegService/FfmpegContext"
 
 const AudioExtractor: React.FC = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null)
-
-  useEffect(() => {
-    const loadFfmpeg = async () => {
-      try {
-        await ffmpegService.loadFfmpeg()
-      } catch (error) {
-        console.error("Error loading FFmpeg:", error)
-      }
-    }
-    loadFfmpeg()
-  }, [])
+  const { isLoaded, extractAudioFromVideo, error } = useFfmpegContext()
 
   const handleExtractAudio = async () => {
-    if (!videoFile) {
-      alert("Please select an MP4 file first")
-      return
+    if (!videoFile) return
+    try {
+      await extractAudioFromVideo(videoFile)
+    } catch (err) {
+      console.error("Extraction failed:", err)
     }
-    await ffmpegService.extractAudioFromVideo(videoFile)
   }
 
   return (
     <Container maxWidth="sm" className="my-8 rounded-lg bg-gray-50 p-6">
+      {error && (
+        <Alert severity="error" className="mb-4">
+          {error}
+        </Alert>
+      )}
+
       <FileInput onFileChange={setVideoFile} />
+
       <Button
         onClick={handleExtractAudio}
         variant="contained"
-        color="primary"
-        disabled={!videoFile}
-        style={{ marginTop: "16px" }}
+        color="secondary"
+        disabled={!isLoaded || !videoFile}
+        style={{ marginTop: "16px", backgroundColor: "#d75056" }}
       >
-        Extract Audio
+        {!isLoaded ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : (
+          "Extract Audio"
+        )}
       </Button>
     </Container>
   )

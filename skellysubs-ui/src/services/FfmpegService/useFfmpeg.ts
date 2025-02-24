@@ -1,9 +1,9 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { fetchFile, toBlobURL } from "@ffmpeg/util"
 
-class FfmpegService {
+class UseFfmpeg {
   private ffmpeg: FFmpeg
-  private isLoaded: boolean
+  isLoaded: boolean
 
   constructor() {
     this.ffmpeg = new FFmpeg()
@@ -78,4 +78,4 @@ class FfmpegService {
   }
 }
 
-export const ffmpegService = new FfmpegService()
+export const ffmpegService = new UseFfmpeg()
