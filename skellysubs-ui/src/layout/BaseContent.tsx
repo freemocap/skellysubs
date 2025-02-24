@@ -1,10 +1,26 @@
-import React from "react"
+// BaseContent.tsx
+import React, { useState } from "react"
 import Box from "@mui/material/Box"
-import WelcomeContent from "../components/WelcomeContent"
 import extendedPaperbaseTheme from "./paperbase_theme/paperbase-theme"
 import { Footnote } from "../components/Footnote"
+import ProcessingPipeline from "../components/ProcessingPipeline"
 
 export const BaseContent = () => {
+  const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const [fileType, setFileType] = useState<"audio" | "video" | null>(null)
+
+  const handleFileUpload = (file: File) => {
+    const type = file.type.startsWith("video/") ? "video" : "audio"
+    setFileType(type)
+    // Move to next step (Extract if video, Transcribe if audio)
+    setCurrentStepIndex(1)
+  }
+
+  const handleExtractionComplete = () => {
+    // Move to transcribe after extraction
+    setCurrentStepIndex(2)
+  }
+
   return (
     <Box
       sx={{
@@ -20,7 +36,12 @@ export const BaseContent = () => {
         display: "flex",
       }}
     >
-      <WelcomeContent />
+      <ProcessingPipeline
+        currentStepIndex={currentStepIndex}
+        fileType={fileType}
+        onFileUpload={handleFileUpload}
+        onExtractionComplete={handleExtractionComplete}
+      />
       <Box component="footer" sx={{ p: 1 }}>
         <Footnote />
       </Box>
