@@ -1,9 +1,11 @@
 import type React from "react"
-import { Box, Typography } from "@mui/material"
+import { Box, TextField, Typography } from "@mui/material"
 import AudioExtractor from "./AudioExtractor"
 
-const logoUrl =
-  "https://media.githubusercontent.com/media/freemocap/skellysubs/156ec99cc45c99a9388889aa21f7844a65f464ca/skellysubs-ui/src/assets/skellysubs-logo.png"
+// const logoWebUrl =
+//   "https://media.githubusercontent.com/media/freemocap/skellysubs/156ec99cc45c99a9388889aa21f7844a65f464ca/skellysubs-ui/src/assets/skellysubs-logo.png"
+
+const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`
 
 const WelcomeContent: React.FC = () => {
   return (
@@ -31,8 +33,8 @@ const WelcomeContent: React.FC = () => {
           },
         }}
       />
-      <Typography variant="h1">Welcome to SkellySubs!</Typography>
-      <Typography variant="h4">
+      <Typography variant="h2">Welcome to SkellySubs!</Typography>
+      <Typography variant="h5">
         Upload a video or audio file to get started.
       </Typography>
       <Typography>
@@ -43,7 +45,6 @@ const WelcomeContent: React.FC = () => {
         variant="body2"
         sx={{
           fontSize: "0.75em",
-          color: "#666",
         }}
       >
         (Hint: Open the browser tools with F12 (Windows) or Cmd+Option+I (macOS)
