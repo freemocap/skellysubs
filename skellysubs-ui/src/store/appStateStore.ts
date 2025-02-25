@@ -1,8 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit"
-import processingStagesSlice from "./slices/processingStagesSlice"
+import processingStagesSlice from "./slices/processingStages"
+import { appStateSlice } from "./slices/appState"
 
 export const AppStateStore = configureStore({
   reducer: {
+    //? Linter giving error - TS2339: Property reducer does not exist on type Reducer<ProcessingStagesState>???
+    appState: appStateSlice.reducer,
     processingStages: processingStagesSlice.reducer,
   },
 })

@@ -18,7 +18,7 @@ SKELLYSUBS_ROUTERS = {
     "/websocket": {
         "connect/{session_id}": skellysubs_websocket_router
     },
-    "/core": {
+    "/processing": {
         "transcribe": transcribe_router,
         # "translate": translate_router,
         # "match_words": match_words_router,

@@ -2,7 +2,7 @@
 import Slider from "@mui/material/Slider"
 import { useAppSelector, useAppDispatch } from "../store/hooks"
 import { Box } from "@mui/material"
-import { setCurrentStage } from "../store/slices/processingStagesSlice"
+import { setCurrentStage } from "../store/slices/processingStages"
 
 const marks = [
   { value: 0, label: "Upload" },
@@ -10,11 +10,11 @@ const marks = [
   { value: 2, label: "Transcribe" },
 ]
 
-const ProcessingPipeline = (
-  {
-    /* existing props */
-  },
-) => {
+export const ProcessingPipeline = ({
+  fileType,
+  onFileUpload,
+  onExtractionComplete,
+}) => {
   const dispatch = useAppDispatch()
   const { currentStage, stages } = useAppSelector(
     state => state.processingStages,

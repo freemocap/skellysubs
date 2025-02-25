@@ -16,30 +16,6 @@ logger = logging.getLogger(__name__)
 transcribe_router = APIRouter()
 
 
-async def background_transcription_task(
-        audio_file: bytes,
-        audio_file_name: str,
-        session_id: uuid.UUID
-):
-    try:
-        result = await get_or_create_openai_client().make_whisper_transcription_request(
-            audio_file=audio_file,
-        )
-        get_skellysubs_app_state().websocket_queue.put_nowait(WebsocketPayload(
-            session_id=session_id,
-            payload=result
-        ))
-        logger.info("Transcription processed successfully!")
-    except Exception as e:
-        logger.exception(f"Transcription failed - {e}")
-        raise
-    finally:
-        # Clean up temp file
-        try:
-            os.remove(audio_file_name)
-        except Exception as e:
-            logger.exception(f"Failed to remove temp file {audio_file_name}")
-
 
 class ValidationResult(BaseModel):
     valid: bool

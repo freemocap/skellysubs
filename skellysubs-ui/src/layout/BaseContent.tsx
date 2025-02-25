@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import Box from "@mui/material/Box"
 import extendedPaperbaseTheme from "./paperbase_theme/paperbase-theme"
 import { Footnote } from "../components/Footnote"
-import ProcessingPipeline from "../components/ProcessingPipeline"
+import { ProcessingPipeline } from "../components/ProcessingPipeline"
 
 export const BaseContent = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
@@ -37,7 +37,6 @@ export const BaseContent = () => {
       }}
     >
       <ProcessingPipeline
-        currentStepIndex={currentStepIndex}
         fileType={fileType}
         onFileUpload={handleFileUpload}
         onExtractionComplete={handleExtractionComplete}
