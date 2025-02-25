@@ -1,7 +1,7 @@
 // ExtractStep.tsx (modified from AudioExtractor.tsx)
 import React from "react"
 import { Box, Typography } from "@mui/material"
-import AudioExtractor from "./AudioExtractor"
+import ProcessingButtons from "./ProcessingButtons"
 
 const FileSelectionStage = () => {
   return (
@@ -20,7 +20,7 @@ const FileSelectionStage = () => {
         Select a video or audio file to get started.
       </Typography>
 
-      <AudioExtractor />
+      <ProcessingButtons />
     </Box>
   )
 }

@@ -1,6 +1,6 @@
 import type React from "react"
 import { Box, TextField, Typography } from "@mui/material"
-import AudioExtractor from "./AudioExtractor"
+import ProcessingButtons from "./ProcessingButtons"
 import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
 
 // const logoWebUrl =
