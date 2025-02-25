@@ -1,6 +1,7 @@
 // slices/processingStagesSlice.ts
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
+import {ffmpegService} from "../../services/FfmpegService/useFfmpeg";
 
 export interface StageState {
   name: string
@@ -20,6 +21,11 @@ interface ThunkState {
   processingStages: ProcessingStagesState
 }
 
+// ???
+// // interface PrepareFileStageState {
+//     inputs: {   originalFile: File | null },
+// outputs: {   audioBlob: File | null,
+//     mp3File: File | null}
 
 
 const initialState: ProcessingStagesState = {
@@ -53,16 +59,24 @@ const initialState: ProcessingStagesState = {
 }
 const prepareFileThunk = createAsyncThunk(
     "processing/prepareFile",
-    async (_, { getState, dispatch }) => {
-      const state = getState() as ThunkState // CHANGED: Better typing
-      const selectedFile = state.appState.selectedFile
+    async (_, { getState }) => {
+        const state = getState() as ThunkState
+        const selectedFile = state.appState.selectedFile
 
-      if (!selectedFile) throw new Error("No file selected")
+        if (!selectedFile) throw new Error("No file selected")
+        if (!ffmpegService.isLoaded) await ffmpegService.loadFfmpeg()
 
-      // Simulate file processing (replace with actual logic)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+        const audioBlob = await ffmpegService.extractAudioFromVideo(selectedFile)
+        const audioUrl = URL.createObjectURL(audioBlob)
 
-      return { path: URL.createObjectURL(selectedFile) } // Example output
+        return {
+            originalFile: {
+                name: selectedFile.name,
+                type: selectedFile.type,
+                size: selectedFile.size,
+            },
+            convertedAudioUrl: audioUrl
+        }
     }
 )
 
@@ -93,6 +107,7 @@ export const processingStagesSlice = createSlice({
       console.log(`Setting Processing stage from ${state.currentStage} to ${action.payload}`)
       state.currentStage = action.payload
     },
+      resetStages: () => initialState
   },
   extraReducers: builder => {
     // Prepare-file Handling
@@ -130,5 +145,5 @@ export const processingStagesSlice = createSlice({
 // Export the new thunk
 export { prepareFileThunk, transcribeAudioThunk }
 
-export const { setCurrentStage } = processingStagesSlice.actions
+export const { setCurrentStage, resetStages } = processingStagesSlice.actions
 export default processingStagesSlice.reducer

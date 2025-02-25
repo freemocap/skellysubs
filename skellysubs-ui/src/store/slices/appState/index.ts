@@ -15,7 +15,10 @@ export const appStateSlice = createSlice({
     setSelectedFile: (state, action) => {
       state.selectedFile = action.payload
     },
+    resetFile: (state) => {
+      state.selectedFile = null
+    }
   },
 })
-export const { setSelectedFile } = appStateSlice.actions
+export const { setSelectedFile, resetFile } = appStateSlice.actions
 export default appStateSlice.reducer

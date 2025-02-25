@@ -31,14 +31,13 @@ class UseFfmpeg {
     this.isLoaded = true
   }
 
-  async extractAudioFromVideo(videoFile: File): Promise<void> {
+  async extractAudioFromVideo(videoFile: File): Promise<Blob> {
     if (!this.isLoaded) {
       throw new Error("FFmpeg is not loaded yet.")
     }
 
     const inputPath = "input.mp4"
     const outputPath = "output.mp3"
-    const downloadPath = "extracted_audio.mp3"
 
     try {
       await this.ffmpeg.deleteFile(inputPath).catch(() => {})
@@ -60,20 +59,15 @@ class UseFfmpeg {
 
       const data = await this.ffmpeg.readFile(outputPath)
       const audioBlob = new Blob([data], { type: "audio/mp3" })
-      const audioUrl = URL.createObjectURL(audioBlob)
-      const link = document.createElement("a")
-      link.href = audioUrl
-      link.download = downloadPath
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
 
-      this.ffmpeg.deleteFile(inputPath).catch(() => {})
-      this.ffmpeg.deleteFile(outputPath).catch(() => {})
+      // Cleanup
+      await this.ffmpeg.deleteFile(inputPath).catch(() => {})
+      await this.ffmpeg.deleteFile(outputPath).catch(() => {})
+
+      return audioBlob
     } catch (error) {
-      console.log(
-        `Error: ${error instanceof Error ? error.message : "Conversion failed"}`,
-      )
+      console.error("Extraction failed:", error)
+      throw error
     }
   }
 }
