@@ -3,23 +3,22 @@ import React, { useState } from "react"
 import Box from "@mui/material/Box"
 import extendedPaperbaseTheme from "./paperbase_theme/paperbase-theme"
 import { Footnote } from "../components/Footnote"
-import { ProcessingPipeline } from "../components/ProcessingPipeline"
+import { ProcessingPipeline } from "../components/ProcessingStages"
+import {useAppDispatch, useAppSelector} from "../store/hooks";
 
 export const BaseContent = () => {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0)
-  const [fileType, setFileType] = useState<"audio" | "video" | null>(null)
+    const dispatch = useAppDispatch()
+    const currentStage = useAppSelector(state => state.processingStages.currentStage)
+    const [fileType, setFileType] = useState<"audio" | "video" | null>(null)
 
-  const handleFileUpload = (file: File) => {
-    const type = file.type.startsWith("video/") ? "video" : "audio"
-    setFileType(type)
-    // Move to next step (Extract if video, Transcribe if audio)
-    setCurrentStepIndex(1)
-  }
+    const handleFileUpload = (file: File) => {
+        const type = file.type.startsWith("video/") ? "video" : "audio"
+        // CHANGED: Dispatch to Redux store
+        dispatch(setSelectedFile(file))
+        setFileType(type)
+    }
 
-  const handleExtractionComplete = () => {
-    // Move to transcribe after extraction
-    setCurrentStepIndex(2)
-  }
+
 
   return (
     <Box

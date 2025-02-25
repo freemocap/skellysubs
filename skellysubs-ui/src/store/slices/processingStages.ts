@@ -1,6 +1,6 @@
 // slices/processingStages.ts
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import { getApiBaseUrl } from "../../../utils/getApiBaseUrl"
+import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
 
 export interface StageState {
   name: string
@@ -13,6 +13,14 @@ interface ProcessingStagesState {
   currentStage: number
   stages: StageState[]
 }
+interface ThunkState {
+  appState: {
+    selectedFile: File | null
+  }
+  processingStages: ProcessingStagesState
+}
+
+
 
 const initialState: ProcessingStagesState = {
   currentStage: 0,
@@ -43,6 +51,21 @@ const initialState: ProcessingStagesState = {
     },
   ],
 }
+const prepareFileThunk = createAsyncThunk(
+    "processing/prepareFile",
+    async (_, { getState, dispatch }) => {
+      const state = getState() as ThunkState // CHANGED: Better typing
+      const selectedFile = state.appState.selectedFile
+
+      if (!selectedFile) throw new Error("No file selected")
+
+      // Simulate file processing (replace with actual logic)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      return { path: URL.createObjectURL(selectedFile) } // Example output
+    }
+)
+
 const transcribeAudioThunk = createAsyncThunk(
   "processing/transcribeAudio",
   async (_, { getState }) => {
@@ -62,31 +85,50 @@ const transcribeAudioThunk = createAsyncThunk(
   },
 )
 
-export const index = createSlice({
+export const processingStagesSlice = createSlice({
   name: "processingStages",
   initialState,
   reducers: {
     setCurrentStage: (state, action) => {
+      console.log(`Setting Processing stage from ${state.currentStage} to ${action.payload}`)
       state.currentStage = action.payload
     },
   },
   extraReducers: builder => {
-    // TranscribeAudio Handling
-    builder.addCase(transcribeAudioThunk.pending, state => {
+    // Prepare-file Handling
+    builder.addCase(prepareFileThunk.pending, state => {
       state.stages[0].status = "processing"
     })
-    builder.addCase(transcribeAudioThunk.fulfilled, (state, action) => {
+    builder.addCase(prepareFileThunk.fulfilled, (state, action) => {
       state.stages[0].status = "completed"
       state.stages[0].output = action.payload
-      state.stages[1].status = "ready"
+      state.stages[1].status = "ready" // Unlock next stage
       state.currentStage = 1
     })
-    builder.addCase(transcribeAudioThunk.rejected, (state, action) => {
+    builder.addCase(prepareFileThunk.rejected, (state, action) => {
       state.stages[0].status = "failed"
-      state.stages[0].error = action.error.message || "Unknown error"
+      state.stages[0].error = action.error.message || "File prep failed"
+    })
+
+    // Transcribe-audio Handling (now using index 1)
+    builder.addCase(transcribeAudioThunk.pending, state => {
+      state.stages[1].status = "processing"
+    })
+    builder.addCase(transcribeAudioThunk.fulfilled, (state, action) => {
+      state.stages[1].status = "completed"
+      state.stages[1].output = action.payload
+      state.stages[2].status = "ready" // Unlock translate-text
+      state.currentStage = 2
+    })
+    builder.addCase(transcribeAudioThunk.rejected, (state, action) => {
+      state.stages[1].status = "failed"
+      state.stages[1].error = action.error.message || "Transcription failed"
     })
   },
 })
 
-export const { setCurrentStage } = index.actions
-export default index.reducer
+// Export the new thunk
+export { prepareFileThunk, transcribeAudioThunk }
+
+export const { setCurrentStage } = processingStagesSlice.actions
+export default processingStagesSlice.reducer
