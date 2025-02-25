@@ -1,6 +1,6 @@
 // File: src/store/appStateStore.ts
 import { configureStore } from "@reduxjs/toolkit"
-import processingStagesSlice from "./slices/processingStages"
+import { processingStagesSlice } from "./slices/processingStages"
 import { appStateSlice } from "./slices/appState"
 
 export const AppStateStore = configureStore({
