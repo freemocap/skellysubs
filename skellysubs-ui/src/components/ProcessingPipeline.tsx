@@ -1,47 +1,39 @@
 // ProcessingPipeline.tsx
-import React, { useMemo } from "react"
+import Slider from "@mui/material/Slider"
+import { useAppSelector, useAppDispatch } from "../store/hooks"
 import { Box } from "@mui/material"
-import UploadStep from "./UploadStep"
-import ExtractStep from "./ExtractStep"
-import TranscribeStep from "./TranscribeStep"
+import { setCurrentStage } from "../store/slices/processingStagesSlice"
 
-const ProcessingPipeline = ({
-  currentStepIndex,
-  fileType,
-  onFileUpload,
-  onExtractionComplete,
-}) => {
-  const steps = useMemo(() => {
-    const s = []
-    s.push({ component: UploadStep, props: { onFileUpload } })
-    if (fileType === "video") {
-      s.push({ component: ExtractStep, props: { onExtractionComplete } })
-    }
-    s.push({ component: TranscribeStep, props: {} })
-    return s
-  }, [fileType, onFileUpload, onExtractionComplete])
+const marks = [
+  { value: 0, label: "Upload" },
+  { value: 1, label: "Extract" },
+  { value: 2, label: "Transcribe" },
+]
+
+const ProcessingPipeline = (
+  {
+    /* existing props */
+  },
+) => {
+  const dispatch = useAppDispatch()
+  const { currentStage, stages } = useAppSelector(
+    state => state.processingStages,
+  )
 
   return (
-    <Box sx={{ overflow: "hidden", width: "100%", maxWidth: "800px" }}>
-      <Box
-        sx={{
-          display: "flex",
-          transform: `translateX(-${currentStepIndex * 100}%)`,
-          transition: "transform 0.5s ease-in-out",
-          width: `${steps.length * 100}%`,
-        }}
-      >
-        {steps.map((step, index) => (
-          <Box
-            key={index}
-            sx={{ width: `${100 / steps.length}%`, flexShrink: 0 }}
-          >
-            <step.component {...step.props} />
-          </Box>
-        ))}
-      </Box>
+    <Box sx={{ width: "100%" }}>
+      <Slider
+        value={currentStage}
+        min={0}
+        max={2}
+        step={1}
+        marks={marks}
+        valueLabelDisplay="auto"
+        sx={{ mb: 4 }}
+        onChange={(_, value) => dispatch(setCurrentStage(value))}
+      />
+
+      {/* Existing step rendering */}
     </Box>
   )
 }
-
-export default ProcessingPipeline

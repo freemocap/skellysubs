@@ -20,7 +20,9 @@ def validate_audio_path(audio_path: str) -> None:
         raise ValueError(f"Unsupported file format: {audio_path}")
 
 
-async def transcribe_audio(audio_path: str, local_whisper: bool = True, model_name: str = "large") -> WhisperTranscriptionResult:
+async def transcribe_audio(audio_path: str,
+                           local_whisper: bool = False,
+                           model_name: str = "large") -> WhisperTranscriptionResult:
     if local_whisper:
         return transcribe_audio_with_local_whisper(audio_path, model_name)
     else:
@@ -28,8 +30,9 @@ async def transcribe_audio(audio_path: str, local_whisper: bool = True, model_na
 
 async def transcribe_audio_openai(audio_path: str) -> WhisperTranscriptionResult:
     validate_audio_path(audio_path)
-    result = await get_or_create_openai_client().make_whisper_transcription_request(audio_file_path=audio_path, prompt=TRANSCRIPTION_BASE_PROMPT)
-    return WhisperTranscriptionResult.from_from_verbose_transcript(result)
+    audio_file = open(audio_path, "rb")
+    result = await get_or_create_openai_client().make_whisper_transcription_request(audio_file=audio_file, prompt=TRANSCRIPTION_BASE_PROMPT)
+    return WhisperTranscriptionResult.from_verbose_transcript(result)
 
 def transcribe_audio_with_local_whisper(audio_path: str, model_name: str = "large") -> WhisperTranscriptionResult:
     import whisper

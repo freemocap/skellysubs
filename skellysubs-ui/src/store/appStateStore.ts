@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit"
-import { appStateSlice } from "./slices/appState"
+import processingStagesSlice from "./slices/processingStagesSlice"
 
 export const AppStateStore = configureStore({
   reducer: {
-    appState: appStateSlice.reducer,
+    processingStages: processingStagesSlice.reducer,
   },
 })
 

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def register_routes(app: FastAPI):
     @app.get("/")
     async def read_root():
-        return RedirectResponse("/ui")
+        return RedirectResponse("/docs")
 
     for prefix, routers in SKELLYSUBS_ROUTERS.items():
         for name, router in routers.items():

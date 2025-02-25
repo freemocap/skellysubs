@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import multiprocessing
+import uuid
 from typing import Optional
 
 from pydantic import BaseModel
@@ -11,10 +12,14 @@ from skellysubs.app.skellysubs_app_state import get_skellysubs_app_state, \
 
 logger = logging.getLogger(__name__)
 
+class WebsocketPayload(BaseModel):
+    payload: str|dict|list|BaseModel
+    session_id: uuid.UUID
 
 class SkellySubsWebsocketServer:
-    def __init__(self, websocket: WebSocket):
+    def __init__(self, websocket: WebSocket, session_id: str):
         self.websocket = websocket
+        self.session_id = session_id
         self._skellysubs_app_state: SkellySubsAppState = get_skellysubs_app_state()
         self.frontend_image_relay_task: Optional[asyncio.Task] = None
 
@@ -31,13 +36,13 @@ class SkellySubsWebsocketServer:
         logger.info("Starting websocket runner...")
         try:
             await asyncio.gather(
-                asyncio.create_task(self._ipc_queue_relay()),
+                asyncio.create_task(self._websocket_queue_relay()),
             )
         except Exception as e:
             logger.exception(f"Error in websocket runner: {e.__class__}: {e}")
             raise
 
-    async def _ipc_queue_relay(self):
+    async def _websocket_queue_relay(self):
         """
         Relay messages from the sub-processes to the frontend via the websocket.
         """
@@ -45,10 +50,18 @@ class SkellySubsWebsocketServer:
 
         try:
             while True:
-                if self._skellysubs_app_state.ipc_queue.qsize() > 0:
+                if self._skellysubs_app_state.websocket_queue.qsize() > 0:
                     try:
-                        await self._handle_ipc_queue_message(
-                            message=self._skellysubs_app_state.ipc_queue.get())
+                        message = self._skellysubs_app_state.websocket_queue.get()
+                        logger.info(f"Got message from queue: {message}")
+                        if not isinstance(message, WebsocketPayload):
+                            raise ValueError(f"Message is not of type WebsocketPayload: {message}")
+                        if message.session_id != self.session_id:
+                            raise ValueError(f"Session ID does not match: {message.session_id} != {self.session_id}")
+                        await self.websocket.send_json(message.model_dump())
+
+                        # await self._handle_ipc_queue_message(
+                        #     message=self._skellysubs_app_state.websocket_queue.get())
                     except multiprocessing.queues.Empty:
                         continue
                 else:
@@ -62,7 +75,6 @@ class SkellySubsWebsocketServer:
             logger.info("Ending listener for frontend payload messages in queue...")
         logger.info("Ending listener for client messages...")
 
-    async def _handle_ipc_queue_message(self, message: BaseModel):
 
-        await self.websocket.send_json(message.model_dump())
+
 

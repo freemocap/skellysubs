@@ -31,7 +31,7 @@ class WhisperTranscriptionResult(BaseModel):
     language: str
 
     @classmethod
-    def from_from_verbose_transcript(cls, verbose_transcript: TranscriptionVerbose):
+    def from_verbose_transcript(cls, verbose_transcript: TranscriptionVerbose):
         segments = []
         transcript_word_index = -1
         for segment_index, segment in enumerate(verbose_transcript.segments):

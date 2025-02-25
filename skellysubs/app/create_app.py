@@ -4,7 +4,8 @@ from pathlib import Path
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 
-from skellysubs.api.http.ui.ui_router import REACT_UI_ASSETS_FOLDER, FFMPEG_FOLDER_NAME, REACT_FFMPEG_WASM_FOLDER
+from skellysubs.api.http.ui.ui_router import REACT_UI_ASSETS_FOLDER, FFMPEG_FOLDER_NAME, REACT_FFMPEG_WASM_FOLDER, \
+    LOGO_FOLDER
 from skellysubs.api.middleware.add_middleware import add_middleware
 from skellysubs.api.middleware.cors import cors
 from skellysubs.app.app_lifespan import lifespan
@@ -18,6 +19,7 @@ def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
     app.mount("/assets", StaticFiles(directory=str(REACT_UI_ASSETS_FOLDER)), name="assets")
     app.mount(f"/{FFMPEG_FOLDER_NAME}", StaticFiles(directory=str(REACT_FFMPEG_WASM_FOLDER)), name=FFMPEG_FOLDER_NAME)
+    app.mount(f"/logo", StaticFiles(directory=str(LOGO_FOLDER)), name="logo")
     cors(app)
     register_routes(app)
     add_middleware(app)

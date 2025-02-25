@@ -1,7 +1,7 @@
 import logging
 import multiprocessing
 from dataclasses import dataclass
-
+from idlelib.debugger_r import close_subprocess_debugger
 
 logger = logging.getLogger(__name__)
 
@@ -9,14 +9,14 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SkellySubsAppState:
     global_kill_flag: multiprocessing.Value
-    ipc_queue: multiprocessing.Queue
+    websocket_queue: multiprocessing.Queue
 
     @classmethod
     def create(cls, global_kill_flag: multiprocessing.Value):
 
         return cls(global_kill_flag=global_kill_flag,
-                     ipc_queue=multiprocessing.Queue()
-                     )
+                   websocket_queue=multiprocessing.Queue()
+                   )
 
 
     def close(self):
@@ -25,6 +25,8 @@ class SkellySubsAppState:
 
 
 SKELLYSUBS_APP_STATE: SkellySubsAppState | None = None
+
+
 
 
 def create_skellysubs_app_state(global_kill_flag: multiprocessing.Value) -> SkellySubsAppState:

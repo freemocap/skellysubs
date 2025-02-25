@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Type
+from typing import Type, Literal
 
 from openai import AsyncOpenAI, BaseModel
 from openai.types.audio import TranscriptionVerbose
@@ -8,22 +8,17 @@ from openai.types.audio import TranscriptionVerbose
 from skellysubs.ai_clients.ai_client_abc import AiClientConfigABC, AiClientABC, AiSystemMessage, AiUserMessage
 from skellysubs.utilities.load_env_variables import OPENAI_API_KEY
 
-
-
-
 logger = logging.getLogger(__name__)
 
 
 class OpenAIClientConfig(AiClientConfigABC):
     model_name: str = "gpt-4o-mini"
-    max_context_length:int = 128_000
+    max_context_length: int = 128_000
 
 
 class OpenaiClient(AiClientABC):
     config: OpenAIClientConfig = OpenAIClientConfig()
     client: AsyncOpenAI = AsyncOpenAI(api_key=OPENAI_API_KEY)
-
-
 
     async def make_json_mode_request(self,
                                      system_prompt: str,
@@ -68,17 +63,26 @@ class OpenaiClient(AiClientABC):
         return output
 
     async def make_whisper_transcription_request(self,
-                                                 prompt: str,
-                                                 audio_file_path: str) -> TranscriptionVerbose:
-        audio_file = open(audio_file_path, "rb")
-        transcript_response = await self.client.audio.transcriptions.create(
-            file=audio_file,
-            model="whisper-1",
-            response_format="verbose_json",
-            prompt=prompt,
-            timestamp_granularities=["segment", "word"]
-        )
+                                                 audio_file,
+                                                 language: str | None = None,
+                                                 prompt: str | None = None,
+                                                 response_format:str= "verbose_json",
+                                                 temperature: float = 0.0,
+                                                 timestamp_granularity=None,
+                                                 ) -> TranscriptionVerbose:
+        if timestamp_granularity is None:
+            timestamp_granularity = ["segment", "word"]
+        # noinspection PyTypeChecker
+        transcript_response = await self.client.audio.transcriptions.create(file=audio_file,
+                                                                            model="whisper-1",
+                                                                            response_format=response_format,
+                                                                            prompt=prompt,
+                                                                            timestamp_granularities=timestamp_granularity,
+                                                                            temperature=temperature,
+                                                                            language=language,
+                                                                            )
         return transcript_response
+
 
 _OPENAI_CLIENT: OpenaiClient | None = None
 
