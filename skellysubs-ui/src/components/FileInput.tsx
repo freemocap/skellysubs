@@ -9,8 +9,8 @@ export const FileInput = ({
 }) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      "audio/*": [".mp3", ".wav", ".mpeg", ".mpga", ".m4a"],
-      "video/*": [".mp4", ".mov", ".webm"],
+      "audio/*": [],
+      "video/*": [],
     },
     multiple: false,
     onDrop: (files: File[]) => files[0] && onFileSelect(files[0]),
