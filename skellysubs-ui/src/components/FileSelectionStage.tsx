@@ -1,6 +1,6 @@
 // ExtractStep.tsx (modified from AudioExtractor.tsx)
 import React from "react"
-import { Box, Container, Typography } from "@mui/material"
+import { Box, Typography } from "@mui/material"
 import AudioExtractor from "./AudioExtractor"
 
 const FileSelectionStage = () => {

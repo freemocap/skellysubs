@@ -34,7 +34,7 @@ export const ProcessingPipeline = ({}) => {
       }}
     >
       <Slider
-        value={currentStage}
+        // value={currentStage}
         min={0}
         max={2}
         step={1}
