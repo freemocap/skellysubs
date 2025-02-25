@@ -35,13 +35,6 @@ const WelcomeContent: React.FC = () => {
         }}
       />
       <Typography variant="h2">Welcome to SkellySubs!</Typography>
-      <Typography variant="h5">
-        Upload a video or audio file to get started.
-      </Typography>
-      <Typography>
-        [NOTE - Doesn't do anything yet, functionality coming soon!].
-      </Typography>
-      <AudioExtractor />
       <Typography
         variant="body2"
         sx={{

@@ -4,21 +4,22 @@ import Box from "@mui/material/Box"
 import extendedPaperbaseTheme from "./paperbase_theme/paperbase-theme"
 import { Footnote } from "../components/Footnote"
 import { ProcessingPipeline } from "../components/ProcessingStages"
-import {useAppDispatch, useAppSelector} from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../store/hooks"
+import { setSelectedFile } from "../store/slices/appState"
+import WelcomeContent from "../components/WelcomeContent"
 
 export const BaseContent = () => {
-    const dispatch = useAppDispatch()
-    const currentStage = useAppSelector(state => state.processingStages.currentStage)
-    const [fileType, setFileType] = useState<"audio" | "video" | null>(null)
+  const dispatch = useAppDispatch()
+  const currentStage = useAppSelector(
+    state => state.processingStages.currentStage,
+  )
+  const [fileType, setFileType] = useState<"audio" | "video" | null>(null)
 
-    const handleFileUpload = (file: File) => {
-        const type = file.type.startsWith("video/") ? "video" : "audio"
-        // CHANGED: Dispatch to Redux store
-        dispatch(setSelectedFile(file))
-        setFileType(type)
-    }
-
-
+  const handleFileUpload = (file: File) => {
+    const type = file.type.startsWith("video/") ? "video" : "audio"
+    dispatch(setSelectedFile(file))
+    setFileType(type)
+  }
 
   return (
     <Box
@@ -35,11 +36,8 @@ export const BaseContent = () => {
         display: "flex",
       }}
     >
-      <ProcessingPipeline
-        fileType={fileType}
-        onFileUpload={handleFileUpload}
-        onExtractionComplete={handleExtractionComplete}
-      />
+      <WelcomeContent />
+      <ProcessingPipeline />
       <Box component="footer" sx={{ p: 1 }}>
         <Footnote />
       </Box>
