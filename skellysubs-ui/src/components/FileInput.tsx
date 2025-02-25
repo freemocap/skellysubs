@@ -1,33 +1,43 @@
-import type React from "react"
-import { TextField } from "@mui/material"
+// File: src/components/FileInput.tsx
+import { Button, Typography } from "@mui/material"
+import { ChangeEvent } from "react"
 
 interface FileInputProps {
-  onFileChange: (file: File | null) => void
+  onFileChange: (file: File) => void
+  acceptedFormats?: string
 }
 
-const FileInput: React.FC<FileInputProps> = ({ onFileChange }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0]
-      if (file.type.startsWith("video/") || file.type.startsWith("audio/")) {
-        onFileChange(file)
-      } else {
-        alert("Please select an audio or video file")
-        event.target.value = ""
-      }
+const FileInput = ({ onFileChange, acceptedFormats = "*" }: FileInputProps) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      onFileChange(file)
     }
   }
 
   return (
-    <TextField
-      label="Select a video or audio file"
-      color="secondary"
-      type="file"
-      margin={"normal"}
-      onChange={handleChange}
-      inputProps={{ accept: "video/*,audio/*" }}
-      focused
-    />
+      <div>
+        <input
+            accept={acceptedFormats}
+            style={{ display: 'none' }}
+            id="contained-button-file"
+            type="file"
+            onChange={handleFileChange}
+        />
+        <label htmlFor="contained-button-file">
+          <Button
+              variant="contained"
+              component="span"
+              color="primary"
+              sx={{ width: '100%' }}
+          >
+            Select File
+          </Button>
+        </label>
+        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+          Supported formats: {acceptedFormats}
+        </Typography>
+      </div>
   )
 }
 

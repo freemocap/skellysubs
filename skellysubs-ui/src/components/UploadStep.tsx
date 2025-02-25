@@ -2,7 +2,7 @@
 import React from "react"
 import { Box, Typography } from "@mui/material"
 import FileInput from "./FileInput"
-import { processFileUpload } from "../store/slices/processingStages"
+import { processFileUpload } from "../store/slices/processingStagesSlice"
 import { useAppDispatch } from "../store/hooks"
 
 const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`

@@ -9,8 +9,9 @@ export const paperbaseTheme = createTheme({
       dark: "#000b10",
     },
     text: {
-      primary: "#c0c0c0",
-    },
+      primary: "#f5f5f5",
+      secondary: "#bdbdbd",
+      disabled: "#888888",    },
   },
   typography: {
     // h5: {

@@ -1,4 +1,4 @@
-// slices/processingStages.ts
+// slices/processingStagesSlice.ts
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
 
