@@ -1,14 +1,16 @@
 import logging
 import os
 import uuid
+from typing import BinaryIO
 
-from fastapi import APIRouter, BackgroundTasks, File, UploadFile, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from skellysubs.ai_clients.openai_client import get_or_create_openai_client
 from skellysubs.api.websocket.websocket_server import WebsocketPayload
 from skellysubs.app.skellysubs_app_state import get_skellysubs_app_state
+from openai.types.audio import TranscriptionVerbose
 
 logger = logging.getLogger(__name__)
 transcribe_router = APIRouter()
@@ -44,52 +46,36 @@ class ValidationResult(BaseModel):
     reason: str | None = None
 
 
-def _validate_audio_file(audio_file: UploadFile):
-    # Validate file type, size, etc. Ma
+def _validate_audio_file(audio_file: BinaryIO) -> ValidationResult:
+    # TODO - Validate file type, size, etc. Ma
     # accept = ['flac', 'm4a', 'mp3', 'mp4', 'mpeg', 'mpga', 'oga', 'ogg', 'wav', 'webm']"
     # accept < 25MB
     return ValidationResult(valid=True)
 
 
-def _validate_session_id(session_id: uuid.UUID):
-    # Validate session_id, ensure its a valid UUID
-    return ValidationResult(valid=True)
-
-
-@transcribe_router.post("/transcribe")
+@transcribe_router.post("/transcribe", response_model=TranscriptionVerbose)
 async def transcribe_endpoint(
-        background_tasks: BackgroundTasks,
         audio_file: UploadFile = File(...),
-        connection_id: uuid.UUID = uuid.uuid4()
-):
+) -> JSONResponse | HTTPException:
     try:
 
-        audio_validation = _validate_audio_file(audio_file)
-        id_validation = _validate_session_id(connection_id)
+        audio_temp_filename = f"temp_{uuid.uuid4()}_{audio_file.filename}"
+        with open(audio_temp_filename, "wb") as incoming_f:
+            incoming_f.write(audio_file.file.read())
 
-        error_message: str = ""
-        if not audio_validation.valid:
-            error_message += f"Invalid audio file: {audio_validation.reason} \n"
-        if not id_validation.valid:
-            error_message += f"Invalid session_id: {id_validation.reason}"
-        if error_message:
-            return HTTPException(status_code=400, detail=error_message)
 
-        temp_file_name = f"temp_{uuid.uuid4()}_{audio_file.filename}"
-        with open(temp_file_name, "wb") as temp_file:
-            temp_file.write(audio_file.file.read())
-        temp_audio_file = open(temp_file_name, "rb")
-        # Pass bytes to background task
-        background_tasks.add_task(
-            background_transcription_task,
-            audio_file=temp_audio_file,
-            audio_file_name=temp_file_name,
-            session_id=connection_id
-        )
+        with open(audio_temp_filename, "rb") as f:
+            audio_validation = _validate_audio_file(f)
+            if not audio_validation.valid:
+                return HTTPException(status_code=400, detail=audio_validation.reason)
 
-        return HTMLResponse(status_code=202, content="Transcription request accepted", background=background_tasks)
+            result = await get_or_create_openai_client().make_whisper_transcription_request(
+                audio_file=f,
+            )
+
+        return JSONResponse(status_code=200, content=result.model_dump())
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.exception("Transcription initialization failed")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.exception("Transcription initialization failed - {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error")

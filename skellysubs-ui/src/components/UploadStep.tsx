@@ -2,17 +2,17 @@
 import React from "react"
 import { Box, Typography } from "@mui/material"
 import FileInput from "./FileInput"
-import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
-import {processFileUpload} from "../store/slices/processingStagesSlice";
-import {useAppDispatch} from "../store/hooks";
+import { processFileUpload } from "../store/slices/processingStagesSlice"
+import { useAppDispatch } from "../store/hooks"
 
 const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`
 
-const dispatch = useAppDispatch()
+const UploadStep = ({ onFileUpload }) => {
+  const dispatch = useAppDispatch()
 
-const handleFileChange = (file: File) => {
+  const handleFileChange = (file: File) => {
     dispatch(processFileUpload(file))
-}
+  }
 
   return (
     <>
