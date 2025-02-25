@@ -10,9 +10,22 @@ const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`
 
 const WelcomeContent: React.FC = () => {
   return (
-    <>
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        p: 4,
+        mb: 4,
+      }}
+    >
       <Box
         sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           width: "40vmin",
           height: "40vmin",
           pointerEvents: "none",
@@ -44,7 +57,7 @@ const WelcomeContent: React.FC = () => {
         (Hint: Open the browser tools with F12 (Windows) or Cmd+Option+I (macOS)
         and check the console for progress)
       </Typography>
-    </>
+    </Box>
   )
 }
 
