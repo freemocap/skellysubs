@@ -2,6 +2,7 @@ import type React from "react"
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 import extendedPaperbaseTheme from "./paperbase_theme/paperbase-theme"
 import { Box } from "@mui/material"
+import {LogsTerminal} from "../components/LogsTerminal";
 
 export const BasePanelLayout = ({
   children,
@@ -39,14 +40,7 @@ export const BasePanelLayout = ({
         />
 
         <Panel collapsible defaultSize={4} minSize={10} collapsedSize={4}>
-          <Box
-            sx={{
-              backgroundColor: extendedPaperbaseTheme.palette.primary.light,
-              height: "100%",
-            }}
-          >
-            - TODO: Put like logs and status updates and whatnot here
-          </Box>
+            <LogsTerminal />
         </Panel>
       </PanelGroup>
     </Box>

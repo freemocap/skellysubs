@@ -3,12 +3,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
 import {ffmpegService} from "../../services/FfmpegService/useFfmpeg";
 
-export interface StageState {
-  name: string
-  status: "not-ready" | "ready" | "processing" | "completed" | "failed"
-  output: any
-  error: string | null
-}
 
 interface ProcessingStagesState {
   currentStage: number
@@ -20,42 +14,104 @@ interface ThunkState {
   }
   processingStages: ProcessingStagesState
 }
+interface FileConversionResult {
+    originalFile: {
+        name: string
+        type: string
+        size: number
+    }
+    convertedAudio: {
+        url: string
+        size: number
+        bitrate: number
+        duration?: number
+    }
+}
 
-// ???
-// // interface PrepareFileStageState {
-//     inputs: {   originalFile: File | null },
-// outputs: {   audioBlob: File | null,
-//     mp3File: File | null}
+interface TranscriptionResult {
+    text: string
+    language: string
+    segments: Array<{
+        start: number
+        end: number
+        text: string
+    }>
+}
 
+interface TranslationResult {
+    translatedText: string
+    sourceLang: string
+    targetLang: string
+}
+
+interface MatchingResult {
+    alignedTranscript: string[]
+    alignedTranslation: string[]
+}
+
+type StageState<T = any> = {
+    name: string
+    status: "not-ready" | "ready" | "processing" | "completed" | "failed"
+    requirements: {
+        needsPreviousStage?: boolean
+        maxFileSize?: number
+        allowedFormats?: string[]
+    }
+    configuration: {
+        audioBitrate?: number
+        targetLanguages?: string[]
+    }
+    input?: T
+    output?: T
+    error: string | null
+}
+
+interface ProcessingStagesState {
+    currentStage: number
+    stages: [
+        StageState<{file: File | null}, FileConversionResult>,
+        StageState<FileConversionResult, TranscriptionResult>,
+        StageState<TranscriptionResult, TranslationResult>,
+        StageState<TranslationResult, MatchingResult>
+    ]
+}
 
 const initialState: ProcessingStagesState = {
-  currentStage: 0,
-  stages: [
-    {
-      name: "prepare-file",
-      status: "ready",
-      output: null,
-      error: null,
-    },
-    {
-      name: "transcribe-audio",
-      status: "not-ready",
-      output: null,
-      error: null,
-    },
-    {
-      name: "translate-text",
-      status: "not-ready",
-      output: null,
-      error: null,
-    },
-    {
-      name: "match-words",
-      status: "not-ready",
-      output: null,
-      error: null,
-    },
-  ],
+    currentStage: 0,
+    stages: [
+        {
+            name: "prepare-file",
+            status: "ready",
+            requirements: {
+                allowedFormats: ['video/*', 'audio/*'],
+                maxFileSize: 1024 * 1024 * 100 // 100MB
+            },
+            configuration: {
+                audioBitrate: 96 // kbps
+            },
+            error: null
+        },
+        {
+            name: "transcribe-audio",
+            status: "not-ready",
+            requirements: {needsPreviousStage: true},
+            configuration: {targetLanguages: ['en']},
+            error: null
+        },
+        {
+            name: "translate-text",
+            status: "not-ready",
+            requirements: {needsPreviousStage: true},
+            configuration: {targetLanguages: ['es', 'fr', 'de']},
+            error: null
+        },
+        {
+            name: "match-words",
+            status: "not-ready",
+            requirements: {needsPreviousStage: true},
+            error: null
+        }
+    ]
 }
 const prepareFileThunk = createAsyncThunk(
     "processing/prepareFile",

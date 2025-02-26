@@ -10,8 +10,8 @@ import { FileInput } from "./FileInput"
 
 const ProcessingButtons = () => {
   const dispatch = useAppDispatch()
-  const selectedFile = useAppSelector(state => state.appState.selectedFile)
-  const processingStages = useAppSelector(state => state.processingStages)
+  const selectedFile = useAppSelector(state => state.appStateReducer.selectedFile)
+  const processingStages = useAppSelector(state => state.processingStagesReducer)
   const currentStageStatus = processingStages.stages[1]?.status
 
   // Automatically start processing when file is selected

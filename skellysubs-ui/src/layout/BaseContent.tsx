@@ -11,17 +11,7 @@ import { FileInput } from "../components/FileInput"
 import WelcomeContent from "../components/WelcomeContent"
 
 export const BaseContent = () => {
-  const dispatch = useAppDispatch()
-  const currentStage = useAppSelector(
-    state => state.processingStages.currentStage,
-  )
-  const [fileType, setFileType] = useState<"audio" | "video" | null>(null)
 
-  const handleFileSelect = (file: File) => {
-    const type = file.type.startsWith("video/") ? "video" : "audio"
-    dispatch(setSelectedFile(file))
-    setFileType(type)
-  }
 
   return (
     <Box

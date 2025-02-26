@@ -12,7 +12,7 @@ export const FileInput = ({
   onFileSelect: (file: File) => void
 }) => {
   const dispatch = useAppDispatch()
-  const selectedFile = useAppSelector(state => state.appState.selectedFile)
+  const selectedFile = useAppSelector(state => state.appStateReducer.selectedFile)
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {

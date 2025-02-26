@@ -1,0 +1,36 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+
+export type LogSeverity = "info" | "warning" | "error" | "success"
+
+export interface LogEntry {
+    timestamp: number
+    message: string
+    severity: LogSeverity
+}
+
+interface LogsState {
+    entries: LogEntry[]
+}
+
+const initialState: LogsState = {
+    entries: [],
+}
+
+export const logsSlice = createSlice({
+    name: "logs",
+    initialState,
+    reducers: {
+        addLog: (state, action: PayloadAction<Omit<LogEntry, "timestamp">>) => {
+            state.entries.push({
+                timestamp: Date.now(),
+                ...action.payload,
+            })
+        },
+        clearLogs: (state) => {
+            state.entries = []
+        },
+    },
+})
+
+export const { addLog, clearLogs } = logsSlice.actions
+export default logsSlice.reducer

@@ -19,7 +19,7 @@ const marks = [
 export const ProcessingPipeline = () => {
   const dispatch = useAppDispatch()
   const { currentStage, stages } = useAppSelector(
-    state => state.processingStages,
+    state => state.processingStagesReducer,
   )
 
   return (
@@ -38,15 +38,23 @@ export const ProcessingPipeline = () => {
     >
       <ProcessingButtons />
 
-      <Slider
-        value={currentStage}
-        min={0}
-        max={5}
-        step={0}
-        marks={marks}
-        valueLabelDisplay="auto"
-        sx={{ mb: 4, color: "secondary.main", width: "50%" }}
-      />
+        <Slider
+            value={currentStage ?? 0} // Fallback to 0 if undefined
+            marks={marks} // Add missing prop
+            min={0}
+            max={5}
+            sx={{
+                mb: 4,
+                width: "90%",
+                '& .MuiSlider-markLabel': {
+                    fontSize: { xs: '0.6rem', sm: '0.8rem', md: '1rem' },
+                    whiteSpace: 'nowrap'
+                }
+            }}
+            slotProps={{
+                markLabel: { style: { transform: 'rotate(-45deg) translateX(-20%)' } }
+            }}
+        />
 
       {/* Add additional stage outputs here */}
       {stages[1].status === "completed" && (
