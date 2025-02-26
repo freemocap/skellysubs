@@ -8,12 +8,10 @@ import FileSelectionStage from "./FileSelectionStage"
 import ProcessingButtons from "./ProcessingButtons"
 
 const marks = [
-  { value: 0, label: "Select Audio/Video File" },
-  { value: 1, label: "Prepare File" },
-  { value: 2, label: "Transcribe Audio" },
-  { value: 3, label: "Translate Text" },
-  { value: 4, label: "Match Words" },
-  { value: 5, label: "Finalize Output" },
+    { value: 0, label: "Prepare File" },
+    { value: 1, label: "Transcribe Audio" },
+    { value: 2, label: "Translate Text" },
+    { value: 3, label: "Match Words" },
 ]
 
 export const ProcessingPipeline = () => {
@@ -39,10 +37,10 @@ export const ProcessingPipeline = () => {
       <ProcessingButtons />
 
         <Slider
-            value={currentStage ?? 0} // Fallback to 0 if undefined
-            marks={marks} // Add missing prop
+            value={currentStage}
+            marks={marks}
             min={0}
-            max={5}
+            max={marks.length - 1}
             sx={{
                 mb: 4,
                 width: "90%",

@@ -3,7 +3,6 @@ import { Box, Button, Typography } from "@mui/material"
 import { useDropzone } from "react-dropzone"
 import DriveFileMoveIcon from "@mui/icons-material/DriveFileMove"
 import { useAppDispatch, useAppSelector } from "../store/hooks"
-import { resetFile } from "../store/slices/appState"
 import { resetStages } from "../store/slices/processingStagesSlice"
 
 export const FileInput = ({
@@ -12,7 +11,6 @@ export const FileInput = ({
   onFileSelect: (file: File) => void
 }) => {
   const dispatch = useAppDispatch()
-  const selectedFile = useAppSelector(state => state.appStateReducer.selectedFile)
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
@@ -23,7 +21,6 @@ export const FileInput = ({
     onDrop: (files: File[]) => files[0] && onFileSelect(files[0]),
   })
   const handleReset = () => {
-    dispatch(resetFile())
     dispatch(resetStages())
   }
 

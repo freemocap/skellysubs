@@ -8,9 +8,6 @@ interface ProcessingStagesState {
   stages: StageState[]
 }
 interface ThunkState {
-  appState: {
-    selectedFile: File | null
-  }
   processingStages: ProcessingStagesState
 }
 interface FileConversionResult {
@@ -114,48 +111,55 @@ const initialState: ProcessingStagesState = {
   ],
 }
 const prepareFileThunk = createAsyncThunk(
-  "processing/prepareFile",
-  async (_, { getState }) => {
-    const state = getState() as ThunkState
-    const selectedFile = state.appState.selectedFile
+    "processing/prepareFile",
+    async (file: File, { rejectWithValue }) => { // Add file parameter
+      try {
+        if (!ffmpegService.isLoaded) await ffmpegService.loadFfmpeg()
+        const audioBlob = await ffmpegService.convertToMP3(file)
 
-    if (!selectedFile) throw new Error("No file selected")
-    if (!ffmpegService.isLoaded) await ffmpegService.loadFfmpeg()
+        if (!audioBlob) throw new Error("Audio conversion failed")
+        const audioUrl = URL.createObjectURL(audioBlob)
 
-    const audioBlob = await ffmpegService.convertToMP3(selectedFile)
-    if (!audioBlob) throw new Error("Audio conversion failed")
-    const audioUrl = URL.createObjectURL(audioBlob)
-
-    return {
-      originalFile: {
-        name: selectedFile.name,
-        type: selectedFile.type,
-        size: selectedFile.size,
-      },
-      convertedAudioUrl: audioUrl,
+        return {
+          originalFile: {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+          },
+          convertedAudio: {
+            url: audioUrl,
+            size: audioBlob.size,
+            bitrate: 96, // Should calculate this properly
+            duration: undefined // Should be populated from FFmpeg
+          }
+        }
+      } catch (error) {
+        return rejectWithValue(error instanceof Error ? error.message : 'Unknown error')
+      }
     }
-  },
 )
 
 const transcribeAudioThunk = createAsyncThunk(
-  "processing/transcribeAudio",
-  async (_, { getState }) => {
-    const state = getState() as { processingStages: ProcessingStagesState }
-    const audioFile = state.processingStages.stages[0].output?.path
-    if (!audioFile) throw new Error("No audio file found")
-    const url = `${getApiBaseUrl()}/processing/transcribe`
-    console.log(`Sending request to ${url} with videoPath: ${audioFile}`)
-    const response = await fetch(`${getApiBaseUrl()}/processing/transcribe`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ audioFile }),
-    })
+    "processing/transcribeAudio",
+    async (_, { getState, rejectWithValue }) => {
+      try {
+        const state = getState() as { processingStages: ProcessingStagesState }
+        const audioUrl = state.processingStages.stages[0].output?.convertedAudio?.url
 
-    if (!response.ok) throw new Error("Audio extraction failed")
-    return response.json()
-  },
-)
+        if (!audioUrl) throw new Error("No audio file found")
+        const response = await fetch(`${getApiBaseUrl()}/processing/transcribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ audioUrl }),
+        })
 
+        if (!response.ok) throw new Error(`HTTP error ${response.status}`)
+        return await response.json()
+      } catch (error) {
+        return rejectWithValue(error instanceof Error ? error.message : 'Unknown error')
+      }
+    }
+    )
 export const processingStagesSlice = createSlice({
   name: "processingStages",
   initialState,
