@@ -24,14 +24,14 @@ const FileDetails: React.FC<FileDetailsProps> = ({
         <Typography variant="body2">Name: {originalFile.name}</Typography>
         <Typography variant="body2">Type: {originalFile.type}</Typography>
         <Typography variant="body2">
-          Size: {(originalFile.size / 1024) * 1024} MB
+          Size: {originalFile.size / (1024 * 1024)} MB
         </Typography>
       </Box>
     )}
 
     <Typography variant="h6">Audio Details:</Typography>
     <Typography variant="body2">
-      Size: {(originalFile.size / 1024) * 1024} bytes
+      Size: {mp3Audio.size / (1024 * 1024)} MB
     </Typography>
     <Typography variant="body2">Bitrate: {mp3Audio.bitrate} kbps</Typography>
     <Typography variant="body2">
