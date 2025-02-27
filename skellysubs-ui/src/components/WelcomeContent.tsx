@@ -1,10 +1,5 @@
 import type React from "react"
-import { Box, TextField, Typography } from "@mui/material"
-import TranscribeAudioButton from "./TranscribeAudioButton"
-import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
-
-// const logoWebUrl =
-//   "https://media.githubusercontent.com/media/freemocap/skellysubs/156ec99cc45c99a9388889aa21f7844a65f464ca/skellysubs-ui/src/assets/skellysubs-logo.png"
+import { Box, Typography } from "@mui/material"
 
 const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`
 

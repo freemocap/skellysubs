@@ -2,7 +2,7 @@ import type React from "react"
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 import extendedPaperbaseTheme from "./paperbase_theme/paperbase-theme"
 import { Box } from "@mui/material"
-import {LogsTerminal} from "../components/LogsTerminal";
+import { LogsTerminal } from "../components/LogsTerminal"
 
 export const BasePanelLayout = ({
   children,
@@ -25,7 +25,7 @@ export const BasePanelLayout = ({
       >
         {/* Top section (horizontal panels) - 80% height */}
         {/*Main/Central Content Panel*/}
-        <Panel defaultSize={80} minSize={10}>
+        <Panel defaultSize={96} minSize={10}>
           {children}
         </Panel>
 
@@ -39,8 +39,23 @@ export const BasePanelLayout = ({
           }}
         />
 
-        <Panel collapsible defaultSize={4} minSize={10} collapsedSize={4}>
-            <LogsTerminal />
+        <Panel
+          collapsible
+          defaultSize={4}
+          minSize={10}
+          collapsedSize={4}
+          style={{
+            backgroundColor: extendedPaperbaseTheme.palette.primary.dark,
+            color: extendedPaperbaseTheme.palette.primary.contrastText,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "left",
+            alignItems: "left",
+            padding: "1rem",
+          }}
+        >
+          {/*<LogsTerminal />*/}
+          woweee it's logs
         </Panel>
       </PanelGroup>
     </Box>

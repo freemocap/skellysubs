@@ -1,10 +1,15 @@
 // File: src/components/ProcessingPipeline.tsx
-import { Box, Typography } from "@mui/material"
+import { Box } from "@mui/material"
 import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
-import TranscribeAudioButton from "./TranscribeAudioButton"
-import { FileInputOld } from "./FileInputOld"
+import FileInputBox from "./file-components/FileInputBox"
+import TranscribeButton from "./button-components/TranscribeButton"
+import type React from "react"
+import { useAppSelector } from "../store/hooks"
+import { selectStage } from "../store/slices/processingStatusSlice"
 
 export const ProcessingPanel = () => {
+  const filePreparationStage = useAppSelector(selectStage("filePreparation"))
+
   return (
     <Box
       sx={{
@@ -19,8 +24,8 @@ export const ProcessingPanel = () => {
         mb: 4,
       }}
     >
-      <FileInputOld />
-      <TranscribeAudioButton />
+      <FileInputBox />
+      <TranscribeButton isReady={filePreparationStage.status === "completed"} />
     </Box>
   )
 }
