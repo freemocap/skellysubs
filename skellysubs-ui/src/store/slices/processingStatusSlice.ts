@@ -125,24 +125,24 @@ export const prepareFileThunk = createProcessingThunk<
     duration,
   }
 })
-
 export const transcribeAudioThunk = createProcessingThunk<
-  File,
+  void, // No input needed
   ProcessingContext["transcription"]
->("audioTranscription", async (context, file) => {
-  if (!file) throw new Error("No audio provided")
+>("transcription", async context => {
+  if (!context.mp3Audio?.url) throw new Error("No audio URL provided")
+  // Fetch the MP3 blob from the URL
+  const response = await fetch(context.mp3Audio.url);
+  const mp3Blob = await response.blob();
+  const formData = new FormData();
+  formData.append('file', mp3Blob, 'audio.mp3');
 
-  const response = await fetch(`${getApiBaseUrl()}/processing/transcribe`, {
+  const transcribeResponse = await fetch(`${getApiBaseUrl()}/processing/transcribe`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ file }),
-  })
-  try {
-    if (!response.ok) new Error(`HTTP error ${response.status}`)
-    return await response.json()
-  } catch (error) {
-    console.error("Transcription failed:", error)
-  }
+    body: formData, // Send as FormData
+  });
+
+  if (!response.ok) throw new Error(`HTTP error ${response.status}`)
+  return await response.json()
 })
 
 // Updated slice with data injection capability
@@ -191,6 +191,18 @@ const processingSlice = createSlice({
       .addCase(prepareFileThunk.rejected, (state, action) => {
         state.stages.filePreparation.status = "failed"
         state.stages.filePreparation.error = action.payload as string
+      })
+      .addCase(transcribeAudioThunk.pending, state => {
+        state.stages.transcription.status = "processing"
+      })
+      .addCase(transcribeAudioThunk.fulfilled, (state, action) => {
+        state.context.transcription = action.payload
+        state.stages.transcription.status = "completed"
+        state.stages.translation.status = "ready" // Activate next stage
+      })
+      .addCase(transcribeAudioThunk.rejected, (state, action) => {
+        state.stages.transcription.status = "failed"
+        state.stages.transcription.error = action.payload as string
       })
   },
 })
