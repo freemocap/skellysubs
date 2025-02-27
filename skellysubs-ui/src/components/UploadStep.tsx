@@ -1,7 +1,7 @@
 // UploadStep.tsx
 import React from "react"
 import { Box, Typography } from "@mui/material"
-import FileInput from "./FileInput"
+import FileInput from "./FileInputOld"
 import { processFileUpload } from "../store/slices/processingStagesSlice"
 import { useAppDispatch } from "../store/hooks"
 

@@ -1,9 +1,10 @@
-// ExtractStep.tsx (modified from AudioExtractor.tsx)
-import React from "react"
+// File: src/components/ProcessingPipeline.tsx
 import { Box, Typography } from "@mui/material"
+import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
 import TranscribeAudioButton from "./TranscribeAudioButton"
+import { FileInputOld } from "./FileInputOld"
 
-const FileSelectionStage = () => {
+export const ProcessingPanel = () => {
   return (
     <Box
       sx={{
@@ -12,17 +13,14 @@ const FileSelectionStage = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        bgcolor: extendedPaperbaseTheme.palette.primary.main,
+        color: extendedPaperbaseTheme.palette.primary.contrastText,
         p: 4,
         mb: 4,
       }}
     >
-      <Typography variant="h5">
-        Select a video or audio file to get started.
-      </Typography>
-
+      <FileInputOld />
       <TranscribeAudioButton />
     </Box>
   )
 }
-
-export default FileSelectionStage

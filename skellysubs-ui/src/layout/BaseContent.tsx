@@ -1,18 +1,12 @@
 // BaseContent.tsx
-import React, { useState } from "react"
+import React from "react"
 import Box from "@mui/material/Box"
-import Typography from "@mui/material/Typography"
 import extendedPaperbaseTheme from "./paperbase_theme/paperbase-theme"
 import { Footnote } from "../components/Footnote"
-import { useAppDispatch, useAppSelector } from "../store/hooks"
-import { setSelectedFile } from "../store/slices/appState"
-import { ProcessingPipeline } from "../components/ProcessingPipeline"
-import { FileInput } from "../components/FileInput"
+import { ProcessingPanel } from "../components/ProcessingPanel"
 import WelcomeContent from "../components/WelcomeContent"
 
 export const BaseContent = () => {
-
-
   return (
     <Box
       sx={{
@@ -30,7 +24,7 @@ export const BaseContent = () => {
     >
       <WelcomeContent />
 
-      <ProcessingPipeline />
+      <ProcessingPanel />
 
       <Box component="footer" sx={{ p: 1, mt: 4 }}>
         <Footnote />
