@@ -43,12 +43,7 @@ const WelcomeContent: React.FC = () => {
         }}
       />
       <Typography variant="h2">Welcome to SkellySubs!</Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          fontSize: "0.75em",
-        }}
-      >
+      <Typography variant="body1">
         (Hint: Open the browser tools with F12 (Windows) or Cmd+Option+I (macOS)
         and check the console for progress)
       </Typography>

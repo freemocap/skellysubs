@@ -28,7 +28,7 @@ const FileInput: React.FC<FileInputProps> = ({ onFileChange }) => {
     <Box
       {...getRootProps()}
       sx={{
-        border: `2px dashed ${extendedPaperbaseTheme.palette.primary.light}`,
+        borderStyle: "dashed",
         borderRadius: 2,
         p: 4,
         textAlign: "center",
@@ -36,6 +36,7 @@ const FileInput: React.FC<FileInputProps> = ({ onFileChange }) => {
         backgroundColor: isDragActive
           ? "rgba(70,131,134, .8)"
           : "rgba(70,131,134, .4)",
+
         transition: "background-color 0.3s ease",
         width: "100%",
         maxWidth: 500,
