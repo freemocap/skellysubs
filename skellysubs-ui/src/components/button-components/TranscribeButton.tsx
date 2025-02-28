@@ -28,9 +28,9 @@ const TranscribeButton: React.FC = () => {
         Transcribe Audio
       </Button>
 
-      {!processingContext.transcription && (
+      {processingContext.transcription && (
         <Typography>
-          {JSON.stringify(processingContext.transcription, null, 2)}
+          {processingContext.transcription.text}
         </Typography>
       )}
     </Box>
