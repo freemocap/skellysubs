@@ -1,7 +1,7 @@
 // File: src/components/ProcessingPipeline.tsx
 import { Box } from "@mui/material"
 import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
-import FileInputBox from "./file-components/FileInputBox"
+import FileSelectionBox from "./file-components/FileSelectionBox"
 import TranscribeButton from "./button-components/TranscribeButton"
 import type React from "react"
 import { useAppSelector } from "../store/hooks"
@@ -24,7 +24,7 @@ export const ProcessingPanel = () => {
         mb: 4,
       }}
     >
-      <FileInputBox />
+      <FileSelectionBox />
       <TranscribeButton isReady={filePreparationStage.status === "completed"} />
     </Box>
   )

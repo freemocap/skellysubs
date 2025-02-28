@@ -20,6 +20,7 @@ export const BaseContent = () => {
         alignItems: "center",
         justifyContent: "center",
         display: "flex",
+        overflow: "auto",
       }}
     >
       <WelcomeContent />

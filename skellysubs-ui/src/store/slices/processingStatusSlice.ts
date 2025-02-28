@@ -131,22 +131,25 @@ export const transcribeAudioThunk = createProcessingThunk<
 >("transcription", async context => {
   if (!context.mp3Audio?.url) throw new Error("No audio URL provided")
   // Fetch the MP3 blob from the URL
-  const response = await fetch(context.mp3Audio.url);
-  const mp3Blob = await response.blob();
-  const formData = new FormData();
-  formData.append('file', mp3Blob, 'audio.mp3');
+  const response = await fetch(context.mp3Audio.url)
+  const mp3Blob = await response.blob()
+  const formData = new FormData()
+  formData.append("file", mp3Blob, "audio.mp3")
 
-  const transcribeResponse = await fetch(`${getApiBaseUrl()}/processing/transcribe`, {
-    method: "POST",
-    body: formData, // Send as FormData
-  });
+  const transcribeResponse = await fetch(
+    `${getApiBaseUrl()}/processing/transcribe`,
+    {
+      method: "POST",
+      body: formData, // Send as FormData
+    },
+  )
 
   if (!response.ok) throw new Error(`HTTP error ${response.status}`)
   return await response.json()
 })
 
 // Updated slice with data injection capability
-const processingSlice = createSlice({
+export const processingSlice = createSlice({
   name: "processing",
   initialState,
   reducers: {

@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit"
 
 export type LogSeverity = "info" | "warning" | "error" | "success"
 
@@ -20,7 +21,8 @@ export const logsSlice = createSlice({
     name: "logs",
     initialState,
     reducers: {
-        addLog: (state, action: PayloadAction<Omit<LogEntry, "timestamp">>) => {
+        addLog: (state,
+                 action: PayloadAction<Omit<LogEntry, "timestamp">>) => {
             state.entries.push({
                 timestamp: Date.now(),
                 ...action.payload,
