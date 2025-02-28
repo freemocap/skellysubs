@@ -1,7 +1,6 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import { ffmpegService } from "../../services/FfmpegService/useFfmpeg"
-import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
+import { createSlice } from "@reduxjs/toolkit"
+import { prepareFileThunk, transcribeAudioThunk } from "../thunks"
 
 export interface AudioVisualFile {
   url: string
@@ -18,7 +17,7 @@ class TranslationResult {}
 
 class MatchingResult {}
 
-interface ProcessingContext {
+export interface ProcessingContext {
   originalFile?: AudioVisualFile
   mp3Audio?: AudioVisualFile
   transcription?: TranscriptionResult
@@ -34,7 +33,7 @@ interface ProcessingStage {
   error: string | null
 }
 
-interface ProcessingState {
+export interface ProcessingState {
   context: ProcessingContext
   stages: Record<string, ProcessingStage>
 }
@@ -74,87 +73,6 @@ const initialState: ProcessingState = {
   },
 }
 
-// Generic stage thunk creator
-function createProcessingThunk<InputType, OutputType>(
-  stageName: string,
-  processor: (
-    context: ProcessingContext,
-    input?: InputType,
-  ) => Promise<OutputType>,
-) {
-  return createAsyncThunk(
-    `processing/${stageName}`,
-    async (input: InputType, { getState, rejectWithValue }) => {
-      const state = getState() as { processing: ProcessingState }
-      const stage = state.processing.stages[stageName]
-
-      // Check requirements
-      const missingRequirements = stage.requirements.filter(
-        req => !state.processing.context[req],
-      )
-
-      if (missingRequirements.length > 0) {
-        return rejectWithValue(
-          `Missing required data: ${missingRequirements.join(", ")}`,
-        )
-      }
-
-      try {
-        return await processor(state.processing.context, input)
-      } catch (error) {
-        return rejectWithValue(
-          error instanceof Error ? error.message : "Unknown error",
-        )
-      }
-    },
-  )
-}
-
-// Example thunk for file preparation
-export const prepareFileThunk = createProcessingThunk<
-  File,
-  ProcessingContext["mp3Audio"]
->("filePreparation", async (context: ProcessingContext, file?: File) => {
-  if (!file) throw new Error("No file provided")
-  if (!ffmpegService.isLoaded) await ffmpegService.loadFfmpeg()
-
-  const { audioBlob, bitrate, duration } =
-    await ffmpegService.convertToMP3(file)
-  if (!audioBlob) throw new Error("Audio conversion failed")
-
-  return {
-    url: URL.createObjectURL(audioBlob),
-    name: file.name,
-    type: file.type,
-    size: audioBlob.size,
-    bitrate,
-    duration,
-  }
-})
-export const transcribeAudioThunk = createProcessingThunk<
-  void, // No input needed
-  ProcessingContext["transcription"]
->("transcription", async context => {
-  if (!context.mp3Audio?.url) throw new Error("No audio URL provided")
-  // Fetch the MP3 blob from the URL
-  const response = await fetch(context.mp3Audio.url)
-  const mp3Blob = await response.blob()
-  const formData = new FormData()
-  formData.append("file", mp3Blob, "audio.mp3")
-
-  const transcribeResponse = await fetch(
-    `${getApiBaseUrl()}/processing/transcribe`,
-    {
-      method: "POST",
-      body: formData, // Send as FormData
-    },
-  )
-
-  if (!transcribeResponse.ok)
-    throw new Error(`HTTP error ${transcribeResponse.status}`)
-  return await transcribeResponse.json()
-})
-
 // Updated slice with data injection capability
 export const processingSlice = createSlice({
   name: "processing",
@@ -175,17 +93,6 @@ export const processingSlice = createSlice({
           if (hasRequirements) stage.status = "ready"
         }
       })
-    },
-    resetProcessing: () => initialState,
-    updateStageStatus: (
-      state,
-      action: PayloadAction<{
-        stage: string
-        status: ProcessingStage["status"]
-      }>,
-    ) => {
-      const stage = state.stages[action.payload.stage]
-      if (stage) stage.status = action.payload.status
     },
   },
   extraReducers: builder => {
@@ -222,10 +129,9 @@ export const selectProcessingContext = (state: {
   processing: ProcessingState
 }) => state.processing.context
 
-export const selectStage =
-  (stageName: string) => (state: { processing: ProcessingState }) =>
-    state.processing.stages[stageName]
-
-export const { injectContextData, resetProcessing, updateStageStatus } =
-  processingSlice.actions
-export default processingSlice.reducer
+export const selectIsTranscribeReady = (state: {
+  processing: ProcessingState
+}) => {
+  return !!state.processing.context.mp3Audio
+}
+export const { injectContextData } = processingSlice.actions

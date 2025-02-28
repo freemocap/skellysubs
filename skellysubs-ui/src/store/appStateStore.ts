@@ -8,6 +8,6 @@ export const AppStateStore = configureStore({
     logs: logsSlice.reducer,
   },
 })
-// Export types for use throughout the app
+// Export types, to be repacked into more App specific form in `hooks.ts`, I think? (JSM)
 export type RootState = ReturnType<typeof AppStateStore.getState>
 export type AppDispatch = typeof AppStateStore.dispatch

@@ -3,18 +3,23 @@ import { Box } from "@mui/material"
 import { useAppDispatch, useAppSelector } from "../../store/hooks"
 import {
   injectContextData,
-  prepareFileThunk,
   selectProcessingContext,
 } from "../../store/slices/processingStatusSlice"
 import FileInput from "./FileInput"
 import FileDetails from "./FileDetails"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
+import { prepareFileThunk } from "../../store/thunks"
+import { ffmpegService } from "../../services/FfmpegService/useFfmpeg"
 
 const FileSelectionBox: React.FC = () => {
   const dispatch = useAppDispatch()
   const processingContext = useAppSelector(selectProcessingContext)
 
-  const handleFileChange = (file: File) => {
+  const handleFileChange = async (file: File) => {
+    if (!ffmpegService.isLoaded) await ffmpegService.loadFfmpeg()
+
+    const { bitrate: ogFileBitrate, duration: ogFileDuration } =
+      await ffmpegService.getAvFileDetails(file)
     const fileURl = URL.createObjectURL(file)
     dispatch(
       injectContextData({
@@ -24,8 +29,8 @@ const FileSelectionBox: React.FC = () => {
           name: file.name,
           type: file.type,
           size: file.size,
-          bitrate: 0,
-          duration: 0,
+          bitrate: ogFileBitrate,
+          duration: ogFileDuration,
         },
       }),
     )
@@ -42,10 +47,7 @@ const FileSelectionBox: React.FC = () => {
     >
       <FileInput onFileChange={handleFileChange} />
       {processingContext.mp3Audio && (
-        <FileDetails
-          mp3Audio={processingContext.mp3Audio}
-          originalFile={processingContext.originalFile}
-        />
+        <FileDetails avFile={processingContext.mp3Audio} />
       )}
     </Box>
   )

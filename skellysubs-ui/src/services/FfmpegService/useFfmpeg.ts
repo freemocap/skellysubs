@@ -165,6 +165,15 @@ class FfmpegWrapper {
       payload: { message: `${message}: ${errorMessage}`, severity: "error" },
     })
   }
+
+  public async getAvFileDetails(
+    file: File,
+  ): Promise<{ bitrate: number; duration: number }> {
+    if (!this.isLoaded) throw new Error("FFmpeg not initialized")
+    const duration = await this.getMediaDuration(file)
+    const bitrate = file.size / duration
+    return { bitrate, duration }
+  }
 }
 
 export const ffmpegService = new FfmpegWrapper()

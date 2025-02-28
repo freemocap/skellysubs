@@ -3,13 +3,8 @@ import { Box } from "@mui/material"
 import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
 import FileSelectionBox from "./file-components/FileSelectionBox"
 import TranscribeButton from "./button-components/TranscribeButton"
-import type React from "react"
-import { useAppSelector } from "../store/hooks"
-import { selectStage } from "../store/slices/processingStatusSlice"
 
 export const ProcessingPanel = () => {
-  const filePreparationStage = useAppSelector(selectStage("filePreparation"))
-
   return (
     <Box
       sx={{
@@ -25,7 +20,7 @@ export const ProcessingPanel = () => {
       }}
     >
       <FileSelectionBox />
-      <TranscribeButton isReady={filePreparationStage.status === "completed"} />
+      <TranscribeButton />
     </Box>
   )
 }

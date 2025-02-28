@@ -1,15 +1,14 @@
-import { useAppDispatch } from "../../store/hooks"
-import { transcribeAudioThunk } from "../../store/slices/processingStatusSlice"
+import { useAppDispatch, useAppSelector } from "../../store/hooks"
+import { selectIsTranscribeReady } from "../../store/slices/processingStatusSlice"
 import { Button } from "@mui/material"
+import { transcribeAudioThunk } from "../../store/thunks"
 
-interface TranscribeButtonProps {
-  isReady: boolean
-}
-
-const TranscribeButton: React.FC<TranscribeButtonProps> = ({ isReady }) => {
+const TranscribeButton: React.FC = () => {
   const dispatch = useAppDispatch()
+  const isReady = useAppSelector(selectIsTranscribeReady)
 
   const handleTranscribeClick = () => {
+    console.log("Transcribe button clicked")
     dispatch(transcribeAudioThunk()) // No argument needed
   }
 
@@ -19,7 +18,7 @@ const TranscribeButton: React.FC<TranscribeButtonProps> = ({ isReady }) => {
       color="secondary"
       sx={{ mt: 2 }}
       onClick={handleTranscribeClick}
-      // disabled={!isReady}
+      disabled={!isReady}
     >
       Transcribe Audio
     </Button>

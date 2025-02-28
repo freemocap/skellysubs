@@ -20,7 +20,7 @@ const SeverityIcon = ({ severity }: { severity: LogSeverity }) => {
 }
 
 export const LogsTerminal = () => {
-  const logs = useAppSelector(state => state.logsReducer.entries)
+  const logs = useAppSelector(state => state.logs.entries)
 
   return (
     <Box
@@ -55,8 +55,7 @@ export const LogsTerminal = () => {
             idx: React.Key | null | undefined,
           ) => (
             <div key={idx} style={{ display: "flex", alignItems: "center" }}>
-              // @ts-ignore
-              <SeverityIcon severity={log.severity} />
+              |{log.severity}|
               <span style={{ color: "#888", marginRight: 8 }}>
                 {new Date(log.timestamp).toLocaleTimeString()}
               </span>

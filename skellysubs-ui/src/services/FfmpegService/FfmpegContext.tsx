@@ -1,9 +1,8 @@
 import type { ReactNode } from "react"
-import { useEffect } from "react"
-import { useState } from "react"
-import { createContext, useContext } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 import { ffmpegService } from "./useFfmpeg"
-import {useAppDispatch} from "../../store/hooks";
+import { useAppDispatch } from "../../store/hooks"
+
 interface FfmpegContextProps {
   isLoaded: boolean
   convertToMP3: typeof ffmpegService.convertToMP3
@@ -16,7 +15,7 @@ interface FfmpegProviderProps {
 
 const FfmpegContext = createContext<FfmpegContextProps | undefined>(undefined)
 
-export const FfmpegContextProvider = ({ children }) => {
+export const FfmpegContextProvider = ({ children }: FfmpegProviderProps) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const dispatch = useAppDispatch()
@@ -35,15 +34,15 @@ export const FfmpegContextProvider = ({ children }) => {
   }, [dispatch])
 
   return (
-      <FfmpegContext.Provider
-          value={{
-            isLoaded,
-            convertToMP3: ffmpegService.convertToMP3.bind(ffmpegService),
-            error,
-          }}
-      >
-        {children}
-      </FfmpegContext.Provider>
+    <FfmpegContext.Provider
+      value={{
+        isLoaded,
+        convertToMP3: ffmpegService.convertToMP3.bind(ffmpegService),
+        error,
+      }}
+    >
+      {children}
+    </FfmpegContext.Provider>
   )
 }
 

@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File
 from starlette.responses import JSONResponse
 
-from skellysubs.__main__ import run_video_subtitle_pipeline
+from skellysubs.run_as_script import run_video_subtitle_pipeline
 
 logger = logging.getLogger(__name__)
 subtitle_router = APIRouter()
