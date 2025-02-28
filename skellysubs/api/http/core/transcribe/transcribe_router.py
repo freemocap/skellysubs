@@ -29,6 +29,7 @@ def _validate_audio_file(audio_file: BinaryIO) -> ValidationResult:
 async def transcribe_endpoint(
         audio_file: UploadFile = File(...),
 ) -> TranscriptionVerbose|None:
+    logger.info(f"Transcription request received for file: {audio_file.filename}")
     audio_temp_filename = f"temp_{uuid.uuid4()}_{audio_file.filename}"
     try:
         with open(audio_temp_filename, "wb") as incoming_f:

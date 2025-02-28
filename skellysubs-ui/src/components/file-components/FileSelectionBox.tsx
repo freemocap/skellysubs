@@ -1,5 +1,5 @@
 import type React from "react"
-import { Box } from "@mui/material"
+import { Box, Typography } from "@mui/material"
 import { useAppDispatch, useAppSelector } from "../../store/hooks"
 import {
   injectContextData,
@@ -47,7 +47,25 @@ const FileSelectionBox: React.FC = () => {
     >
       <FileInput onFileChange={handleFileChange} />
       {processingContext.mp3Audio && (
-        <FileDetails avFile={processingContext.mp3Audio} />
+        <Box
+          sx={{
+            mt: 3,
+            p: 2,
+            border: "1px solid",
+            borderColor: extendedPaperbaseTheme.palette.primary.light,
+            borderRadius: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="h6">
+              Extracted Audio File: <br />{" "}
+            </Typography>
+            <Typography variant="body2">
+              {processingContext.mp3Audio.name}{" "}
+            </Typography>
+          </Box>
+          <FileDetails avFile={processingContext.mp3Audio} />
+        </Box>
       )}
     </Box>
   )

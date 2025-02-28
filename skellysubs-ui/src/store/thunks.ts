@@ -5,8 +5,6 @@ import type {
   ProcessingContext,
   ProcessingState,
 } from "./slices/processingStatusSlice"
-import { injectContextData } from "./slices/processingStatusSlice"
-import { useAppDispatch } from "./hooks"
 
 // Generic stage thunk creator
 function createProcessingThunk<InputType, OutputType>(
@@ -80,25 +78,22 @@ export const transcribeAudioThunk = createProcessingThunk<
     console.log("MP3 Blob fetched successfully -- size:", mp3Blob.size)
 
     const formData = new FormData()
-    formData.append("file", mp3Blob, "audio.mp3")
-
+    formData.append("audio_file", mp3Blob, "audio.mp3")
+    const transcribeEndpointUrl = `${getApiBaseUrl()}/processing/transcribe`
     console.log(
-      `Sending formData to url: ${getApiBaseUrl()}/processing/transcribe`,
+      `Sending formData to url: ${transcribeEndpointUrl} -- formData:`,
+      formData,
     )
-    const transcribeResponse = await fetch(
-      `${getApiBaseUrl()}/processing/transcribe`,
-      {
-        method: "POST",
-        body: formData,
-      },
-    )
+    const transcribeResponse = await fetch(transcribeEndpointUrl, {
+      method: "POST",
+      body: formData,
+    })
 
     if (!transcribeResponse.ok) {
-      throw new Error(`HTTP error ${transcribeResponse.status}`)
+      new Error(`HTTP error ${transcribeResponse.status}`)
     }
 
-    const transcription = await transcribeResponse.json()
-    return transcription
+    return await transcribeResponse.json()
   } catch (error) {
     console.error("Transcription error:", error)
     throw error instanceof Error ? error : new Error("Unknown error")

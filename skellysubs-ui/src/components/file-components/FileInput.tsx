@@ -51,9 +51,14 @@ const FileInput: React.FC<FileInputProps> = ({ onFileChange }) => {
     >
       <>
         {processingContext.originalFile ? (
-          <Typography variant="h6" gutterBottom>
-            Selected file:{processingContext.originalFile.name}
-          </Typography>
+          <>
+            <Typography variant="h6" gutterBottom>
+              Selected file: <br />
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              {processingContext.originalFile.name}
+            </Typography>
+          </>
         ) : (
           <Typography variant="h6" gutterBottom>
             Select an audio or video file to get started!
@@ -72,20 +77,14 @@ const FileInput: React.FC<FileInputProps> = ({ onFileChange }) => {
           )
         }
         sx={{
-          fontSize: "1.1rem",
+          fontSize: ".8rem",
           textTransform: "none",
-          py: 2,
           color: extendedPaperbaseTheme.palette.primary.contrastText,
         }}
       >
         <>
           {processingContext.originalFile ? (
-            <>
-              <Typography variant="body2" gutterBottom>
-                Selected file:
-              </Typography>
-              <FileDetails avFile={processingContext.originalFile} />
-            </>
+            <FileDetails avFile={processingContext.originalFile} />
           ) : (
             <Typography variant="body2" gutterBottom>
               Select a file...
