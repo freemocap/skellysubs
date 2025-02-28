@@ -3,6 +3,15 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { ffmpegService } from "../../services/FfmpegService/useFfmpeg"
 import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
 
+export interface AudioVisualFile {
+  url: string
+  name: string
+  type: string
+  size: number
+  bitrate: number
+  duration?: number
+}
+
 class TranscriptionResult {}
 
 class TranslationResult {}
@@ -10,13 +19,8 @@ class TranslationResult {}
 class MatchingResult {}
 
 interface ProcessingContext {
-  originalFile?: File
-  mp3Audio?: {
-    url: string
-    size: number
-    bitrate: number
-    duration?: number
-  }
+  originalFile?: AudioVisualFile
+  mp3Audio?: AudioVisualFile
   transcription?: TranscriptionResult
   translation?: TranslationResult
   alignment?: MatchingResult
@@ -110,7 +114,7 @@ function createProcessingThunk<InputType, OutputType>(
 export const prepareFileThunk = createProcessingThunk<
   File,
   ProcessingContext["mp3Audio"]
->("filePreparation", async (context, file) => {
+>("filePreparation", async (context: ProcessingContext, file?: File) => {
   if (!file) throw new Error("No file provided")
   if (!ffmpegService.isLoaded) await ffmpegService.loadFfmpeg()
 
@@ -120,6 +124,8 @@ export const prepareFileThunk = createProcessingThunk<
 
   return {
     url: URL.createObjectURL(audioBlob),
+    name: file.name,
+    type: file.type,
     size: audioBlob.size,
     bitrate,
     duration,
@@ -144,8 +150,9 @@ export const transcribeAudioThunk = createProcessingThunk<
     },
   )
 
-  if (!response.ok) throw new Error(`HTTP error ${response.status}`)
-  return await response.json()
+  if (!transcribeResponse.ok)
+    throw new Error(`HTTP error ${transcribeResponse.status}`)
+  return await transcribeResponse.json()
 })
 
 // Updated slice with data injection capability

@@ -15,8 +15,6 @@ export const BasePanelLayout = ({
         flexDirection: "column",
         height: "100vh",
         width: "100vw",
-        justifyContent: "center",
-        alignItems: "center",
       }}
     >
       <PanelGroup
@@ -24,7 +22,13 @@ export const BasePanelLayout = ({
         style={{ height: "100%", width: "100%" }}
       >
         {/* Top section (horizontal panels) - Fixed height */}
-        <Panel defaultSize={80} minSize={10}>
+        <Panel
+          defaultSize={79}
+          minSize={20}
+          style={{
+            overflow: "auto", // Allow scrolling within the panel if needed
+          }}
+        >
           {children}
         </Panel>
 
@@ -38,7 +42,7 @@ export const BasePanelLayout = ({
 
         <Panel
           collapsible
-          defaultSize={20}
+          defaultSize={4}
           minSize={10}
           collapsedSize={4}
           style={{

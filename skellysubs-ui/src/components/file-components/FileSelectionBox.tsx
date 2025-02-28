@@ -15,7 +15,20 @@ const FileSelectionBox: React.FC = () => {
   const processingContext = useAppSelector(selectProcessingContext)
 
   const handleFileChange = (file: File) => {
-    dispatch(injectContextData({ key: "originalFile", data: file }))
+    const fileURl = URL.createObjectURL(file)
+    dispatch(
+      injectContextData({
+        key: "originalFile",
+        data: {
+          url: fileURl,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          bitrate: 0,
+          duration: 0,
+        },
+      }),
+    )
     dispatch(prepareFileThunk(file))
   }
 
