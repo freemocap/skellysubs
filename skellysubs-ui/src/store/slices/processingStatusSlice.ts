@@ -11,8 +11,24 @@ export interface AudioVisualFile {
   duration?: number
 }
 
-class TranscriptionResult {}
+export interface WordSegment {
+  word: string
+  start: number
+  end: number
+}
 
+export interface TranscriptionResult {
+  text: string
+  language: string
+  duration: number
+  words: WordSegment[]
+  segments: {
+    id: number
+    text: string
+    start: number
+    end: number
+  }[]
+}
 class TranslationResult {}
 
 class MatchingResult {}

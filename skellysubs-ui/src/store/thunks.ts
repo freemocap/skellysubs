@@ -90,10 +90,12 @@ export const transcribeAudioThunk = createProcessingThunk<
     })
 
     if (!transcribeResponse.ok) {
-      new Error(`HTTP error ${transcribeResponse.status}`)
+      throw new Error(`HTTP error ${transcribeResponse.status}`)
     }
 
-    return await transcribeResponse.json()
+    const result = await transcribeResponse.json()
+    console.log(`Transcription result: ${JSON.stringify(result, null, 2)}`)
+    return result as ProcessingContext["transcription"]
   } catch (error) {
     console.error("Transcription error:", error)
     throw error instanceof Error ? error : new Error("Unknown error")

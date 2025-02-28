@@ -50,4 +50,5 @@ async def transcribe_endpoint(
         raise HTTPException(status_code=500, detail="Internal server error")
     finally:
         os.remove(audio_temp_filename)
+    logger.info(f"Returning transcription: {transcription_result}")
     return transcription_result
