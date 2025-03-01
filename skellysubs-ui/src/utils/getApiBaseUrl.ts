@@ -6,5 +6,5 @@ export const getApiBaseUrl = () => {
   //   "http://localhost:8080"
   // )
   // return "http://localhost:8080"
-  return "https://skellysubs-740414332371.us-central1.run.app/"
+  return "https://skellysubs-740414332371.us-central1.run.app"
 }
