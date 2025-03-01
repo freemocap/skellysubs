@@ -5,5 +5,6 @@ export const getApiBaseUrl = () => {
   //   process.env.REACT_APP_API_BASE_URL ||
   //   "http://localhost:8080"
   // )
-  return "http://localhost:8080"
+  // return "http://localhost:8080"
+  return "https://skellysubs-740414332371.us-central1.run.app/"
 }
