@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     ffmpeg \
     curl \
+    idle3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js for building the UI
