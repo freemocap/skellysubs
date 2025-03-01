@@ -150,5 +150,10 @@ export const selectIsTranscribeReady = (state: {
 }) => {
   return !!state.processing.context.mp3Audio
 }
+export const selectIsTranslateReady = (state: {
+  processing: ProcessingState
+}) => {
+  return !!state.processing.context.transcription
+}
 
 export const { injectContextData } = processingSlice.actions

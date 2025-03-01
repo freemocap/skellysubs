@@ -8,7 +8,7 @@ import { transcribeAudioThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
 
-const TranscribeButton: React.FC = () => {
+const TranscribeAudioButton: React.FC = () => {
   const dispatch = useAppDispatch()
   const isReady = useAppSelector(selectIsTranscribeReady)
   const processingContext = useAppSelector(selectProcessingContext)
@@ -25,7 +25,7 @@ const TranscribeButton: React.FC = () => {
 
     const a = document.createElement("a")
     a.href = url
-    a.download = "transcription.json"
+    a.download = `${processingContext.originalFile?.name}_transcription.json`
     a.click()
 
     // Clean up the URL object
@@ -63,17 +63,21 @@ const TranscribeButton: React.FC = () => {
             variant="contained"
             onClick={handleDownloadClick}
             sx={{
+              m: 3,
+              p: 4,
               backgroundColor: extendedPaperbaseTheme.palette.primary.light,
               borderColor: "#222222",
               borderStyle: "solid",
               borderWidth: "1px",
             }}
           >
-            Download transcription results (openai verbose json format)
+            Download transcription results
+            <br />
+            (openai verbose json format)
           </Button>
         </>
       )}
     </Box>
   )
 }
-export default TranscribeButton
+export default TranscribeAudioButton

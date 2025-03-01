@@ -101,3 +101,29 @@ export const transcribeAudioThunk = createProcessingThunk<
     throw error instanceof Error ? error : new Error("Unknown error")
   }
 })
+export const translateTextThunk = createProcessingThunk<
+  void, // No input needed
+  ProcessingContext["translation"]
+>("translation", async context => {
+  try {
+    if (!context.transcription) throw new Error("No transcription provided")
+
+    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate`
+
+    const translationResponse = await fetch(translationEndpointUrl, {
+      method: "POST",
+      body: JSON.stringify(context.transcription, null, 2),
+    })
+
+    if (!translationResponse.ok) {
+      throw new Error(`HTTP error ${translationResponse.status}`)
+    }
+
+    const result = await translationResponse.json()
+    console.log(`Translation result: ${JSON.stringify(result, null, 2)}`)
+    return result as ProcessingContext["translation"]
+  } catch (error) {
+    console.error("Translation error:", error)
+    throw error instanceof Error ? error : new Error("Unknown error")
+  }
+})

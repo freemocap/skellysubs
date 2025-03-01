@@ -2,7 +2,8 @@
 import { Box } from "@mui/material"
 import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
 import FileSelectionBox from "./file-components/FileSelectionBox"
-import TranscribeButton from "./button-components/TranscribeButton"
+import TranscribeAudioButton from "./button-components/TranscribeAudioButton"
+import TranslateTextButton from "./button-components/TranslateTextButton"
 
 export const ProcessingPanel = () => {
   return (
@@ -20,7 +21,8 @@ export const ProcessingPanel = () => {
       }}
     >
       <FileSelectionBox />
-      <TranscribeButton />
+      <TranscribeAudioButton />
+      <TranslateTextButton />
     </Box>
   )
 }
