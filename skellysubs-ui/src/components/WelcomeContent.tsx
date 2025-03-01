@@ -1,7 +1,9 @@
 import type React from "react"
 import { Box, Typography } from "@mui/material"
 
-const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`
+// const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`
+const logoUrl =
+  "https://media.githubusercontent.com/media/freemocap/skellysubs/a30fa61cd2dcadfb3c1754548bde263afa5181e9/skellysubs-ui/public/logo/skellysubs-logo.png"
 
 const WelcomeContent: React.FC = () => {
   return (
