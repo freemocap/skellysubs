@@ -109,10 +109,18 @@ export const translateTextThunk = createProcessingThunk<
     if (!context.transcription) throw new Error("No transcription provided")
 
     const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate`
-
+    const requestBody = JSON.stringify(context.transcription, null, 2)
+    console.log(
+      `Sending translation request to url: ${translationEndpointUrl} -- body:`,
+      requestBody,
+    )
     const translationResponse = await fetch(translationEndpointUrl, {
       method: "POST",
-      body: JSON.stringify(context.transcription, null, 2),
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: requestBody,
     })
 
     if (!translationResponse.ok) {

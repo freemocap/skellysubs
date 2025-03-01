@@ -33,4 +33,4 @@ RUN uv sync --frozen
 ENV PYTHONPATH="/app"
 ENV PORT=8080
 
-CMD ["uv", "run", "skellysubs/run_skellysubs_server.py"]
+CMD ["uv", "run", "skellysubs/__main__.py"]

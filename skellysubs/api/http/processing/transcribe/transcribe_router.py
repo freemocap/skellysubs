@@ -8,6 +8,7 @@ from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel
 
 from skellysubs.ai_clients.openai_client import get_or_create_openai_client
+from skellysubs.core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
 
 logger = logging.getLogger(__name__)
 transcribe_router = APIRouter()

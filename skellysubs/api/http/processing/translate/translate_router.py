@@ -4,7 +4,6 @@ from fastapi import APIRouter, HTTPException
 from openai.types.audio import TranscriptionVerbose
 
 from skellysubs.core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
-from skellysubs.core.translation_pipeline.models.translated_text_models import TranslatedText
 from skellysubs.core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
 from skellysubs.core.translation_pipeline.translate_transcription_pipeline import translate_transcription_pipeline
 
