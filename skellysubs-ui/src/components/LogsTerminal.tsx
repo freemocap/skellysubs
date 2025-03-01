@@ -4,7 +4,6 @@ import { useAppSelector } from "../store/hooks"
 import { Box } from "@mui/material"
 import { CheckCircle, Error, Info, Warning } from "@mui/icons-material"
 import type { LogSeverity } from "../store/slices/LogsSlice"
-import Terminal from "react-terminal-ui"
 
 const SeverityIcon = ({ severity }: { severity: LogSeverity }) => {
   const iconStyle = { fontSize: 16, marginRight: 1 }

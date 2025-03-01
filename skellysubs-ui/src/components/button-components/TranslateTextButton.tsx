@@ -68,8 +68,8 @@ const TranslateTextButton: React.FC = () => {
               <div key={i}>
                 {translation.translated_language_name}:{" "}
                 {translation.translated_text}
-                {translation.translated_romanized_text && (
-                  <>Romanized: {translation.translated_romanized_text}</>
+                {translation.romanized_text && (
+                  <>Romanized: {translation.romanized_text}</>
                 )}
                 <br />
               </div>
