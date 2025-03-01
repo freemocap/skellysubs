@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js and pnpm for building the UI
+# Install Node.js for building the UI
 RUN curl -fsSL https://deb.nodesource.com/setup_23.x | bash - && \
     apt-get install -y nodejs
 

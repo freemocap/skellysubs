@@ -23,10 +23,9 @@ Original demo video - [https://github.com/user-attachments/assets/0bc27df0-9614-
 
 
 ## Usage
-- Change video path in `__main__.py`
-- run with `python skellysubs/__main__.py`
+- run server with `python skellysubs/__main__.py` (Go to `http://localhost:8080` in your browser for API documentation)
+- run fronted with `cd skellysubs-ui` then `npm run dev`
 
-- or run the server with `python skellysubs/run_skellysubs_server.py` and visit `http://localhost:8080/docs` to see the API documentation
 
 ## Docker 
 
