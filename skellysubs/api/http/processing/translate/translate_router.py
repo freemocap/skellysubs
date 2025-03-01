@@ -5,7 +5,8 @@ from openai.types.audio import TranscriptionVerbose
 
 from skellysubs.core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
 from skellysubs.core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
-from skellysubs.core.translation_pipeline.translate_transcription_pipeline import translate_transcription_pipeline
+from skellysubs.core.translation_pipeline.translate_transcription_pipeline import translate_transcription_pipeline, \
+    full_text_translation
 
 logger = logging.getLogger(__name__)
 translate_router = APIRouter()
@@ -23,7 +24,9 @@ async def translate_transcript_endpoint(
     try:
 
 
-        translation =await translate_transcription_pipeline(og_transcription=WhisperTranscriptionResult.from_verbose_transcript(transcription))
+        initialized_transcription = TranslatedTranscription.initialize(og_transcription=WhisperTranscriptionResult.from_verbose_transcript(transcription),
+                                                                       original_langauge="english")
+        translation = await full_text_translation(initialized_transcription=initialized_transcription)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

@@ -4,7 +4,7 @@ import {
   selectProcessingContext,
 } from "../../store/slices/processingStatusSlice"
 import { Box, Button, Typography } from "@mui/material"
-import { transcribeAudioThunk, translateTextThunk } from "../../store/thunks"
+import { translateTextThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
 
@@ -59,7 +59,21 @@ const TranslateTextButton: React.FC = () => {
       {processingContext.translation && (
         <>
           <Typography>
-            {JSON.stringify(processingContext.translation)}
+            Original text: <br />
+            {processingContext.translation.original_text}
+            Translations: <br />
+            {Object.entries(
+              processingContext.translation.translations.translations,
+            ).map(([key, translation], i) => (
+              <div key={i}>
+                {translation.translated_language_name}:{" "}
+                {translation.translated_text}
+                {translation.translated_romanized_text && (
+                  <>Romanized: {translation.translated_romanized_text}</>
+                )}
+                <br />
+              </div>
+            ))}
           </Typography>
           <Button
             variant="contained"

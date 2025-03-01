@@ -1,7 +1,8 @@
 import type React from "react"
+import { useEffect, useRef } from "react"
 import { useAppSelector } from "../store/hooks"
 import { Box } from "@mui/material"
-import { Info, Warning, Error, CheckCircle } from "@mui/icons-material"
+import { CheckCircle, Error, Info, Warning } from "@mui/icons-material"
 import type { LogSeverity } from "../store/slices/LogsSlice"
 import Terminal from "react-terminal-ui"
 
@@ -21,49 +22,34 @@ const SeverityIcon = ({ severity }: { severity: LogSeverity }) => {
 
 export const LogsTerminal = () => {
   const logs = useAppSelector(state => state.logs.entries)
+  const terminalRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight
+    }
+  }, [logs])
   return (
     <Box
       sx={{
         height: "100%",
         backgroundColor: "#1e1e1e",
         color: "#ffffff",
-        p: 2,
         fontFamily: "monospace",
         overflowY: "auto",
+        overflowX: "auto",
+        textWrap: "nowrap",
       }}
     >
-      <Terminal height="100%">
-        {logs.map(
-          (
-            log: {
-              severity: string
-              timestamp: string | number | Date
-              message:
-                | string
-                | number
-                | boolean
-                | React.ReactElement<
-                    any,
-                    string | React.JSXElementConstructor<any>
-                  >
-                | Iterable<React.ReactNode>
-                | React.ReactPortal
-                | null
-                | undefined
-            },
-            idx: React.Key | null | undefined,
-          ) => (
-            <div key={idx} style={{ display: "flex", alignItems: "center" }}>
-              |{log.severity}|
-              <span style={{ color: "#888", marginRight: 8 }}>
-                {new Date(log.timestamp).toLocaleTimeString()}
-              </span>
-              {log.message}
-            </div>
-          ),
-        )}
-      </Terminal>
+      {logs.map((log, idx) => (
+        <div key={idx} style={{ display: "flex", alignItems: "center" }}>
+          |{log.severity}|
+          <span style={{ color: "#888", marginRight: 8 }}>
+            {new Date(log.timestamp).toLocaleTimeString()}
+          </span>
+          {log.message}
+        </div>
+      ))}
     </Box>
   )
 }

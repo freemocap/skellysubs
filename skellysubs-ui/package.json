@@ -1,10 +1,10 @@
 {
-  "name": "vite-template-redux",
+  "name": "skellysubs",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "cross-env DEV_MODE=true vite",
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
@@ -31,7 +31,6 @@
     "react-redux": "^9.2.0",
     "react-resizable-panels": "^2.1.7",
     "react-router-dom": "^7.2.0",
-    "react-terminal-ui": "^1.4.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {

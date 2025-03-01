@@ -1,6 +1,10 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
-import { prepareFileThunk, transcribeAudioThunk } from "../thunks"
+import {
+  prepareFileThunk,
+  transcribeAudioThunk,
+  translateTextThunk,
+} from "../thunks"
 
 export interface AudioVisualFile {
   url: string
@@ -29,7 +33,80 @@ export interface TranscriptionResult {
     end: number
   }[]
 }
-class TranslationResult {}
+interface MatchedTranslatedWord {
+  original_language: string
+  start_time: number
+  end_time: number
+  target_language: LanguageConfig
+  original_word_text: string
+  original_word_index: number
+  translated_word_text: string
+  translated_word_romanized_text: string | null
+  translated_word_index: number
+}
+
+interface MatchedTranslatedSegment {
+  start: number
+  end: number
+  target_language_config: LanguageConfig
+  original_segment_text: string
+  translated_segment_text: string
+  romanized_translated_text: string | null
+  original_words_list: string[]
+  translated_words_list: string[]
+  romanized_translated_words_list: string[] | null
+  matched_translated_words: MatchedTranslatedWord[]
+}
+
+interface TranslatedWhisperWordTimestamp {
+  start: number
+  end: number
+  original_word: string
+  matched_words: Record<string, MatchedTranslatedWord>
+}
+
+interface TranscriptSegment {
+  original_segment_text: string
+  original_language: string
+  translations: TranslationsCollection
+  start: number
+  end: number
+  matched_translated_segment_by_language: Record<
+    string,
+    MatchedTranslatedSegment
+  > | null
+  words: TranslatedWhisperWordTimestamp[]
+}
+
+interface TranslationsCollection {
+  translations: Record<
+    string,
+    {
+      translated_text: string
+      romanized_text: string
+      translated_language_name: string
+      romanization_method: string
+    }
+  >
+}
+
+interface LanguageConfig {
+  language_name: string
+  language_code: string
+  romanization_method: string
+  background: {
+    family_tree: string[]
+    alphabet: string
+    sample_text: string
+  }
+}
+
+interface TranslatedTranscription {
+  original_text: string
+  original_language: string
+  translations: TranslationsCollection
+  segments: TranscriptSegment[]
+}
 
 class MatchingResult {}
 
@@ -37,7 +114,7 @@ export interface ProcessingContext {
   originalFile?: AudioVisualFile
   mp3Audio?: AudioVisualFile
   transcription?: TranscriptionResult
-  translation?: TranslationResult
+  translation?: TranslatedTranscription
   alignment?: MatchingResult
 }
 
@@ -77,13 +154,6 @@ const initialState: ProcessingState = {
       requirements: ["transcription"],
       status: "idle",
       produces: "translation",
-      error: null,
-    },
-    alignment: {
-      name: "alignment",
-      requirements: ["transcription", "translation"],
-      status: "idle",
-      produces: "alignment",
       error: null,
     },
   },
@@ -136,6 +206,17 @@ export const processingSlice = createSlice({
       .addCase(transcribeAudioThunk.rejected, (state, action) => {
         state.stages.transcription.status = "failed"
         state.stages.transcription.error = action.payload as string
+      })
+      .addCase(translateTextThunk.pending, state => {
+        state.stages.translation.status = "processing"
+      })
+      .addCase(translateTextThunk.fulfilled, (state, action) => {
+        state.context.translation = action.payload
+        state.stages.translation.status = "completed"
+      })
+      .addCase(translateTextThunk.rejected, (state, action) => {
+        state.stages.translation.status = "failed"
+        state.stages.translation.error = action.payload as string
       })
   },
 })
