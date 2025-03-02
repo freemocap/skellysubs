@@ -1,5 +1,12 @@
 export function getApiBaseUrl() {
-  const url = window.location.origin
-  // TODO - not this
-  return url.replace("5173", "8080")
+  const ogUrl = window.location.origin
+  let url = ogUrl
+
+  // Check if 'localhost' is in the URL and replace the port with 8080
+  if (ogUrl.includes("localhost")) {
+    url = ogUrl.replace(/:\d+/, ":8080") // This uses a regular expression to replace any port with 8080
+  }
+
+  console.log(`Base URL: ${url}`)
+  return url // Ensure to return the modified URL
 }
