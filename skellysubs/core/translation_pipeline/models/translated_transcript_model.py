@@ -50,7 +50,7 @@ class TranslatedTranscription(BaseModel):
                                                   end=segment.end,
                                                   matched_translated_segment_by_language={},
                                                   words=[TranslatedWhisperWordTimestamp.from_whisper_result(word)
-                                                         for word in segment.words]
+                                                         for word in segment.words] if segment.words else []
                                                   )
                                 )
         except Exception as e:

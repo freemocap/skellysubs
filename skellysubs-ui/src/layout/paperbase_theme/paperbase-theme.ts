@@ -11,7 +11,8 @@ export const paperbaseTheme = createTheme({
     text: {
       primary: "#f5f5f5",
       secondary: "#bdbdbd",
-      disabled: "#888888",    },
+      disabled: "#888888",
+    },
   },
   typography: {
     // h5: {
@@ -44,6 +45,13 @@ const extendedPaperbaseTheme = {
       styleOverrides: {
         root: {
           textTransform: "none",
+          "&.Mui-disabled": {
+            backgroundColor: "#555555", // Custom background for disabled state
+            color: "#111", // Custom text color for disabled state
+            borderStyle: "solid",
+            borderColor: "#888888",
+            borderWidth: "1px",
+          },
         },
         contained: {
           boxShadow: "none",

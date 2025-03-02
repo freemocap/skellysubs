@@ -3,7 +3,7 @@ import {
   selectIsTranslateReady,
   selectProcessingContext,
 } from "../../store/slices/processingStatusSlice"
-import { Box, Button, Typography } from "@mui/material"
+import { Box, Button, CircularProgress, Typography } from "@mui/material"
 import { translateTextThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
@@ -12,6 +12,9 @@ const TranslateTextButton: React.FC = () => {
   const dispatch = useAppDispatch()
   const isReady = useAppSelector(selectIsTranslateReady)
   const processingContext = useAppSelector(selectProcessingContext)
+  const translationStatus = useAppSelector(
+    state => state.processing.stages.translation.status,
+  )
 
   const handleTranslateClick = () => {
     console.log("Translate button clicked")
@@ -49,11 +52,25 @@ const TranslateTextButton: React.FC = () => {
       <Button
         variant="contained"
         color="secondary"
-        sx={{ m: 2 }}
+        sx={{ m: 2, position: "relative" }}
         onClick={handleTranslateClick}
-        disabled={!isReady}
+        disabled={!isReady || translationStatus === "processing"}
       >
-        Translate Text
+        {translationStatus === "processing"
+          ? "Processing..."
+          : "Translate Text"}
+        {translationStatus === "processing" && (
+          <CircularProgress
+            size={24}
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              marginTop: "-12px",
+              marginLeft: "-12px",
+            }}
+          />
+        )}
       </Button>
       {processingContext.translation && (
         <>
