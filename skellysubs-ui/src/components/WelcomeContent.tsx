@@ -14,8 +14,6 @@ const WelcomeContent: React.FC = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        p: 4,
-        mb: 4,
       }}
     >
       <Box
@@ -45,7 +43,9 @@ const WelcomeContent: React.FC = () => {
         }}
       />
       <Typography variant="h2">Welcome to SkellySubs!</Typography>
-      <Typography variant="body1">
+      <br />
+      <br />
+      <Typography variant="body1" color="#aaa">
         (Hint: Open the browser tools with F12 (Windows) or Cmd+Option+I (macOS)
         and check the console for progress)
       </Typography>

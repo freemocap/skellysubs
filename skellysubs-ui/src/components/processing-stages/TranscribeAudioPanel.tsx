@@ -8,7 +8,7 @@ import { transcribeAudioThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
 
-const TranscribeAudioButton: React.FC = () => {
+const TranscribeAudioPanel: React.FC = () => {
   const dispatch = useAppDispatch()
   const isReady = useAppSelector(selectIsTranscribeReady)
   const processingContext = useAppSelector(selectProcessingContext)
@@ -49,6 +49,13 @@ const TranscribeAudioButton: React.FC = () => {
         borderRadius: 2,
       }}
     >
+      <Typography
+        variant="body1"
+        color={extendedPaperbaseTheme.palette.text.disabled}
+      >
+        {!processingContext.mp3Audio &&
+          " No audio file available! upload a video or audio file first. "}
+      </Typography>
       <Button
         variant="contained"
         color="secondary"
@@ -72,10 +79,10 @@ const TranscribeAudioButton: React.FC = () => {
           />
         )}
       </Button>
-
       {processingContext.transcription && (
         <>
           <Typography>{processingContext.transcription.text}</Typography>
+
           <Button
             variant="contained"
             onClick={handleDownloadClick}
@@ -97,4 +104,4 @@ const TranscribeAudioButton: React.FC = () => {
     </Box>
   )
 }
-export default TranscribeAudioButton
+export default TranscribeAudioPanel

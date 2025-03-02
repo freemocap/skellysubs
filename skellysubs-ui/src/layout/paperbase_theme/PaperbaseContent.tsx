@@ -4,7 +4,7 @@ import { HashRouter } from "react-router-dom"
 import { CssBaseline } from "@mui/material"
 import extendedPaperbaseTheme from "./paperbase-theme"
 import { BasePanelLayout } from "../BasePanelLayout"
-import { BaseContent } from "../BaseContent"
+import { MainContent } from "../MainContent"
 
 export const PaperbaseContent = function () {
   return (
@@ -12,7 +12,7 @@ export const PaperbaseContent = function () {
       <CssBaseline />
       <HashRouter>
         <BasePanelLayout>
-          <BaseContent />
+          <MainContent />
         </BasePanelLayout>
       </HashRouter>
     </ThemeProvider>

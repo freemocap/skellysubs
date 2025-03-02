@@ -6,14 +6,13 @@ import { Footnote } from "../components/Footnote"
 import { ProcessingPanel } from "../components/ProcessingPanel"
 import WelcomeContent from "../components/WelcomeContent"
 
-export const BaseContent = () => {
+export const MainContent = () => {
   return (
     <Box
       sx={{
         py: 6,
         px: 4,
         flex: 1,
-        height: "100%",
         bgcolor: extendedPaperbaseTheme.palette.primary.main,
         borderColor: extendedPaperbaseTheme.palette.divider,
         flexDirection: "column",

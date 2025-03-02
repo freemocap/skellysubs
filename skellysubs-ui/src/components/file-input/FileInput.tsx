@@ -42,7 +42,6 @@ const FileInput: React.FC<FileInputProps> = ({ onFileChange }) => {
         backgroundColor: isDragActive
           ? "rgba(70,131,134, .8)"
           : "rgba(70,131,134, .4)",
-
         transition: "background-color 0.3s ease",
         width: "100%",
         maxWidth: 500,

@@ -8,7 +8,7 @@ import { translateTextThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
 
-const TranslateTextButton: React.FC = () => {
+const TranslateTranscriptPanel: React.FC = () => {
   const dispatch = useAppDispatch()
   const isReady = useAppSelector(selectIsTranslateReady)
   const processingContext = useAppSelector(selectProcessingContext)
@@ -49,6 +49,13 @@ const TranslateTextButton: React.FC = () => {
         borderRadius: 2,
       }}
     >
+      <Typography
+        variant="body1"
+        color={extendedPaperbaseTheme.palette.text.disabled}
+      >
+        {!processingContext.transcription &&
+          " No transcript available, transcribe audio first. "}
+      </Typography>
       <Button
         variant="contained"
         color="secondary"
@@ -125,4 +132,4 @@ const TranslateTextButton: React.FC = () => {
     </Box>
   )
 }
-export default TranslateTextButton
+export default TranslateTranscriptPanel
