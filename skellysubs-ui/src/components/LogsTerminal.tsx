@@ -24,12 +24,15 @@ export const LogsTerminal = () => {
   const terminalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight
+    const terminal = terminalRef.current
+    if (terminal) {
+      terminal.scrollTop = terminal.scrollHeight
     }
   }, [logs])
+
   return (
     <Box
+      ref={terminalRef}
       sx={{
         height: "100%",
         backgroundColor: "#1e1e1e",
@@ -38,11 +41,13 @@ export const LogsTerminal = () => {
         overflowY: "auto",
         overflowX: "auto",
         textWrap: "nowrap",
+        transition: "all 0.3s ease-in-out",
       }}
     >
+      Hey look, its logs!
       {logs.map((log, idx) => (
         <div key={idx} style={{ display: "flex", alignItems: "center" }}>
-          |{log.severity}|
+          <SeverityIcon severity={log.severity} />
           <span style={{ color: "#888", marginRight: 8 }}>
             {new Date(log.timestamp).toLocaleTimeString()}
           </span>

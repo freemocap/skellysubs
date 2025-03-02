@@ -7,6 +7,7 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material"
 import { translateTextThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
+import { logger } from "../../utils/logger"
 
 const TranslateTranscriptPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -17,7 +18,7 @@ const TranslateTranscriptPanel: React.FC = () => {
   )
 
   const handleTranslateClick = () => {
-    console.log("Translate button clicked")
+    logger("Translate button clicked")
     dispatch(translateTextThunk()) // No argument needed
   }
 

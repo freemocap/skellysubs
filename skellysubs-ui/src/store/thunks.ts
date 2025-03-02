@@ -5,6 +5,7 @@ import type {
   ProcessingContext,
   ProcessingState,
 } from "./slices/processingStatusSlice"
+import { logger } from "../utils/logger"
 
 // Generic stage thunk creator
 function createProcessingThunk<InputType, OutputType>(
@@ -70,19 +71,18 @@ export const transcribeAudioThunk = createProcessingThunk<
   try {
     if (!context.mp3Audio?.url) throw new Error("No audio URL provided")
 
-    console.log("Fetching MP3 from URL:", context.mp3Audio.url)
+    logger(`Fetching MP3 from URL: ${context.mp3Audio.url}`)
     const response = await fetch(context.mp3Audio.url)
     if (!response.ok) throw new Error("Failed to fetch MP3")
 
     const mp3Blob = await response.blob()
-    console.log("MP3 Blob fetched successfully -- size:", mp3Blob.size)
+    logger(`MP3 Blob fetched successfully -- size: ${mp3Blob.size}`)
 
     const formData = new FormData()
     formData.append("audio_file", mp3Blob, "audio.mp3")
     const transcribeEndpointUrl = `${getApiBaseUrl()}/processing/transcribe`
-    console.log(
-      `Sending formData to url: ${transcribeEndpointUrl} -- formData:`,
-      formData,
+    logger(
+      `Sending formData to url: ${transcribeEndpointUrl} -- formData: ${formData}`,
     )
     const transcribeResponse = await fetch(transcribeEndpointUrl, {
       method: "POST",
@@ -94,7 +94,7 @@ export const transcribeAudioThunk = createProcessingThunk<
     }
 
     const result = await transcribeResponse.json()
-    console.log(`Transcription result: ${JSON.stringify(result, null, 2)}`)
+    logger(`Transcription result: ${JSON.stringify(result, null, 2)}`)
     return result as ProcessingContext["transcription"]
   } catch (error) {
     console.error("Transcription error:", error)
@@ -110,9 +110,8 @@ export const translateTextThunk = createProcessingThunk<
 
     const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate`
     const requestBody = JSON.stringify(context.transcription, null, 2)
-    console.log(
-      `Sending translation request to url: ${translationEndpointUrl} -- body:`,
-      requestBody,
+    logger(
+      `Sending translation request to url: ${translationEndpointUrl} -- body: ${requestBody}`,
     )
     const translationResponse = await fetch(translationEndpointUrl, {
       method: "POST",
@@ -128,7 +127,7 @@ export const translateTextThunk = createProcessingThunk<
     }
 
     const result = await translationResponse.json()
-    console.log(`Translation result: ${JSON.stringify(result, null, 2)}`)
+    logger(`Translation result: ${JSON.stringify(result, null, 2)}`)
     return result as ProcessingContext["translation"]
   } catch (error) {
     console.error("Translation error:", error)

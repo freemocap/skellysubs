@@ -1,12 +1,13 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { fetchFile, toBlobURL } from "@ffmpeg/util"
 import type { AppDispatch } from "../../store/appStateStore"
+import { useLogger } from "../loggerService/loggerContext"
+import { logger } from "../../utils/logger"
 
 class FfmpegWrapper {
   public isLoaded: boolean
   private ffmpeg: FFmpeg
   private dispatch?: AppDispatch
-
   constructor() {
     this.ffmpeg = new FFmpeg()
     this.isLoaded = false
@@ -14,7 +15,8 @@ class FfmpegWrapper {
 
   async loadFfmpeg(dispatch?: AppDispatch): Promise<void> {
     if (this.isLoaded) return
-    console.log("Loading FFmpeg...")
+    logger("Loading FFmpeg...", "info")
+
     this.dispatch = dispatch
     try {
       const ffmpegFilesBaseFolder = `${window.location.origin}/ffmpeg.wasm@0.12.9`
@@ -23,18 +25,11 @@ class FfmpegWrapper {
       const ffmpegWorkerPath = `${ffmpegFilesBaseFolder}/ffmpeg-core.worker.js`
 
       this.ffmpeg.on("log", ({ message }) => {
-        console.log(`ffmpeg: ${message}`)
-        this.dispatch?.({
-          type: "logs/addLog",
-          payload: {
-            message: `FFmpeg: ${message}`,
-            severity: "info",
-          },
-        })
+        logger(`ffmpeg: ${message}`, "info")
       })
-      // // Configure progress handler
+      // Configure progress handler
       // this.ffmpeg.on('progress', ({ progress }) => {
-      //     console.log(Math.round(progress * 100))
+      //     logger(Math.round(progress * 100))
       // })
       await this.ffmpeg.load({
         coreURL: await toBlobURL(ffmpegCorePath, "text/javascript"),
@@ -42,14 +37,7 @@ class FfmpegWrapper {
         workerURL: await toBlobURL(ffmpegWorkerPath, "text/javascript"),
       })
     } catch (error) {
-      console.error(error)
-      this.dispatch?.({
-        type: "logs/addLog",
-        payload: {
-          message: `FFmpeg: ${error}`,
-          severity: "info",
-        },
-      })
+      logger(`FFmpeg: ${error}`, "error")
     }
     this.isLoaded = true
   }
@@ -64,8 +52,9 @@ class FfmpegWrapper {
     let audioBlob: Blob | null = null
     let bitrate: number
 
-    console.log(
+    logger(
       `Converting '${file.name} (${(file.size / 1024) * 1024} MB, duration: ${duration} seconds, bitrate: ${originalBitrate} kbps)' to MP3...`,
+      "info",
     )
     const inputPath = "input." + (file.type.includes("audio") ? "mp3" : "mp4")
     const outputPath = "output.mp3"
@@ -78,13 +67,13 @@ class FfmpegWrapper {
 
       // Calculate target bitrate
       if (file.size >= maxSizeMB * 1024 * 1024) {
-        console.log(
+        logger(
           `FFmpeg: File larger than 25MB transcription endpoint limit... Calculating target bitrate...`,
         )
         bitrate = this.calculateTargetBitrate(duration, maxSizeMB)
-        console.log(`FFmpeg: Target bitrate: ${bitrate} kbps`)
+        logger(`FFmpeg: Target bitrate: ${bitrate} kbps`)
       } else {
-        console.log(
+        logger(
           `FFmpeg: File smaller than 25MB transcription endpoint limit... Using original bitrate...`,
         )
         bitrate = Math.floor(originalBitrate / 1000)
@@ -117,7 +106,7 @@ class FfmpegWrapper {
         )
       }
       const logMsg = `FFmpeg: Initial audio file ready to process! - ${(audioBlob.size / 1024) * 1024} MB`
-      console.log(logMsg)
+      logger(logMsg)
       this.dispatch?.({
         type: "logs/addLog",
         payload: {

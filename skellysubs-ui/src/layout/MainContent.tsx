@@ -26,9 +26,7 @@ export const MainContent = () => {
 
       <ProcessingPanel />
 
-      <Box component="footer" sx={{ p: 1, mt: 4 }}>
-        <Footnote />
-      </Box>
+      <Footnote />
     </Box>
   )
 }

@@ -1,3 +1,5 @@
+import { logger } from "./logger"
+
 export function getApiBaseUrl() {
   const ogUrl = window.location.origin
   let url = ogUrl
@@ -7,6 +9,6 @@ export function getApiBaseUrl() {
     url = ogUrl.replace(/:\d+/, ":8080") // This uses a regular expression to replace any port with 8080
   }
 
-  console.log(`Base URL: ${url}`)
+  logger(`Base URL: ${url}`)
   return url // Ensure to return the modified URL
 }

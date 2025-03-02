@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { z } from "zod"
+import { logger } from "../../utils/logger"
 
 const MAX_RECONNECT_ATTEMPTS = 20
 
@@ -44,7 +45,7 @@ export const useWebSocket = () => {
     const parseAndValidateMessage = (data: string) => {
       try {
         const parsedData = JSON.parse(data)
-        console.log("Parsed websocket data:", parsedData)
+        logger("Parsed websocket data:", parsedData)
       } catch (e) {
         if (e instanceof z.ZodError) {
           console.error(
@@ -52,7 +53,7 @@ export const useWebSocket = () => {
             JSON.stringify(e.errors, null, 2),
           )
         } else {
-          console.log(`Websocket message: ${data}`)
+          logger(`Websocket message: ${data}`)
         }
       }
     }
@@ -71,7 +72,7 @@ export const useWebSocket = () => {
     ws.onopen = () => {
       setIsConnected(true)
       setConnectAttempt(0)
-      console.log(`Websocket is connected to url: ${wsUrl}`)
+      logger(`Websocket is connected to url: ${wsUrl}`)
     }
 
     ws.onclose = () => {
@@ -80,7 +81,7 @@ export const useWebSocket = () => {
     }
 
     ws.onmessage = event => {
-      // console.log('Websocket message received with length: ', event.data.length);
+      // logger('Websocket message received with length: ', event.data.length);
       handleIncomingMessage(event.data)
     }
 
@@ -101,7 +102,7 @@ export const useWebSocket = () => {
   useEffect(() => {
     const timeout = setTimeout(
       () => {
-        console.log(
+        logger(
           `Connecting (attempt #${connectAttempt + 1} of ${MAX_RECONNECT_ATTEMPTS}) to websocket at url: ${wsUrl}`,
         )
         connect()
