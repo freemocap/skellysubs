@@ -7,6 +7,7 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material"
 import { transcribeAudioThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
+import { logger } from "../../utils/logger"
 
 const TranscribeAudioPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -17,7 +18,7 @@ const TranscribeAudioPanel: React.FC = () => {
   )
 
   const handleTranscribeClick = () => {
-    console.log("Transcribe button clicked")
+    logger("Transcribe button clicked")
     dispatch(transcribeAudioThunk()) // No argument needed
   }
 

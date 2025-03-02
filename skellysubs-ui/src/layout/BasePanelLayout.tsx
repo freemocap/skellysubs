@@ -57,7 +57,6 @@ export const BasePanelLayout = ({
           }}
         >
           <LogsTerminal />
-          {/*woweee it's logs*/}
         </Panel>
       </PanelGroup>
     </Box>
