@@ -55,26 +55,42 @@ const TranslateTextButton: React.FC = () => {
       >
         Translate Text
       </Button>
-
       {processingContext.translation && (
         <>
-          <Typography>
+          <Typography sx={{ mb: 2, textAlign: "center" }}>
             Original text: <br />
             {processingContext.translation.original_text}
-            Translations: <br />
-            {Object.entries(
-              processingContext.translation.translations.translations,
-            ).map(([key, translation], i) => (
-              <div key={i}>
-                {translation.translated_language_name}:{" "}
-                {translation.translated_text}
-                {translation.romanized_text && (
-                  <>Romanized: {translation.romanized_text}</>
-                )}
-                <br />
-              </div>
-            ))}
           </Typography>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Translations:
+          </Typography>
+          {Object.entries(
+            processingContext.translation.translations.translations,
+          ).map(([key, translation], i) => (
+            <Box
+              key={i}
+              sx={{
+                mb: 2,
+                p: 2,
+                border: "1px solid #ddd",
+                borderRadius: 1,
+                width: "100%",
+                textAlign: "left",
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                {translation.translated_language_name}:
+              </Typography>
+              <Typography variant="body1">
+                {translation.translated_text}
+              </Typography>
+              {translation.romanized_text && (
+                <Typography variant="body2" sx={{ fontStyle: "italic" }}>
+                  Romanized: {translation.romanized_text}
+                </Typography>
+              )}
+            </Box>
+          ))}
           <Button
             variant="contained"
             onClick={handleDownloadClick}
