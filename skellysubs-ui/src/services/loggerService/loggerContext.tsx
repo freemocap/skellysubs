@@ -2,8 +2,8 @@ import type React from "react"
 import { createContext, useContext, useCallback } from "react"
 import type { LogSeverity } from "../../store/slices/LogsSlice"
 import { addLog } from "../../store/slices/LogsSlice"
-import { useDispatch } from "react-redux"
 import { useAppDispatch } from "../../store/hooks"
+import { logger } from "../../utils/logger"
 
 interface LoggerContextType {
   log: (message: string, severity: LogSeverity) => void
