@@ -1,23 +1,23 @@
-import { useAppDispatch, useAppSelector } from "../../store/hooks"
+import { useAppDispatch, useAppSelector } from "../../../store/hooks"
 import {
   selectIsTranscribeReady,
   selectProcessingContext,
-} from "../../store/slices/processingStatusSlice"
+} from "../../../store/slices/processing-status/processingStatusSlice"
 import { Button, IconButton, Typography } from "@mui/material"
 import SettingsIcon from "@mui/icons-material/Settings"
 
-import { transcribeAudioThunk } from "../../store/thunks"
-import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
+import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
 import { useState } from "react"
-import { logger } from "../../utils/logger"
+import { logger } from "../../../utils/logger"
 import {
   ProcessingButton,
   ProcessingPanelLayout,
-} from "./ProcessingPanelLayout"
+} from "../ProcessingPanelLayout"
 import { TranscriptionControls } from "./TranscriptionControls"
+import {transcribeAudioThunk} from "../../../store/thunks/transcribeAudioThunk";
 
-const TranscribeAudioPanel: React.FC = () => {
+const TranscriptionPanel: React.FC = () => {
   const dispatch = useAppDispatch()
   const isReady = useAppSelector(selectIsTranscribeReady)
   const processingContext = useAppSelector(selectProcessingContext)
@@ -120,4 +120,4 @@ const TranscribeAudioPanel: React.FC = () => {
     </ProcessingPanelLayout>
   )
 }
-export default TranscribeAudioPanel
+export default TranscriptionPanel

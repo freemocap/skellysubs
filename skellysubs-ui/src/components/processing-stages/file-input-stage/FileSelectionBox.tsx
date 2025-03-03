@@ -1,15 +1,15 @@
 import type React from "react"
 import { Box, Typography } from "@mui/material"
-import { useAppDispatch, useAppSelector } from "../../store/hooks"
+import { useAppDispatch, useAppSelector } from "../../../store/hooks"
 import {
   injectContextData,
   selectProcessingContext,
-} from "../../store/slices/processingStatusSlice"
+} from "../../../store/slices/processing-status/processingStatusSlice"
 import FileInput from "./FileInput"
 import FileDetails from "./FileDetails"
-import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
-import { prepareFileThunk } from "../../store/thunks"
-import { ffmpegService } from "../../services/FfmpegService/useFfmpeg"
+import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
+import { ffmpegService } from "../../../services/FfmpegService/useFfmpeg"
+import {prepareFileThunk} from "../../../store/thunks/prepareFileThunk";
 
 const FileSelectionBox: React.FC = () => {
   const dispatch = useAppDispatch()

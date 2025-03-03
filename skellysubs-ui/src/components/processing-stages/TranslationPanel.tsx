@@ -2,9 +2,9 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks"
 import {
   selectIsTranslateReady,
   selectProcessingContext,
-} from "../../store/slices/processingStatusSlice"
+} from "../../store/slices/processing-status/processingStatusSlice"
 import { Box, Button, IconButton, Typography } from "@mui/material"
-import { translateTextThunk } from "../../store/thunks"
+import { translateTextThunk } from "../../store/thunks/translateTextThunk"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
 import { useState } from "react"
@@ -16,7 +16,7 @@ import {
 import { TranslationControls } from "./TranslationControls"
 import SettingsIcon from "@mui/icons-material/Settings"
 
-const TranslateTranscriptPanel: React.FC = () => {
+const TranslationPanel: React.FC = () => {
   const dispatch = useAppDispatch()
   const isReady = useAppSelector(selectIsTranslateReady)
   const processingContext = useAppSelector(selectProcessingContext)
@@ -147,4 +147,4 @@ const TranslateTranscriptPanel: React.FC = () => {
     </ProcessingPanelLayout>
   )
 }
-export default TranslateTranscriptPanel
+export default TranslationPanel
