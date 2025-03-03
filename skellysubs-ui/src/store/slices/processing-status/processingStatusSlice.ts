@@ -1,8 +1,8 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
 import {
-  translateTextThunk,
-} from "../../thunks/translateTextThunk"
+  translationThunk,
+} from "../../thunks/translationThunk"
 import {
   AudioVisualFile, ProcessingContext,
   ProcessingStage, ProcessingState,
@@ -10,7 +10,7 @@ import {
   TranslatedTranscription
 } from "./processing-status-types";
 import {prepareFileThunk} from "../../thunks/prepareFileThunk";
-import {transcribeAudioThunk} from "../../thunks/transcribeAudioThunk";
+import {transcriptionThunk} from "../../thunks/transcriptionThunk";
 
 // Updated initial state
 const initialState: ProcessingState = {
@@ -76,26 +76,26 @@ export const processingSlice = createSlice({
         state.stages.filePreparation.status = "failed"
         state.stages.filePreparation.error = action.payload as string
       })
-      .addCase(transcribeAudioThunk.pending, state => {
+      .addCase(transcriptionThunk.pending, state => {
         state.stages.transcription.status = "processing"
       })
-      .addCase(transcribeAudioThunk.fulfilled, (state, action) => {
+      .addCase(transcriptionThunk.fulfilled, (state, action) => {
         state.context.transcription = action.payload
         state.stages.transcription.status = "completed"
         state.stages.translation.status = "ready" // Activate next stage
       })
-      .addCase(transcribeAudioThunk.rejected, (state, action) => {
+      .addCase(transcriptionThunk.rejected, (state, action) => {
         state.stages.transcription.status = "failed"
         state.stages.transcription.error = action.payload as string
       })
-      .addCase(translateTextThunk.pending, state => {
+      .addCase(translationThunk.pending, state => {
         state.stages.translation.status = "processing"
       })
-      .addCase(translateTextThunk.fulfilled, (state, action) => {
+      .addCase(translationThunk.fulfilled, (state, action) => {
         state.context.translation = action.payload
         state.stages.translation.status = "completed"
       })
-      .addCase(translateTextThunk.rejected, (state, action) => {
+      .addCase(translationThunk.rejected, (state, action) => {
         state.stages.translation.status = "failed"
         state.stages.translation.error = action.payload as string
       })

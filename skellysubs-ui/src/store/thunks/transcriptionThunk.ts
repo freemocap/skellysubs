@@ -4,7 +4,7 @@ import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
 
 import { createProcessingThunk } from "./createProcessingThunk"
 
-export const transcribeAudioThunk = createProcessingThunk<
+export const transcriptionThunk = createProcessingThunk<
   { language?: string; prompt?: string },
   ProcessingContext["transcription"]
 >("transcription", async (context, params) => {

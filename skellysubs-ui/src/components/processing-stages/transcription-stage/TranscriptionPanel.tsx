@@ -13,7 +13,7 @@ import {
   ProcessingButton,
   ProcessingPanelLayout,
 } from "../ProcessingPanelLayout"
-import { transcribeAudioThunk } from "../../../store/thunks/transcribeAudioThunk"
+import { transcriptionThunk } from "../../../store/thunks/transcriptionThunk"
 import SettingsIcon from "@mui/icons-material/Settings"
 import { TranscriptionControls } from "./TranscriptionControls"
 
@@ -33,7 +33,7 @@ const TranscriptionPanel: React.FC = () => {
       `Transcribe button clicked with parameters -  language: ${language}, prompt: ${prompt}`,
     )
     dispatch(
-      transcribeAudioThunk({
+      transcriptionThunk({
         language: language === "auto-detect" ? "" : language,
         prompt: prompt === "None" ? "" : prompt,
       }),
