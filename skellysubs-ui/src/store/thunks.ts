@@ -64,10 +64,12 @@ export const prepareFileThunk = createProcessingThunk<
     duration,
   }
 })
+
 export const transcribeAudioThunk = createProcessingThunk<
-  void, // No input needed
+  { language?: string; prompt?: string },
   ProcessingContext["transcription"]
->("transcription", async context => {
+>("transcription", async (context, params) => {
+  // params now available
   try {
     if (!context.mp3Audio?.url) throw new Error("No audio URL provided")
 
@@ -80,6 +82,9 @@ export const transcribeAudioThunk = createProcessingThunk<
 
     const formData = new FormData()
     formData.append("audio_file", mp3Blob, "audio.mp3")
+    if (params?.language) formData.append("language", params.language)
+    if (params?.prompt) formData.append("prompt", params.prompt)
+
     const transcribeEndpointUrl = `${getApiBaseUrl()}/processing/transcribe`
     logger(
       `Sending formData to url: ${transcribeEndpointUrl} -- formData: ${formData}`,
@@ -102,23 +107,30 @@ export const transcribeAudioThunk = createProcessingThunk<
   }
 })
 export const translateTextThunk = createProcessingThunk<
-  void, // No input needed
+  { targetLanguages?: string[]; romanize?: boolean },
   ProcessingContext["translation"]
->("translation", async context => {
+>("translation", async (context, params) => {
   try {
     if (!context.transcription) throw new Error("No transcription provided")
 
     const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate`
-    const requestBody = JSON.stringify(context.transcription, null, 2)
+    const requestBody = JSON.stringify(
+      {
+        ...context.transcription,
+        translation_config: {
+          // New config section
+          target_languages: params?.targetLanguages || [],
+          romanize: params?.romanize || false,
+        },
+      },
+      null,
+      2,
+    )
     logger(
       `Sending translation request to url: ${translationEndpointUrl} -- body: ${requestBody}`,
     )
     const translationResponse = await fetch(translationEndpointUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-
       body: requestBody,
     })
 

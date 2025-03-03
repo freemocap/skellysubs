@@ -11,15 +11,18 @@ from skellysubs.core.translation_pipeline.translate_transcription_pipeline impor
 logger = logging.getLogger(__name__)
 translate_router = APIRouter()
 
-
-
+from pydantic import BaseModel
+class TranslationConfig(BaseModel):
+    target_languages: list[str] = []
+    romanize: bool = False
 
 
 @translate_router.post("/translate", response_model=TranslatedTranscription)
 async def translate_transcript_endpoint(
-        transcription: TranscriptionVerbose
+        transcription: TranscriptionVerbose,
+        translation_config: TranslationConfig
 ) -> TranslatedTranscription:
-    logger.info(f"Translation request received for transcription: {transcription.text}")
+    logger.info(f"Translation request received for transcription: {transcription.text} with config: {translation_config.model_dump_json(indent=2)}")
 
     try:
 

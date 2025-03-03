@@ -6,8 +6,10 @@ import {
 import { Box, Button, CircularProgress, Typography } from "@mui/material"
 import { transcribeAudioThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
-import type React from "react"
+import React, { useState } from "react"
 import { logger } from "../../utils/logger"
+import {ProcessingButton, ProcessingPanelLayout} from "./ProcessingPanelLayout"
+import { TranscriptionControls } from "./TranscriptionControls"
 
 const TranscribeAudioPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -16,11 +18,16 @@ const TranscribeAudioPanel: React.FC = () => {
   const transcriptionStatus = useAppSelector(
     state => state.processing.stages.transcription.status,
   )
+    const [language, setLanguage] = useState("auto-detect");
+    const [prompt, setPrompt] = useState("None");
 
-  const handleTranscribeClick = () => {
-    logger("Transcribe button clicked")
-    dispatch(transcribeAudioThunk()) // No argument needed
-  }
+    const handleTranscribeClick = () => {
+        logger(`Transcribe button clicked with parameters -  language: ${language}, prompt: ${prompt}`)
+        dispatch(transcribeAudioThunk({
+            language: language === "auto-detect" ? "" : language,
+            prompt: prompt === "None" ? "" : prompt
+        }));
+    };
 
   const handleDownloadClick = () => {
     const json = JSON.stringify(processingContext.transcription, null, 2)
@@ -37,7 +44,8 @@ const TranscribeAudioPanel: React.FC = () => {
   }
 
   return (
-    <Box
+    <ProcessingPanelLayout
+      borderColor="#ff0"
       sx={{
         m: 3,
         p: 3,
@@ -57,29 +65,18 @@ const TranscribeAudioPanel: React.FC = () => {
         {!processingContext.mp3Audio &&
           " No audio file available! upload a video or audio file first. "}
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        sx={{ m: 2, position: "relative" }}
-        onClick={handleTranscribeClick}
-        disabled={!isReady || transcriptionStatus === "processing"}
-      >
-        {transcriptionStatus === "processing"
-          ? "Processing..."
-          : "Transcribe Audio"}
-        {transcriptionStatus === "processing" && (
-          <CircularProgress
-            size={24}
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              marginTop: "-12px",
-              marginLeft: "-12px",
-            }}
-          />
-        )}
-      </Button>
+        <TranscriptionControls
+            language={language}
+            setLanguage={setLanguage}
+            prompt={prompt}
+            setPrompt={setPrompt}
+        />
+        <ProcessingButton
+            status={transcriptionStatus}
+            isReady={isReady}
+            label="Transcribe Audio"
+            onClick={handleTranscribeClick}
+        />
       {processingContext.transcription && (
         <>
           <Typography>{processingContext.transcription.text}</Typography>
@@ -102,7 +99,7 @@ const TranscribeAudioPanel: React.FC = () => {
           </Button>
         </>
       )}
-    </Box>
+    </ProcessingPanelLayout>
   )
 }
 export default TranscribeAudioPanel
