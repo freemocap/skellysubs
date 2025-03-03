@@ -90,62 +90,22 @@
       }
     }
   },
-  "annotation_configs": {
-    "ENGLISH": {
-      "font_file": "ARIAL.TTF",
-      "buffer_size": 100,
-      "color": [
-        27,
-        158,
-        119
-      ]
-    },
-    "SPANISH": {
-      "font_file": "ARIAL.TTF",
-      "buffer_size": 100,
-      "color": [
-        217,
-        95,
-        2
-      ]
-    },
-    "ARABIC_LEVANTINE": {
-      "font_file": "ARIAL.TTF",
-      "font_size_ratio": 1.15,
-      "buffer_size": 100,
-      "color": [
-        231,
-        41,
-        138
-      ]
-    },
-    "CHINESE_MANDARIN_SIMPLIFIED": {
-      "font_file": "NotoSerifCJKsc-VF-Simplified-Chinese.ttf",
-      "font_size_ratio": 1.1,
-      "buffer_size": 100,
-      "color": [
-        157,
-        152,
-        219
-      ]
-    },
-    "HINDI": {
-      "font_file": "NotoSansDevanagari-VariableFont.ttf",
-      "buffer_size": 100,
-      "color": [
-        255,
-        152,
-        219
-      ]
-    },
-    "FRENCH": {
-      "font_file": "ARIAL.TTF",
-      "buffer_size": 100,
-      "color": [
-        102,
-        166,
-        30
-      ]
+  "IGBO": {
+    "language_name": "Igbo",
+    "language_code": "ig",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Niger-Congo",
+        "Atlantic-Congo",
+        "Volta-Congo",
+        "Benue-Congo",
+        "Igboid"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Nwaanyị nwere ike iji gị n'ihu.",
+      "sample_romanized_text": "NONE"
     }
   }
+
 }
