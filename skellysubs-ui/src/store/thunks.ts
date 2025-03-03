@@ -107,7 +107,11 @@ export const transcribeAudioThunk = createProcessingThunk<
   }
 })
 export const translateTextThunk = createProcessingThunk<
-  { targetLanguages?: string[]; romanize?: boolean },
+  {
+    targetLanguages?: string[]
+    romanize?: boolean
+    romanizationMethod?: string
+  },
   ProcessingContext["translation"]
 >("translation", async (context, params) => {
   try {
@@ -118,9 +122,9 @@ export const translateTextThunk = createProcessingThunk<
       {
         ...context.transcription,
         translation_config: {
-          // New config section
           target_languages: params?.targetLanguages || [],
           romanize: params?.romanize || false,
+          romanization_method: params?.romanizationMethod || "",
         },
       },
       null,

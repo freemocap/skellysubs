@@ -3,13 +3,18 @@ import {
   selectIsTranslateReady,
   selectProcessingContext,
 } from "../../store/slices/processingStatusSlice"
-import { Box, Button, CircularProgress, Typography } from "@mui/material"
+import { Box, Button, IconButton, Typography } from "@mui/material"
 import { translateTextThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
-import React, {useState} from "react"
+import type React from "react"
+import { useState } from "react"
 import { logger } from "../../utils/logger"
-import {ProcessingButton, ProcessingPanelLayout} from "./ProcessingPanelLayout";
-import {TranslationControls} from "./TranslationControls";
+import {
+  ProcessingButton,
+  ProcessingPanelLayout,
+} from "./ProcessingPanelLayout"
+import { TranslationControls } from "./TranslationControls"
+import SettingsIcon from "@mui/icons-material/Settings"
 
 const TranslateTranscriptPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -18,18 +23,20 @@ const TranslateTranscriptPanel: React.FC = () => {
   const translationStatus = useAppSelector(
     state => state.processing.stages.translation.status,
   )
-    const [targetLanguages, setTargetLanguages] = useState("")
-    const [romanize, setRomanize] = useState(false)
-    const [romanizationMethod, setRomanizationMethod] = useState("");
-
-    const handleTranslateClick = () => {
-        logger("Translate button clicked");
-        dispatch(translateTextThunk({
-            targetLanguages: targetLanguages.split(","),
-            romanize,
-            romanizationMethod
-        }));
-    };
+  const [targetLanguages, setTargetLanguages] = useState("")
+  const [romanize, setRomanize] = useState(false)
+  const [romanizationMethod, setRomanizationMethod] = useState("")
+  const [showControls, setShowControls] = useState(false)
+  const handleTranslateClick = () => {
+    logger("Translate button clicked")
+    dispatch(
+      translateTextThunk({
+        targetLanguages: targetLanguages.split(","),
+        romanize,
+        romanizationMethod,
+      }),
+    )
+  }
 
   const handleDownloadClick = () => {
     const json = JSON.stringify(processingContext.translation, null, 2)
@@ -46,7 +53,8 @@ const TranslateTranscriptPanel: React.FC = () => {
   }
 
   return (
-    <ProcessingPanelLayout borderColor="#00aa3c"
+    <ProcessingPanelLayout
+      borderColor="#00aa3c"
       sx={{
         m: 3,
         p: 3,
@@ -61,24 +69,31 @@ const TranslateTranscriptPanel: React.FC = () => {
       <Typography
         variant="body1"
         color={extendedPaperbaseTheme.palette.text.disabled}
+        sx={{ mb: 2 }}
       >
         {!processingContext.transcription &&
           " No transcript available, transcribe audio first. "}
       </Typography>
+
+      <IconButton onClick={() => setShowControls(!showControls)}>
+        <SettingsIcon />
+      </IconButton>
+      {showControls && (
         <TranslationControls
-            targetLanguages={targetLanguages}
-            setTargetLanguages={setTargetLanguages}
-            romanize={romanize}
-            setRomanize={setRomanize}
-            romanizationMethod={romanizationMethod}
-            setRomanizationMethod={setRomanizationMethod}
+          targetLanguages={targetLanguages}
+          setTargetLanguages={setTargetLanguages}
+          romanize={romanize}
+          setRomanize={setRomanize}
+          romanizationMethod={romanizationMethod}
+          setRomanizationMethod={setRomanizationMethod}
         />
-        <ProcessingButton
-            status={translationStatus}
-            isReady={isReady}
-            label="Translate Text"
-            onClick={handleTranslateClick}
-        />
+      )}
+      <ProcessingButton
+        status={translationStatus}
+        isReady={isReady}
+        label="Translate Text"
+        onClick={handleTranslateClick}
+      />
       {processingContext.translation && (
         <>
           <Typography sx={{ mb: 2, textAlign: "center" }}>

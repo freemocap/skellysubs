@@ -3,12 +3,18 @@ import {
   selectIsTranscribeReady,
   selectProcessingContext,
 } from "../../store/slices/processingStatusSlice"
-import { Box, Button, CircularProgress, Typography } from "@mui/material"
+import { Button, IconButton, Typography } from "@mui/material"
+import SettingsIcon from "@mui/icons-material/Settings"
+
 import { transcribeAudioThunk } from "../../store/thunks"
 import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
-import React, { useState } from "react"
+import type React from "react"
+import { useState } from "react"
 import { logger } from "../../utils/logger"
-import {ProcessingButton, ProcessingPanelLayout} from "./ProcessingPanelLayout"
+import {
+  ProcessingButton,
+  ProcessingPanelLayout,
+} from "./ProcessingPanelLayout"
 import { TranscriptionControls } from "./TranscriptionControls"
 
 const TranscribeAudioPanel: React.FC = () => {
@@ -18,16 +24,21 @@ const TranscribeAudioPanel: React.FC = () => {
   const transcriptionStatus = useAppSelector(
     state => state.processing.stages.transcription.status,
   )
-    const [language, setLanguage] = useState("auto-detect");
-    const [prompt, setPrompt] = useState("None");
+  const [language, setLanguage] = useState("auto-detect")
+  const [prompt, setPrompt] = useState("None")
+  const [showControls, setShowControls] = useState(false)
 
-    const handleTranscribeClick = () => {
-        logger(`Transcribe button clicked with parameters -  language: ${language}, prompt: ${prompt}`)
-        dispatch(transcribeAudioThunk({
-            language: language === "auto-detect" ? "" : language,
-            prompt: prompt === "None" ? "" : prompt
-        }));
-    };
+  const handleTranscribeClick = () => {
+    logger(
+      `Transcribe button clicked with parameters -  language: ${language}, prompt: ${prompt}`,
+    )
+    dispatch(
+      transcribeAudioThunk({
+        language: language === "auto-detect" ? "" : language,
+        prompt: prompt === "None" ? "" : prompt,
+      }),
+    )
+  }
 
   const handleDownloadClick = () => {
     const json = JSON.stringify(processingContext.transcription, null, 2)
@@ -61,22 +72,29 @@ const TranscribeAudioPanel: React.FC = () => {
       <Typography
         variant="body1"
         color={extendedPaperbaseTheme.palette.text.disabled}
+        sx={{ mb: 2 }}
       >
         {!processingContext.mp3Audio &&
           " No audio file available! upload a video or audio file first. "}
       </Typography>
+      <IconButton onClick={() => setShowControls(!showControls)}>
+        <SettingsIcon />
+      </IconButton>
+      {showControls && (
         <TranscriptionControls
-            language={language}
-            setLanguage={setLanguage}
-            prompt={prompt}
-            setPrompt={setPrompt}
+          language={language}
+          setLanguage={setLanguage}
+          prompt={prompt}
+          setPrompt={setPrompt}
         />
-        <ProcessingButton
-            status={transcriptionStatus}
-            isReady={isReady}
-            label="Transcribe Audio"
-            onClick={handleTranscribeClick}
-        />
+      )}
+      <ProcessingButton
+        status={transcriptionStatus}
+        isReady={isReady}
+        label="Transcribe Audio"
+        onClick={handleTranscribeClick}
+      />
+
       {processingContext.transcription && (
         <>
           <Typography>{processingContext.transcription.text}</Typography>
