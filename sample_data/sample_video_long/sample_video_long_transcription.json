@@ -1,870 +1,623 @@
 {
-    "text": "Hello, I'm saying words to the microphone. My name is Jon Matthis, with no h and two t's in Matthis. 1, 2, 3, 4, 5, 6, 7, 8, 9. And I have a cat named Poo and another one named Ollie. And dogs are good and horses are tall. Thank you for listening. Thank you for coming to this wonderful day. And I hope that everything will be in good in the future too. Cthulhu, Dinosaur, Vibrant, Hexagon, Sparkling Water, Juggling Balls.",
-    "segments": [
-        {
-            "id": 0,
-            "seek": 0.0,
-            "start": 0.0,
-            "end": 8.680000305175781,
-            "text": " Hello, I'm saying words to the microphone. My name is Jon Matthis, with no h and two t's in Matthis.",
-            "tokens": [
-                50380,
-                2425,
-                11,
-                286,
-                478,
-                1566,
-                2283,
-                281,
-                264,
-                10952,
-                13,
-                1222,
-                1315,
-                307,
-                7745,
-                6789,
-                11176,
-                11,
-                365,
-                572,
-                276,
-                293,
-                732,
-                256,
-                311,
-                294,
-                6789,
-                11176,
-                13,
-                50796
-            ],
-            "temperature": 0.0,
-            "avg_logprob": -0.2819501757621765,
-            "compression_ratio": 1.2978723049163818,
-            "no_speech_prob": 0.15791693329811096,
-            "words": [
-                {
-                    "start": 0.0,
-                    "end": 0.7200000286102295,
-                    "word": "Hello",
-                    "index_in_segment": 1,
-                    "index_in_transcript": 0,
-                    "probability": null
-                },
-                {
-                    "start": 0.8600000143051147,
-                    "end": 1.1200000047683716,
-                    "word": "I'm",
-                    "index_in_segment": 2,
-                    "index_in_transcript": 1,
-                    "probability": null
-                },
-                {
-                    "start": 1.1200000047683716,
-                    "end": 1.559999942779541,
-                    "word": "saying",
-                    "index_in_segment": 3,
-                    "index_in_transcript": 2,
-                    "probability": null
-                },
-                {
-                    "start": 1.559999942779541,
-                    "end": 2.0999999046325684,
-                    "word": "words",
-                    "index_in_segment": 4,
-                    "index_in_transcript": 3,
-                    "probability": null
-                },
-                {
-                    "start": 2.0999999046325684,
-                    "end": 2.5399999618530273,
-                    "word": "to",
-                    "index_in_segment": 5,
-                    "index_in_transcript": 4,
-                    "probability": null
-                },
-                {
-                    "start": 2.5399999618530273,
-                    "end": 2.940000057220459,
-                    "word": "the",
-                    "index_in_segment": 6,
-                    "index_in_transcript": 5,
-                    "probability": null
-                },
-                {
-                    "start": 2.940000057220459,
-                    "end": 3.359999895095825,
-                    "word": "microphone",
-                    "index_in_segment": 7,
-                    "index_in_transcript": 6,
-                    "probability": null
-                },
-                {
-                    "start": 3.6600000858306885,
-                    "end": 3.6600000858306885,
-                    "word": "My",
-                    "index_in_segment": 8,
-                    "index_in_transcript": 7,
-                    "probability": null
-                },
-                {
-                    "start": 3.6600000858306885,
-                    "end": 3.819999933242798,
-                    "word": "name",
-                    "index_in_segment": 9,
-                    "index_in_transcript": 8,
-                    "probability": null
-                },
-                {
-                    "start": 3.819999933242798,
-                    "end": 4.039999961853027,
-                    "word": "is",
-                    "index_in_segment": 10,
-                    "index_in_transcript": 9,
-                    "probability": null
-                },
-                {
-                    "start": 4.039999961853027,
-                    "end": 4.739999771118164,
-                    "word": "Jon",
-                    "index_in_segment": 11,
-                    "index_in_transcript": 10,
-                    "probability": null
-                },
-                {
-                    "start": 4.739999771118164,
-                    "end": 5.480000019073486,
-                    "word": "Matthis",
-                    "index_in_segment": 12,
-                    "index_in_transcript": 11,
-                    "probability": null
-                },
-                {
-                    "start": 6.420000076293945,
-                    "end": 6.539999961853027,
-                    "word": "with",
-                    "index_in_segment": 13,
-                    "index_in_transcript": 12,
-                    "probability": null
-                },
-                {
-                    "start": 6.539999961853027,
-                    "end": 7.0,
-                    "word": "no",
-                    "index_in_segment": 14,
-                    "index_in_transcript": 13,
-                    "probability": null
-                },
-                {
-                    "start": 7.0,
-                    "end": 7.320000171661377,
-                    "word": "h",
-                    "index_in_segment": 15,
-                    "index_in_transcript": 14,
-                    "probability": null
-                },
-                {
-                    "start": 7.320000171661377,
-                    "end": 7.559999942779541,
-                    "word": "and",
-                    "index_in_segment": 16,
-                    "index_in_transcript": 15,
-                    "probability": null
-                },
-                {
-                    "start": 7.559999942779541,
-                    "end": 7.800000190734863,
-                    "word": "two",
-                    "index_in_segment": 17,
-                    "index_in_transcript": 16,
-                    "probability": null
-                },
-                {
-                    "start": 7.800000190734863,
-                    "end": 8.140000343322754,
-                    "word": "t's",
-                    "index_in_segment": 18,
-                    "index_in_transcript": 17,
-                    "probability": null
-                },
-                {
-                    "start": 8.140000343322754,
-                    "end": 8.279999732971191,
-                    "word": "in",
-                    "index_in_segment": 19,
-                    "index_in_transcript": 18,
-                    "probability": null
-                },
-                {
-                    "start": 8.279999732971191,
-                    "end": 8.680000305175781,
-                    "word": "Matthis",
-                    "index_in_segment": 20,
-                    "index_in_transcript": 19,
-                    "probability": null
-                }
-            ]
-        },
-        {
-            "id": 1,
-            "seek": 0.0,
-            "start": 10.300000190734863,
-            "end": 19.360000610351562,
-            "text": " 1, 2, 3, 4, 5, 6, 7, 8, 9. And I have a cat named Poo and another one named Ollie.",
-            "tokens": [
-                50872,
-                502,
-                11,
-                568,
-                11,
-                805,
-                11,
-                1017,
-                11,
-                1025,
-                11,
-                1386,
-                11,
-                1614,
-                11,
-                1649,
-                11,
-                1722,
-                13,
-                400,
-                286,
-                362,
-                257,
-                3857,
-                4926,
-                430,
-                1986,
-                293,
-                1071,
-                472,
-                4926,
-                35089,
-                13,
-                51332
-            ],
-            "temperature": 0.0,
-            "avg_logprob": -0.2819501757621765,
-            "compression_ratio": 1.2978723049163818,
-            "no_speech_prob": 0.15791693329811096,
-            "words": [
-                {
-                    "start": 10.300000190734863,
-                    "end": 10.65999984741211,
-                    "word": "1",
-                    "index_in_segment": 1,
-                    "index_in_transcript": 20,
-                    "probability": null
-                },
-                {
-                    "start": 10.920000076293945,
-                    "end": 10.920000076293945,
-                    "word": "2",
-                    "index_in_segment": 2,
-                    "index_in_transcript": 21,
-                    "probability": null
-                },
-                {
-                    "start": 10.9399995803833,
-                    "end": 11.279999732971191,
-                    "word": "3",
-                    "index_in_segment": 3,
-                    "index_in_transcript": 22,
-                    "probability": null
-                },
-                {
-                    "start": 11.579999923706055,
-                    "end": 11.600000381469727,
-                    "word": "4",
-                    "index_in_segment": 4,
-                    "index_in_transcript": 23,
-                    "probability": null
-                },
-                {
-                    "start": 11.979999542236328,
-                    "end": 12.0600004196167,
-                    "word": "5",
-                    "index_in_segment": 5,
-                    "index_in_transcript": 24,
-                    "probability": null
-                },
-                {
-                    "start": 12.359999656677246,
-                    "end": 12.420000076293945,
-                    "word": "6",
-                    "index_in_segment": 6,
-                    "index_in_transcript": 25,
-                    "probability": null
-                },
-                {
-                    "start": 12.640000343322754,
-                    "end": 12.760000228881836,
-                    "word": "7",
-                    "index_in_segment": 7,
-                    "index_in_transcript": 26,
-                    "probability": null
-                },
-                {
-                    "start": 12.760000228881836,
-                    "end": 13.220000267028809,
-                    "word": "8",
-                    "index_in_segment": 8,
-                    "index_in_transcript": 27,
-                    "probability": null
-                },
-                {
-                    "start": 13.760000228881836,
-                    "end": 13.800000190734863,
-                    "word": "9",
-                    "index_in_segment": 9,
-                    "index_in_transcript": 28,
-                    "probability": null
-                },
-                {
-                    "start": 15.5600004196167,
-                    "end": 16.200000762939453,
-                    "word": "And",
-                    "index_in_segment": 10,
-                    "index_in_transcript": 29,
-                    "probability": null
-                },
-                {
-                    "start": 16.200000762939453,
-                    "end": 16.540000915527344,
-                    "word": "I",
-                    "index_in_segment": 11,
-                    "index_in_transcript": 30,
-                    "probability": null
-                },
-                {
-                    "start": 16.540000915527344,
-                    "end": 16.760000228881836,
-                    "word": "have",
-                    "index_in_segment": 12,
-                    "index_in_transcript": 31,
-                    "probability": null
-                },
-                {
-                    "start": 16.760000228881836,
-                    "end": 17.100000381469727,
-                    "word": "a",
-                    "index_in_segment": 13,
-                    "index_in_transcript": 32,
-                    "probability": null
-                },
-                {
-                    "start": 17.100000381469727,
-                    "end": 17.100000381469727,
-                    "word": "cat",
-                    "index_in_segment": 14,
-                    "index_in_transcript": 33,
-                    "probability": null
-                },
-                {
-                    "start": 17.100000381469727,
-                    "end": 17.68000030517578,
-                    "word": "named",
-                    "index_in_segment": 15,
-                    "index_in_transcript": 34,
-                    "probability": null
-                },
-                {
-                    "start": 17.68000030517578,
-                    "end": 18.0,
-                    "word": "Poo",
-                    "index_in_segment": 16,
-                    "index_in_transcript": 35,
-                    "probability": null
-                },
-                {
-                    "start": 18.0,
-                    "end": 18.280000686645508,
-                    "word": "and",
-                    "index_in_segment": 17,
-                    "index_in_transcript": 36,
-                    "probability": null
-                },
-                {
-                    "start": 18.280000686645508,
-                    "end": 18.540000915527344,
-                    "word": "another",
-                    "index_in_segment": 18,
-                    "index_in_transcript": 37,
-                    "probability": null
-                },
-                {
-                    "start": 18.540000915527344,
-                    "end": 18.739999771118164,
-                    "word": "one",
-                    "index_in_segment": 19,
-                    "index_in_transcript": 38,
-                    "probability": null
-                },
-                {
-                    "start": 18.739999771118164,
-                    "end": 19.0,
-                    "word": "named",
-                    "index_in_segment": 20,
-                    "index_in_transcript": 39,
-                    "probability": null
-                },
-                {
-                    "start": 19.0,
-                    "end": 19.360000610351562,
-                    "word": "Ollie",
-                    "index_in_segment": 21,
-                    "index_in_transcript": 40,
-                    "probability": null
-                }
-            ]
-        },
-        {
-            "id": 2,
-            "seek": 1936.0,
-            "start": 19.920000076293945,
-            "end": 30.059999465942383,
-            "text": " And dogs are good and horses are tall. Thank you for listening. Thank you for coming to",
-            "tokens": [
-                50392,
-                400,
-                7197,
-                366,
-                665,
-                293,
-                13112,
-                366,
-                6764,
-                13,
-                1044,
-                291,
-                337,
-                4764,
-                13,
-                1044,
-                291,
-                337,
-                1348,
-                281,
-                50908
-            ],
-            "temperature": 0.0,
-            "avg_logprob": -0.2676391899585724,
-            "compression_ratio": 1.3587785959243774,
-            "no_speech_prob": 0.6017522811889648,
-            "words": [
-                {
-                    "start": 19.920000076293945,
-                    "end": 20.639999389648438,
-                    "word": "And",
-                    "index_in_segment": 1,
-                    "index_in_transcript": 41,
-                    "probability": null
-                },
-                {
-                    "start": 20.639999389648438,
-                    "end": 21.420000076293945,
-                    "word": "dogs",
-                    "index_in_segment": 2,
-                    "index_in_transcript": 42,
-                    "probability": null
-                },
-                {
-                    "start": 21.420000076293945,
-                    "end": 21.940000534057617,
-                    "word": "are",
-                    "index_in_segment": 3,
-                    "index_in_transcript": 43,
-                    "probability": null
-                },
-                {
-                    "start": 21.940000534057617,
-                    "end": 22.3799991607666,
-                    "word": "good",
-                    "index_in_segment": 4,
-                    "index_in_transcript": 44,
-                    "probability": null
-                },
-                {
-                    "start": 22.3799991607666,
-                    "end": 23.540000915527344,
-                    "word": "and",
-                    "index_in_segment": 5,
-                    "index_in_transcript": 45,
-                    "probability": null
-                },
-                {
-                    "start": 23.540000915527344,
-                    "end": 23.68000030517578,
-                    "word": "horses",
-                    "index_in_segment": 6,
-                    "index_in_transcript": 46,
-                    "probability": null
-                },
-                {
-                    "start": 23.68000030517578,
-                    "end": 24.739999771118164,
-                    "word": "are",
-                    "index_in_segment": 7,
-                    "index_in_transcript": 47,
-                    "probability": null
-                },
-                {
-                    "start": 24.739999771118164,
-                    "end": 25.420000076293945,
-                    "word": "tall",
-                    "index_in_segment": 8,
-                    "index_in_transcript": 48,
-                    "probability": null
-                },
-                {
-                    "start": 26.020000457763672,
-                    "end": 27.020000457763672,
-                    "word": "Thank",
-                    "index_in_segment": 9,
-                    "index_in_transcript": 49,
-                    "probability": null
-                },
-                {
-                    "start": 27.020000457763672,
-                    "end": 27.239999771118164,
-                    "word": "you",
-                    "index_in_segment": 10,
-                    "index_in_transcript": 50,
-                    "probability": null
-                },
-                {
-                    "start": 27.239999771118164,
-                    "end": 27.760000228881836,
-                    "word": "for",
-                    "index_in_segment": 11,
-                    "index_in_transcript": 51,
-                    "probability": null
-                },
-                {
-                    "start": 27.760000228881836,
-                    "end": 28.15999984741211,
-                    "word": "listening",
-                    "index_in_segment": 12,
-                    "index_in_transcript": 52,
-                    "probability": null
-                },
-                {
-                    "start": 28.920000076293945,
-                    "end": 28.959999084472656,
-                    "word": "Thank",
-                    "index_in_segment": 13,
-                    "index_in_transcript": 53,
-                    "probability": null
-                },
-                {
-                    "start": 28.959999084472656,
-                    "end": 29.040000915527344,
-                    "word": "you",
-                    "index_in_segment": 14,
-                    "index_in_transcript": 54,
-                    "probability": null
-                },
-                {
-                    "start": 29.040000915527344,
-                    "end": 29.239999771118164,
-                    "word": "for",
-                    "index_in_segment": 15,
-                    "index_in_transcript": 55,
-                    "probability": null
-                },
-                {
-                    "start": 29.239999771118164,
-                    "end": 29.540000915527344,
-                    "word": "coming",
-                    "index_in_segment": 16,
-                    "index_in_transcript": 56,
-                    "probability": null
-                },
-                {
-                    "start": 29.540000915527344,
-                    "end": 30.059999465942383,
-                    "word": "to",
-                    "index_in_segment": 17,
-                    "index_in_transcript": 57,
-                    "probability": null
-                }
-            ]
-        },
-        {
-            "id": 3,
-            "seek": 1936.0,
-            "start": 30.219999313354492,
-            "end": 40.279998779296875,
-            "text": " this wonderful day. And I hope that everything will be in good in the future too. Cthulhu,",
-            "tokens": [
-                50908,
-                341,
-                3715,
-                786,
-                13,
-                400,
-                286,
-                1454,
-                300,
-                1203,
-                486,
-                312,
-                294,
-                665,
-                294,
-                264,
-                2027,
-                886,
-                13,
-                383,
-                392,
-                425,
-                12086,
-                11,
-                51400
-            ],
-            "temperature": 0.0,
-            "avg_logprob": -0.2676391899585724,
-            "compression_ratio": 1.3587785959243774,
-            "no_speech_prob": 0.6017522811889648,
-            "words": [
-                {
-                    "start": 30.219999313354492,
-                    "end": 31.219999313354492,
-                    "word": "this",
-                    "index_in_segment": 1,
-                    "index_in_transcript": 58,
-                    "probability": null
-                },
-                {
-                    "start": 31.219999313354492,
-                    "end": 31.760000228881836,
-                    "word": "wonderful",
-                    "index_in_segment": 2,
-                    "index_in_transcript": 59,
-                    "probability": null
-                },
-                {
-                    "start": 31.760000228881836,
-                    "end": 32.31999969482422,
-                    "word": "day",
-                    "index_in_segment": 3,
-                    "index_in_transcript": 60,
-                    "probability": null
-                },
-                {
-                    "start": 32.70000076293945,
-                    "end": 33.70000076293945,
-                    "word": "And",
-                    "index_in_segment": 4,
-                    "index_in_transcript": 61,
-                    "probability": null
-                },
-                {
-                    "start": 33.70000076293945,
-                    "end": 34.18000030517578,
-                    "word": "I",
-                    "index_in_segment": 5,
-                    "index_in_transcript": 62,
-                    "probability": null
-                },
-                {
-                    "start": 34.18000030517578,
-                    "end": 34.220001220703125,
-                    "word": "hope",
-                    "index_in_segment": 6,
-                    "index_in_transcript": 63,
-                    "probability": null
-                },
-                {
-                    "start": 34.220001220703125,
-                    "end": 34.97999954223633,
-                    "word": "that",
-                    "index_in_segment": 7,
-                    "index_in_transcript": 64,
-                    "probability": null
-                },
-                {
-                    "start": 34.97999954223633,
-                    "end": 35.29999923706055,
-                    "word": "everything",
-                    "index_in_segment": 8,
-                    "index_in_transcript": 65,
-                    "probability": null
-                },
-                {
-                    "start": 35.29999923706055,
-                    "end": 35.880001068115234,
-                    "word": "will",
-                    "index_in_segment": 9,
-                    "index_in_transcript": 66,
-                    "probability": null
-                },
-                {
-                    "start": 35.880001068115234,
-                    "end": 36.380001068115234,
-                    "word": "be",
-                    "index_in_segment": 10,
-                    "index_in_transcript": 67,
-                    "probability": null
-                },
-                {
-                    "start": 36.380001068115234,
-                    "end": 37.13999938964844,
-                    "word": "in",
-                    "index_in_segment": 11,
-                    "index_in_transcript": 68,
-                    "probability": null
-                },
-                {
-                    "start": 37.13999938964844,
-                    "end": 37.560001373291016,
-                    "word": "good",
-                    "index_in_segment": 12,
-                    "index_in_transcript": 69,
-                    "probability": null
-                },
-                {
-                    "start": 37.560001373291016,
-                    "end": 37.7400016784668,
-                    "word": "in",
-                    "index_in_segment": 13,
-                    "index_in_transcript": 70,
-                    "probability": null
-                },
-                {
-                    "start": 37.7400016784668,
-                    "end": 38.040000915527344,
-                    "word": "the",
-                    "index_in_segment": 14,
-                    "index_in_transcript": 71,
-                    "probability": null
-                },
-                {
-                    "start": 38.040000915527344,
-                    "end": 38.060001373291016,
-                    "word": "future",
-                    "index_in_segment": 15,
-                    "index_in_transcript": 72,
-                    "probability": null
-                },
-                {
-                    "start": 38.060001373291016,
-                    "end": 39.459999084472656,
-                    "word": "too",
-                    "index_in_segment": 16,
-                    "index_in_transcript": 73,
-                    "probability": null
-                },
-                {
-                    "start": 39.959999084472656,
-                    "end": 40.279998779296875,
-                    "word": "Cthulhu",
-                    "index_in_segment": 17,
-                    "index_in_transcript": 74,
-                    "probability": null
-                }
-            ]
-        },
-        {
-            "id": 4,
-            "seek": 4028.0,
-            "start": 40.279998779296875,
-            "end": 52.97999954223633,
-            "text": " Dinosaur, Vibrant, Hexagon, Sparkling Water, Juggling Balls.",
-            "tokens": [
-                50404,
-                413,
-                15220,
-                3463,
-                11,
-                691,
-                6414,
-                394,
-                11,
-                634,
-                87,
-                6709,
-                11,
-                23424,
-                1688,
-                8772,
-                11,
-                508,
-                29921,
-                10744,
-                82,
-                13,
-                51116
-            ],
-            "temperature": 0.0,
-            "avg_logprob": -0.3656432628631592,
-            "compression_ratio": 0.9523809552192688,
-            "no_speech_prob": 0.42592740058898926,
-            "words": [
-                {
-                    "start": 40.279998779296875,
-                    "end": 41.959999084472656,
-                    "word": "Dinosaur",
-                    "index_in_segment": 1,
-                    "index_in_transcript": 75,
-                    "probability": null
-                },
-                {
-                    "start": 43.47999954223633,
-                    "end": 43.900001525878906,
-                    "word": "Vibrant",
-                    "index_in_segment": 2,
-                    "index_in_transcript": 76,
-                    "probability": null
-                },
-                {
-                    "start": 46.15999984741211,
-                    "end": 47.099998474121094,
-                    "word": "Hexagon",
-                    "index_in_segment": 3,
-                    "index_in_transcript": 77,
-                    "probability": null
-                },
-                {
-                    "start": 50.58000183105469,
-                    "end": 51.099998474121094,
-                    "word": "Sparkling",
-                    "index_in_segment": 4,
-                    "index_in_transcript": 78,
-                    "probability": null
-                },
-                {
-                    "start": 51.099998474121094,
-                    "end": 51.65999984741211,
-                    "word": "Water",
-                    "index_in_segment": 5,
-                    "index_in_transcript": 79,
-                    "probability": null
-                },
-                {
-                    "start": 51.779998779296875,
-                    "end": 52.119998931884766,
-                    "word": "Juggling",
-                    "index_in_segment": 6,
-                    "index_in_transcript": 80,
-                    "probability": null
-                },
-                {
-                    "start": 52.119998931884766,
-                    "end": 52.97999954223633,
-                    "word": "Balls",
-                    "index_in_segment": 7,
-                    "index_in_transcript": 81,
-                    "probability": null
-                }
-            ]
-        }
-    ],
-    "language": "english"
+  "duration": 55.54999923706055,
+  "language": "english",
+  "text": "Hello. I'm saying words to the microphone. My name is John Mathis with no H and two T's in Mathis. One, two, three, four, five, six, seven, eight, nine. And I have a cat named Poo and another one named Ollie. And dogs are good and horses are tall. Thank you for listening. Thank you for coming to this wonderful day and I hope that everything will be in good in the future too. Cthulhu, dinosaur, vibrant, hexagon, sparkling water juggling balls.",
+  "segments": [
+    {
+      "id": 0,
+      "avg_logprob": -0.2672506272792816,
+      "compression_ratio": 1.4745762348175049,
+      "end": 7.78000020980835,
+      "no_speech_prob": 0.04181129112839699,
+      "seek": 0,
+      "start": 0,
+      "temperature": 0,
+      "text": " Hello. I'm saying words to the microphone. My name is John Mathis with no H and two",
+      "tokens": [
+        50364,
+        2425,
+        13,
+        286,
+        478,
+        1566,
+        2283,
+        281,
+        264,
+        10952,
+        13,
+        1222,
+        1315,
+        307,
+        2619,
+        15776,
+        271,
+        365,
+        572,
+        389,
+        293,
+        732,
+        50746
+      ]
+    },
+    {
+      "id": 1,
+      "avg_logprob": -0.2672506272792816,
+      "compression_ratio": 1.4745762348175049,
+      "end": 18,
+      "no_speech_prob": 0.04181129112839699,
+      "seek": 0,
+      "start": 7.78000020980835,
+      "temperature": 0,
+      "text": " T's in Mathis. One, two, three, four, five, six, seven, eight, nine. And I have a cat named Poo",
+      "tokens": [
+        50746,
+        314,
+        311,
+        294,
+        15776,
+        271,
+        13,
+        1485,
+        11,
+        732,
+        11,
+        1045,
+        11,
+        1451,
+        11,
+        1732,
+        11,
+        2309,
+        11,
+        3407,
+        11,
+        3180,
+        11,
+        4949,
+        13,
+        400,
+        286,
+        362,
+        257,
+        3857,
+        4926,
+        430,
+        1986,
+        51258
+      ]
+    },
+    {
+      "id": 2,
+      "avg_logprob": -0.2672506272792816,
+      "compression_ratio": 1.4745762348175049,
+      "end": 27.559999465942383,
+      "no_speech_prob": 0.04181129112839699,
+      "seek": 0,
+      "start": 18,
+      "temperature": 0,
+      "text": " and another one named Ollie. And dogs are good and horses are tall. Thank you for",
+      "tokens": [
+        51258,
+        293,
+        1071,
+        472,
+        4926,
+        35089,
+        13,
+        400,
+        7197,
+        366,
+        665,
+        293,
+        13112,
+        366,
+        6764,
+        13,
+        1044,
+        291,
+        337,
+        51742
+      ]
+    },
+    {
+      "id": 3,
+      "avg_logprob": -0.27192679047584534,
+      "compression_ratio": 1.3142857551574707,
+      "end": 35.31999969482422,
+      "no_speech_prob": 0.028739718720316887,
+      "seek": 2758,
+      "start": 27.579999923706055,
+      "temperature": 0,
+      "text": " listening. Thank you for coming to this wonderful day and I hope that everything",
+      "tokens": [
+        50364,
+        4764,
+        13,
+        1044,
+        291,
+        337,
+        1348,
+        281,
+        341,
+        3715,
+        786,
+        293,
+        286,
+        1454,
+        300,
+        1203,
+        50752
+      ]
+    },
+    {
+      "id": 4,
+      "avg_logprob": -0.27192679047584534,
+      "compression_ratio": 1.3142857551574707,
+      "end": 51.02000045776367,
+      "no_speech_prob": 0.028739718720316887,
+      "seek": 2758,
+      "start": 35.31999969482422,
+      "temperature": 0,
+      "text": " will be in good in the future too. Cthulhu, dinosaur, vibrant, hexagon, sparkling",
+      "tokens": [
+        50752,
+        486,
+        312,
+        294,
+        665,
+        294,
+        264,
+        2027,
+        886,
+        13,
+        383,
+        392,
+        425,
+        12086,
+        11,
+        23627,
+        11,
+        21571,
+        11,
+        23291,
+        6709,
+        11,
+        39967,
+        51536
+      ]
+    },
+    {
+      "id": 5,
+      "avg_logprob": -0.27192679047584534,
+      "compression_ratio": 1.3142857551574707,
+      "end": 52.68000030517578,
+      "no_speech_prob": 0.028739718720316887,
+      "seek": 2758,
+      "start": 51.02000045776367,
+      "temperature": 0,
+      "text": " water juggling balls.",
+      "tokens": [
+        51536,
+        1281,
+        361,
+        29921,
+        9803,
+        13,
+        51704
+      ]
+    }
+  ],
+  "words": [
+    {
+      "end": 0.7200000286102295,
+      "start": 0,
+      "word": "Hello"
+    },
+    {
+      "end": 1.1200000047683716,
+      "start": 0.9399999976158142,
+      "word": "I'm"
+    },
+    {
+      "end": 1.559999942779541,
+      "start": 1.1200000047683716,
+      "word": "saying"
+    },
+    {
+      "end": 2.0999999046325684,
+      "start": 1.559999942779541,
+      "word": "words"
+    },
+    {
+      "end": 2.5399999618530273,
+      "start": 2.0999999046325684,
+      "word": "to"
+    },
+    {
+      "end": 2.940000057220459,
+      "start": 2.5399999618530273,
+      "word": "the"
+    },
+    {
+      "end": 3.359999895095825,
+      "start": 2.940000057220459,
+      "word": "microphone"
+    },
+    {
+      "end": 3.680000066757202,
+      "start": 3.680000066757202,
+      "word": "My"
+    },
+    {
+      "end": 3.819999933242798,
+      "start": 3.680000066757202,
+      "word": "name"
+    },
+    {
+      "end": 4.059999942779541,
+      "start": 3.819999933242798,
+      "word": "is"
+    },
+    {
+      "end": 4.739999771118164,
+      "start": 4.059999942779541,
+      "word": "John"
+    },
+    {
+      "end": 5.699999809265137,
+      "start": 4.739999771118164,
+      "word": "Mathis"
+    },
+    {
+      "end": 6.539999961853027,
+      "start": 5.699999809265137,
+      "word": "with"
+    },
+    {
+      "end": 7,
+      "start": 6.539999961853027,
+      "word": "no"
+    },
+    {
+      "end": 7.340000152587891,
+      "start": 7,
+      "word": "H"
+    },
+    {
+      "end": 7.579999923706055,
+      "start": 7.340000152587891,
+      "word": "and"
+    },
+    {
+      "end": 7.78000020980835,
+      "start": 7.579999923706055,
+      "word": "two"
+    },
+    {
+      "end": 8.140000343322754,
+      "start": 7.78000020980835,
+      "word": "T's"
+    },
+    {
+      "end": 8.319999694824219,
+      "start": 8.140000343322754,
+      "word": "in"
+    },
+    {
+      "end": 8.84000015258789,
+      "start": 8.319999694824219,
+      "word": "Mathis"
+    },
+    {
+      "end": 10.680000305175781,
+      "start": 10.300000190734863,
+      "word": "One"
+    },
+    {
+      "end": 10.880000114440918,
+      "start": 10.760000228881836,
+      "word": "two"
+    },
+    {
+      "end": 11.300000190734863,
+      "start": 11.039999961853027,
+      "word": "three"
+    },
+    {
+      "end": 11.600000381469727,
+      "start": 11.539999961853027,
+      "word": "four"
+    },
+    {
+      "end": 12.0600004196167,
+      "start": 11.979999542236328,
+      "word": "five"
+    },
+    {
+      "end": 12.420000076293945,
+      "start": 12.359999656677246,
+      "word": "six"
+    },
+    {
+      "end": 12.760000228881836,
+      "start": 12.640000343322754,
+      "word": "seven"
+    },
+    {
+      "end": 13.199999809265137,
+      "start": 13.140000343322754,
+      "word": "eight"
+    },
+    {
+      "end": 13.800000190734863,
+      "start": 13.600000381469727,
+      "word": "nine"
+    },
+    {
+      "end": 16.18000030517578,
+      "start": 15.5,
+      "word": "And"
+    },
+    {
+      "end": 16.540000915527344,
+      "start": 16.18000030517578,
+      "word": "I"
+    },
+    {
+      "end": 16.760000228881836,
+      "start": 16.540000915527344,
+      "word": "have"
+    },
+    {
+      "end": 17.100000381469727,
+      "start": 16.760000228881836,
+      "word": "a"
+    },
+    {
+      "end": 17.100000381469727,
+      "start": 17.100000381469727,
+      "word": "cat"
+    },
+    {
+      "end": 17.65999984741211,
+      "start": 17.100000381469727,
+      "word": "named"
+    },
+    {
+      "end": 18,
+      "start": 17.65999984741211,
+      "word": "Poo"
+    },
+    {
+      "end": 18.280000686645508,
+      "start": 18,
+      "word": "and"
+    },
+    {
+      "end": 18.540000915527344,
+      "start": 18.280000686645508,
+      "word": "another"
+    },
+    {
+      "end": 18.739999771118164,
+      "start": 18.540000915527344,
+      "word": "one"
+    },
+    {
+      "end": 19,
+      "start": 18.739999771118164,
+      "word": "named"
+    },
+    {
+      "end": 19.360000610351562,
+      "start": 19,
+      "word": "Ollie"
+    },
+    {
+      "end": 20.979999542236328,
+      "start": 20.299999237060547,
+      "word": "And"
+    },
+    {
+      "end": 21.420000076293945,
+      "start": 20.979999542236328,
+      "word": "dogs"
+    },
+    {
+      "end": 21.920000076293945,
+      "start": 21.420000076293945,
+      "word": "are"
+    },
+    {
+      "end": 22.34000015258789,
+      "start": 21.920000076293945,
+      "word": "good"
+    },
+    {
+      "end": 23.360000610351562,
+      "start": 22.34000015258789,
+      "word": "and"
+    },
+    {
+      "end": 23.68000030517578,
+      "start": 23.360000610351562,
+      "word": "horses"
+    },
+    {
+      "end": 24.739999771118164,
+      "start": 23.68000030517578,
+      "word": "are"
+    },
+    {
+      "end": 25.360000610351562,
+      "start": 24.739999771118164,
+      "word": "tall"
+    },
+    {
+      "end": 27,
+      "start": 26.31999969482422,
+      "word": "Thank"
+    },
+    {
+      "end": 27.239999771118164,
+      "start": 27,
+      "word": "you"
+    },
+    {
+      "end": 27.579999923706055,
+      "start": 27.239999771118164,
+      "word": "for"
+    },
+    {
+      "end": 28.260000228881836,
+      "start": 27.579999923706055,
+      "word": "listening"
+    },
+    {
+      "end": 28.959999084472656,
+      "start": 28.81999969482422,
+      "word": "Thank"
+    },
+    {
+      "end": 29.040000915527344,
+      "start": 28.959999084472656,
+      "word": "you"
+    },
+    {
+      "end": 29.280000686645508,
+      "start": 29.040000915527344,
+      "word": "for"
+    },
+    {
+      "end": 29.540000915527344,
+      "start": 29.280000686645508,
+      "word": "coming"
+    },
+    {
+      "end": 30.040000915527344,
+      "start": 29.540000915527344,
+      "word": "to"
+    },
+    {
+      "end": 31.18000030517578,
+      "start": 30.040000915527344,
+      "word": "this"
+    },
+    {
+      "end": 31.799999237060547,
+      "start": 31.18000030517578,
+      "word": "wonderful"
+    },
+    {
+      "end": 32.279998779296875,
+      "start": 31.799999237060547,
+      "word": "day"
+    },
+    {
+      "end": 33.68000030517578,
+      "start": 32.279998779296875,
+      "word": "and"
+    },
+    {
+      "end": 34.18000030517578,
+      "start": 33.68000030517578,
+      "word": "I"
+    },
+    {
+      "end": 34.220001220703125,
+      "start": 34.18000030517578,
+      "word": "hope"
+    },
+    {
+      "end": 35.02000045776367,
+      "start": 34.220001220703125,
+      "word": "that"
+    },
+    {
+      "end": 35.31999969482422,
+      "start": 35.02000045776367,
+      "word": "everything"
+    },
+    {
+      "end": 35.70000076293945,
+      "start": 35.31999969482422,
+      "word": "will"
+    },
+    {
+      "end": 36.400001525878906,
+      "start": 35.70000076293945,
+      "word": "be"
+    },
+    {
+      "end": 37.13999938964844,
+      "start": 36.400001525878906,
+      "word": "in"
+    },
+    {
+      "end": 37.560001373291016,
+      "start": 37.13999938964844,
+      "word": "good"
+    },
+    {
+      "end": 37.7599983215332,
+      "start": 37.560001373291016,
+      "word": "in"
+    },
+    {
+      "end": 38.099998474121094,
+      "start": 37.7599983215332,
+      "word": "the"
+    },
+    {
+      "end": 38.099998474121094,
+      "start": 38.099998474121094,
+      "word": "future"
+    },
+    {
+      "end": 39.459999084472656,
+      "start": 38.099998474121094,
+      "word": "too"
+    },
+    {
+      "end": 40.2599983215332,
+      "start": 39.959999084472656,
+      "word": "Cthulhu"
+    },
+    {
+      "end": 41.86000061035156,
+      "start": 41.29999923706055,
+      "word": "dinosaur"
+    },
+    {
+      "end": 43.84000015258789,
+      "start": 43.47999954223633,
+      "word": "vibrant"
+    },
+    {
+      "end": 47.060001373291016,
+      "start": 46.060001373291016,
+      "word": "hexagon"
+    },
+    {
+      "end": 51.02000045776367,
+      "start": 50.70000076293945,
+      "word": "sparkling"
+    },
+    {
+      "end": 51.68000030517578,
+      "start": 51.02000045776367,
+      "word": "water"
+    },
+    {
+      "end": 52.099998474121094,
+      "start": 51.68000030517578,
+      "word": "juggling"
+    },
+    {
+      "end": 52.68000030517578,
+      "start": 52.099998474121094,
+      "word": "balls"
+    }
+  ],
+  "task": "transcribe"
 }

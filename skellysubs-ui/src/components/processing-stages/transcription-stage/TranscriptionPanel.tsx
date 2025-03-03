@@ -3,7 +3,7 @@ import {
   selectIsTranscribeReady,
   selectProcessingContext,
 } from "../../../store/slices/processing-status/processingStatusSlice"
-import { Button, Typography } from "@mui/material"
+import { Button, IconButton, Typography } from "@mui/material"
 
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
@@ -14,6 +14,8 @@ import {
   ProcessingPanelLayout,
 } from "../ProcessingPanelLayout"
 import { transcribeAudioThunk } from "../../../store/thunks/transcribeAudioThunk"
+import SettingsIcon from "@mui/icons-material/Settings"
+import { TranscriptionControls } from "./TranscriptionControls"
 
 const TranscriptionPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -38,7 +40,7 @@ const TranscriptionPanel: React.FC = () => {
     )
   }
 
-  const handleDownloadClick = () => {
+  const handleDownloadJSONClick = () => {
     const json = JSON.stringify(processingContext.transcription, null, 2)
     const blob = new Blob([json], { type: "application/json" })
     const url = URL.createObjectURL(blob)
@@ -51,7 +53,26 @@ const TranscriptionPanel: React.FC = () => {
     // Clean up the URL object
     URL.revokeObjectURL(url)
   }
+  const handleDownloadSRTClick = () => {
+    if (!processingContext.transcription?.srt_subtitles_string) return
+    logger(`[TranscriptionPanel] Downloading SRT subtitles...`)
+    const srtBlob = new Blob(
+      [processingContext.transcription.srt_subtitles_string],
+      {
+        type: "text/srt",
+      },
+    )
+    const url = URL.createObjectURL(srtBlob)
 
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${processingContext.originalFile?.name}_transcription.subtitles.srt`
+    a.click()
+
+    // Clean up the URL object
+    URL.revokeObjectURL(url)
+    logger("done downloading srt")
+  }
   return (
     <ProcessingPanelLayout
       borderColor="#ff0"
@@ -79,17 +100,17 @@ const TranscriptionPanel: React.FC = () => {
             : null}
       </Typography>
 
-      {/*<IconButton onClick={() => setShowControls(!showControls)}>*/}
-      {/*  <SettingsIcon />*/}
-      {/*</IconButton>*/}
-      {/*{showControls && (*/}
-      {/*  <TranscriptionControls*/}
-      {/*    language={language}*/}
-      {/*    setLanguage={setLanguage}*/}
-      {/*    prompt={prompt}*/}
-      {/*    setPrompt={setPrompt}*/}
-      {/*  />*/}
-      {/*)}*/}
+      <IconButton onClick={() => setShowControls(!showControls)}>
+        <SettingsIcon />
+      </IconButton>
+      {showControls && (
+        <TranscriptionControls
+          language={language}
+          setLanguage={setLanguage}
+          prompt={prompt}
+          setPrompt={setPrompt}
+        />
+      )}
 
       <ProcessingButton
         status={transcriptionStatus}
@@ -100,11 +121,17 @@ const TranscriptionPanel: React.FC = () => {
 
       {processingContext.transcription && (
         <>
-          <Typography>{processingContext.transcription.text}</Typography>
+          <Typography>
+            {processingContext.transcription.transcript.text}
+          </Typography>
+          <br />
+          <Typography>
+            {processingContext.transcription.srt_subtitles_string}
+          </Typography>
 
           <Button
             variant="contained"
-            onClick={handleDownloadClick}
+            onClick={handleDownloadJSONClick}
             sx={{
               m: 3,
               p: 4,
@@ -117,6 +144,21 @@ const TranscriptionPanel: React.FC = () => {
             Download transcription results
             <br />
             (openai verbose json format)
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleDownloadSRTClick}
+            sx={{
+              m: 3,
+              p: 4,
+              backgroundColor: extendedPaperbaseTheme.palette.secondary.light,
+              borderColor: "#222222",
+              borderStyle: "solid",
+              borderWidth: "1px",
+            }}
+          >
+            Download SRT subtitles
           </Button>
         </>
       )}
