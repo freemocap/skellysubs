@@ -89,13 +89,18 @@ interface TranslationsCollection {
   >
 }
 
-export interface TranslatedTranscription {
-  original_text: string
-  original_language: string
-  translations: TranslationsCollection
-  segments: TranscriptSegment[]
+export interface TranslationResponse {
+  prompts: Record<string, string>;
+  translations: Record<
+      string,
+      {
+        translated_text: string;
+        romanized_text: string;
+        translated_language_name: string;
+        romanization_method: string;
+      }
+  >;
 }
-
 export class MatchingResult {}
 
 export interface ProcessingStage {
@@ -110,7 +115,7 @@ export interface ProcessingContext {
   originalFile?: AudioVisualFile
   mp3Audio?: AudioVisualFile
   transcription?: TranscriptionResult
-  translation?: TranslatedTranscription
+  translation?: TranslationResponse
 }
 export interface ProcessingState {
   context: ProcessingContext

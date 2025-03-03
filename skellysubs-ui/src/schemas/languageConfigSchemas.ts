@@ -4,7 +4,7 @@ export const LanguageBackgroundSchema = z.object({
   family_tree: z.array(z.string()),
   alphabet: z.string(),
   sample_text: z.string(),
-  sample_romanized_text: z.string(),
+  sample_romanized_text: z.string().optional(),
 })
 
 export const LanguageConfigSchema = z.object({

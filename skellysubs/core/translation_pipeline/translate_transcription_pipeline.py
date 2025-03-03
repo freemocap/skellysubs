@@ -3,9 +3,11 @@ import logging
 
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
 from skellysubs.core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
+from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation_pipeline.models.translated_segment_models import MatchedTranslatedSegment
 from skellysubs.core.translation_pipeline.models.translated_text_models import TranslatedText
 from skellysubs.core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
 from skellysubs.core.translation_pipeline.translation_prompts.full_text_transcript_translation_prompt import \
     format_full_text_translation_system_prompt
 from skellysubs.core.translation_pipeline.translation_prompts.segement_word_level_translation_prompt import \
@@ -103,40 +105,25 @@ async def segment_level_translation(
     return full_text_translated_transcript
 
 
-async def full_text_translation(initialized_transcription: TranslatedTranscription) -> TranslatedTranscription:
+async def full_text_translation(text: str, original_language: str,
+                                target_languages: dict[LanguageNameString, LanguageConfig]) -> tuple[dict[LanguageNameString,str], dict[LanguageNameString, TranslatedText]]:
     # Full-text translation
 
-    full_text_system_prompts_by_language = format_full_text_translation_system_prompt(
-        initialized_translated_transcript_without_words=initialized_transcription)
+    system_prompts_by_language = format_full_text_translation_system_prompt(text=text,
+                                                                                      target_languages=target_languages,
+                                                                                      original_language=original_language)
 
     full_text_tasks = []
-    for language, system_prompt in full_text_system_prompts_by_language.items():
-        full_text_tasks.append(asyncio.create_task(get_ai_client().make_json_mode_request( system_prompt=system_prompt,
-                                                                                    prompt_model=TranslatedText,
-                                                                                    )))
-        # results.append(await get_ai_client().make_json_mode_request(system_prompt=system_prompt,
-        #                                                             prompt_model=TranslatedText,  # type: ignore
-        #                                                             ))
+    for language, system_prompt in system_prompts_by_language.items():
+        full_text_tasks.append(asyncio.create_task(get_ai_client().make_json_mode_request(system_prompt=system_prompt,
+                                                                                          prompt_model=TranslatedText,
+                                                                                          )))
+
+    translations = {}
     results: list[TranslatedText] = await asyncio.gather(*[task for task in full_text_tasks], return_exceptions=True)
-    for key, result in zip(initialized_transcription.translations.translations.keys(), results):
-        initialized_transcription.translations.translations[key] = result
+    for key, result in zip(target_languages.keys(), results):
+        translations[key] = result
 
-    return initialized_transcription
+    return system_prompts_by_language, translations
 
 
-def validate_translated_segment(segment_number, translated_segment, translated_transcript_with_words):
-    if not len(translated_segment.words) == len(translated_transcript_with_words.segments[segment_number].words):
-        raise ValueError(f"Word-level translation mismatch: "
-                         f"Original segment has length {len(translated_transcript_with_words.segments[segment_number].words)}, "
-                         f"translated segment has length {len(translated_segment.words)}")
-    if not all([translated_segment.words[i].original_word ==
-                translated_transcript_with_words.segments[segment_number].words[i].original_word for i in
-                range(len(translated_segment.words))]):
-        raise ValueError(f"Word-level translation mismatch: "
-                         f"Original segment has words {[word.original_word for word in translated_transcript_with_words.segments[segment_number].words]}, "
-                         f"translated segment has words {[word.original_word for word in translated_segment.words]}")
-    if not translated_transcript_with_words.segments[
-               segment_number].original_segment_text == translated_segment.original_segment_text:
-        raise ValueError(f"Word-level translation mismatch: "
-                         f"Original segment has text {translated_transcript_with_words.segments[segment_number].original_segment_text}, "
-                         f"translated segment has text {translated_segment.original_segment_text}")

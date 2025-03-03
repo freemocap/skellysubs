@@ -1,16 +1,9 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
-import {
-  translationThunk,
-} from "../../thunks/translationThunk"
-import {
-  AudioVisualFile, ProcessingContext,
-  ProcessingStage, ProcessingState,
-  TranscriptionResult,
-  TranslatedTranscription
-} from "./processing-status-types";
-import {prepareFileThunk} from "../../thunks/prepareFileThunk";
-import {transcriptionThunk} from "../../thunks/transcriptionThunk";
+import { translationThunk } from "../../thunks/translationThunk"
+import { ProcessingContext, ProcessingState } from "./processing-status-types"
+import { prepareFileThunk } from "../../thunks/prepareFileThunk"
+import { transcriptionThunk } from "../../thunks/transcriptionThunk"
 
 // Updated initial state
 const initialState: ProcessingState = {

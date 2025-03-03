@@ -122,7 +122,7 @@ const TranscriptionPanel: React.FC = () => {
       {processingContext.transcription && (
         <>
           <Typography>
-            {processingContext.transcription.transcript.text}
+            {processingContext.transcription.transcript?.text}
           </Typography>
 
           <Button

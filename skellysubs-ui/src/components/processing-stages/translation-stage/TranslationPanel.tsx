@@ -27,25 +27,27 @@ const TranslationPanel: React.FC = () => {
   const translationStatus = useAppSelector(
     state => state.processing.stages.translation.status,
   )
-  const [targetLanguages, setTargetLanguages] = useState("")
-  const [showControls, setShowControls] = useState(false)
-  const [languageOptions, setLanguageOptions] =
-    useState < Record<string, LanguageConfig>()
+  // const [targetLanguages, setTargetLanguages] = useState("")
+  // const [showControls, setShowControls] = useState(false)
+    const [languageOptions, setLanguageOptions] = useState<Record<string, LanguageConfig>>({});
 
-  useEffect(() => {
-    getLanguageConfigs()
-      .then(({ language_configs }) => {
-        const options = Object.values(language_configs)
-        setLanguageOptions(options)
-      })
-      .catch(error => console.error("Failed to load language configs:", error))
-  }, [])
+    useEffect(() => {
+        getLanguageConfigs()
+            .then((languageConfigs) => {
+                setLanguageOptions(languageConfigs);
+            })
+            .catch(error => console.error("Failed to load language configs:", error));
+    }, []);
 
-  const handleTranslateClick = () => {
-    logger("Translate button clicked")
-    dispatch(translationThunk(languageOptions))
-  }
+    const handleTranslateClick = () => {
+        if (!Object.keys(languageOptions).length || !processingContext.transcription) return;
 
+        dispatch(translationThunk({
+            text: processingContext.transcription.transcript.text,
+            targetLanguages: languageOptions,
+            originalLanguage: processingContext.transcription.transcript.language
+        }));
+    };
   const handleDownloadClick = () => {
     const json = JSON.stringify(processingContext.translation, null, 2)
     const blob = new Blob([json], { type: "application/json" })
@@ -82,17 +84,17 @@ const TranslationPanel: React.FC = () => {
           " No transcript available, transcribe audio first. "}
       </Typography>
 
-      <IconButton onClick={() => setShowControls(!showControls)}>
-        <SettingsIcon />
-      </IconButton>
-      {showControls && (
-        <TranslationControls
-          languageOptions={languageOptions}
-          setLanguageOptions={setLanguageOptions}
-          targetLanguages={targetLanguages}
-          setTargetLanguages={setTargetLanguages}
-        />
-      )}
+      {/*<IconButton onClick={() => setShowControls(!showControls)}>*/}
+      {/*  <SettingsIcon />*/}
+      {/*</IconButton>*/}
+      {/*{showControls && (*/}
+      {/*  <TranslationControls*/}
+      {/*    languageOptions={languageOptions}*/}
+      {/*    setLanguageOptions={setLanguageOptions}*/}
+      {/*    targetLanguages={targetLanguages}*/}
+      {/*    setTargetLanguages={setTargetLanguages}*/}
+      {/*  />*/}
+      {/*)}*/}
       <ProcessingButton
         status={translationStatus}
         isReady={isReady}
@@ -103,13 +105,13 @@ const TranslationPanel: React.FC = () => {
         <>
           <Typography sx={{ mb: 2, textAlign: "center" }}>
             Original text: <br />
-            {processingContext.translation.original_text}
+            {processingContext.transcription?.transcript?.text}
           </Typography>
           <Typography variant="h6" sx={{ mb: 1 }}>
             Translations:
           </Typography>
           {Object.entries(
-            processingContext.translation.translations.translations,
+            processingContext.translation.translations,
           ).map(([key, translation], i) => (
             <Box
               key={i}

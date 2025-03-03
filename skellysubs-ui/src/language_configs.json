@@ -1,5 +1,5 @@
 {
-    "ENGLISH": {
+    "english": {
       "language_name": "English",
       "language_code": "en",
       "romanization_method": "NONE",
@@ -14,7 +14,7 @@
         "sample_romanized_text": "NONE"
       }
     },
-    "SPANISH": {
+    "spanish": {
       "language_name": "Spanish",
       "language_code": "es",
       "romanization_method": "NONE",
@@ -29,7 +29,7 @@
         "sample_romanized_text": "NONE"
       }
     },
-    "ARABIC_LEVANTINE": {
+    "arabic_levantine": {
       "language_name": "Arabic (Levantine)",
       "language_code": "ar",
       "romanization_method": "ALA_LC",
@@ -44,7 +44,7 @@
         "sample_romanized_text": "Sifr bārid ya'kul khubzan wa fākihatan ṭayyibatan."
       }
     },
-    "CHINESE_MANDARIN_SIMPLIFIED": {
+    "chinese_mandarin_simplified": {
       "language_name": "Chinese (Mandarin, Simplified)",
       "language_code": "zh",
       "romanization_method": "PINYIN",
@@ -58,7 +58,7 @@
         "sample_romanized_text": "Shìyě zhōng zuì liànglì de fēngjǐng, shì nǐ de wéixiào."
       }
     },
-    "HINDI": {
+    "hindi": {
       "language_name": "Hindi",
       "language_code": "hi",
       "romanization_method": "ISO_15919",
@@ -73,7 +73,7 @@
         "sample_romanized_text": "Ēka tēza bhūrī lōmaṛī ālasī kutē kē ūpara kūdatī hai."
       }
     },
-    "FRENCH": {
+    "french": {
       "language_name": "French",
       "language_code": "fr",
       "romanization_method": "NONE",
@@ -88,7 +88,7 @@
         "sample_romanized_text": "NONE"
       }
     },
-  "IGBO": {
+  "igbo": {
     "language_name": "Igbo",
     "language_code": "ig",
     "romanization_method": "NONE",

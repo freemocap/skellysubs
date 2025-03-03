@@ -12,7 +12,9 @@ import type { z } from "zod"
 
 export const translationThunk = createProcessingThunk<
   {
+    text:string,
     targetLanguages: Record<string, LanguageConfig>
+    originalLanguage: string
   },
   ProcessingContext["translation"]
 >("translation", async (context, params) => {
@@ -21,12 +23,11 @@ export const translationThunk = createProcessingThunk<
     if (!params?.targetLanguages) {
       throw new Error("No target languages provided")
     }
-    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/text`
+    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/text?original_language=${params.originalLanguage}`
     const requestBody = JSON.stringify(
       {
-        text: context.transcription.transcript.text,
+        text: params.text,
         target_languages: params.targetLanguages,
-        original_langugage: context.transcription.transcript.language,
       },
       null,
       2,
