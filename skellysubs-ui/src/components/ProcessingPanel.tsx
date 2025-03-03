@@ -3,7 +3,7 @@ import { Box } from "@mui/material"
 import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
 import FileSelectionBox from "./processing-stages/file-input-stage/FileSelectionBox"
 import TranscriptionPanel from "./processing-stages/transcription-stage/TranscriptionPanel"
-import TranslationPanel from "./processing-stages/TranslationPanel"
+import TranslationPanel from "./processing-stages/translation-stage/TranslationPanel"
 
 export const ProcessingPanel = () => {
   return (

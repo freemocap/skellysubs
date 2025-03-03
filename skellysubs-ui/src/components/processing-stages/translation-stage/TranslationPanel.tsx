@@ -1,18 +1,18 @@
-import { useAppDispatch, useAppSelector } from "../../store/hooks"
+import { useAppDispatch, useAppSelector } from "../../../store/hooks"
 import {
   selectIsTranslateReady,
   selectProcessingContext,
-} from "../../store/slices/processing-status/processingStatusSlice"
+} from "../../../store/slices/processing-status/processingStatusSlice"
 import { Box, Button, IconButton, Typography } from "@mui/material"
-import { translateTextThunk } from "../../store/thunks/translateTextThunk"
-import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
+import { translateTextThunk } from "../../../store/thunks/translateTextThunk"
+import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
 import { useState } from "react"
-import { logger } from "../../utils/logger"
+import { logger } from "../../../utils/logger"
 import {
   ProcessingButton,
   ProcessingPanelLayout,
-} from "./ProcessingPanelLayout"
+} from "../ProcessingPanelLayout"
 import { TranslationControls } from "./TranslationControls"
 import SettingsIcon from "@mui/icons-material/Settings"
 
