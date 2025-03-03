@@ -75,19 +75,19 @@ const TranslationPanel: React.FC = () => {
           " No transcript available, transcribe audio first. "}
       </Typography>
 
-      <IconButton onClick={() => setShowControls(!showControls)}>
-        <SettingsIcon />
-      </IconButton>
-      {showControls && (
-        <TranslationControls
-          targetLanguages={targetLanguages}
-          setTargetLanguages={setTargetLanguages}
-          romanize={romanize}
-          setRomanize={setRomanize}
-          romanizationMethod={romanizationMethod}
-          setRomanizationMethod={setRomanizationMethod}
-        />
-      )}
+      {/*<IconButton onClick={() => setShowControls(!showControls)}>*/}
+      {/*  <SettingsIcon />*/}
+      {/*</IconButton>*/}
+      {/*{showControls && (*/}
+      {/*  <TranslationControls*/}
+      {/*    targetLanguages={targetLanguages}*/}
+      {/*    setTargetLanguages={setTargetLanguages}*/}
+      {/*    romanize={romanize}*/}
+      {/*    setRomanize={setRomanize}*/}
+      {/*    romanizationMethod={romanizationMethod}*/}
+      {/*    setRomanizationMethod={setRomanizationMethod}*/}
+      {/*  />*/}
+      {/*)}*/}
       <ProcessingButton
         status={translationStatus}
         isReady={isReady}

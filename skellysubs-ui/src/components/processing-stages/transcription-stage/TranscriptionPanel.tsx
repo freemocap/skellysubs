@@ -3,8 +3,7 @@ import {
   selectIsTranscribeReady,
   selectProcessingContext,
 } from "../../../store/slices/processing-status/processingStatusSlice"
-import { Button, IconButton, Typography } from "@mui/material"
-import SettingsIcon from "@mui/icons-material/Settings"
+import { Button, Typography } from "@mui/material"
 
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import type React from "react"
@@ -14,8 +13,7 @@ import {
   ProcessingButton,
   ProcessingPanelLayout,
 } from "../ProcessingPanelLayout"
-import { TranscriptionControls } from "./TranscriptionControls"
-import {transcribeAudioThunk} from "../../../store/thunks/transcribeAudioThunk";
+import { transcribeAudioThunk } from "../../../store/thunks/transcribeAudioThunk"
 
 const TranscriptionPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -74,20 +72,25 @@ const TranscriptionPanel: React.FC = () => {
         color={extendedPaperbaseTheme.palette.text.disabled}
         sx={{ mb: 2 }}
       >
-        {!processingContext.mp3Audio &&
-          " No audio file available! upload a video or audio file first. "}
+        {!processingContext.mp3Audio
+          ? "No audio file available! Please upload a video or audio file first."
+          : !processingContext.transcription
+            ? "Audio file available, ready to transcribe!"
+            : null}
       </Typography>
-      <IconButton onClick={() => setShowControls(!showControls)}>
-        <SettingsIcon />
-      </IconButton>
-      {showControls && (
-        <TranscriptionControls
-          language={language}
-          setLanguage={setLanguage}
-          prompt={prompt}
-          setPrompt={setPrompt}
-        />
-      )}
+
+      {/*<IconButton onClick={() => setShowControls(!showControls)}>*/}
+      {/*  <SettingsIcon />*/}
+      {/*</IconButton>*/}
+      {/*{showControls && (*/}
+      {/*  <TranscriptionControls*/}
+      {/*    language={language}*/}
+      {/*    setLanguage={setLanguage}*/}
+      {/*    prompt={prompt}*/}
+      {/*    setPrompt={setPrompt}*/}
+      {/*  />*/}
+      {/*)}*/}
+
       <ProcessingButton
         status={transcriptionStatus}
         isReady={isReady}

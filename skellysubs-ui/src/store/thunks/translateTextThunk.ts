@@ -1,7 +1,7 @@
 import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
 
 import { logger } from "../../utils/logger"
-import { ProcessingContext } from "../slices/processing-status/processing-status-types"
+import type { ProcessingContext } from "../slices/processing-status/processing-status-types"
 import { createProcessingThunk } from "./createProcessingThunk"
 
 export const translateTextThunk = createProcessingThunk<
@@ -19,11 +19,11 @@ export const translateTextThunk = createProcessingThunk<
     const requestBody = JSON.stringify(
       {
         ...context.transcription,
-        translation_config: {
-          target_languages: params?.targetLanguages || [],
-          romanize: params?.romanize || false,
-          romanization_method: params?.romanizationMethod || "",
-        },
+        // translation_config: {
+        //   target_languages: params?.targetLanguages || [],
+        //   romanize: params?.romanize || false,
+        //   romanization_method: params?.romanizationMethod || "",
+        // },
       },
       null,
       2,
