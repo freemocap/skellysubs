@@ -124,17 +124,11 @@ const TranscriptionPanel: React.FC = () => {
           <Typography>
             {processingContext.transcription.transcript.text}
           </Typography>
-          <br />
-          <Typography>
-            {processingContext.transcription.srt_subtitles_string}
-          </Typography>
 
           <Button
             variant="contained"
             onClick={handleDownloadJSONClick}
             sx={{
-              m: 3,
-              p: 4,
               backgroundColor: extendedPaperbaseTheme.palette.primary.light,
               borderColor: "#222222",
               borderStyle: "solid",
@@ -151,14 +145,13 @@ const TranscriptionPanel: React.FC = () => {
             onClick={handleDownloadSRTClick}
             sx={{
               m: 3,
-              p: 4,
               backgroundColor: extendedPaperbaseTheme.palette.secondary.light,
               borderColor: "#222222",
               borderStyle: "solid",
               borderWidth: "1px",
             }}
           >
-            Download SRT subtitles
+            Download subtitles (.srt format)
           </Button>
         </>
       )}

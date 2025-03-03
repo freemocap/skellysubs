@@ -4,31 +4,26 @@ from fastapi import APIRouter, HTTPException
 from openai.types.audio import TranscriptionVerbose
 
 from skellysubs.core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
+from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
-from skellysubs.core.translation_pipeline.translate_transcription_pipeline import translate_transcription_pipeline, \
-    full_text_translation
+from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
+from skellysubs.core.translation_pipeline.translate_transcription_pipeline import  full_text_translation
 
 logger = logging.getLogger(__name__)
 translate_router = APIRouter()
 
-from pydantic import BaseModel
-class TranslationConfig(BaseModel):
-    target_languages: list[str] = []
-    romanize: bool = False
 
-
-@translate_router.post("/translate", response_model=TranslatedTranscription)
-async def translate_transcript_endpoint(
-        transcription: TranscriptionVerbose,
-        translation_config: TranslationConfig
+@translate_router.post("/translate/text", response_model=TranslatedTranscription)
+async def translate_text_endpoint(
+        text: str,
+        target_languages: dict[LanguageNameString, LanguageConfig],
+        original_language: str = "english"
 ) -> TranslatedTranscription:
-    logger.info(f"Translation request received for transcription: {transcription.text} with config: {translation_config.model_dump_json(indent=2)}")
+    logger.info(f"Translation request received for transcription: {text} with configs: {[key for key in target_languages.keys()]}")
 
     try:
-
-
         initialized_transcription = TranslatedTranscription.initialize(og_transcription=WhisperTranscriptionResult.from_verbose_transcript(transcription),
-                                                                       original_langauge="english")
+                                                                       original_langauge=original_language)
         translation = await full_text_translation(initialized_transcription=initialized_transcription)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

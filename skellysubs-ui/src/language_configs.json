@@ -1,5 +1,4 @@
 {
-  "language_configs": {
     "ENGLISH": {
       "language_name": "English",
       "language_code": "en",
@@ -88,8 +87,7 @@
         "sample_text": "Le vif renard brun saute par-dessus le chien paresseux.",
         "sample_romanized_text": "NONE"
       }
-    }
-  },
+    },
   "IGBO": {
     "language_name": "Igbo",
     "language_code": "ig",
@@ -107,5 +105,4 @@
       "sample_romanized_text": "NONE"
     }
   }
-
 }
