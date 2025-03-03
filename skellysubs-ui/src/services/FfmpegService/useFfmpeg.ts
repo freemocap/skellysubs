@@ -66,7 +66,7 @@ class FfmpegWrapper {
       "info",
     )
     const inputExtension = file.name.split(".").pop() || "tmp"
-    const inputPath = "input." + file.type
+    const inputPath = "input." + inputExtension
     const outputPath = "output.mp3"
     const audioFileName = `${file.name.replace(/\.[^/.]+$/, "")}.audio.mp3`
     try {
