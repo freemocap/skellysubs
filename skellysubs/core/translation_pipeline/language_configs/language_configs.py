@@ -32,7 +32,7 @@ def get_language_configs(yaml_path: str | None=None) ->dict[LanguageNameString, 
         yaml_path = Path(__file__).parent / 'language_configs.yaml'
     with open(yaml_path, 'r', encoding="utf-8") as file:
         config_data = yaml.safe_load(file)
-        language_configs = {name.lower(): LanguageConfig(**config) for name, config in config_data['language_configs'].items()}
+        language_configs = {name: LanguageConfig(**config) for name, config in config_data['language_configs'].items()}
     if  not language_configs:
         raise ValueError("No language configs found in the yaml file")
 

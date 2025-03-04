@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit"
-import { processingSlice } from "./slices/processingStatusSlice"
+import { processingSlice } from "./slices/processing-status/processingStatusSlice"
 import { logsSlice } from "./slices/LogsSlice"
 
 export const AppStateStore = configureStore({

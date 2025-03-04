@@ -3,9 +3,9 @@ import { Box, Button, Typography } from "@mui/material"
 import { useDropzone } from "react-dropzone"
 import DriveFileMoveIcon from "@mui/icons-material/DriveFileMove"
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone"
-import extendedPaperbaseTheme from "../../layout/paperbase_theme/paperbase-theme"
-import { useAppSelector } from "../../store/hooks"
-import { selectProcessingContext } from "../../store/slices/processingStatusSlice"
+import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
+import { useAppSelector } from "../../../store/hooks"
+import { selectProcessingContext } from "../../../store/slices/processing-status/processingStatusSlice"
 import FileDetails from "./FileDetails"
 
 interface FileInputProps {

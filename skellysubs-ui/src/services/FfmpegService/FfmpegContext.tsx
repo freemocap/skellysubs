@@ -1,7 +1,6 @@
 import type { ReactNode } from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import { ffmpegService } from "./useFfmpeg"
-import { useAppDispatch } from "../../store/hooks"
 
 interface FfmpegContextProps {
   isLoaded: boolean
@@ -18,12 +17,11 @@ const FfmpegContext = createContext<FfmpegContextProps | undefined>(undefined)
 export const FfmpegContextProvider = ({ children }: FfmpegProviderProps) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const dispatch = useAppDispatch()
 
   useEffect(() => {
     const loadFfmpeg = async () => {
       try {
-        await ffmpegService.loadFfmpeg(dispatch)
+        await ffmpegService.loadFfmpeg()
         setIsLoaded(true)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load FFmpeg")
@@ -31,7 +29,7 @@ export const FfmpegContextProvider = ({ children }: FfmpegProviderProps) => {
     }
 
     if (!ffmpegService.isLoaded) loadFfmpeg()
-  }, [dispatch])
+  }, [])
 
   return (
     <FfmpegContext.Provider

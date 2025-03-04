@@ -2,9 +2,8 @@ import type React from "react"
 import { Box, Typography } from "@mui/material"
 
 // const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`
-const logoUrl =
-  "https://media.githubusercontent.com/media/freemocap/skellysubs/a30fa61cd2dcadfb3c1754548bde263afa5181e9/skellysubs-ui/public/logo/skellysubs-logo.png"
-
+// const logoUrl = "https://media.githubusercontent.com/media/freemocap/skellysubs/a30fa61cd2dcadfb3c1754548bde263afa5181e9/skellysubs-ui/public/logo/skellysubs-logo.png"
+const logoPath = `${window.location.origin}/logo/skellysubs-logo.png`
 const WelcomeContent: React.FC = () => {
   return (
     <Box
@@ -26,7 +25,7 @@ const WelcomeContent: React.FC = () => {
           pointerEvents: "none",
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
-          backgroundImage: `url(${logoUrl})`,
+          backgroundImage: `url(${logoPath})`,
           transition: "all 0.3s ease-in-out",
           animation: "App-logo-float infinite 3s ease-in-out",
           "@keyframes App-logo-float": {

@@ -1,11 +1,11 @@
 import logging
-from datetime import timedelta
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 
 from skellysubs.core.audio_transcription.whisper_transcript_result_model import \
     WhisperTranscriptionResult
+from skellysubs.core.subtitles.subtitle_generators import generate_vtt_files, generate_ttml_files
 from skellysubs.core.translation_pipeline.models.translated_segment_models import MatchedTranslatedWord, \
     MatchedTranslatedSegment, TranslatedWhisperWordTimestamp, TranscriptSegment, CurrentSegmentAndMatchedWord
 from skellysubs.core.translation_pipeline.models.translated_text_models import TranslationsCollection
@@ -114,139 +114,9 @@ class TranslatedTranscription(BaseModel):
 
     def generate_subtitle_files(self, file_basename: str, subtitle_directory: str):
         logger.info(f"Generating subtitle files for {file_basename} in {subtitle_directory}")
-        self.generate_srt_files(file_basename, str(Path(subtitle_directory) / 'srt'))
-        self.generate_vtt_files(file_basename, str(Path(subtitle_directory) / 'vtt'))
-        self.generate_ttml_files(file_basename, str(Path(subtitle_directory) / 'ttml'))
-
-    def generate_srt_files(self, file_basename: str, save_directory: str):
-        """Generate SRT file content from a TranslatedTranscription object."""
-        logger.info(f"Generating SRT files for {file_basename} in {save_directory}")
-        save_directory = Path(save_directory)
-        save_directory.mkdir(parents=True, exist_ok=True)
-
-        def format_srt_time(seconds: float) -> str:
-            """Convert seconds to SRT timestamp format."""
-            if seconds <= 0:
-                seconds = 0.1
-            td = timedelta(seconds=seconds)
-            return str(td)[:-3].replace('.', ',')
-
-        def create_srt_block(index, start, end, word_list, romanized_word_list=None):
-            start_time = format_srt_time(start)
-            end_time = format_srt_time(end)
-            srt_block = f"{index}\n{start_time} --> {end_time}\n{' '.join(word_list)}\n"
-            if romanized_word_list:
-                srt_block += ' '.join(romanized_word_list) + '\n'
-            return srt_block
-
-        for language_name in self.og_text_and_translations.keys():
-            srt_content = []
-            str_content_with_romanization = []
-            for index, segment in enumerate(self.segments, start=1):
-                segment_word_list, romanized_word_list = segment.get_word_list_by_language(language_name)
-                srt_content.append(create_srt_block(index, segment.start, segment.end, segment_word_list))
-                if romanized_word_list:
-                    str_content_with_romanization.append(create_srt_block(index, segment.start, segment.end,
-                                                                          segment_word_list, romanized_word_list))
-            srt_filename = save_directory / f"{file_basename}_{language_name}.srt"
-            with open(srt_filename, 'w', encoding='utf-8') as f:
-                f.write('\n\n'.join(srt_content))
-
-            if str_content_with_romanization:
-                srt_filename = save_directory / f"{file_basename}_{language_name}_with_romanization.srt"
-                with open(srt_filename, 'w', encoding='utf-8') as f:
-                    f.write('\n\n'.join(str_content_with_romanization))
-
-    def generate_vtt_files(self, file_basename: str, save_directory: str):
-        """Generate VTT file content from a TranslatedTranscription object."""
-        logger.info(f"Generating VTT files for {file_basename} in {save_directory}")
-        save_directory = Path(save_directory)
-        save_directory.mkdir(parents=True, exist_ok=True)
-
-        def format_vtt_time(seconds: float) -> str:
-            """Convert seconds to VTT timestamp format."""
-            if seconds <= 0:
-                seconds = 0.1
-            td = timedelta(seconds=seconds)
-            return str(td)[:-3] + '.000'
-
-        for language_name in self.translations.translations.keys():
-            vtt_content = ["WEBVTT\n"]
-            vtt_content_with_romanization = ["WEBVTT\n"]
-            for index, segment in enumerate(self.segments, start=1):
-                start_time = format_vtt_time(segment.start)
-                end_time = format_vtt_time(segment.end)
-                segment_word_list, romanized_word_list = segment.get_word_list_by_language(language_name)
-
-                vtt_block = f"{start_time} --> {end_time} line:50%\n{' '.join(segment_word_list)}\n"
-                vtt_content.append(vtt_block)
-
-                if romanized_word_list:
-                    vtt_block_with_romanization = vtt_block + ' '.join(romanized_word_list) + '\n'
-                    vtt_content_with_romanization.append(vtt_block_with_romanization)
-
-            vtt_filename = save_directory / f"{file_basename}_{language_name}.vtt"
-            with open(vtt_filename, 'w', encoding='utf-8') as f:
-                f.write('\n'.join(vtt_content))
-
-            if len(vtt_content_with_romanization) > 1:
-                vtt_filename_with_romanization = save_directory / f"{file_basename}_{language_name}_with_romanization.vtt"
-                with open(vtt_filename_with_romanization, 'w', encoding='utf-8') as f:
-                    f.write('\n'.join(vtt_content_with_romanization))
-
-    def generate_ttml_files(self, file_basename: str, save_directory: str):
-        """Generate TTML file content from a TranslatedTranscription object."""
-        logger.info(f"Generating TTML files for {file_basename} in {save_directory}")
-        save_directory = Path(save_directory)
-        save_directory.mkdir(parents=True, exist_ok=True)
-
-        def format_ttml_time(seconds: float) -> str:
-            """Convert seconds to TTML timestamp format."""
-            if seconds <= 0:
-                seconds = 0.1
-            td = timedelta(seconds=seconds)
-            hours, remainder = divmod(td.seconds, 3600)
-            minutes, seconds = divmod(remainder, 60)
-            return f"{hours:02}:{minutes:02}:{seconds:02}.{td.microseconds // 1000:03}"
-
-        for language_name in self.translations.translations.keys():
-            ttml_content = [
-                '<?xml version="1.0" encoding="UTF-8"?>',
-                '<tt xmlns="http://www.w3.org/ns/ttml">',
-                '<head>',
-                '<layout>',
-                '<region xml:id="bottomHalf" tts:origin="0% 50%" tts:extent="100% 50%"/>',
-                '</layout>',
-                '</head>',
-                '<body><div>'
-            ]
-            ttml_content_with_romanization = ttml_content.copy()
-
-            for index, segment in enumerate(self.segments, start=1):
-                start_time = format_ttml_time(segment.start)
-                end_time = format_ttml_time(segment.end)
-                segment_word_list, romanized_word_list = segment.get_word_list_by_language(language_name)
-
-                ttml_block = f'<p begin="{start_time}" end="{end_time}">{" ".join(segment_word_list)}</p>'
-                ttml_content.append(ttml_block)
-
-                if romanized_word_list:
-                    ttml_block_with_romanization = (
-                        f'<p begin="{start_time}" end="{end_time}">'
-                        f'{" ".join(segment_word_list)}<br/>{" ".join(romanized_word_list)}</p>'
-                    )
-                    ttml_content_with_romanization.append(ttml_block_with_romanization)
-
-            ttml_content.append('</div></body></tt>')
-            ttml_filename = save_directory / f"{file_basename}_{language_name}.ttml"
-            with open(ttml_filename, 'w', encoding='utf-8') as f:
-                f.write('\n'.join(ttml_content))
-
-            if len(ttml_content_with_romanization) > 3:  # Check if there are any entries beyond the headers
-                ttml_content_with_romanization.append('</div></body></tt>')
-                ttml_filename_with_romanization = save_directory / f"{file_basename}_{language_name}_with_romanization.ttml"
-                with open(ttml_filename_with_romanization, 'w', encoding='utf-8') as f:
-                    f.write('\n'.join(ttml_content_with_romanization))
+        generate_srt_formatted_subtitles(self, file_basename, str(Path(subtitle_directory) / 'srt'))
+        generate_vtt_files(self, file_basename, str(Path(subtitle_directory) / 'vtt'))
+        generate_ttml_files(self, file_basename, str(Path(subtitle_directory) / 'ttml'))
 
 
 if __name__ == '__main__':
