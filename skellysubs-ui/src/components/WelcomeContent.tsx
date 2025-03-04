@@ -25,7 +25,7 @@ const WelcomeContent: React.FC = () => {
           pointerEvents: "none",
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
-          backgroundImage: `url(${logoPath})`,
+          backgroundImage: `url(${logoUrl})`,
           transition: "all 0.3s ease-in-out",
           animation: "App-logo-float infinite 3s ease-in-out",
           "@keyframes App-logo-float": {
