@@ -1,9 +1,9 @@
 // File: src/components/ProcessingPipeline.tsx
 import { Box } from "@mui/material"
 import extendedPaperbaseTheme from "../layout/paperbase_theme/paperbase-theme"
-import FileSelectionBox from "./file-input/FileSelectionBox"
-import TranscribeAudioPanel from "./processing-stages/TranscribeAudioPanel"
-import TranslateTranscriptPanel from "./processing-stages/TranslateTranscriptPanel"
+import FileSelectionBox from "./processing-stages/file-input-stage/FileSelectionBox"
+import TranscriptionPanel from "./processing-stages/transcription-stage/TranscriptionPanel"
+import TranslationPanel from "./processing-stages/translation-stage/TranslationPanel"
 
 export const ProcessingPanel = () => {
   return (
@@ -17,8 +17,8 @@ export const ProcessingPanel = () => {
       }}
     >
       <FileSelectionBox />
-      <TranscribeAudioPanel />
-      <TranslateTranscriptPanel />
+      <TranscriptionPanel />
+      <TranslationPanel />
     </Box>
   )
 }

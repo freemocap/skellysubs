@@ -1,0 +1,108 @@
+{
+    "english": {
+      "language_name": "English",
+      "language_code": "en",
+      "romanization_method": "NONE",
+      "background": {
+        "family_tree": [
+          "Indo-European",
+          "Germanic",
+          "West Germanic"
+        ],
+        "alphabet": "Latin",
+        "sample_text": "The quick brown fox jumps over the lazy dog.",
+        "sample_romanized_text": "NONE"
+      }
+    },
+    "spanish": {
+      "language_name": "Spanish",
+      "language_code": "es",
+      "romanization_method": "NONE",
+      "background": {
+        "family_tree": [
+          "Indo-European",
+          "Italic",
+          "Romance"
+        ],
+        "alphabet": "Latin",
+        "sample_text": "El veloz murciélago hindú comía feliz cardillo y kiwi.",
+        "sample_romanized_text": "NONE"
+      }
+    },
+    "arabic_levantine": {
+      "language_name": "Arabic (Levantine)",
+      "language_code": "ar",
+      "romanization_method": "ALA_LC",
+      "background": {
+        "family_tree": [
+          "Afro-Asiatic",
+          "Semitic",
+          "Central Semitic"
+        ],
+        "alphabet": "Arabic",
+        "sample_text": "صِفْرٌ بَارِدٌ يَأْكُلُ خُبْزًا وَفَاكِهَةً طَيِّبَةً.",
+        "sample_romanized_text": "Sifr bārid ya'kul khubzan wa fākihatan ṭayyibatan."
+      }
+    },
+    "chinese_mandarin_simplified": {
+      "language_name": "Chinese (Mandarin, Simplified)",
+      "language_code": "zh",
+      "romanization_method": "PINYIN",
+      "background": {
+        "family_tree": [
+          "Sino-Tibetan",
+          "Sinitic"
+        ],
+        "alphabet": "Simplified Chinese characters",
+        "sample_text": "視野中最靚麗的風景，是你的微笑。",
+        "sample_romanized_text": "Shìyě zhōng zuì liànglì de fēngjǐng, shì nǐ de wéixiào."
+      }
+    },
+    "hindi": {
+      "language_name": "Hindi",
+      "language_code": "hi",
+      "romanization_method": "ISO_15919",
+      "background": {
+        "family_tree": [
+          "Indo-European",
+          "Indo-Iranian",
+          "Indo-Aryan"
+        ],
+        "alphabet": "Devanagari",
+        "sample_text": "एक तेज़ भूरी लोमड़ी आलसी कुत्ते के ऊपर कूदती है।",
+        "sample_romanized_text": "Ēka tēza bhūrī lōmaṛī ālasī kutē kē ūpara kūdatī hai."
+      }
+    },
+    "french": {
+      "language_name": "French",
+      "language_code": "fr",
+      "romanization_method": "NONE",
+      "background": {
+        "family_tree": [
+          "Indo-European",
+          "Italic",
+          "Romance"
+        ],
+        "alphabet": "Latin",
+        "sample_text": "Le vif renard brun saute par-dessus le chien paresseux.",
+        "sample_romanized_text": "NONE"
+      }
+    },
+  "igbo": {
+    "language_name": "Igbo",
+    "language_code": "ig",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Niger-Congo",
+        "Atlantic-Congo",
+        "Volta-Congo",
+        "Benue-Congo",
+        "Igboid"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Nwaanyị nwere ike iji gị n'ihu.",
+      "sample_romanized_text": "NONE"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import type React from "react"
 import { PaperbaseContent } from "./layout/paperbase_theme/PaperbaseContent"
 import { Provider } from "react-redux"
-import { AppStateStore } from "./store/appStateStore"
+import { AppStateStore } from "./store/AppStateStore"
 import { FfmpegContextProvider } from "./services/FfmpegService/FfmpegContext"
 import { initializeLogger } from "./utils/logger"
 initializeLogger(AppStateStore)
