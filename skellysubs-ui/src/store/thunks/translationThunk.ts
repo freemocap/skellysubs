@@ -33,7 +33,7 @@ export const translationThunk = createProcessingThunk<
       2,
     )
     logger(
-      `Sending translation request to url: ${translationEndpointUrl} with body: ${JSON.stringify(requestBody, null, 2)}`,
+      `Sending translation request to url: ${translationEndpointUrl}...`,
     )
     const translationResponse = await fetch(translationEndpointUrl, {
       method: "POST",
@@ -49,7 +49,7 @@ export const translationThunk = createProcessingThunk<
 
     const result = await translationResponse.json()
     logger(
-      `Translation successful! Response: ${JSON.stringify(result, null, 2)}`,
+      `Translation successful!`,
     )
     return result as ProcessingContext["translation"]
   } catch (error) {

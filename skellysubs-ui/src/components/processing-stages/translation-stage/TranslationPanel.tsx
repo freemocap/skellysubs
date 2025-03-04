@@ -29,25 +29,33 @@ const TranslationPanel: React.FC = () => {
   )
   // const [targetLanguages, setTargetLanguages] = useState("")
   // const [showControls, setShowControls] = useState(false)
-    const [languageOptions, setLanguageOptions] = useState<Record<string, LanguageConfig>>({});
+  const [languageOptions, setLanguageOptions] = useState<
+    Record<string, LanguageConfig>
+  >({})
 
-    useEffect(() => {
-        getLanguageConfigs()
-            .then((languageConfigs) => {
-                setLanguageOptions(languageConfigs);
-            })
-            .catch(error => console.error("Failed to load language configs:", error));
-    }, []);
+  useEffect(() => {
+    getLanguageConfigs()
+      .then(languageConfigs => {
+        setLanguageOptions(languageConfigs)
+      })
+      .catch(error => console.error("Failed to load language configs:", error))
+  }, [])
 
-    const handleTranslateClick = () => {
-        if (!Object.keys(languageOptions).length || !processingContext.transcription) return;
+  const handleTranslateClick = () => {
+    if (
+      !Object.keys(languageOptions).length ||
+      !processingContext.transcription
+    )
+      return
 
-        dispatch(translationThunk({
-            text: processingContext.transcription.transcript.text,
-            targetLanguages: languageOptions,
-            originalLanguage: processingContext.transcription.transcript.language
-        }));
-    };
+    dispatch(
+      translationThunk({
+        text: processingContext.transcription.transcript.text,
+        targetLanguages: languageOptions,
+        originalLanguage: processingContext.transcription.transcript.language,
+      }),
+    )
+  }
   const handleDownloadClick = () => {
     const json = JSON.stringify(processingContext.translation, null, 2)
     const blob = new Blob([json], { type: "application/json" })
@@ -110,28 +118,53 @@ const TranslationPanel: React.FC = () => {
           <Typography variant="h6" sx={{ mb: 1 }}>
             Translations:
           </Typography>
-          {Object.entries(
-            processingContext.translation.translations,
-          ).map(([key, translation], i) => (
-            <Box
-              key={i}
-              sx={{
-                mb: 2,
-                p: 2,
-                border: "1px solid #ddd",
-                borderRadius: 1,
-                width: "100%",
-                textAlign: "left",
-              }}
-            >
-              <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                {translation.translated_language_name}:
-              </Typography>
-              <Typography variant="body1">
-                {translation.translated_text}
-              </Typography>
-            </Box>
-          ))}
+          {Object.entries(processingContext.translation.translations).map(
+            ([key, translation], i) => (
+              <Box
+                key={i}
+                sx={{
+                  mb: 2,
+                  p: 2,
+                  border: "1px solid #ddd",
+                  borderRadius: 1,
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                  {translation.translated_language_name}:
+                </Typography>
+                <Typography variant="body1">
+                  {translation.translated_text}
+                </Typography>
+                <br />
+
+                {translation.romanized_text && (
+                  <>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 1,
+                        color: extendedPaperbaseTheme.palette.text.secondary,
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      Romanized ({translation.romanization_method}):
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: extendedPaperbaseTheme.palette.text.secondary,
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      {translation.romanized_text}
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            ),
+          )}
           <Button
             variant="contained"
             onClick={handleDownloadClick}
