@@ -10,7 +10,7 @@ import type {
 } from "../../schemas/languageConfigSchemas"
 import type { z } from "zod"
 
-export const translationThunk = createProcessingThunk<
+export const translationTextThunk = createProcessingThunk<
   {
     text:string,
     targetLanguages: Record<string, LanguageConfig>

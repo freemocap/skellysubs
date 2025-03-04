@@ -15,7 +15,7 @@ import { useEffect, useState } from "react"
 import type { LanguageConfig } from "../../../schemas/languageConfigSchemas"
 import { getLanguageConfigs } from "../../../utils/getLanguageConfigs"
 import { logger } from "../../../utils/logger"
-import { translationThunk } from "../../../store/thunks/translationThunk"
+import { translationTextThunk } from "../../../store/thunks/translationTextThunk"
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 
 const TranslationPanel: React.FC = () => {
@@ -47,7 +47,7 @@ const TranslationPanel: React.FC = () => {
       return
     logger(`Translate button clicked`)
     dispatch(
-      translationThunk({
+      translationTextThunk({
         text: processingContext.transcription.transcript.text,
         targetLanguages: languageOptions,
         originalLanguage: processingContext.transcription.transcript.language,
