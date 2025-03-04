@@ -42,6 +42,20 @@ class TranslatedText(BaseModel):
         return cleaned_characters
 
 
+class TranslatedTranscriptSegment(BaseModel):
+    translated_text: TranslatedText = Field(description="The translated text in the target language, with romanization if applicable")
+    original_segment_text: str = Field(description="The original text of the segment in its original language")
+    start: float = Field(description="The start time of the period in the recording when the segment was spoken in seconds since the start of the recording. Should match the end time of the previous segment or the start time of the recording for the first segment.")
+    end: float = Field(description="The end time of the segment in the recording when the segment was spoken in seconds since the start of the recording. Should match the start time of the next segment or the end time of the recording for the last segment.")
+    duration: float = Field(description="The duration of the segment in seconds")
+
+class TranslatedTranscript(BaseModel):
+    original_full_text: str
+    translated_full_text: TranslatedText
+    original_language: LanguageNameString
+    translated_language: LanguageConfig
+    translated_segments: list[TranslatedTranscriptSegment]
+
 class TranslationsCollection(BaseModel):
     translations: dict[LanguageNameString, TranslatedText] = Field(default_factory=dict)
 
@@ -51,10 +65,10 @@ class TranslationsCollection(BaseModel):
             [translation.translated_text == NOT_TRANSLATED_YET_TEXT for translation in self.translations.values()])
 
     @classmethod
-    def create(cls, original_language: LanguageNameString):
+    def create(cls, original_language: LanguageNameString, target_languages: dict[LanguageNameString, LanguageConfig]):
         # Load language configurations from YAML
         translations = {language.lower(): TranslatedText.initialize(language_config=config)
-                        for language, config in get_language_configs().items() if
+                        for language, config in target_languages.items() if
                         original_language.lower() not in language.lower()}
         return cls(translations=translations)
 

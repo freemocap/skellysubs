@@ -1,7 +1,7 @@
 from openai.types.audio import TranscriptionVerbose
 
 SrtFormatedString = str
-def convert_to_srt(transcription_verbose: TranscriptionVerbose) -> SrtFormatedString:
+def convert_transcript_to_srt(transcription_verbose: TranscriptionVerbose) -> SrtFormatedString:
     def format_time(seconds):
         hours = int(seconds // 3600)
         minutes = int((seconds % 3600) // 60)
@@ -29,4 +29,4 @@ if __name__ == "__main__":
     with open(SAMPLE_DATA_TRANSCRIPT_PATH) as f:
         sample_transcript = TranscriptionVerbose(**json.load(f))
 
-    print(convert_to_srt(sample_transcript))
+    print(convert_transcript_to_srt(sample_transcript))

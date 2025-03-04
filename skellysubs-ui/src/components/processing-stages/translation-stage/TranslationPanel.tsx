@@ -1,13 +1,11 @@
 // src/components/processing-panel/translation/TranslationPanel.tsx
 
-import { Box, Button, IconButton, Typography } from "@mui/material"
+import { Box, Button, Typography } from "@mui/material"
 
 import {
   ProcessingButton,
   ProcessingPanelLayout,
 } from "../ProcessingPanelLayout"
-import { TranslationControls } from "./TranslationControls"
-import SettingsIcon from "@mui/icons-material/Settings"
 import { useAppDispatch, useAppSelector } from "../../../store/hooks"
 import {
   selectIsTranslateReady,
@@ -47,7 +45,7 @@ const TranslationPanel: React.FC = () => {
       !processingContext.transcription
     )
       return
-
+    logger(`Translate button clicked`)
     dispatch(
       translationThunk({
         text: processingContext.transcription.transcript.text,
@@ -56,7 +54,8 @@ const TranslationPanel: React.FC = () => {
       }),
     )
   }
-  const handleDownloadClick = () => {
+  const handleDownloadJSONClick = () => {
+    logger(`[TranslationPanel] Downloading translation results...`)
     const json = JSON.stringify(processingContext.translation, null, 2)
     const blob = new Blob([json], { type: "application/json" })
     const url = URL.createObjectURL(blob)
@@ -167,7 +166,7 @@ const TranslationPanel: React.FC = () => {
           )}
           <Button
             variant="contained"
-            onClick={handleDownloadClick}
+            onClick={handleDownloadJSONClick}
             sx={{
               backgroundColor: extendedPaperbaseTheme.palette.primary.light,
               borderColor: "#222222",

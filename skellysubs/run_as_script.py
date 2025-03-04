@@ -5,7 +5,7 @@ from pathlib import Path
 import requests
 
 from skellysubs.core.translation_pipeline.get_video_and_output_paths import get_video_and_output_paths
-from skellysubs.core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.core.translation_pipeline.models.translated_transcript_model import OldTranslatedTranscription
 from skellysubs.core.translation_pipeline.translate_video import translate_video
 from skellysubs.core.video_annotator.annotate_video_with_subtitles import annotate_video_with_subtitles
 import logging
@@ -49,7 +49,7 @@ async def run_video_subtitle_pipeline(video_name: str) -> None:
         logger.debug(f"Translation file already exists - loading from {translation_path}")
         with open(translation_path, 'r', encoding='utf-8') as f:
             transcription_json = json.load(f)
-        translation_result = TranslatedTranscription(**transcription_json)
+        translation_result = OldTranslatedTranscription(**transcription_json)
     else:
         logger.debug(f"Translation file does not exist - running translation pipeline...")
         translation_result = await translate_video(video_path=video_path)

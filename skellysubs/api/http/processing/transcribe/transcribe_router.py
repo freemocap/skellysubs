@@ -7,7 +7,7 @@ from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel
 
 from skellysubs.ai_clients.openai_client import get_or_create_openai_client
-from skellysubs.core.subtitles.srt_format_subtitle_generator import convert_to_srt
+from skellysubs.core.subtitles.srt_format_subtitle_generator import convert_transcript_to_srt
 
 logger = logging.getLogger(__name__)
 transcribe_router = APIRouter()
@@ -50,4 +50,4 @@ async def transcribe_endpoint(
         os.remove(audio_temp_filename)
     logger.info(f"Returning transcription: {transcription_result}")
     return TranscriptionResponse(transcript=transcription_result,
-                                 srt_subtitles_string=convert_to_srt(transcription_result))
+                                 srt_subtitles_string=convert_transcript_to_srt(transcription_result))

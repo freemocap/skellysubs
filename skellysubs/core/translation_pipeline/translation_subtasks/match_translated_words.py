@@ -1,8 +1,11 @@
+import asyncio
 import logging
 
+from skellysubs.ai_clients.ai_client_strategy import get_ai_client
 from skellysubs.core.translation_pipeline.language_configs.language_configs import get_language_configs
+from skellysubs.core.translation_pipeline.models.translated_segment_models import MatchedTranslatedSegment
 from skellysubs.core.translation_pipeline.models.translated_transcript_model import \
-    TranslatedTranscription
+    OldTranslatedTranscription
 
 logger = logging.getLogger(__name__)
 WORD_LEVEL_TRANSLATION_MATCHING_TASK_INSTRUCTIONS = """
@@ -26,7 +29,7 @@ If a word in the target language covers multiple words in the original language 
  both 'I' and 'speak' in English), you can match the same word multiple times. 
 
 ### EXAMPLE OF A TIME WHEN THE TARGET LANGUAGE WORD COVERS MULTIPLE WORDS IN THE ORIGINAL LANGUAGE ###
- 
+
 Example original language segment: "My Name is Jon"
 ([0] Hello, [starting_timestamp: 0.0, ending_timestamp: 0.42])
 ([1] my [starting_timestamp: 0.46, ending_timestamp: 0.58])
@@ -87,7 +90,7 @@ Your answer must be provided in accordance to the JSON format provided in the pr
 
 
 def format_segment_word_level_transcript_translation_system_prompts(
-        initialized_translated_transcript: TranslatedTranscription) -> dict[str, dict[int, str]]:
+        initialized_translated_transcript: OldTranslatedTranscription) -> dict[str, dict[int, str]]:
     logger.debug(f"Word-level translation prompts for {initialized_translated_transcript.original_language} \n\n")
     prompts_by_segment_by_language = {}
 
@@ -96,12 +99,55 @@ def format_segment_word_level_transcript_translation_system_prompts(
         #     continue
         prompts_by_segment_by_language[language] = {}
         for segment_number, segment in enumerate(initialized_translated_transcript.segments):
-            prompts_by_segment_by_language[language][segment_number] = WORD_LEVEL_TRANSLATION_MATCHING_TASK_INSTRUCTIONS.format(
+            prompts_by_segment_by_language[language][
+                segment_number] = WORD_LEVEL_TRANSLATION_MATCHING_TASK_INSTRUCTIONS.format(
                 original_language=initialized_translated_transcript.original_language,
-                target_language_with_their_romanization_methods=get_language_configs()[language.lower()].model_dump_json(indent=2, exclude={"annotation_config"}),
+                target_language_with_their_romanization_methods=get_language_configs()[
+                    language.lower()].model_dump_json(indent=2, exclude={"annotation_config"}),
                 current_segment_in_original_language_including_indexed_words_and_timestamps=segment.original_segment_text_with_words_indexed_and_timestamped,
                 indexed_list_of_available_words_in_target_languages="\n".join(
                     segment.get_indexed_word_list_by_language(language))
             )
 
     return prompts_by_segment_by_language
+
+
+async def word_level_translation_and_matching(segment_level_translated_transcript: OldTranslatedTranscription):
+    # Word-level translation
+
+    prompts_by_segment_by_language = format_segment_word_level_transcript_translation_system_prompts(
+        initialized_translated_transcript=segment_level_translated_transcript)
+
+    tasks = []
+    result_addresses = []
+    for language in segment_level_translated_transcript.full_text_translations.translations.keys():
+        for segment_number, segment in enumerate(segment_level_translated_transcript.segments):
+            address = {'language': language, 'segment_number': segment_number}
+            task = asyncio.create_task(get_ai_client().make_json_mode_request(
+                system_prompt=prompts_by_segment_by_language[language][segment_number],
+                prompt_model=MatchedTranslatedSegment,  # type: ignore
+            )
+            )
+            result_addresses.append(address)
+            tasks.append(task)
+
+    # Run all tasks concurrently
+
+    logger.info(f"Running {len(tasks)} word-level translation tasks concurrently")
+    results = await asyncio.gather(*[task for task in tasks], return_exceptions=True)
+    logger.info(f"Finished running {len(tasks)} word-level translation tasks")
+    # Handle the results and exceptions
+    for result, address in zip(results, result_addresses):
+        if not isinstance(result, MatchedTranslatedSegment):
+            logger.error(f"Error in task {address}: {result}")
+            raise ValueError(f"Error in task {address}: {result}")
+        try:
+            target_language = address['language']
+            segment_number = address['segment_number']
+            segment_level_translated_transcript.segments[segment_number].matched_translated_segment_by_language[
+                target_language] = result
+        except Exception as e:
+            logger.error(f"Error processing {address}: {str(e)}")
+            raise
+
+    return segment_level_translated_transcript

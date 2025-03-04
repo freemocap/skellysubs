@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from skellysubs.core.translation_pipeline.translate_transcription_pipeline import translate_transcription_pipeline
+from skellysubs.core.translation_pipeline.translation_subtasks.translate_transcription_pipeline import translate_transcription_pipeline
 from skellysubs.core.audio_transcription.get_or_compute_video_transcription import get_or_compute_video_transcription
-from skellysubs.core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.core.translation_pipeline.models.translated_transcript_model import OldTranslatedTranscription
 
 
-async def translate_video(video_path: str, re_transcribe: bool = False) -> TranslatedTranscription:
+async def translate_video(video_path: str, re_transcribe: bool = False) -> OldTranslatedTranscription:
     if not Path(video_path).exists():
         raise FileNotFoundError(f"File not found: {video_path}")
     if not Path(video_path).is_file():

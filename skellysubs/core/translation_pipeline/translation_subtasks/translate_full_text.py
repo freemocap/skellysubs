@@ -1,9 +1,9 @@
+import asyncio
 import logging
 
-
-
-from skellysubs.core.translation_pipeline.language_configs.language_configs import get_language_configs, LanguageConfig
-from skellysubs.core.translation_pipeline.models.translated_transcript_model import TranslatedTranscription
+from skellysubs.ai_clients.ai_client_strategy import get_ai_client
+from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
+from skellysubs.core.translation_pipeline.models.translated_text_models import TranslatedText
 from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
 
 logger = logging.getLogger(__name__)
@@ -65,3 +65,24 @@ def format_full_text_translation_system_prompt(
 
     return full_text_translation_prompts_by_language
 
+async def text_translation(text: str, original_language: str,
+                           target_languages: dict[LanguageNameString, LanguageConfig]) -> tuple[
+    dict[LanguageNameString, str], dict[LanguageNameString, TranslatedText]]:
+    # Full-text translation
+
+    system_prompts_by_language = format_full_text_translation_system_prompt(text=text,
+                                                                            target_languages=target_languages,
+                                                                            original_language=original_language)
+
+    full_text_tasks = []
+    for language, system_prompt in system_prompts_by_language.items():
+        full_text_tasks.append(asyncio.create_task(get_ai_client().make_json_mode_request(system_prompt=system_prompt,
+                                                                                          prompt_model=TranslatedText,
+                                                                                          )))
+
+    translations = {}
+    results: list[TranslatedText] = await asyncio.gather(*[task for task in full_text_tasks], return_exceptions=True)
+    for key, result in zip(target_languages.keys(), results):
+        translations[key] = result
+
+    return system_prompts_by_language, translations

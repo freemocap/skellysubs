@@ -1,13 +1,13 @@
 import logging
-from pathlib import Path
 
+from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel, Field
 
 from skellysubs.core.audio_transcription.whisper_transcript_result_model import \
     WhisperTranscriptionResult
-from skellysubs.core.subtitles.subtitle_generators import generate_vtt_files, generate_ttml_files
+from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation_pipeline.models.translated_segment_models import MatchedTranslatedWord, \
-    MatchedTranslatedSegment, TranslatedWhisperWordTimestamp, TranscriptSegment, CurrentSegmentAndMatchedWord
+    MatchedTranslatedSegment, TranslatedWhisperWordTimestamp, TranslatedTranscriptSegmentWithMatchedWords, CurrentSegmentAndMatchedWord
 from skellysubs.core.translation_pipeline.models.translated_text_models import TranslationsCollection
 from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString, \
     OriginalTextString
@@ -15,50 +15,59 @@ from skellysubs.core.translation_pipeline.models.translation_typehints import La
 logger = logging.getLogger(__name__)
 
 
-class TranslatedTranscription(BaseModel):
+class OldTranslatedTranscription(BaseModel):
     original_text: OriginalTextString = Field(
         description="The original text of the transcription in its original language")
     original_language: LanguageNameString = Field(description="The name of the original language of the transcription")
-    translations: TranslationsCollection = Field(
-        description="The translations of the original text into the target languages with their romanizations")
-    segments: list[TranscriptSegment] = Field(
+    segments: list[TranslatedTranscriptSegmentWithMatchedWords] = Field(
         description="Timestamped segments of the original text, with translations and romanizations (excluding word-level timestamps)")
+    full_text_translations: TranslationsCollection = Field(
+        description="The translations of the original text into the target languages with their romanizations")
 
     @property
     def translated_languages(self) -> list[LanguageNameString]:
-        return [language for language in self.translations.languages_and_romanizations().keys()]
+        return [language for language in self.full_text_translations.languages_and_romanizations().keys()]
 
     @property
     def og_text_and_translations(self) -> dict[str, dict[str, str]]:
         ret = {self.original_language.lower(): {'text': self.original_text, 'romanization': None}}
-        for language, translation in self.translations.translations.items():
+        for language, translation in self.full_text_translations.translations.items():
             ret[language.lower()] = {'text': translation.translated_text, 'romanization': translation.romanized_text}
         return ret
 
     @classmethod
+    def from_results(cls, original_transcript:TranscriptionVerbose,
+                     target_languages: dict[LanguageNameString, LanguageConfig],
+                     full_text_translations: dict[LanguageNameString, str],
+                     translated_segments: list[MatchedTranslatedSegment]):
+        pass
+
+    @classmethod
     def initialize(cls,
-                   og_transcription: WhisperTranscriptionResult,
-                   original_langauge: LanguageNameString):
+                   og_transcription: TranscriptionVerbose,
+                   original_langauge: LanguageNameString,
+                     target_languages: dict[LanguageNameString, LanguageConfig]):
 
         segments = []
         try:
             for segment in og_transcription.segments:
-                segments.append(TranscriptSegment(original_segment_text=segment.text,
-                                                  original_language=original_langauge,
-                                                  translations=TranslationsCollection.create(original_language=original_langauge),
-                                                  start=segment.start,
-                                                  end=segment.end,
-                                                  matched_translated_segment_by_language={},
-                                                  words=[TranslatedWhisperWordTimestamp.from_whisper_result(word)
+                segments.append(TranslatedTranscriptSegmentWithMatchedWords(original_segment_text=segment.text,
+                                                                            original_language=original_langauge,
+                                                                            translations=TranslationsCollection.create(original_language=original_langauge,
+                                                                                                target_languages=target_languages),
+                                                                            start=segment.start,
+                                                                            end=segment.end,
+                                                                            matched_translated_segment_by_language={},
+                                                                            words=[TranslatedWhisperWordTimestamp.from_whisper_result(word)
                                                          for word in segment.words] if segment.words else []
-                                                  )
+                                                                            )
                                 )
         except Exception as e:
             logger.error(f"Error initializing TranslatedTranscription: {e}")
             raise
         return cls(original_text=og_transcription.text,
                    original_language=original_langauge,
-                   translations=TranslationsCollection.create(original_language=original_langauge),
+                   full_text_translations=TranslationsCollection.create(original_language=original_langauge),
                    segments=segments)
 
 
@@ -66,7 +75,7 @@ class TranslatedTranscription(BaseModel):
         """
         Get the segment and word that contains the given timestamp (in seconds since the start of the recording)
         """
-        current_segment: TranscriptSegment | None = None
+        current_segment: TranslatedTranscriptSegmentWithMatchedWords | None = None
         current_word: TranslatedWhisperWordTimestamp | None = None
         matched_translated_segments: dict[LanguageNameString, MatchedTranslatedSegment] = {}
         matched_translated_words: dict[LanguageNameString, MatchedTranslatedWord] = {}
@@ -112,11 +121,6 @@ class TranslatedTranscription(BaseModel):
                                             matched_segment_by_language=matched_translated_segments,
                                             matched_word_by_language=matched_translated_words)
 
-    def generate_subtitle_files(self, file_basename: str, subtitle_directory: str):
-        logger.info(f"Generating subtitle files for {file_basename} in {subtitle_directory}")
-        generate_srt_formatted_subtitles(self, file_basename, str(Path(subtitle_directory) / 'srt'))
-        generate_vtt_files(self, file_basename, str(Path(subtitle_directory) / 'vtt'))
-        generate_ttml_files(self, file_basename, str(Path(subtitle_directory) / 'ttml'))
 
 
 if __name__ == '__main__':
@@ -126,8 +130,8 @@ if __name__ == '__main__':
                                                         segments=[],
                                                         language="ENGLISH")
 
-    translated_transcription = TranslatedTranscription.initialize(og_transcription=outer_og_transcription,
-                                                                  original_langauge="ENGLISH")
+    translated_transcription = OldTranslatedTranscription.initialize(og_transcription=outer_og_transcription,
+                                                                     original_langauge="ENGLISH")
 
     print(f"INITIALIZED TRANSLATED TRANSCRIPTION")
     pprint(translated_transcription.model_dump(), indent=2)
