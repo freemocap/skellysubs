@@ -17,29 +17,25 @@ import {
 import ExpandMore from "@mui/icons-material/ExpandMore"
 import ExpandLess from "@mui/icons-material/ExpandLess"
 import type { LanguageConfig } from "../../../schemas/languageConfigSchemas"
+import {useAppDispatch, useAppSelector} from "../../../store/hooks";
+import {
+  addCustomLanguage,
+  selectLanguageOptions, selectSelectedTargetLanguages, toggleLanguage,
+  updateLanguageConfig
+} from "../../../store/slices/processing-configs/translationConfigSlice";
 
-export const LanguageConfigList = ({
-  languageOptions,
-  setLanguageOptions,
-  targetLanguages,
-  setTargetLanguages,
-}: {
-  languageOptions: Record<string, LanguageConfig>
-  setLanguageOptions: (configs: Record<string, LanguageConfig>) => void
-  targetLanguages: string
-  setTargetLanguages: (v: string) => void
-}) => {
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [newLanguageOpen, setNewLanguageOpen] = useState(false)
-  const [newLanguageName, setNewLanguageName] = useState("")
+export const LanguageConfigList = () => {
+  const dispatch = useAppDispatch();
+  const languageOptions = useAppSelector(selectLanguageOptions);
+  const selectedTargetLanguages = useAppSelector(selectSelectedTargetLanguages);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [newLanguageOpen, setNewLanguageOpen] = useState(false);
+  const [newLanguageName, setNewLanguageName] = useState("");
 
   const handleToggle = (code: string) => () => {
-    const codes = targetLanguages.split(",").filter(c => c)
-    const newCodes = codes.includes(code)
-      ? codes.filter(c => c !== code)
-      : [...codes, code]
-    setTargetLanguages(newCodes.join(","))
-  }
+    dispatch(toggleLanguage(code));
+  };
+
 
   const handleAddLanguage = () => {
     const newLanguage: LanguageConfig = {
@@ -53,29 +49,28 @@ export const LanguageConfigList = ({
         sample_romanized_text: "",
         wikipedia_links: [],
       },
-    }
-    setLanguageOptions({
-      ...languageOptions,
-      [newLanguageName.toLowerCase()]: newLanguage,
-    })
-    setNewLanguageOpen(false)
-    setNewLanguageName("")
-  }
+    };
+    dispatch(addCustomLanguage(newLanguage));
+    setNewLanguageOpen(false);
+    setNewLanguageName("");
+  };
 
   const updateLanguage = (
-    key: string,
-    field: string,
-    value: string | string[],
-    nestedField?: keyof LanguageConfig["background"],
+      key: string,
+      field: string,
+      value: string | string[],
+      nestedField?: keyof LanguageConfig["background"],
   ) => {
-    const updated = { ...languageOptions }
+    const updatedLang = { ...languageOptions[key] };
+
     if (nestedField) {
-      ;(updated[key].background as any)[nestedField] = value
+      (updatedLang.background as any)[nestedField] = value;
     } else {
-      ;(updated[key] as any)[field] = value
+      (updatedLang as any)[field] = value;
     }
-    setLanguageOptions(updated)
-  }
+
+    dispatch(updateLanguageConfig({ key, config: updatedLang }));
+  };
 
   return (
     <Box sx={{ width: "100%", mb: 2 }}>
@@ -84,10 +79,8 @@ export const LanguageConfigList = ({
           <div key={key}>
             <ListItem>
               <Checkbox
-                checked={targetLanguages
-                  .split(",")
-                  .includes(lang.language_code)}
-                onChange={handleToggle(lang.language_code)}
+                  checked={selectedTargetLanguages.includes(lang.language_code)}
+                  onChange={handleToggle(lang.language_code)}
               />
               <ListItemText
                 primary={lang.language_name}

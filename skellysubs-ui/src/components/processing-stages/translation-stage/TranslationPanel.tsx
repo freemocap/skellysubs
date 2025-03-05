@@ -19,7 +19,12 @@ import { translationTextThunk } from "../../../store/thunks/translationTextThunk
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import SettingsIcon from "@mui/icons-material/Settings"
 import { TranslationControls } from "./TranslationControls"
-
+import Chip from "@mui/material/Chip";
+import {
+    selectLanguageOptions,
+    selectSelectedTargetLanguages,
+    setLanguageOptions, toggleLanguage,
+} from "../../../store/slices/processing-configs/translationConfigSlice"
 const TranslationPanel: React.FC = () => {
   const dispatch = useAppDispatch()
   const isReady = useAppSelector(selectIsTranslateReady)
@@ -27,49 +32,40 @@ const TranslationPanel: React.FC = () => {
   const translationStatus = useAppSelector(
     state => state.processing.stages.translation.status,
   )
-  const [targetLanguages, setTargetLanguages] = useState("")
   const [showControls, setShowControls] = useState(false)
-  const [languageOptions, setLanguageOptions] = useState<
-    Record<string, LanguageConfig>
-  >({})
+  const languageOptions = useAppSelector(selectLanguageOptions)
+  const selectedTargetLanguages = useAppSelector(selectSelectedTargetLanguages)
 
-  useEffect(() => {
-    getLanguageConfigs()
-      .then(languageConfigs => {
-        setLanguageOptions(languageConfigs)
-      })
-      .catch(error => console.error("Failed to load language configs:", error))
-  }, [])
-  const handleTranslateClick = () => {
-    if (
-      !Object.keys(languageOptions).length ||
-      !processingContext.transcription
-    )
-      return
+    useEffect(() => {
+        getLanguageConfigs()
+            .then(languageConfigs => {
+                dispatch(setLanguageOptions(languageConfigs));
+            })
+            .catch(error => console.error("Failed to load language configs:", error));
+    }, [dispatch]);
 
-    // Filter the language options to only include selected target languages
-    const selectedLanguages = targetLanguages.split(",").reduce(
-      (acc, code) => {
-        const language = Object.values(languageOptions).find(
-          lang => lang.language_code === code,
-        )
-        if (language) {
-          acc[language.language_name.toLowerCase()] = language
-        }
-        return acc
-      },
-      {} as Record<string, LanguageConfig>,
-    )
+    const handleTranslateClick = () => {
+        if (!processingContext.transcription) return;
 
-    logger(`Translate button clicked`)
-    dispatch(
-      translationTextThunk({
-        text: processingContext.transcription.transcript.text,
-        targetLanguages: selectedLanguages,
-        originalLanguage: processingContext.transcription.transcript.language,
-      }),
-    )
-  }
+        const targetLanguagesConfig = selectedTargetLanguages.reduce(
+            (acc, code) => {
+                const language = languageOptions[code]; // Direct access by code
+                if (language) {
+                    acc[language.language_code] = language;
+                }
+                return acc;
+            },
+            {} as Record<string, LanguageConfig>,
+        );
+        logger(`Translate button clicked`);
+        dispatch(
+            translationTextThunk({
+                text: processingContext.transcription.transcript.text,
+                targetLanguages: targetLanguagesConfig,
+                originalLanguage: processingContext.transcription.transcript.language,
+            }),
+        );
+    };
   const handleDownloadJSONClick = () => {
     logger(`[TranslationPanel] Downloading translation results...`)
     const json = JSON.stringify(processingContext.translation, null, 2)
@@ -106,17 +102,23 @@ const TranslationPanel: React.FC = () => {
         {!processingContext.transcription &&
           " No transcript available, transcribe audio first. "}
       </Typography>
-
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+            {selectedTargetLanguages.map(code => {
+                const lang = Object.values(languageOptions).find(l => l.language_code === code);
+                return (
+                    <Chip
+                        key={code}
+                        label={lang?.language_name || code}
+                        onDelete={() => dispatch(toggleLanguage(code))}
+                    />
+                );
+            })}
+        </Box>
       <IconButton onClick={() => setShowControls(!showControls)}>
         <SettingsIcon />
       </IconButton>
       {showControls && (
-        <TranslationControls
-          languageOptions={languageOptions}
-          setLanguageOptions={setLanguageOptions}
-          targetLanguages={targetLanguages}
-          setTargetLanguages={setTargetLanguages}
-        />
+        <TranslationControls/>
       )}
       <ProcessingButton
         status={translationStatus}
