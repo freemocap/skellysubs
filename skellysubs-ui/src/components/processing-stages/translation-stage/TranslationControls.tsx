@@ -1,5 +1,5 @@
 import { Box } from "@mui/material"
-import { LanguageConfigList } from "./LanguageConfigList"
+import { LanguageConfigList } from "./language-configs/LanguageConfigList"
 
 export const TranslationControls = () => {
   return (

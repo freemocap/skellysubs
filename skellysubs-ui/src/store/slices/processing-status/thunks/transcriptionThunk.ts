@@ -1,6 +1,6 @@
-import type { ProcessingContext } from "../slices/processing-status/processing-status-types"
-import { logger } from "../../utils/logger"
-import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
+import type { ProcessingContext } from "../processing-status-types"
+import { logger } from "../../../../utils/logger"
+import { getApiBaseUrl } from "../../../../utils/getApiBaseUrl"
 
 import { createProcessingThunk } from "./createProcessingThunk"
 

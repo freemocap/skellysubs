@@ -1,20 +1,8 @@
 import type React from "react"
 import { useState } from "react"
-import { Panel } from "react-resizable-panels"
-import {
-  Box,
-  Collapse,
-  List,
-  ListItemButton,
-  ListItemText,
-  Typography,
-} from "@mui/material"
-import {
-  ChevronLeft,
-  ChevronRight,
-  ExpandLess,
-  ExpandMore,
-} from "@mui/icons-material"
+import { Box, Collapse, List, ListItemButton, Typography } from "@mui/material"
+import { KeyboardArrowDown, KeyboardArrowRight } from "@mui/icons-material"
+import { TranslationControls } from "../components/processing-stages/translation-stage/TranslationControls"
 
 export const RightSideConfigPanel = ({
   isCollapsed,
@@ -24,9 +12,7 @@ export const RightSideConfigPanel = ({
   toggleCollapse: () => void
 }) => {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
-    general: true,
-    appearance: false,
-    advanced: false,
+    translation: true,
   })
 
   const handleSectionToggle = (section: string) => {
@@ -36,27 +22,6 @@ export const RightSideConfigPanel = ({
   return (
     <Box sx={{ position: "relative", height: "100%" }}>
       {/* Collapse Toggle Handle */}
-      <Box
-        sx={{
-          position: "absolute",
-          left: -28,
-          top: "50%",
-          transform: "translateY(-50%)",
-          cursor: "pointer",
-          zIndex: 1000,
-          backgroundColor: "background.paper",
-          borderRadius: "50%",
-          boxShadow: 1,
-          "&:hover": { backgroundColor: "action.hover" },
-        }}
-        onClick={toggleCollapse}
-      >
-        {isCollapsed ? (
-          <ChevronLeft fontSize="large" />
-        ) : (
-          <ChevronRight fontSize="large" />
-        )}
-      </Box>
 
       {!isCollapsed && (
         <Box sx={{ p: 2 }}>
@@ -66,33 +31,11 @@ export const RightSideConfigPanel = ({
 
           <List component="nav">
             <ConfigSection
-              title="General Settings"
-              open={openSections.general}
-              onToggle={() => handleSectionToggle("general")}
+              title="Translation Settings"
+              open={openSections.translation}
+              onToggle={() => handleSectionToggle("translation")}
             >
-              <Typography variant="body2">Theme selection</Typography>
-              <Typography variant="body2">Default values</Typography>
-              <Typography variant="body2">User preferences</Typography>
-            </ConfigSection>
-
-            <ConfigSection
-              title="Appearance"
-              open={openSections.appearance}
-              onToggle={() => handleSectionToggle("appearance")}
-            >
-              <Typography variant="body2">Dark/Light mode</Typography>
-              <Typography variant="body2">UI density</Typography>
-              <Typography variant="body2">Font sizes</Typography>
-            </ConfigSection>
-
-            <ConfigSection
-              title="Advanced"
-              open={openSections.advanced}
-              onToggle={() => handleSectionToggle("advanced")}
-            >
-              <Typography variant="body2">API configurations</Typography>
-              <Typography variant="body2">Debug mode</Typography>
-              <Typography variant="body2">Experimental features</Typography>
+              <TranslationControls />
             </ConfigSection>
           </List>
         </Box>
@@ -114,37 +57,15 @@ const ConfigSection = ({
 }) => (
   <>
     <ListItemButton onClick={onToggle} sx={{ px: 0 }}>
+      {open ? (
+        <KeyboardArrowDown sx={{ ml: 1 }} />
+      ) : (
+        <KeyboardArrowRight sx={{ ml: 1 }} />
+      )}
       <Typography variant="subtitle2">{title}</Typography>
-      {open ? <ExpandLess sx={{ ml: 1 }} /> : <ExpandMore sx={{ ml: 1 }} />}
     </ListItemButton>
     <Collapse in={open}>
-      <Box sx={{ pl: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-        {children}
-      </Box>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>{children}</Box>
     </Collapse>
   </>
-)
-// Dummy components for sub-sections
-const GeneralSettings = () => (
-  <div>
-    <Typography variant="body2">Theme selection</Typography>
-    <Typography variant="body2">Default values</Typography>
-    <Typography variant="body2">User preferences</Typography>
-  </div>
-)
-
-const AppearanceSettings = () => (
-  <div>
-    <Typography variant="body2">Dark/Light mode</Typography>
-    <Typography variant="body2">UI density</Typography>
-    <Typography variant="body2">Font sizes</Typography>
-  </div>
-)
-
-const AdvancedOptions = () => (
-  <div>
-    <Typography variant="body2">API configurations</Typography>
-    <Typography variant="body2">Debug mode</Typography>
-    <Typography variant="body2">Experimental features</Typography>
-  </div>
 )

@@ -1,7 +1,7 @@
 // src/components/processing-panel/translation/TranslationPanel.tsx
 
-import { Box, Button, Drawer, IconButton, Typography } from "@mui/material"
-
+import { Box, Button, IconButton, Typography } from "@mui/material"
+import AddCircleIcon from "@mui/icons-material/AddCircle"
 import {
   ProcessingButton,
   ProcessingPanelLayout,
@@ -11,20 +11,20 @@ import {
   selectIsTranslateReady,
   selectProcessingContext,
 } from "../../../store/slices/processing-status/processingStatusSlice"
-import { useEffect, useState } from "react"
+import { useContext, useEffect } from "react"
 import type { LanguageConfig } from "../../../schemas/languageConfigSchemas"
 import { logger } from "../../../utils/logger"
-import { translationTextThunk } from "../../../store/thunks/translationTextThunk"
+import { translationTextThunk } from "../../../store/slices/processing-status/thunks/translationTextThunk"
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import SettingsIcon from "@mui/icons-material/Settings"
-import { TranslationControls } from "./TranslationControls"
 import Chip from "@mui/material/Chip"
 import {
   fetchLanguageConfigs,
-  selectLanguageOptions,
+  selectAvailableTargetLanguages,
   selectSelectedTargetLanguages,
   toggleLanguage,
 } from "../../../store/slices/processing-configs/translationConfigSlice"
+import { RightPanelContext } from "../../../layout/BasePanelLayout"
 
 const TranslationPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -33,9 +33,11 @@ const TranslationPanel: React.FC = () => {
   const translationStatus = useAppSelector(
     state => state.processing.stages.translation.status,
   )
-  const [showControls, setShowControls] = useState(false)
-  const languageOptions = useAppSelector(selectLanguageOptions)
+  const availableTargetLanguages = useAppSelector(
+    selectAvailableTargetLanguages,
+  )
   const selectedTargetLanguages = useAppSelector(selectSelectedTargetLanguages)
+  const { toggleRightPanel } = useContext(RightPanelContext)
 
   useEffect(() => {
     dispatch(fetchLanguageConfigs())
@@ -44,23 +46,25 @@ const TranslationPanel: React.FC = () => {
   const handleTranslateClick = () => {
     if (!processingContext.transcription) return
 
+    // Match selected languages by their actual config keys
     const targetLanguagesConfig = selectedTargetLanguages.reduce(
-      (acc, code) => {
-        const language = languageOptions[code] // Direct access by code
+      (acc, configKey) => {
+        const language = availableTargetLanguages[configKey]
         if (language) {
-          acc[language.language_code] = language
+          acc[configKey] = language
         }
         return acc
       },
       {} as Record<string, LanguageConfig>,
     )
+
     const translateThunkArgs = {
       text: processingContext.transcription.transcript.text,
       targetLanguages: targetLanguagesConfig,
       originalLanguage: processingContext.transcription.transcript.language,
     }
     logger(
-      `Translate button clicked with parameters -  targetLanguages: ${JSON.stringify(translateThunkArgs, null, 2)}`,
+      `Translate button clicked with parameters - targetLanguages: ${JSON.stringify(translateThunkArgs, null, 2)}`,
     )
     dispatch(translationTextThunk(translateThunkArgs))
   }
@@ -90,45 +94,47 @@ const TranslationPanel: React.FC = () => {
         borderStyle: "solid",
         borderWidth: "1px",
         borderRadius: 2,
+        position: "relative",
       }}
     >
       <Typography
         variant="body1"
         color={extendedPaperbaseTheme.palette.text.disabled}
-        sx={{ mb: 2 }}
+        sx={{ m: 2 }}
       >
         {!processingContext.transcription &&
           " No transcript available, transcribe audio first. "}
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
-        {selectedTargetLanguages.map(code => {
-          const lang = Object.values(languageOptions).find(
-            l => l.language_code === code,
-          )
+        {selectedTargetLanguages.map(configKey => {
+          const lang = availableTargetLanguages[configKey]
           return (
             <Chip
-              key={code}
-              label={lang?.language_name || code}
-              onDelete={() => dispatch(toggleLanguage(code))}
+              key={configKey}
+              label={lang?.language_name || configKey}
+              onDelete={() => dispatch(toggleLanguage(configKey))}
+              sx={{ backgroundColor: "#005d5d" }}
             />
           )
         })}
+        <IconButton onClick={toggleRightPanel}>
+          <AddCircleIcon />
+        </IconButton>
       </Box>
-      <IconButton onClick={() => setShowControls(!showControls)}>
-        <SettingsIcon />
-      </IconButton>
-      <Drawer
-        anchor="right"
-        open={showControls}
-        onClose={() => setShowControls(false)}
-        sx={{ width: 300, flexShrink: 0 }}
-        variant="persistent"
+
+      <Box
+        sx={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          zIndex: 1,
+        }}
       >
-        <Box sx={{ width: 300, p: 2 }}>
-          <Typography variant="h6">Language Configuration</Typography>
-          <TranslationControls />
-        </Box>
-      </Drawer>
+        <IconButton onClick={toggleRightPanel}>
+          <SettingsIcon />
+        </IconButton>
+      </Box>
+
       <ProcessingButton
         status={translationStatus}
         isReady={isReady}

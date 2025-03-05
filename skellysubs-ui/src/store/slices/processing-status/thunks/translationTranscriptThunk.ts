@@ -1,18 +1,17 @@
-// src/thunks/translationThunk.ts
-import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
-import { logger } from "../../utils/logger"
-import type { ProcessingContext } from "../slices/processing-status/processing-status-types"
+import { getApiBaseUrl } from "../../../../utils/getApiBaseUrl"
+import { logger } from "../../../../utils/logger"
+import type { ProcessingContext } from "../processing-status-types"
 import { createProcessingThunk } from "./createProcessingThunk"
-import { getLanguageConfigs } from "../../utils/getLanguageConfigs"
+import { getLanguageConfigs } from "../../../../utils/getLanguageConfigs"
 import type {
   LanguageConfig,
   LanguageConfigSchema,
-} from "../../schemas/languageConfigSchemas"
+} from "../../../../schemas/languageConfigSchemas"
 import type { z } from "zod"
 
-export const translationTextThunk = createProcessingThunk<
+export const translationTranscriptThunk = createProcessingThunk<
   {
-    text:string,
+    text: string
     targetLanguages: Record<string, LanguageConfig>
     originalLanguage: string
   },
@@ -23,7 +22,7 @@ export const translationTextThunk = createProcessingThunk<
     if (!params?.targetLanguages) {
       throw new Error("No target languages provided")
     }
-    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/text?original_language=${params.originalLanguage}`
+    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/transcript`
     const requestBody = JSON.stringify(
       {
         text: params.text,
@@ -32,9 +31,7 @@ export const translationTextThunk = createProcessingThunk<
       null,
       2,
     )
-    logger(
-      `Sending translation request to url: ${translationEndpointUrl}...`,
-    )
+    logger(`Sending translation request to url: ${translationEndpointUrl}...`)
     const translationResponse = await fetch(translationEndpointUrl, {
       method: "POST",
       headers: {
@@ -48,9 +45,7 @@ export const translationTextThunk = createProcessingThunk<
     }
 
     const result = await translationResponse.json()
-    logger(
-      `Translation successful!`,
-    )
+    logger(`Translation successful!`)
     return result as ProcessingContext["translation"]
   } catch (error) {
     console.error("Translation error:", error)

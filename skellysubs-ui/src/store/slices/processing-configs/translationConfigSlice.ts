@@ -21,33 +21,37 @@ export const fetchLanguageConfigs = createAsyncThunk(
     logger(
       "[TranslationConfigSlice - fetchLanguageConfigs] Loading language configs...",
     )
-    try{return await getLanguageConfigs()} catch (error) {
-        logger(
-            `[TranslationConfigSlice - fetchLanguageConfigs] Error loading language configs: ${error}`,
-        )
-        throw error
+    try {
+      return await getLanguageConfigs()
+    } catch (error) {
+      logger(
+        `[TranslationConfigSlice - fetchLanguageConfigs] Error loading language configs: ${error}`,
+      )
+      throw error
     }
-
   },
 )
-
 export const translationConfigSlice = createSlice({
   name: "translationConfig",
   initialState,
   reducers: {
     toggleLanguage: (state, action: PayloadAction<string>) => {
-      const code = action.payload
-      const index = state.selectedTargetLanguages.indexOf(code)
+      const configKey = action.payload
+      const index = state.selectedTargetLanguages.indexOf(configKey)
       if (index === -1) {
-        state.selectedTargetLanguages.push(code)
+        state.selectedTargetLanguages.push(configKey)
       } else {
         state.selectedTargetLanguages.splice(index, 1)
       }
     },
     addCustomLanguage: (state, action: PayloadAction<LanguageConfig>) => {
       const lang = action.payload
-      const key = lang.language_code // Use code instead of name
-      state.availableTargetLanguages[key] = lang
+      // Generate a safe key from language name
+      const key = lang.language_name.toLowerCase().replace(/[^a-z0-9]+/g, "_")
+      state.availableTargetLanguages[key] = {
+        ...lang,
+        language_code: lang.language_code || key, // Fallback to generated key
+      }
     },
     updateLanguageConfig: (
       state,
@@ -63,6 +67,37 @@ export const translationConfigSlice = createSlice({
         `[TranslationConfigSlice - fetchLanguageConfigs] Fulfilled - available languages: ${Object.keys(action.payload).join(", ")}`,
       )
       state.availableTargetLanguages = action.payload
+
+      // Only set initial selection if no languages are selected yet
+      if (state.selectedTargetLanguages.length === 0) {
+        const availableKeys = Object.keys(action.payload)
+        if (availableKeys.length > 0) {
+          // Create array of indices and select randomly
+          const indices = Array.from(
+            { length: availableKeys.length },
+            (_, i) => i,
+          )
+          const selectedIndices: number[] = []
+
+          // Collect unique random indices
+          while (selectedIndices.length < Math.min(3, availableKeys.length)) {
+            const randomIndex = Math.floor(Math.random() * availableKeys.length)
+            if (!selectedIndices.includes(randomIndex)) {
+              selectedIndices.push(randomIndex)
+            }
+          }
+
+          // Sort indices to maintain original order
+          selectedIndices.sort((a, b) => a - b)
+
+          // Get keys in original order
+          const initialSelection = selectedIndices.map(i => availableKeys[i])
+          state.selectedTargetLanguages = initialSelection
+          logger(
+            `[TranslationConfigSlice] Initial random selection: ${initialSelection.join(", ")}`,
+          )
+        }
+      }
     })
   },
 })
@@ -70,7 +105,7 @@ export const translationConfigSlice = createSlice({
 export const { toggleLanguage, addCustomLanguage, updateLanguageConfig } =
   translationConfigSlice.actions
 
-export const selectLanguageOptions = (state: RootState) =>
+export const selectAvailableTargetLanguages = (state: RootState) =>
   state.translationConfig.availableTargetLanguages
 
 export const selectSelectedTargetLanguages = (state: RootState) =>
