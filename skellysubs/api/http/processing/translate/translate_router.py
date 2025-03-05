@@ -44,7 +44,8 @@ async def translate_text_endpoint(
 
     try:
 
-        prompts, translations = await text_translation(text=text, target_languages=target_languages,
+        prompts, translations = await text_translation(text=text,
+                                                       target_languages=target_languages,
                                                        original_language=original_language)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

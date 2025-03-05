@@ -11,7 +11,10 @@
       ],
       "alphabet": "Latin",
       "sample_text": "The quick brown fox jumps over the lazy dog.",
-      "sample_romanized_text": "NONE"
+      "sample_romanized_text": "NONE",
+        "wikipedia_links": [
+            "https://en.wikipedia.org/wiki/English_language"
+        ]
     }
   },
   "spanish": {
@@ -26,7 +29,10 @@
       ],
       "alphabet": "Latin",
       "sample_text": "El veloz murciélago hindú comía feliz cardillo y kiwi.",
-      "sample_romanized_text": "NONE"
+      "sample_romanized_text": "NONE",
+        "wikipedia_links": [
+            "https://en.wikipedia.org/wiki/Spanish_language"
+        ]
     }
   },
   "arabic_levantine": {
@@ -41,7 +47,10 @@
       ],
       "alphabet": "Arabic",
       "sample_text": "صِفْرٌ بَارِدٌ يَأْكُلُ خُبْزًا وَفَاكِهَةً طَيِّبَةً.",
-      "sample_romanized_text": "Sifr bārid ya'kul khubzan wa fākihatan ṭayyibatan."
+      "sample_romanized_text": "Sifr bārid ya'kul khubzan wa fākihatan ṭayyibatan.",
+        "wikipedia_links": [
+            "https://en.wikipedia.org/wiki/Levantine_Arabic"
+        ]
     }
   },
   "chinese_mandarin_simplified": {
@@ -56,7 +65,7 @@
       "alphabet": "Simplified Chinese characters",
       "sample_text": "視野中最靚麗的風景，是你的微笑。",
       "sample_romanized_text": "Shìyě zhōng zuì liànglì de fēngjǐng, shì nǐ de wéixiào.",
-      "info_links": [
+      "wikipedia_links": [
         "https://en.wikipedia.org/wiki/Chinese_language"
       ]
     }
@@ -74,7 +83,7 @@
       "alphabet": "Devanagari",
       "sample_text": "एक तेज़ भूरी लोमड़ी आलसी कुत्ते के ऊपर कूदती है।",
       "sample_romanized_text": "Ēka tēza bhūrī lōmaṛī ālasī kutē kē ūpara kūdatī hai.",
-      "info_links": [
+      "wikipedia_links": [
         "https://en.wikipedia.org/wiki/Hindi"
       ]
     }
@@ -92,7 +101,7 @@
       "alphabet": "Latin",
       "sample_text": "Le vif renard brun saute par-dessus le chien paresseux.",
       "sample_romanized_text": "NONE",
-      "info_links": [
+      "wikipedia_links": [
         "https://en.wikipedia.org/wiki/French_language"
       ]
     }
@@ -112,7 +121,7 @@
       "alphabet": "Latin",
       "sample_text": "Nwaanyị nwere ike iji gị n'ihu.",
       "sample_romanized_text": "NONE",
-      "info_links": [
+      "wikipedia_links": [
         "https://en.wikipedia.org/wiki/Igbo_language"
       ]
     }
@@ -131,28 +140,12 @@
       "alphabet": "Aramaic",
       "sample_text": "ܒܫܠܡܐ ܥܠ ܐܢܫܐ ܕܝܠܝ ܘܥܠ ܐܪܥܐ ܒܪܝܟܐ",
       "sample_romanized_text": "B'shlama 'al nasha d'yali w'al ar'a brikha",
-      "info_links": [
+      "wikipedia_links": [
         "https://en.wikipedia.org/wiki/Aramaic_language"
       ]
     }
   },
-  "japanese": {
-    "language_name": "Japanese",
-    "language_code": "ja",
-    "romanization_method": "HEPBURN",
-    "background": {
-      "family_tree": [
-        "Japonic",
-        "Japanese"
-      ],
-      "alphabet": "Kanji, Hiragana, Katakana",
-      "sample_text": "猫は魚を食べる。",
-      "sample_romanized_text": "Neko wa sakana o taberu.",
-      "info_links": [
-        "https://en.wikipedia.org/wiki/Japanese_language"
-      ]
-    }
-  },
+
   "cherokee": {
     "language_name": "Cherokee",
     "language_code": "chr",
@@ -166,7 +159,7 @@
       "alphabet": "Cherokee",
       "sample_text": "ᎣᏏᏲ ᎠᏎᏃᎯ ᏂᎦᏓ ᎡᎳᏗᎢᎦ ᎾᎥ",
       "sample_romanized_text": "Osiyo ase nohi nigada eladiiga nav",
-      "info_links": [
+      "wikipedia_links": [
         "https://en.wikipedia.org/wiki/Cherokee_language",
         "https://en.wikipedia.org/wiki/Cherokee_syllabary"
       ]
@@ -186,7 +179,7 @@
       "alphabet": "Cyrillic",
       "sample_text": "Швидкий коричневий лис стрибає через лінивого пса.",
       "sample_romanized_text": "Shvydkyy korychnevyy lys strybaye cherez linivoho psa.",
-      "info_links": ["https://en.wikipedia.org/wiki/Ukrainian_language"]
+      "wikipedia_links": ["https://en.wikipedia.org/wiki/Ukrainian_language"]
     }
   },
   "catalan": {
@@ -201,7 +194,7 @@
       ],
       "alphabet": "Latin",
       "sample_text": "La guineu marró ràpida salta sobre el gos mandrós.",
-      "info_links": [ "https://en.wikipedia.org/wiki/Catalan_language"      ]
+      "wikipedia_links": [ "https://en.wikipedia.org/wiki/Catalan_language"      ]
     }
   },
   "kurdish": {
@@ -217,7 +210,7 @@
       ],
       "alphabet": "Latin",
       "sample_text": "Lîsê sor biçûk li ser kûçikê xwe diçe.",
-      "info_links": [
+      "wikipedia_links": [
         "https://en.wikipedia.org/wiki/Kurdish_language"
       ]
     }
