@@ -1,20 +1,19 @@
+// skellysubs-ui/src/schemas/languageConfigSchemas.ts
 import { z } from "zod"
-
-export const LanguageBackgroundSchema = z.object({
-  family_tree: z.array(z.string()),
-  alphabet: z.string(),
-  sample_text: z.string(),
-  sample_romanized_text: z.string().optional(),
-  wikipedia_links: z.array(z.string()),
-})
 
 export const LanguageConfigSchema = z.object({
   language_name: z.string(),
   language_code: z.string(),
   romanization_method: z.string(),
-  background: LanguageBackgroundSchema,
+  background: z.object({
+    family_tree: z.array(z.string()),
+    alphabet: z.string(),
+    sample_text: z.string(),
+    sample_romanized_text: z.string(),
+    wikipedia_links: z.array(z.string().url()),
+  }),
 })
 
-export const LanguageConfigsSchema = z.record(z.string(), LanguageConfigSchema)
-
 export type LanguageConfig = z.infer<typeof LanguageConfigSchema>
+
+export const LanguageConfigsSchema = z.record(LanguageConfigSchema)
