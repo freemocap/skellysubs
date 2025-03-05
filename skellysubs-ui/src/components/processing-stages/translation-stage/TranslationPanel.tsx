@@ -1,6 +1,6 @@
 // src/components/processing-panel/translation/TranslationPanel.tsx
 
-import { Box, Button, Typography } from "@mui/material"
+import { Box, Button, IconButton, Typography } from "@mui/material"
 
 import {
   ProcessingButton,
@@ -17,6 +17,8 @@ import { getLanguageConfigs } from "../../../utils/getLanguageConfigs"
 import { logger } from "../../../utils/logger"
 import { translationTextThunk } from "../../../store/thunks/translationTextThunk"
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
+import SettingsIcon from "@mui/icons-material/Settings"
+import { TranslationControls } from "./TranslationControls"
 
 const TranslationPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -25,8 +27,8 @@ const TranslationPanel: React.FC = () => {
   const translationStatus = useAppSelector(
     state => state.processing.stages.translation.status,
   )
-  // const [targetLanguages, setTargetLanguages] = useState("")
-  // const [showControls, setShowControls] = useState(false)
+  const [targetLanguages, setTargetLanguages] = useState("")
+  const [showControls, setShowControls] = useState(false)
   const [languageOptions, setLanguageOptions] = useState<
     Record<string, LanguageConfig>
   >({})
@@ -38,18 +40,32 @@ const TranslationPanel: React.FC = () => {
       })
       .catch(error => console.error("Failed to load language configs:", error))
   }, [])
-
   const handleTranslateClick = () => {
     if (
       !Object.keys(languageOptions).length ||
       !processingContext.transcription
     )
       return
+
+    // Filter the language options to only include selected target languages
+    const selectedLanguages = targetLanguages.split(",").reduce(
+      (acc, code) => {
+        const language = Object.values(languageOptions).find(
+          lang => lang.language_code === code,
+        )
+        if (language) {
+          acc[language.language_name.toLowerCase()] = language
+        }
+        return acc
+      },
+      {} as Record<string, LanguageConfig>,
+    )
+
     logger(`Translate button clicked`)
     dispatch(
       translationTextThunk({
         text: processingContext.transcription.transcript.text,
-        targetLanguages: languageOptions,
+        targetLanguages: selectedLanguages,
         originalLanguage: processingContext.transcription.transcript.language,
       }),
     )
@@ -91,17 +107,17 @@ const TranslationPanel: React.FC = () => {
           " No transcript available, transcribe audio first. "}
       </Typography>
 
-      {/*<IconButton onClick={() => setShowControls(!showControls)}>*/}
-      {/*  <SettingsIcon />*/}
-      {/*</IconButton>*/}
-      {/*{showControls && (*/}
-      {/*  <TranslationControls*/}
-      {/*    languageOptions={languageOptions}*/}
-      {/*    setLanguageOptions={setLanguageOptions}*/}
-      {/*    targetLanguages={targetLanguages}*/}
-      {/*    setTargetLanguages={setTargetLanguages}*/}
-      {/*  />*/}
-      {/*)}*/}
+      <IconButton onClick={() => setShowControls(!showControls)}>
+        <SettingsIcon />
+      </IconButton>
+      {showControls && (
+        <TranslationControls
+          languageOptions={languageOptions}
+          setLanguageOptions={setLanguageOptions}
+          targetLanguages={targetLanguages}
+          setTargetLanguages={setTargetLanguages}
+        />
+      )}
       <ProcessingButton
         status={translationStatus}
         isReady={isReady}
@@ -138,7 +154,7 @@ const TranslationPanel: React.FC = () => {
                 </Typography>
                 <br />
 
-                {translation.romanized_text && (
+                {!(translation.romanization_method === "NONE") && (
                   <>
                     <Typography
                       variant="body2"

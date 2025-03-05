@@ -23,7 +23,7 @@ class TextTranslationRequest(BaseModel):
 
 
 class TextTranslationResponse(BaseModel):
-    prompts: dict[LanguageNameString, str]
+    prompts: dict[LanguageNameString, list[str]]
     translations: dict[LanguageNameString, TranslatedText]
 
 
