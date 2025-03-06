@@ -12,7 +12,7 @@ import {
   IconButton,
 } from "@mui/material"
 import { ExpandMore, ExpandLess } from "@mui/icons-material"
-import type { LanguageConfig } from "../../../../schemas/languageConfigSchemas"
+import type { LanguageConfig } from "../../../../store/slices/translation-config/languageConfigSchemas"
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks"
 import {
   addCustomLanguage,
@@ -20,7 +20,7 @@ import {
   selectSelectedTargetLanguages,
   toggleLanguage,
   updateLanguageConfig,
-} from "../../../../store/slices/processing-configs/translationConfigSlice"
+} from "../../../../store/slices/translation-config/translationConfigSlice"
 import { LanguageConfigEditor } from "./LanguageConfigEditor"
 import extendedPaperbaseTheme from "../../../../layout/paperbase_theme/paperbase-theme"
 

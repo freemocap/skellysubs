@@ -1,7 +1,7 @@
 // skellysubs-ui/src/store/slices/processing-configs/translationConfigSlice.ts
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import type { LanguageConfig } from "../../../schemas/languageConfigSchemas"
+import type { LanguageConfig } from "./languageConfigSchemas"
 import type { RootState } from "../../AppStateStore"
 import { getLanguageConfigs } from "../../../utils/getLanguageConfigs"
 import { logger } from "../../../utils/logger"

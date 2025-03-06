@@ -1,6 +1,6 @@
 // skellysubs-ui/src/utils/getLanguageConfigs.ts
-import type { LanguageConfig } from "../schemas/languageConfigSchemas"
-import { LanguageConfigsSchema } from "../schemas/languageConfigSchemas"
+import type { LanguageConfig } from "../store/slices/translation-config/languageConfigSchemas"
+import { LanguageConfigsSchema } from "../store/slices/translation-config/languageConfigSchemas"
 import languageConfigs from "../language_configs.json"
 
 export const getLanguageConfigs = async (): Promise<

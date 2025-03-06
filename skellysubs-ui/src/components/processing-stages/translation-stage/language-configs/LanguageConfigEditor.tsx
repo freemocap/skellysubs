@@ -7,10 +7,10 @@ import {
   TextField,
   Grid,
 } from "@mui/material"
-import type { LanguageConfig } from "../../../../schemas/languageConfigSchemas"
+import type { LanguageConfig } from "../../../../store/slices/translation-config/languageConfigSchemas"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { LanguageConfigSchema } from "../../../../schemas/languageConfigSchemas"
+import { LanguageConfigSchema } from "../../../../store/slices/translation-config/languageConfigSchemas"
 
 interface LanguageConfigEditorProps {
   open: boolean

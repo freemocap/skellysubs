@@ -1,4 +1,4 @@
-import type { LanguageConfig } from "../../../schemas/languageConfigSchemas"
+import type { LanguageConfig } from "../translation-config/languageConfigSchemas"
 
 export interface AudioVisualFile {
   url: string

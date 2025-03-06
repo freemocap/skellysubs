@@ -9,20 +9,20 @@ import {
   selectProcessingContext,
 } from "../../../store/slices/processing-status/processingStatusSlice"
 import { useContext, useEffect } from "react"
-import type { LanguageConfig } from "../../../schemas/languageConfigSchemas"
+import type { LanguageConfig } from "../../../store/slices/translation-config/languageConfigSchemas"
 import { logger } from "../../../utils/logger"
 import SettingsIcon from "@mui/icons-material/Settings"
 import {
   fetchLanguageConfigs,
   selectAvailableTargetLanguages,
   selectSelectedTargetLanguages,
-} from "../../../store/slices/processing-configs/translationConfigSlice"
+} from "../../../store/slices/translation-config/translationConfigSlice"
 import { RightPanelContext } from "../../../layout/BasePanelLayout"
 import { translationTranscriptThunk } from "../../../store/slices/processing-status/thunks/translationTranscriptThunk"
 import { LanguageChipsPanel } from "./LanguageChipsPanel"
 import { DownloadTranslationButton } from "./DownloadTranslationButton"
 import { RichTreeView } from "@mui/x-tree-view"
-import TranscriptView from "../TranscriptView";
+import TranslatedTranscriptView from "./TranslatedTranscriptView";
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme";
 
 const TranslationPanel: React.FC = () => {
@@ -132,7 +132,7 @@ const TranslationPanel: React.FC = () => {
                             backgroundColor : extendedPaperbaseTheme.palette.primary.dark,
                         }
                         }>
-                      <TranscriptView
+                      <TranslatedTranscriptView
                           key={languageName}
                           laguageName={languageName}
                           translation={translation}

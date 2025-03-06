@@ -7,7 +7,7 @@ import { getLanguageConfigs } from "../../../../utils/getLanguageConfigs"
 import type {
   LanguageConfig,
   LanguageConfigSchema,
-} from "../../../../schemas/languageConfigSchemas"
+} from "../../translation-config/languageConfigSchemas"
 import type { z } from "zod"
 
 export const translationTextThunk = createProcessingThunk<

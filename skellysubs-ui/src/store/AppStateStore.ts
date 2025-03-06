@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { processingSlice } from "./slices/processing-status/processingStatusSlice"
 import { logsSlice } from "./slices/LogsSlice"
-import {translationConfigSlice} from "./slices/processing-configs/translationConfigSlice";
+import {translationConfigSlice} from "./slices/translation-config/translationConfigSlice";
 
 export const AppStateStore = configureStore({
   reducer: {

@@ -5,7 +5,7 @@ import type {
   TranscriptionVerbose,
 } from "../processing-status-types"
 import { createProcessingThunk } from "./createProcessingThunk"
-import type { LanguageConfig } from "../../../../schemas/languageConfigSchemas"
+import type { LanguageConfig } from "../../translation-config/languageConfigSchemas"
 
 export const translationTranscriptThunk = createProcessingThunk<
   {

@@ -1,12 +1,12 @@
 import { RichTreeView } from "@mui/x-tree-view"
-import {TranslatedTranscript} from "../../store/slices/processing-status/processing-status-types";
+import {TranslatedTranscript} from "../../../store/slices/processing-status/processing-status-types";
 
 interface TranslatedTranscriptViewProps {
   laguageName: string
   translation: TranslatedTranscript
 }
 
-const TranscriptView: React.FC<TranslatedTranscriptViewProps> = ({
+const TranslatedTranscriptView: React.FC<TranslatedTranscriptViewProps> = ({
   laguageName,
   translation
 }) => {
@@ -101,4 +101,4 @@ const TranscriptView: React.FC<TranslatedTranscriptViewProps> = ({
   )
 }
 
-export default TranscriptView
+export default TranslatedTranscriptView

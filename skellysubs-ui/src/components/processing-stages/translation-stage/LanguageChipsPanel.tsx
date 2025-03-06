@@ -4,7 +4,7 @@ import {RightPanelContext} from "../../../layout/BasePanelLayout";
 import {
     selectAvailableTargetLanguages,
     selectSelectedTargetLanguages, toggleLanguage
-} from "../../../store/slices/processing-configs/translationConfigSlice";
+} from "../../../store/slices/translation-config/translationConfigSlice";
 import {Box, IconButton} from "@mui/material";
 import Chip from "@mui/material/Chip";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
