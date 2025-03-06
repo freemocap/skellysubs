@@ -75,7 +75,6 @@ const TranscriptionPanel: React.FC = () => {
   }
   return (
     <ProcessingPanelLayout
-      borderColor="#ff0"
       sx={{
         m: 3,
         p: 3,

@@ -23,6 +23,7 @@
     "@melloware/react-logviewer": "^6.1.2",
     "@mui/icons-material": "^6.4.5",
     "@mui/material": "^6.4.5",
+    "@mui/x-tree-view": "^7.26.0",
     "@reduxjs/toolkit": "^2.0.1",
     "@tailwindcss/vite": "^4.0.9",
     "axios": "^1.8.1",
