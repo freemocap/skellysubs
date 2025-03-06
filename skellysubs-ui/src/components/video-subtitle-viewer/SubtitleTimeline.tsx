@@ -1,5 +1,5 @@
 import { Button, Stack } from "@mui/material";
-import {Subtitle} from "./video-subtitle-viewer-types";
+import type {Subtitle} from "./video-subtitle-viewer-types";
 
 interface SubtitleTimelineProps {
     subtitles: Subtitle[];

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Editor } from "@monaco-editor/react";
-import {Subtitle} from "./video-subtitle-viewer-types";
+import type {Subtitle} from "./video-subtitle-viewer-types";
 
 interface SubtitleEditorProps {
     vttContent: string;
@@ -27,7 +27,7 @@ export const SubtitleEditor = ({
             language="plaintext"
             theme="vs-dark"
             value={vttContent}
-            onChange={(value: string) => value && onContentChange(value)}
+            onChange={(value) => value && onContentChange(value)}
             onMount={handleEditorDidMount}
             options={{
                 minimap: { enabled: false },
