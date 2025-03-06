@@ -1,7 +1,4 @@
-// src/components/processing-panel/translation/TranslationPanel.tsx
-
-import { Box, Button, IconButton, Typography } from "@mui/material"
-
+import {IconButton, Paper, Typography} from "@mui/material"
 import {
   ProcessingButton,
   ProcessingPanelLayout,
@@ -11,20 +8,23 @@ import {
   selectIsTranslateReady,
   selectProcessingContext,
 } from "../../../store/slices/processing-status/processingStatusSlice"
-import { useEffect, useState } from "react"
-import type { LanguageConfig } from "../../../schemas/languageConfigSchemas"
-import { getLanguageConfigs } from "../../../utils/getLanguageConfigs"
+import { useContext, useEffect } from "react"
+import type { LanguageConfig } from "../../../store/slices/translation-config/languageConfigSchemas"
 import { logger } from "../../../utils/logger"
-import { translationTextThunk } from "../../../store/thunks/translationTextThunk"
-import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import SettingsIcon from "@mui/icons-material/Settings"
-import { TranslationControls } from "./TranslationControls"
-import Chip from "@mui/material/Chip";
 import {
-    selectLanguageOptions,
-    selectSelectedTargetLanguages,
-    setLanguageOptions, toggleLanguage,
-} from "../../../store/slices/processing-configs/translationConfigSlice"
+  fetchLanguageConfigs,
+  selectAvailableTargetLanguages,
+  selectSelectedTargetLanguages,
+} from "../../../store/slices/translation-config/translationConfigSlice"
+import { RightPanelContext } from "../../../layout/BasePanelLayout"
+import { translationTranscriptThunk } from "../../../store/slices/processing-status/thunks/translationTranscriptThunk"
+import { LanguageChipsPanel } from "./LanguageChipsPanel"
+import { DownloadTranslationButton } from "./DownloadTranslationButton"
+import { RichTreeView } from "@mui/x-tree-view"
+import TranslatedTranscriptView from "./TranslatedTranscriptView";
+import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme";
+
 const TranslationPanel: React.FC = () => {
   const dispatch = useAppDispatch()
   const isReady = useAppSelector(selectIsTranslateReady)
@@ -32,40 +32,40 @@ const TranslationPanel: React.FC = () => {
   const translationStatus = useAppSelector(
     state => state.processing.stages.translation.status,
   )
-  const [showControls, setShowControls] = useState(false)
-  const languageOptions = useAppSelector(selectLanguageOptions)
+  const availableTargetLanguages = useAppSelector(
+    selectAvailableTargetLanguages,
+  )
   const selectedTargetLanguages = useAppSelector(selectSelectedTargetLanguages)
+  const { toggleRightPanel } = useContext(RightPanelContext)
 
-    useEffect(() => {
-        getLanguageConfigs()
-            .then(languageConfigs => {
-                dispatch(setLanguageOptions(languageConfigs));
-            })
-            .catch(error => console.error("Failed to load language configs:", error));
-    }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchLanguageConfigs())
+  }, [dispatch])
 
-    const handleTranslateClick = () => {
-        if (!processingContext.transcription) return;
+  const handleTranslateClick = () => {
+    if (!processingContext.transcription) return
 
-        const targetLanguagesConfig = selectedTargetLanguages.reduce(
-            (acc, code) => {
-                const language = languageOptions[code]; // Direct access by code
-                if (language) {
-                    acc[language.language_code] = language;
-                }
-                return acc;
-            },
-            {} as Record<string, LanguageConfig>,
-        );
-        logger(`Translate button clicked`);
-        dispatch(
-            translationTextThunk({
-                text: processingContext.transcription.transcript.text,
-                targetLanguages: targetLanguagesConfig,
-                originalLanguage: processingContext.transcription.transcript.language,
-            }),
-        );
-    };
+    const targetLanguagesConfig = selectedTargetLanguages.reduce(
+      (acc, configKey) => {
+        const language = availableTargetLanguages[configKey]
+        if (language) {
+          acc[configKey] = language
+        }
+        return acc
+      },
+      {} as Record<string, LanguageConfig>,
+    )
+
+    const translateThunkArgs = {
+      transcript: processingContext.transcription.transcript,
+      targetLanguages: targetLanguagesConfig,
+    }
+    logger(
+      `Translate transcript button clicked with parameters - targetLanguages: ${JSON.stringify(translateThunkArgs, null, 2)}`,
+    )
+    dispatch(translationTranscriptThunk(translateThunkArgs))
+  }
+
   const handleDownloadJSONClick = () => {
     logger(`[TranslationPanel] Downloading translation results...`)
     const json = JSON.stringify(processingContext.translation, null, 2)
@@ -76,128 +76,75 @@ const TranslationPanel: React.FC = () => {
     a.href = url
     a.download = `${processingContext.originalFile?.name}_translation.json`
     a.click()
-
     URL.revokeObjectURL(url)
   }
 
   return (
     <ProcessingPanelLayout
-      borderColor="#00aa3c"
-      sx={{
-        m: 3,
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        borderStyle: "solid",
-        borderWidth: "1px",
-        borderRadius: 2,
-      }}
+        sx={{
+          m: 3,
+          p: 3,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          borderStyle: "solid",
+          borderColor: "#00aa22",
+          borderWidth: "1px",
+          borderRadius: 2,
+        }}
     >
-      <Typography
-        variant="body1"
-        color={extendedPaperbaseTheme.palette.text.disabled}
-        sx={{ mb: 2 }}
-      >
+      <Typography variant="body1" color="text.disabled" sx={{ m: 2 }}>
         {!processingContext.transcription &&
-          " No transcript available, transcribe audio first. "}
+          "No transcript available, transcribe audio first."}
       </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-            {selectedTargetLanguages.map(code => {
-                const lang = Object.values(languageOptions).find(l => l.language_code === code);
-                return (
-                    <Chip
-                        key={code}
-                        label={lang?.language_name || code}
-                        onDelete={() => dispatch(toggleLanguage(code))}
-                    />
-                );
-            })}
-        </Box>
-      <IconButton onClick={() => setShowControls(!showControls)}>
+
+      <LanguageChipsPanel />
+
+      <IconButton
+        onClick={toggleRightPanel}
+        sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
+      >
         <SettingsIcon />
       </IconButton>
-      {showControls && (
-        <TranslationControls/>
-      )}
+
       <ProcessingButton
         status={translationStatus}
         isReady={isReady}
         label="Translate Text"
         onClick={handleTranslateClick}
       />
+
       {processingContext.translation && (
         <>
-          <Typography sx={{ mb: 2, textAlign: "center" }}>
-            Original text: <br />
-            {processingContext.transcription?.transcript?.text}
-          </Typography>
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            Translations:
-          </Typography>
-          {Object.entries(processingContext.translation.translations).map(
-            ([key, translation], i) => (
-              <Box
-                key={i}
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  border: "1px solid #ddd",
-                  borderRadius: 1,
-                  width: "100%",
-                  textAlign: "left",
-                }}
-              >
-                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                  {translation.translated_language_name}:
-                </Typography>
-                <Typography variant="body1">
-                  {translation.translated_text}
-                </Typography>
-                <br />
+          {processingContext.translation &&
+              Object.entries(processingContext.translation.translated_transcripts).map(
+                  ([languageName, translation]) => (
+                      <Paper
+                        key={languageName}
+                        sx={{
+                            width: "100%",
+                            m: 2,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-start",
+                          borderStyle: "solid",
+                            borderColor: extendedPaperbaseTheme.palette.primary.light,
+                            backgroundColor : extendedPaperbaseTheme.palette.primary.dark,
+                        }
+                        }>
+                      <TranslatedTranscriptView
+                          key={languageName}
+                          laguageName={languageName}
+                          translation={translation}
+                      />
+                        </Paper>
+                  )
+              )}
 
-                {!(translation.romanization_method === "NONE") && (
-                  <>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mt: 1,
-                        color: extendedPaperbaseTheme.palette.text.secondary,
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      Romanized ({translation.romanization_method}):
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: extendedPaperbaseTheme.palette.text.secondary,
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      {translation.romanized_text}
-                    </Typography>
-                  </>
-                )}
-              </Box>
-            ),
-          )}
-          <Button
-            variant="contained"
-            onClick={handleDownloadJSONClick}
-            sx={{
-              backgroundColor: extendedPaperbaseTheme.palette.primary.light,
-              borderColor: "#222222",
-              borderStyle: "solid",
-              borderWidth: "1px",
-            }}
-          >
-            Download translation results
-          </Button>
+          <DownloadTranslationButton onClick={handleDownloadJSONClick} />
         </>
       )}
     </ProcessingPanelLayout>
   )
 }
-
 export default TranslationPanel

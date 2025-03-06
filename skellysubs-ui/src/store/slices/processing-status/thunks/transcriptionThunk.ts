@@ -1,6 +1,6 @@
-import type { ProcessingContext } from "../slices/processing-status/processing-status-types"
-import { logger } from "../../utils/logger"
-import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
+import type { ProcessingContext } from "../processing-status-types"
+import { logger } from "../../../../utils/logger"
+import { getApiBaseUrl } from "../../../../utils/getApiBaseUrl"
 
 import { createProcessingThunk } from "./createProcessingThunk"
 
@@ -34,7 +34,9 @@ export const transcriptionThunk = createProcessingThunk<
     })
 
     if (!transcribeResponse.ok) {
-      throw new Error(`HTTP error ${transcribeResponse.status}`)
+      const errorBody = await transcribeResponse.text()
+      logger(`Translation error response: ${errorBody}`)
+      throw new Error(`HTTP error ${transcribeResponse.status}: ${errorBody}`)
     }
 
     const result = await transcribeResponse.json()

@@ -13,7 +13,7 @@ import {
   ProcessingButton,
   ProcessingPanelLayout,
 } from "../ProcessingPanelLayout"
-import { transcriptionThunk } from "../../../store/thunks/transcriptionThunk"
+import { transcriptionThunk } from "../../../store/slices/processing-status/thunks/transcriptionThunk"
 import SettingsIcon from "@mui/icons-material/Settings"
 import { TranscriptionControls } from "./TranscriptionControls"
 
@@ -75,7 +75,6 @@ const TranscriptionPanel: React.FC = () => {
   }
   return (
     <ProcessingPanelLayout
-      borderColor="#ff0"
       sx={{
         m: 3,
         p: 3,

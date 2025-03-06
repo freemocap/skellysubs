@@ -1,20 +1,16 @@
-// src/thunks/translationThunk.ts
-import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
-import { logger } from "../../utils/logger"
-import type { ProcessingContext } from "../slices/processing-status/processing-status-types"
-import { createProcessingThunk } from "./createProcessingThunk"
-import { getLanguageConfigs } from "../../utils/getLanguageConfigs"
+import { getApiBaseUrl } from "../../../../utils/getApiBaseUrl"
+import { logger } from "../../../../utils/logger"
 import type {
-  LanguageConfig,
-  LanguageConfigSchema,
-} from "../../schemas/languageConfigSchemas"
-import type { z } from "zod"
+  ProcessingContext,
+  TranscriptionVerbose,
+} from "../processing-status-types"
+import { createProcessingThunk } from "./createProcessingThunk"
+import type { LanguageConfig } from "../../translation-config/languageConfigSchemas"
 
-export const translationTextThunk = createProcessingThunk<
+export const translationTranscriptThunk = createProcessingThunk<
   {
-    text:string,
+    transcript: TranscriptionVerbose
     targetLanguages: Record<string, LanguageConfig>
-    originalLanguage: string
   },
   ProcessingContext["translation"]
 >("translation", async (context, params) => {
@@ -23,18 +19,16 @@ export const translationTextThunk = createProcessingThunk<
     if (!params?.targetLanguages) {
       throw new Error("No target languages provided")
     }
-    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/text?original_language=${params.originalLanguage}`
+    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/transcript`
     const requestBody = JSON.stringify(
       {
-        text: params.text,
+        transcript: params.transcript,
         target_languages: params.targetLanguages,
       },
       null,
       2,
     )
-    logger(
-      `Sending translation request to url: ${translationEndpointUrl}...`,
-    )
+    logger(`Sending translation request to url: ${translationEndpointUrl}...`)
     const translationResponse = await fetch(translationEndpointUrl, {
       method: "POST",
       headers: {
@@ -44,13 +38,13 @@ export const translationTextThunk = createProcessingThunk<
     })
 
     if (!translationResponse.ok) {
-      throw new Error(`HTTP error ${translationResponse.status}`)
+      const errorBody = await translationResponse.text()
+      logger(`Translation error response: ${errorBody}`)
+      throw new Error(`HTTP error ${translationResponse.status}: ${errorBody}`)
     }
 
     const result = await translationResponse.json()
-    logger(
-      `Translation successful!`,
-    )
+    logger(`Translation successful!`)
     return result as ProcessingContext["translation"]
   } catch (error) {
     console.error("Translation error:", error)
