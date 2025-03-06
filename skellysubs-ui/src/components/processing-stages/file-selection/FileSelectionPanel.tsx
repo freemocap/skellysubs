@@ -12,7 +12,7 @@ interface FileInputProps {
   onFileChange: (file: File) => void
 }
 
-const FileInput: React.FC<FileInputProps> = ({ onFileChange }) => {
+const FileSelectionPanel: React.FC<FileInputProps> = ({ onFileChange }) => {
   const processingContext = useAppSelector(selectProcessingContext)
 
   const handleFileSelect = (file: File) => {
@@ -98,4 +98,4 @@ const FileInput: React.FC<FileInputProps> = ({ onFileChange }) => {
   )
 }
 
-export default FileInput
+export default FileSelectionPanel

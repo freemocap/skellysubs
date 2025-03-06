@@ -5,7 +5,7 @@ import {
   injectContextData,
   selectProcessingContext,
 } from "../../../store/slices/processing-status/processingStatusSlice"
-import FileInput from "./FileInput"
+import FileSelectionPanel from "./FileSelectionPanel"
 import FileDetails from "./FileDetails"
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import { ffmpegService } from "../../../services/FfmpegService/useFfmpeg"
@@ -45,7 +45,7 @@ const FileSelectionBox: React.FC = () => {
         bgcolor: extendedPaperbaseTheme.palette.primary.main,
       }}
     >
-      <FileInput onFileChange={handleFileChange} />
+      <FileSelectionPanel onFileChange={handleFileChange} />
       {processingContext.mp3Audio && (
         <Box
           sx={{

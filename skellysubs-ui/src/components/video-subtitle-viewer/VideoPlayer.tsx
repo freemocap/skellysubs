@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack, Typography } from "@mui/material";
 import { PlayArrow, Pause, VolumeUp, VolumeOff } from "@mui/icons-material";
-import {Subtitle, SubtitleCue} from "./video-subtitle-viewer-types";
+import type {Subtitle, SubtitleCue} from "./video-subtitle-viewer-types";
 import {VideoControls, VideoWrapper} from "./video-subtitle-viewer-styles";
 import {formatTime} from "./video-subtitle-viewer-utils";
 
@@ -90,7 +90,7 @@ export const VideoPlayer = ({
                     <Typography variant="body2" sx={{ color: "common.white", ml: 1 }}>
                         {currentSubtitle ? formatTime(currentSubtitle.start) : "00:00:00.000"}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)" }}>
+                    <Typography variant="h6" sx={{ color: "rgba(255,255,255,0.6)" }}>
                         {currentSubtitle?.text.join(" ") || ""}
                     </Typography>
                 </Stack>

@@ -2,7 +2,8 @@ import type React from "react"
 import { Box, Typography } from "@mui/material"
 
 // const logoUrl = `${window.location.origin}/logo/skellysubs-logo.png`
-const logoUrl = "https://media.githubusercontent.com/media/freemocap/skellysubs/a30fa61cd2dcadfb3c1754548bde263afa5181e9/skellysubs-ui/public/logo/skellysubs-logo.png"
+const logoUrl =
+  "https://media.githubusercontent.com/media/freemocap/skellysubs/a30fa61cd2dcadfb3c1754548bde263afa5181e9/skellysubs-ui/public/logo/skellysubs-logo.png"
 // const logoPath = `${window.location.origin}/logo/skellysubs-logo.png`
 const WelcomeContent: React.FC = () => {
   return (
@@ -44,9 +45,13 @@ const WelcomeContent: React.FC = () => {
       <Typography variant="h2">Welcome to SkellySubs!</Typography>
       <br />
       <br />
-      <Typography variant="body1" color="#aaa">
+      <Typography variant="body2" align="center">
         (Hint: Open the browser tools with F12 (Windows) or Cmd+Option+I (macOS)
-        and check the console for progress)
+        and check the console for progress.
+      </Typography>
+
+      <Typography variant="body1" align="center">
+        Install React and Redux DevTools for deeper details!)
       </Typography>
     </Box>
   )

@@ -20,7 +20,8 @@ export const RightSideConfigPanel = ({
   }
 
   return (
-    <Box sx={{ position: "relative", height: "100%" }}>
+    <Box sx={{ position: "relative", height: "100%"
+    }}>
       {/* Collapse Toggle Handle */}
 
       {!isCollapsed && (
@@ -31,7 +32,7 @@ export const RightSideConfigPanel = ({
 
           <List component="nav">
             <ConfigSection
-              title="Translation Settings"
+              title="Target Languages"
               open={openSections.translation}
               onToggle={() => handleSectionToggle("translation")}
             >

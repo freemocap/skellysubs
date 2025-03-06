@@ -132,7 +132,7 @@ export const BasePanelLayout = ({
             defaultSize={0}
             style={{
               overflow: isRightPanelCollapsed ? "visible" : "auto",
-              backgroundColor: extendedPaperbaseTheme.palette.background.paper,
+              backgroundColor: extendedPaperbaseTheme.palette.primary.dark,
               borderLeft: `1px solid ${extendedPaperbaseTheme.palette.divider}`,
               position: "relative",
             }}

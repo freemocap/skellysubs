@@ -23,5 +23,5 @@ code {
 /* Monaco Editor overrides to match paperbase theme */
 .monaco-editor .margin,
 .monaco-editor .monaco-editor-background {
-  background-color: #0a6c00 !important;
+  /*background-color: #0a6c00 !important;*/
 }

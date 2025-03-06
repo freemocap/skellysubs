@@ -1,7 +1,7 @@
 import type React from "react"
 import { Box, Button, Typography } from "@mui/material"
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
-import {AudioVisualFile} from "../../../store/slices/processing-status/processing-status-types";
+import type {AudioVisualFile} from "../../../store/slices/processing-status/processing-status-types";
 
 interface FileDetailsProps {
   avFile: AudioVisualFile

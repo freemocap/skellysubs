@@ -11,6 +11,6 @@ export const VideoControls = styled(Box)({
     bottom: 0,
     left: 0,
     right: 0,
-    background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+    background: 'linear-gradient(to top, rgba(0, 55,55,0.9), transparent)',
     padding: '1rem'
 });
