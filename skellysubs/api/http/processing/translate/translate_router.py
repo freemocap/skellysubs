@@ -4,8 +4,11 @@ from fastapi import APIRouter, HTTPException
 from fastapi import Body, Query
 from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel
-
 from skellysubs.core.subtitles.subtitle_formatter_factor import SubtitleFormatterFactory, SubtitleFormat
+
+from skellysubs.core.subtitles.formatters.base_subtitle_formatter import FormattedSubtitles
+from skellysubs.core.subtitles.subtitle_generator import SubtitleGenerator
+from skellysubs.core.subtitles.subtitle_types import AllSubtitlesByLanguage
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation.models.translated_text import TranslatedText
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
@@ -32,7 +35,7 @@ class TextTranslationResponse(BaseModel):
 class TranscriptTranslationResponse(BaseModel):
     translated_transcripts: dict[LanguageNameString, TranslatedTranscript]
     segment_prompts_by_language: dict[LanguageNameString, list[str]]
-    subtitles_by_language: dict[LanguageNameString, dict[str, SrtFormatedString]]
+    subtitles_by_language: dict[LanguageNameString, FormattedSubtitles]
 
 
 @translate_router.post("/translate/text", response_model=TextTranslationResponse)
@@ -66,8 +69,8 @@ async def translate_transcript_endpoint(
     logger.info(
         f"Translation request received for transcription with {len(transcript.segments)} segments and target languages: {[key for key in target_languages.keys()]}")
     translated_transcripts = {}
-    subtitle_formatter = SubtitleFormatterFactory.get_formatter(SubtitleFormat.SRT)
-    subtitles_by_language = {}
+    subtitles_by_language: AllSubtitlesByLanguage = {}
+    processor = SubtitleGenerator()
 
     try:
         full_text_prompts, full_text_translations = await text_translation(text=transcript.text,
@@ -79,8 +82,7 @@ async def translate_transcript_endpoint(
             full_text_translations=full_text_translations,
             target_languages=target_languages,
         )
-        subtitle_formatter = SubtitleFormatterFactory.get_formatter(SubtitleFormat.SRT)
-        subtitles_by_language = {}
+
         for language, language_config in target_languages.items():
             translated_transcripts[language] = TranslatedTranscript(original_language=transcript.language,
                                                                     original_full_text=transcript.text,
@@ -91,8 +93,8 @@ async def translate_transcript_endpoint(
                                                                         language]
                                                                     )
 
-            subtitles_by_language[language] = subtitle_formatter.format_translated_transcript(
-                translated_transcript=translated_transcripts[language])
+            subtitles_by_language[language] = processor.generate_all_formats(translated_transcripts[language])
+
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
