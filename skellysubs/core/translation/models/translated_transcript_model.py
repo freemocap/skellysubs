@@ -2,13 +2,14 @@ import logging
 
 from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel, Field
+from skellysubs.core.translation.models.translated_text_models import TranslationsCollection
 
 from skellysubs.core.transcription.whisper_transcript_result_model import \
     WhisperTranscriptionResult
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation.models.translated_segment_models import MatchedTranslatedWord, \
-    MatchedTranslatedSegment, TranslatedWhisperWordTimestamp, TranslatedTranscriptSegmentWithMatchedWords, CurrentSegmentAndMatchedWord
-from skellysubs.core.translation.models.translated_text_models import TranslationsCollection
+    MatchedTranslatedSegment, TranslatedWhisperWordTimestamp, TranslatedTranscriptSegmentWithMatchedWords, \
+    CurrentSegmentAndMatchedWord
 from skellysubs.core.translation.models.translation_typehints import LanguageNameString, \
     OriginalTextString
 
@@ -36,7 +37,7 @@ class OldTranslatedTranscription(BaseModel):
         return ret
 
     @classmethod
-    def from_results(cls, original_transcript:TranscriptionVerbose,
+    def from_results(cls, original_transcript: TranscriptionVerbose,
                      target_languages: dict[LanguageNameString, LanguageConfig],
                      full_text_translations: dict[LanguageNameString, str],
                      translated_segments: list[MatchedTranslatedSegment]):
@@ -46,20 +47,24 @@ class OldTranslatedTranscription(BaseModel):
     def initialize(cls,
                    og_transcription: TranscriptionVerbose,
                    original_langauge: LanguageNameString,
-                     target_languages: dict[LanguageNameString, LanguageConfig]):
+                   target_languages: dict[LanguageNameString, LanguageConfig]):
 
         segments = []
         try:
             for segment in og_transcription.segments:
                 segments.append(TranslatedTranscriptSegmentWithMatchedWords(original_segment_text=segment.text,
                                                                             original_language=original_langauge,
-                                                                            translations=TranslationsCollection.create(original_language=original_langauge,
-                                                                                                target_languages=target_languages),
+                                                                            translations=TranslationsCollection.create(
+                                                                                original_language=original_langauge,
+                                                                                target_languages=target_languages),
                                                                             start=segment.start,
                                                                             end=segment.end,
                                                                             matched_translated_segment_by_language={},
-                                                                            words=[TranslatedWhisperWordTimestamp.from_whisper_result(word)
-                                                         for word in segment.words] if segment.words else []
+                                                                            words=[
+                                                                                TranslatedWhisperWordTimestamp.from_whisper_result(
+                                                                                    word)
+                                                                                for word in
+                                                                                segment.words] if segment.words else []
                                                                             )
                                 )
         except Exception as e:
@@ -69,7 +74,6 @@ class OldTranslatedTranscription(BaseModel):
                    original_language=original_langauge,
                    full_text_translations=TranslationsCollection.create(original_language=original_langauge),
                    segments=segments)
-
 
     def get_matched_segment_and_word_at_timestamp(self, timestamp: float) -> CurrentSegmentAndMatchedWord:
         """
@@ -120,7 +124,6 @@ class OldTranslatedTranscription(BaseModel):
                                             current_word=current_word,
                                             matched_segment_by_language=matched_translated_segments,
                                             matched_word_by_language=matched_translated_words)
-
 
 
 if __name__ == '__main__':

@@ -53,7 +53,7 @@ class SubtitleTimeFormatter:
         return f"{hours}:{minutes:02}:{int(seconds_remainder):02}.{centiseconds:02}"
 
     @staticmethod
-    def format_time_markdown(seconds:float) -> str:
+    def format_time_markdown(seconds: float) -> str:
         """
         Format time for Markdown format using VTT format: HH:MM:SS.mmm
 

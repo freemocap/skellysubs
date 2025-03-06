@@ -1,7 +1,5 @@
 import enum
 
-from skellysubs.core.translation.models.translation_typehints import LanguageNameString
-
 SubtitleFormattedString = str
 SrtFormattedString = SubtitleFormattedString
 VttFormattedString = SubtitleFormattedString
@@ -14,6 +12,7 @@ class SubtitleFormats(enum.Enum):
     VTT: VttFormattedString = "vtt"
     SSA: SsaFormattedString = "ssa"
     MD: MdFormattedString = "md"
+
 
 class SubtitleTypes(enum.Enum):
     original_spoken = "original_spoken"

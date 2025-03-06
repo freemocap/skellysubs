@@ -12,9 +12,11 @@ from skellysubs.app.skellysubs_app_state import get_skellysubs_app_state, \
 
 logger = logging.getLogger(__name__)
 
+
 class WebsocketPayload(BaseModel):
-    payload: str|dict|list|BaseModel
+    payload: str | dict | list | BaseModel
     session_id: uuid.UUID
+
 
 class SkellySubsWebsocketServer:
     def __init__(self, websocket: WebSocket, session_id: str):
@@ -74,7 +76,3 @@ class SkellySubsWebsocketServer:
         finally:
             logger.info("Ending listener for frontend payload messages in queue...")
         logger.info("Ending listener for client messages...")
-
-
-
-

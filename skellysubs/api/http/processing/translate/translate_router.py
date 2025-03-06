@@ -4,11 +4,9 @@ from fastapi import APIRouter, HTTPException
 from fastapi import Body, Query
 from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel
-from skellysubs.core.subtitles.subtitle_formatter_factor import SubtitleFormatterFactory, SubtitleFormat
 
 from skellysubs.core.subtitles.formatters.base_subtitle_formatter import FormattedSubtitles
 from skellysubs.core.subtitles.subtitle_generator import SubtitleGenerator
-from skellysubs.core.subtitles.subtitle_types import AllSubtitlesByLanguage
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation.models.translated_text import TranslatedText
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
@@ -69,7 +67,7 @@ async def translate_transcript_endpoint(
     logger.info(
         f"Translation request received for transcription with {len(transcript.segments)} segments and target languages: {[key for key in target_languages.keys()]}")
     translated_transcripts = {}
-    subtitles_by_language: AllSubtitlesByLanguage = {}
+    subtitles_by_language: [LanguageNameString, FormattedSubtitles] = {}
     processor = SubtitleGenerator()
 
     try:

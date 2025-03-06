@@ -1,17 +1,12 @@
 import asyncio
-import json
 import logging
-import re
 
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation.models.translated_text import TranslatedText
 from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 
-from skellysubs.utilities.get_wikipedia_article_contents import get_wikipedia_texts
-
 logger = logging.getLogger(__name__)
-
 
 # Here is some information about the language you will be translating into:
 #
@@ -103,6 +98,7 @@ async def format_full_text_translation_system_prompt(
 
     return full_text_translation_prompts_by_language
 
+
 def split_text_into_segments(text, max_word_length=150):
     words = text.split()
     segments = []
@@ -118,10 +114,11 @@ def split_text_into_segments(text, max_word_length=150):
         segments.append(' '.join(current_segment))
 
     return segments
+
+
 async def text_translation(text: str, original_language: str,
                            target_languages: dict[LanguageNameString, LanguageConfig]) -> tuple[
     dict[LanguageNameString, list[str]], dict[LanguageNameString, TranslatedText]]:
-
     # Full-text translation
     system_prompts_by_language = await format_full_text_translation_system_prompt(
         text=text,
@@ -134,7 +131,6 @@ async def text_translation(text: str, original_language: str,
     language_addresses = []
 
     for language, system_prompts in system_prompts_by_language.items():
-
 
         for prompt in system_prompts:
             task = asyncio.create_task(

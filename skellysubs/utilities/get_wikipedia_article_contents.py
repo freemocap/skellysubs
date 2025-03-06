@@ -47,7 +47,7 @@ else:
     cache = {}
 
 
-async def get_wikipedia_texts(urls: list[str]) ->str:
+async def get_wikipedia_texts(urls: list[str]) -> str:
     wiki_wiki = wikipediaapi.Wikipedia(
         user_agent='Skelly FreeMoCap (info@freemocap.org)',
         language='en',
@@ -75,14 +75,16 @@ async def get_wikipedia_texts(urls: list[str]) ->str:
 
                 if page.exists():
                     logger.debug(f'Found {page.title} in {url}, length: {len(page.text.split(" "))} words')
-                    logger.info(f"Generating translation-specifc AI summary for {url} - will be cached in ({CACHE_FILE}) for future runs")
+                    logger.info(
+                        f"Generating translation-specifc AI summary for {url} - will be cached in ({CACHE_FILE}) for future runs")
                     ai_summary = await openai_client.make_text_generation_request(
                         system_prompt=WIKIPEDIA_TRANSLATION_SUMMARY_PROMPT.format(url=url,
                                                                                   page_text=page.text),
 
                     )
                     # Store in cache
-                    cache[url] = {'base_content': page.text, 'ai_summary': ai_summary, 'updated': datetime.now().isoformat()}
+                    cache[url] = {'base_content': page.text, 'ai_summary': ai_summary,
+                                  'updated': datetime.now().isoformat()}
                     page_contents.append(ai_summary)
                 else:
                     logger.error(f"Page does not exist for URL: {url}")

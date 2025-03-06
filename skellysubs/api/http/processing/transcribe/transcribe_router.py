@@ -5,18 +5,18 @@ import uuid
 from fastapi import APIRouter, File, UploadFile, HTTPException, Form
 from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel
+from skellysubs.core.subtitles.srt_format_subtitle_generator import convert_transcript_to_srt
 
 from skellysubs.ai_clients.openai_client import get_or_create_openai_client
-from skellysubs.core.subtitles.srt_format_subtitle_generator import convert_transcript_to_srt
 
 logger = logging.getLogger(__name__)
 transcribe_router = APIRouter()
 
 
-
 class ValidationResult(BaseModel):
     valid: bool
     reason: str | None = None
+
 
 class TranscriptionResponse(BaseModel):
     transcript: TranscriptionVerbose
@@ -28,7 +28,7 @@ async def transcribe_endpoint(
         audio_file: UploadFile = File(...),
         language: str = Form(None),
         prompt: str = Form(None)
-) -> TranscriptionResponse|None:
+) -> TranscriptionResponse | None:
     logger.info(f"Transcription request received for file: {audio_file.filename}")
     audio_temp_filename = f"temp_{uuid.uuid4()}_{audio_file.filename}"
     try:

@@ -1,6 +1,6 @@
-from skellysubs.core.subtitles.formatters.base_subtitle_formatter import SubtitleFormatter
 from openai.types.audio import TranscriptionVerbose
 
+from skellysubs.core.subtitles.formatters.base_subtitle_formatter import SubtitleFormatter
 from skellysubs.core.subtitles.formatters.subtitle_time_formatter import SubtitleTimeFormatter
 from skellysubs.core.subtitles.subtitle_types import (
     SubtitleTypes,
@@ -46,7 +46,7 @@ class SrtSubtitleFormatter(SubtitleFormatter):
         return subtitle_types
 
     @staticmethod
-    def _format_romanized(translated_transcript:TranslatedTranscript) -> str:
+    def _format_romanized(translated_transcript: TranslatedTranscript) -> str:
         """
         Format transcript with both translated and romanized text
 

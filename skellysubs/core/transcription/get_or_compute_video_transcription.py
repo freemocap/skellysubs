@@ -3,12 +3,12 @@ from pathlib import Path
 
 from moviepy import VideoFileClip
 
-from skellysubs.core.transcription.whisper_transcript_result_model import WhisperTranscriptionResult
 from skellysubs.core.transcription.whisper_audio_transcription import transcribe_audio
+from skellysubs.core.transcription.whisper_transcript_result_model import WhisperTranscriptionResult
 
 
 async def get_or_compute_video_transcription(video_path: str,
-                                             local_whisper:bool = False,
+                                             local_whisper: bool = False,
                                              re_transcribe: bool = False) -> WhisperTranscriptionResult:
     extension = Path(video_path).suffix
     audio_path = video_path.replace(f"{extension}", ".mp3")
@@ -35,4 +35,5 @@ def scrape_and_save_audio_from_video(audio_path: str, video_path: str) -> None:
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(get_or_compute_video_transcription(video_path="../sample_data/short_video_short/short_video_short.mp4"))

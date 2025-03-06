@@ -10,5 +10,3 @@ async def get_video_and_output_paths(video_path: str) -> tuple[str, str, str]:
     if not Path(video_path).is_file():
         raise ValueError(f"Path is not a file: {video_path}")
     return subtitled_video_path, video_path, translation_path
-
-

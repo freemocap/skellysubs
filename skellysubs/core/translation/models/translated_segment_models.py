@@ -1,15 +1,16 @@
 from pydantic import BaseModel, Field
+from skellysubs.core.translation.models.translated_text_models import TranslationsCollection
 
 from skellysubs.core.transcription.whisper_transcript_result_model import WhisperWordTimestamp
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation.models.translated_text_models import TranslationsCollection
 from skellysubs.core.translation.models.translation_typehints import StartingTimestamp, \
     EndingTimestamp, OriginalTextString, TranslatedTextString, RomanizedTextString, LanguageNameString
 from skellysubs.utilities.strip_punctuation_and_whitespace import strip_punctuation_and_whitespace
 
 
 class MatchedTranslatedWord(BaseModel):
-    original_language: LanguageNameString = Field(description="The original language of the word from the original segment")
+    original_language: LanguageNameString = Field(
+        description="The original language of the word from the original segment")
     start_time: StartingTimestamp = Field(
         description="The start time of the period in the segment when the word was spoken, in seconds since the start of the recording. Should match the end time of the previous word in the segment or the start time of the segment for the first word.")
     end_time: EndingTimestamp = Field(
@@ -89,8 +90,6 @@ class TranslatedTranscriptSegmentWithMatchedWords(BaseModel):
                                                                                                description="The matched translated segment with the original segment")
     words: list[TranslatedWhisperWordTimestamp] = Field(
         description="The words in the segment, with their start and end times in the recording")
-
-
 
     def get_word_list_by_language(self, language: LanguageNameString) -> tuple[list[str], list[str] | None]:
         if "original" in language.lower():

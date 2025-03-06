@@ -71,14 +71,15 @@ def annotate_video_with_subtitles(video_path: str,
                 if "english" in language_name.lower():
                     highlighted_word_index = current_segment_and_matched_word.current_word_index
                 else:
-                    highlighted_word_index = current_segment_and_matched_word.get_matched_word_index_by_language(language_name)
+                    highlighted_word_index = current_segment_and_matched_word.get_matched_word_index_by_language(
+                        language_name)
 
                 multiline_y_start = annotate_image_with_subtitles(language_name=language_name,
                                                                   config=config,
                                                                   image_annotator=image_annotator,
                                                                   multiline_y_start=multiline_y_start,
                                                                   current_segment=current_segment,
-                                                                  highlighted_word_index= highlighted_word_index,
+                                                                  highlighted_word_index=highlighted_word_index,
                                                                   video_width=video_width,
                                                                   video_height=video_height)
 
@@ -121,7 +122,7 @@ def annotate_image_with_subtitles(language_name: LanguageNameString,
     text_height = get_default_text_height(image_height=video_height)
     horizontal_buffer = int(video_width * SUBTITLES_SIDE_BUFFER_RATIO)
     if right_to_left:
-        current_x = video_width - horizontal_buffer*4
+        current_x = video_width - horizontal_buffer * 4
     else:
         current_x = horizontal_buffer
 
@@ -194,11 +195,11 @@ def annotate_image_with_subtitles(language_name: LanguageNameString,
             if right_to_left:
                 if current_x - text_width < horizontal_buffer:
                     current_y += text_height
-                    current_x = video_width - horizontal_buffer*4
+                    current_x = video_width - horizontal_buffer * 4
 
             else:
-                if current_x + text_width > video_width - horizontal_buffer*4:
+                if current_x + text_width > video_width - horizontal_buffer * 4:
                     current_y += text_height
                     current_x = horizontal_buffer
 
-    return current_y +text_height*NEWLINE_RATIO*1.5
+    return current_y + text_height * NEWLINE_RATIO * 1.5

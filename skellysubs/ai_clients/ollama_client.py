@@ -10,6 +10,7 @@ from skellysubs.ai_clients.ai_client_abc import AiClientConfigABC, AiClientABC, 
 # Initialize the Ollama async client
 OLLAMA_ASYNC_CLIENT = None
 
+
 def get_or_create_ollama_client() -> AsyncClient:
     global OLLAMA_ASYNC_CLIENT
     if OLLAMA_ASYNC_CLIENT is None:

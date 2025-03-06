@@ -1,20 +1,18 @@
 import logging
-import os
 from pathlib import Path
 
 from fastapi import APIRouter
-from starlette.responses import HTMLResponse, FileResponse
-from starlette.staticfiles import StaticFiles
+from starlette.responses import FileResponse
 
 logger = logging.getLogger(__name__)
 
 ui_router = APIRouter()
 
-REACT_UI_DIST_FOLDER = Path(__file__).parent.parent.parent.parent.parent  / 'skellysubs-ui' / 'dist'
+REACT_UI_DIST_FOLDER = Path(__file__).parent.parent.parent.parent.parent / 'skellysubs-ui' / 'dist'
 REACT_UI_ASSETS_FOLDER = REACT_UI_DIST_FOLDER / 'assets'
-FFMPEG_FOLDER_NAME ='ffmpeg.wasm@0.12.9'
-REACT_FFMPEG_WASM_FOLDER = REACT_UI_DIST_FOLDER /FFMPEG_FOLDER_NAME
-LOGO_FOLDER = REACT_UI_DIST_FOLDER /"logo"
+FFMPEG_FOLDER_NAME = 'ffmpeg.wasm@0.12.9'
+REACT_FFMPEG_WASM_FOLDER = REACT_UI_DIST_FOLDER / FFMPEG_FOLDER_NAME
+LOGO_FOLDER = REACT_UI_DIST_FOLDER / "logo"
 REACT_UI_INDEX_FILE = REACT_UI_DIST_FOLDER / 'index.html'
 
 if not REACT_UI_DIST_FOLDER.exists():

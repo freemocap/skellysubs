@@ -9,7 +9,8 @@ from skellysubs.core.transcription.whisper_transcript_result_model import Whispe
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-TRANSCRIPTION_BASE_PROMPT ="Words you may hear, with their correct spelling: `Jon Matthis`, `Jonathan Samir Matthis`, `FreeMoCap`"
+TRANSCRIPTION_BASE_PROMPT = "Words you may hear, with their correct spelling: `Jon Matthis`, `Jonathan Samir Matthis`, `FreeMoCap`"
+
 
 def validate_audio_path(audio_path: str) -> None:
     if not Path(audio_path).exists():
@@ -28,11 +29,14 @@ async def transcribe_audio(audio_path: str,
     else:
         return await transcribe_audio_openai(audio_path)
 
+
 async def transcribe_audio_openai(audio_path: str) -> WhisperTranscriptionResult:
     validate_audio_path(audio_path)
     audio_file = open(audio_path, "rb")
-    result = await get_or_create_openai_client().make_whisper_transcription_request(audio_file=audio_file, prompt=TRANSCRIPTION_BASE_PROMPT)
+    result = await get_or_create_openai_client().make_whisper_transcription_request(audio_file=audio_file,
+                                                                                    prompt=TRANSCRIPTION_BASE_PROMPT)
     return WhisperTranscriptionResult.from_verbose_transcript(result)
+
 
 def transcribe_audio_with_local_whisper(audio_path: str, model_name: str = "large") -> WhisperTranscriptionResult:
     import whisper
@@ -42,7 +46,7 @@ def transcribe_audio_with_local_whisper(audio_path: str, model_name: str = "larg
 
     validate_audio_path(audio_path)
     model = whisper.load_model(model_name)
-    result = model.transcribe(audio = audio_path,
+    result = model.transcribe(audio=audio_path,
                               word_timestamps=True,
                               temperature=0.0,
                               no_speech_threshold=0.5,

@@ -1,7 +1,7 @@
 import string
 
 
-def strip_punctuation_and_whitespace(text:str) -> str:
+def strip_punctuation_and_whitespace(text: str) -> str:
     # Define additional punctuation for foreign languages
     additional_punctuation = (
         '，。、？！：；（）《》【】「」『』・〜·'
@@ -21,6 +21,7 @@ def strip_punctuation_and_whitespace(text:str) -> str:
 
     # Strip leading and trailing whitespace and remove punctuation
     return text.strip().translate(translator)
+
 
 if __name__ == '__main__':
     # Example usage

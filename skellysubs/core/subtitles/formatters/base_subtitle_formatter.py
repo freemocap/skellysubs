@@ -5,10 +5,8 @@ from openai.types.audio import TranscriptionVerbose
 from openai.types.audio.transcription_segment import TranscriptionSegment
 from pydantic import BaseModel, field_validator
 
-from skellysubs.core.subtitles.formatters.md_subtitle_formatter import MDFormatter
-from skellysubs.core.subtitles.formatters.srt_subtitle_formatter import SrtSubtitleFormatter
 from skellysubs.core.subtitles.subtitle_types import SrtFormattedString, VttFormattedString, SsaFormattedString, \
-    MdFormattedString, SubtitleTypes, SubtitleFormats, FormattedSubtitleStringsByType
+    MdFormattedString, FormattedSubtitleStringsByType
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
 from skellysubs.core.translation.models.translated_transcript_segment import TranslatedTranscriptSegment
 
@@ -60,7 +58,7 @@ class SubtitleFormatter(ABC):
     Concrete implementations should handle specific subtitle format requirements.
     """
 
-    def validate_segments(self, segments: Sequence[TranslatedTranscriptSegment|TranscriptionSegment]) -> None:
+    def validate_segments(self, segments: Sequence[TranslatedTranscriptSegment | TranscriptionSegment]) -> None:
         """
         Validate subtitle timing and format constraints
 
@@ -88,7 +86,6 @@ class SubtitleFormatter(ABC):
                     f"Subtitle overlap detected at {segment.start}s"
                 )
 
-
             previous_end = segment.end
 
     @abstractmethod
@@ -106,4 +103,3 @@ class SubtitleFormatter(ABC):
             Dictionary mapping subtitle types to formatted subtitle strings
         """
         pass
-

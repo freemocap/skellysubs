@@ -11,6 +11,7 @@ from ..files_and_folder_names import get_log_file_path
 
 MAX_DELTA_T_LEN = 10
 
+
 class LogLevels(Enum):
     ALL = logging.NOTSET  # 0 # All logs, including those from third-party libraries
     GUI = 3  # For logs that are printed in the GUI
@@ -37,6 +38,7 @@ class CustomFormatter(logging.Formatter):
         date_format_with_microseconds = "%Y-%m-%dT%H:%M:%S.%f"  # Including microseconds with %f
         return datetime.strftime(datetime.fromtimestamp(timestamp), date_format_with_microseconds)
 
+
 class DeltaTimeFilter(logging.Filter):
     def __init__(self):
         super().__init__()
@@ -46,12 +48,13 @@ class DeltaTimeFilter(logging.Filter):
         current_time = datetime.now().timestamp()
         delta_ms = (current_time - self.prev_time) * 1000
         delta_t_str = f"Δt:{delta_ms:.3f}"
-        if len(delta_t_str) > MAX_DELTA_T_LEN-2:
-            delta_t_str = delta_t_str[:MAX_DELTA_T_LEN-2]
+        if len(delta_t_str) > MAX_DELTA_T_LEN - 2:
+            delta_t_str = delta_t_str[:MAX_DELTA_T_LEN - 2]
         delta_t_str += "ms"
         record.delta_t = delta_t_str
         self.prev_time = current_time
         return True
+
 
 class LoggerBuilder:
     DEFAULT_LOGGING = {"version": 1, "disable_existing_loggers": False}
@@ -70,8 +73,6 @@ class LoggerBuilder:
 
     def _set_logging_level(self, level: LogLevels):
         logging.root.setLevel(level.value)
-
-
 
     class ColoredConsoleHandler(logging.StreamHandler):
 
@@ -131,11 +132,10 @@ class LoggerBuilder:
         console_handler.addFilter(DeltaTimeFilter())
         return console_handler
 
-
     def configure(self):
         if len(logging.getLogger().handlers) == 0:
-            handlers = [#self.build_file_handler(),
-                        self.build_console_handler()]
+            handlers = [  # self.build_file_handler(),
+                self.build_console_handler()]
             for handler in handlers:
                 if handler not in logging.getLogger("").handlers:
                     logging.getLogger("").handlers.append(handler)

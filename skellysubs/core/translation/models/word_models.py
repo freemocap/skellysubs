@@ -24,7 +24,8 @@ class WordTypeABC(BaseModel, ABC):
 
 
 class UnknownWordType(WordTypeABC):
-    linguistic_annotation:str = "WORD-NOT-YET-CATEGORIZED"
+    linguistic_annotation: str = "WORD-NOT-YET-CATEGORIZED"
+
 
 class OtherWordType(WordTypeABC):
     pass
@@ -76,7 +77,7 @@ class PronounType(WordTypeABC):
                                   description="The formality of the pronoun, e.g. formal, informal, etc (if applicable, else None).")
 
 
-class WordTypeSchemas(str,enum.Enum):
+class WordTypeSchemas(str, enum.Enum):
     NOUN = NounType.model_json_schema()
     VERB = VerbType.model_json_schema()
     ADJECTIVE = AdjectiveType.model_json_schema()

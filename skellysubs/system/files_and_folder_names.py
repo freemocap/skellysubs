@@ -4,9 +4,10 @@ from time import time
 
 
 def get_skellysubs_data_folder_path() -> str:
-    path  =  Path().home() / "Sync" / "skellysubs-data"
+    path = Path().home() / "Sync" / "skellysubs-data"
     path.mkdir(parents=True, exist_ok=True)
     return str(path)
+
 
 def get_gmt_offset_string():
     # from - https://stackoverflow.com/a/53860920/14662833
@@ -31,11 +32,9 @@ def create_new_default_recording_name():
     return recording_name
 
 
-
-
-
 def create_log_file_name():
     return "skellysubs_" + time.strftime("%Y-%m-%d_%H_%M_%S") + ".log"
+
 
 def get_log_file_path():
     log_folder_path = Path(get_skellysubs_data_folder_path()) / 'logs'

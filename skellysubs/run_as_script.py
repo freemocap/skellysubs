@@ -1,4 +1,5 @@
 import json
+import logging
 import urllib
 from pathlib import Path
 
@@ -8,8 +9,10 @@ from skellysubs.core.translation.get_video_and_output_paths import get_video_and
 from skellysubs.core.translation.models.translated_transcript_model import OldTranslatedTranscription
 from skellysubs.core.translation.translate_video import translate_video
 from skellysubs.core.video_annotator.annotate_video_with_subtitles import annotate_video_with_subtitles
-import logging
+
 logger = logging.getLogger(__name__)
+
+
 def is_url(video_name: str) -> bool:
     # Check whether the given string is a URL
     if not video_name.startswith("http"):
@@ -20,6 +23,7 @@ def is_url(video_name: str) -> bool:
     except ValueError:
         return False
 
+
 async def download_video(url: str, download_path: str) -> str:
     # Download video from URL and save it to a local file
     response = requests.get(url, stream=True)
@@ -28,6 +32,7 @@ async def download_video(url: str, download_path: str) -> str:
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
     return download_path
+
 
 async def run_video_subtitle_pipeline(video_name: str) -> None:
     logger.info(f"Running video subtitle pipeline for {video_name}")
@@ -44,7 +49,6 @@ async def run_video_subtitle_pipeline(video_name: str) -> None:
      video_path,
      translation_path) = await get_video_and_output_paths(video_path=video_name)
 
-
     if Path(translation_path).exists():
         logger.debug(f"Translation file already exists - loading from {translation_path}")
         with open(translation_path, 'r', encoding='utf-8') as f:
@@ -55,7 +59,8 @@ async def run_video_subtitle_pipeline(video_name: str) -> None:
         translation_result = await translate_video(video_path=video_path)
         logger.debug(f"Translation pipeline complete!")
         # Save the translation result
-        Path(video_path.replace('.mp4', '_translation.json')).write_text(translation_result.model_dump_json(indent=4), encoding='utf-8')
+        Path(video_path.replace('.mp4', '_translation.json')).write_text(translation_result.model_dump_json(indent=4),
+                                                                         encoding='utf-8')
         logger.debug(f"Translation result saved to {translation_path}")
 
         # Generate subtitle files
@@ -69,12 +74,14 @@ async def run_video_subtitle_pipeline(video_name: str) -> None:
     logger.debug(f"Starting video annotation...")
 
     # Annotate the video with the translated words
-    annotate_video_with_subtitles(video_path = video_path,
-                                  translated_transcript = translation_result,
-                                  subtitled_video_path = subtitled_video_path)
+    annotate_video_with_subtitles(video_path=video_path,
+                                  translated_transcript=translation_result,
+                                  subtitled_video_path=subtitled_video_path)
+
 
 if __name__ == '__main__':
     import asyncio
+
     video_paths = [
         "../sample_data/2025-02-12-jsm-video/2025-02-12-jsm-video.mp4",
         "../sample_data/sample_video_short/sample_video_short.mp4",

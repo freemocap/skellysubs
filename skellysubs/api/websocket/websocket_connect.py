@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 skellysubs_websocket_router = APIRouter()
 
+
 def is_valid_uuid(uuid: str) -> bool:
     """
     Check if a string is a valid UUID.
@@ -18,6 +19,7 @@ def is_valid_uuid(uuid: str) -> bool:
     except ValueError:
         return False
     return str(uuid_obj) == uuid
+
 
 @skellysubs_websocket_router.websocket("/connect/{session_id}")
 async def skellysubs_websocket_server_connect(websocket: WebSocket, session_id: str):

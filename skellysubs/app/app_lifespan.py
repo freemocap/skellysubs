@@ -11,7 +11,6 @@ from skellysubs.system.files_and_folder_names import get_skellysubs_data_folder_
 logger = logging.getLogger(__name__)
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup actions
@@ -21,7 +20,8 @@ async def lifespan(app: FastAPI):
 
     localhost_url = APP_URL.replace('0.0.0.0', 'localhost')
     logger.success(f"SkellySubs API (version:{skellysubs.__version__}) started successfully 💀🤖💬")
-    logger.api(f"SkellySubs API  running on: \n\t\t\tSwagger API docs - {localhost_url} \n\t\t\tTest UI: {localhost_url}/ui 👈[click to open backend UI in your browser]")
+    logger.api(
+        f"SkellySubs API  running on: \n\t\t\tSwagger API docs - {localhost_url} \n\t\t\tTest UI: {localhost_url}/ui 👈[click to open backend UI in your browser]")
 
     # Let the app do its thing
     yield

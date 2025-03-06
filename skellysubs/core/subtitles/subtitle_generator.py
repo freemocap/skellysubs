@@ -30,6 +30,7 @@ class SubtitleGenerator:
         - Ensures consistent output across different subtitle formats
         - Handles both translated and original transcript inputs
     """
+
     def __init__(self):
         self._formatters = {
             SubtitleFormats.SRT: SrtSubtitleFormatter(),
@@ -54,7 +55,6 @@ class SubtitleGenerator:
         formatted_subtitles = {}
 
         for format_type, formatter in self._formatters.items():
-            formatted_subtitles[format_type]  = formatter.format_transcript(transcript)
-
+            formatted_subtitles[format_type] = formatter.format_transcript(transcript)
 
         return FormattedSubtitles(**formatted_subtitles)

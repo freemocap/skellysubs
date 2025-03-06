@@ -12,11 +12,6 @@ from skellysubs.core.translation.translation_subtasks.translate_transcript_segme
 logger = logging.getLogger(__name__)
 
 
-
-
-
-
-
 async def translate_transcription_pipeline(og_transcription: WhisperTranscriptionResult,
                                            original_language: str = "ENGLISH"
                                            ) -> OldTranslatedTranscription:
@@ -31,5 +26,3 @@ async def translate_transcription_pipeline(og_transcription: WhisperTranscriptio
         segment_level_translated_transcript=segment_level_translated_transcript)
 
     return translated_transcript_with_words
-
-
