@@ -1,6 +1,6 @@
 // Example thunk for file preparation
-import type { ProcessingContext } from "../processing-status-types"
-import { ffmpegService } from "../../../../services/FfmpegService/useFfmpeg"
+import type { ProcessingContext } from "../slices/processing-status/processing-status-types"
+import { ffmpegService } from "../../services/FfmpegService/useFfmpeg"
 import { createProcessingThunk } from "./createProcessingThunk"
 
 export const prepareFileThunk = createProcessingThunk<

@@ -9,7 +9,7 @@ import FileSelectionPanel from "./FileSelectionPanel"
 import FileDetails from "./FileDetails"
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import { ffmpegService } from "../../../services/FfmpegService/useFfmpeg"
-import { prepareFileThunk } from "../../../store/slices/processing-status/thunks/prepareFileThunk"
+import { prepareFileThunk } from "../../../store/thunks/prepareFileThunk"
 
 const FileSelectionBox: React.FC = () => {
   const dispatch = useAppDispatch()

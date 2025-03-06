@@ -6,7 +6,7 @@ from openai.types.audio.transcription_segment import TranscriptionSegment
 from pydantic import BaseModel, field_validator
 
 from skellysubs.core.subtitles.subtitle_types import SrtFormattedString, VttFormattedString, SsaFormattedString, \
-    MdFormattedString, FormattedSubtitleStringsByType, SubtitleFormattedString, SubtitleTypes
+    MdFormattedString, FormattedSubtitleStringsByVariant, SubtitleFormattedString, SubtitleVariant
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
 from skellysubs.core.translation.models.translated_transcript_segment import TranslatedTranscriptSegment
 
@@ -26,10 +26,10 @@ class FormattedSubtitles(BaseModel):
         # ssa: SubStation Alpha format subtitles
         md: Markdown format transcription text and segments
     """
-    srt: dict[SubtitleTypes, SrtFormattedString]
+    srt: dict[SubtitleVariant, SrtFormattedString]
     # vtt: VttFormattedString
     # ssa: SsaFormattedString
-    md: dict[SubtitleTypes, MdFormattedString]
+    md: dict[SubtitleVariant, MdFormattedString]
 
 
 
@@ -79,7 +79,7 @@ class SubtitleFormatter(ABC):
     def format_transcript(
             self,
             transcript: TranslatedTranscript | TranscriptionVerbose
-    ) -> FormattedSubtitleStringsByType:
+    ) -> FormattedSubtitleStringsByVariant:
         """
         Format translated transcript into subtitle format with variants
 

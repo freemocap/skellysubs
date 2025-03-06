@@ -3,8 +3,8 @@ from openai.types.audio import TranscriptionVerbose
 from skellysubs.core.subtitles.formatters.base_subtitle_formatter import SubtitleFormatter
 from skellysubs.core.subtitles.formatters.subtitle_time_formatter import SubtitleTimeFormatter
 from skellysubs.core.subtitles.subtitle_types import (
-    SubtitleTypes,
-    FormattedSubtitleStringsByType
+    SubtitleVariant,
+    FormattedSubtitleStringsByVariant
 )
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
 
@@ -20,7 +20,7 @@ class MDFormatter(SubtitleFormatter):
     def format_transcript(
             self,
             transcript: TranslatedTranscript | TranscriptionVerbose
-    ) -> FormattedSubtitleStringsByType:
+    ) -> FormattedSubtitleStringsByVariant:
         """Format a translated transcript into Markdown format with variants"""
         self.validate_segments(transcript.segments)
 
@@ -47,12 +47,12 @@ class MDFormatter(SubtitleFormatter):
             )
 
         if isinstance(transcript, TranslatedTranscript):
-            subtitle_types[SubtitleTypes.translation_only] = "\n".join(base_md)
+            subtitle_types[SubtitleVariant.translation_only] = "\n".join(base_md)
             if  transcript.translated_language.romanization_method and transcript.translated_language.romanization_method.lower() != "none":
-                subtitle_types[SubtitleTypes.translation_with_romanization] = self._format_romanized(transcript)
-            subtitle_types[SubtitleTypes.multi_language] = self._format_multi_language(transcript)
+                subtitle_types[SubtitleVariant.translation_with_romanization] = self._format_romanized(transcript)
+            subtitle_types[SubtitleVariant.multi_language] = self._format_multi_language(transcript)
         if isinstance(transcript, TranscriptionVerbose):
-            subtitle_types[SubtitleTypes.original_spoken] = "\n".join(base_md)
+            subtitle_types[SubtitleVariant.original_spoken] = "\n".join(base_md)
 
 
         return subtitle_types

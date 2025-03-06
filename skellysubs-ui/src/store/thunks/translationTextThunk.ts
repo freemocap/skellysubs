@@ -1,16 +1,20 @@
-import { getApiBaseUrl } from "../../../../utils/getApiBaseUrl"
-import { logger } from "../../../../utils/logger"
-import type {
-  ProcessingContext,
-  TranscriptionVerbose,
-} from "../processing-status-types"
+// src/thunks/translationThunk.ts
+import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
+import { logger } from "../../utils/logger"
+import type { ProcessingContext } from "../slices/processing-status/processing-status-types"
 import { createProcessingThunk } from "./createProcessingThunk"
-import type { LanguageConfig } from "../../translation-config/languageConfigSchemas"
+import { getLanguageConfigs } from "../../utils/getLanguageConfigs"
+import type {
+  LanguageConfig,
+  LanguageConfigSchema,
+} from "../slices/translation-config/languageConfigSchemas"
+import type { z } from "zod"
 
-export const translationTranscriptThunk = createProcessingThunk<
+export const translationTextThunk = createProcessingThunk<
   {
-    transcript: TranscriptionVerbose
+    text: string
     targetLanguages: Record<string, LanguageConfig>
+    originalLanguage: string
   },
   ProcessingContext["translation"]
 >("translation", async (context, params) => {
@@ -19,10 +23,10 @@ export const translationTranscriptThunk = createProcessingThunk<
     if (!params?.targetLanguages) {
       throw new Error("No target languages provided")
     }
-    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/transcript`
+    const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/text?original_language=${params.originalLanguage}`
     const requestBody = JSON.stringify(
       {
-        transcript: params.transcript,
+        text: params.text,
         target_languages: params.targetLanguages,
       },
       null,

@@ -1,4 +1,4 @@
-import {Subtitle} from "./video-subtitle-viewer-types";
+import type {Subtitle} from "./video-subtitle-viewer-types";
 
 export const parseVTT = (vttContent: string): Subtitle[] => {
     const lines = vttContent.split("\n");

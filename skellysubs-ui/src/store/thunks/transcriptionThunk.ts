@@ -1,13 +1,15 @@
-import type { ProcessingContext } from "../processing-status-types"
-import { logger } from "../../../../utils/logger"
-import { getApiBaseUrl } from "../../../../utils/getApiBaseUrl"
+import type { ProcessingContext } from "../slices/processing-status/processing-status-types"
+import { logger } from "../../utils/logger"
+import { getApiBaseUrl } from "../../utils/getApiBaseUrl"
 
 import { createProcessingThunk } from "./createProcessingThunk"
+import {addAvailableSubtitles} from "../slices/available-subtitles/availableSubtitlesSlice";
+import type {SubtitleFormat, SubtitleVariant} from "../slices/available-subtitles/available-subtitles-types";
 
 export const transcriptionThunk = createProcessingThunk<
   { language?: string; prompt?: string },
   ProcessingContext["transcription"]
->("transcription", async (context, params) => {
+>("transcription", async (context, params,   thunkAPI ) => {
   // params now available
   try {
     if (!context.mp3Audio?.url) throw new Error("No audio URL provided")
@@ -41,6 +43,19 @@ export const transcriptionThunk = createProcessingThunk<
 
     const result = await transcribeResponse.json()
     logger(`Transcription result: ${JSON.stringify(result, null, 2)}`)
+    // Add subtitles to available subtitles slice
+    Object.entries(result.formatted_subtitles).forEach(([format, subtitles]) => {
+      Object.entries(subtitles).forEach(([variant, content]) => {
+        thunkAPI?.dispatch(addAvailableSubtitles({
+          id: `source_${result.transcript.language}_${variant}_${format}`,
+          name: `${result.transcript.language} (${variant})`,
+          variant: variant as SubtitleVariant,
+          format: format as SubtitleFormat,
+          language: result.transcript.language,
+          content: content as string
+        }));
+      });
+    });
     return result as ProcessingContext["transcription"]
   } catch (error) {
     console.error("Transcription error:", error)

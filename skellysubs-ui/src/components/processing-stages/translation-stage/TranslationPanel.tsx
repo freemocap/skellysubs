@@ -18,7 +18,7 @@ import {
   selectSelectedTargetLanguages,
 } from "../../../store/slices/translation-config/translationConfigSlice"
 import { RightPanelContext } from "../../../layout/BasePanelLayout"
-import { translationTranscriptThunk } from "../../../store/slices/processing-status/thunks/translationTranscriptThunk"
+import { translationTranscriptThunk } from "../../../store/thunks/translationTranscriptThunk"
 import { LanguageChipsPanel } from "./LanguageChipsPanel"
 import { DownloadTranslationButton } from "./DownloadTranslationButton"
 import { RichTreeView } from "@mui/x-tree-view"

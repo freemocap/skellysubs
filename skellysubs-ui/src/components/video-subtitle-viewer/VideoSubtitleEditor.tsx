@@ -10,12 +10,12 @@ import {
 import { useAppDispatch, useAppSelector } from "../../store/hooks"
 import { selectProcessingContext } from "../../store/slices/processing-status/processingStatusSlice"
 import {
-  addSubtitle,
+  addAvailableSubtitles,
   selectSelectedSubtitle,
-  selectSubtitle,
+  selectAvailableSubtitles,
   selectSubtitles,
-  updateSubtitle,
-} from "../../store/slices/subtitleOptionsSlice"
+  updateAvailableSubtitles,
+} from "../../store/slices/available-subtitles/availableSubtitlesSlice"
 import { convertSRTtoVTT, parseVTT } from "./video-subtitle-viewer-utils"
 import type { Subtitle } from "./video-subtitle-viewer-types"
 import { VideoPlayer } from "./VideoPlayer"
@@ -47,7 +47,7 @@ export const VideoSubtitleEditor = () => {
       if (!exists) {
         const vttContent = convertSRTtoVTT(transcription.srt_subtitles_string)
         dispatch(
-          addSubtitle({
+          addAvailableSubtitles({
             id: "original",
             name: "Original Transcript",
             type: "original",
@@ -55,7 +55,7 @@ export const VideoSubtitleEditor = () => {
             vttContent,
           }),
         )
-        dispatch(selectSubtitle("original"))
+        dispatch(selectAvailableSubtitles("original"))
       }
     }
   }, [transcription, dispatch, subtitles])
@@ -97,7 +97,7 @@ export const VideoSubtitleEditor = () => {
           <SubtitleVersionSelector
             subtitles={subtitles }
             selectedId={selectedSubtitle?.id}
-            onSelect={id => dispatch(selectSubtitle(id))}
+            onSelect={id => dispatch(selectAvailableSubtitles(id))}
           />
           <Card sx={{ border: "1px solid #cff", borderRadius: 1 }}>
             <CardHeader
@@ -111,7 +111,7 @@ export const VideoSubtitleEditor = () => {
                 onContentChange={value =>
                   selectedSubtitle &&
                   dispatch(
-                    updateSubtitle({
+                    updateAvailableSubtitles({
                       id: selectedSubtitle.id,
                       vttContent: value,
                     }),

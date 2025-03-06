@@ -3,8 +3,8 @@ from openai.types.audio import TranscriptionVerbose
 from skellysubs.core.subtitles.formatters.base_subtitle_formatter import SubtitleFormatter
 from skellysubs.core.subtitles.formatters.subtitle_time_formatter import SubtitleTimeFormatter
 from skellysubs.core.subtitles.subtitle_types import (
-    SubtitleTypes,
-    FormattedSubtitleStringsByType
+    SubtitleVariant,
+    FormattedSubtitleStringsByVariant
 )
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
 
@@ -20,22 +20,22 @@ class SrtSubtitleFormatter(SubtitleFormatter):
     def format_transcript(
             self,
             transcript: TranslatedTranscript | TranscriptionVerbose
-    ) -> FormattedSubtitleStringsByType:
+    ) -> FormattedSubtitleStringsByVariant:
         """Format a translated transcript into SRT format with variants"""
         self.validate_segments(transcript.segments)
         subtitle_types = {}
 
         if isinstance(transcript, TranscriptionVerbose):
-            subtitle_types[SubtitleTypes.original_spoken] = self._format_transcription(transcript)
+            subtitle_types[SubtitleVariant.original_spoken] = self._format_transcription(transcript)
             return subtitle_types
 
         if isinstance(transcript, TranslatedTranscript):
-            subtitle_types[SubtitleTypes.translation_only] = self._format_translation(transcript)
+            subtitle_types[SubtitleVariant.translation_only] = self._format_translation(transcript)
 
             if self._has_romanization(transcript):
-                subtitle_types[SubtitleTypes.translation_with_romanization] = self._format_romanized(transcript)
+                subtitle_types[SubtitleVariant.translation_with_romanization] = self._format_romanized(transcript)
 
-            subtitle_types[SubtitleTypes.multi_language] = self._format_multi_language(transcript)
+            subtitle_types[SubtitleVariant.multi_language] = self._format_multi_language(transcript)
             return subtitle_types
 
         raise ValueError("Invalid transcript type!")

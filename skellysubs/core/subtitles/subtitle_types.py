@@ -14,12 +14,12 @@ class SubtitleFormats(enum.Enum):
     MD: MdFormattedString = "md"
 
 
-class SubtitleTypes(enum.Enum):
+class SubtitleVariant(enum.Enum):
     original_spoken = "original_spoken"
-    translation_only = "translated_script_only"
-    translation_with_romanization = "translated_with_romanization"
+    translation_only = "translation_only"
+    translation_with_romanization = "translation_with_romanization"
     multi_language = "multi_language"
 
 
-FormattedSubtitleStringsByType = dict[SubtitleTypes, SubtitleFormattedString]
-SubtitleStringsByFormatByType = dict[SubtitleFormats, FormattedSubtitleStringsByType]
+FormattedSubtitleStringsByVariant = dict[SubtitleVariant, SubtitleFormattedString]
+SubtitleStringsByFormatByVariant = dict[SubtitleFormats, FormattedSubtitleStringsByVariant]
