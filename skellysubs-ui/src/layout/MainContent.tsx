@@ -5,6 +5,7 @@ import extendedPaperbaseTheme from "./paperbase_theme/paperbase-theme"
 import { Footnote } from "../components/Footnote"
 import { ProcessingPanel } from "../components/ProcessingPanel"
 import WelcomeContent from "../components/WelcomeContent"
+import VideoSubtitleEditor from "../components/video-subtitle-viewer/VideoSubtitleEditor"
 
 export const MainContent = () => {
   return (
@@ -25,7 +26,7 @@ export const MainContent = () => {
       <WelcomeContent />
 
       <ProcessingPanel />
-
+      <VideoSubtitleEditor />
       <Footnote />
     </Box>
   )

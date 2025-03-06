@@ -41,6 +41,14 @@ export const paperbaseTheme = createTheme({
 const extendedPaperbaseTheme = {
   ...paperbaseTheme,
   components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#587501',
+          color: '#f5f5f5'
+        }
+      }
+    },
     MuiButton: {
       styleOverrides: {
         root: {
