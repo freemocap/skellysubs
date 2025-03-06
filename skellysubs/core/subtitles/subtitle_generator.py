@@ -55,6 +55,7 @@ class SubtitleGenerator:
         formatted_subtitles = {}
 
         for format_type, formatter in self._formatters.items():
-            formatted_subtitles[format_type] = formatter.format_transcript(transcript)
+            formatted_subtitles[format_type.value] = formatter.format_transcript(transcript)
 
-        return FormattedSubtitles(**formatted_subtitles)
+        return FormattedSubtitles(srt= formatted_subtitles[SubtitleFormats.SRT.value],
+                                  md= formatted_subtitles[SubtitleFormats.MD.value])

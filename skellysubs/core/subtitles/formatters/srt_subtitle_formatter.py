@@ -21,51 +21,121 @@ class SrtSubtitleFormatter(SubtitleFormatter):
             self,
             transcript: TranslatedTranscript | TranscriptionVerbose
     ) -> FormattedSubtitleStringsByType:
-
         """Format a translated transcript into SRT format with variants"""
-        self.validate_segments(transcript.translated_segments)
-
+        self.validate_segments(transcript.segments)
         subtitle_types = {}
-        language_config = transcript.translated_language
 
-        # Base translated version
-        base_srt = []
-        for index, segment in enumerate(transcript.translated_segments, 1):
-            start_time = SubtitleTimeFormatter.format_time_srt(segment.start)
-            end_time = SubtitleTimeFormatter.format_time_srt(segment.end)
-            base_srt.append(
-                f"{index}\n{start_time} --> {end_time}\n"
-                f"{segment.translated_text.translated_text.strip()}"
+        if isinstance(transcript, TranscriptionVerbose):
+            subtitle_types[SubtitleTypes.original_spoken] = self._format_transcription(transcript)
+            return subtitle_types
+
+        if isinstance(transcript, TranslatedTranscript):
+            subtitle_types[SubtitleTypes.translation_only] = self._format_translation(transcript)
+
+            if self._has_romanization(transcript):
+                subtitle_types[SubtitleTypes.translation_with_romanization] = self._format_romanized(transcript)
+
+            subtitle_types[SubtitleTypes.multi_language] = self._format_multi_language(transcript)
+            return subtitle_types
+
+        raise ValueError("Invalid transcript type!")
+
+    @staticmethod
+    def _has_romanization(transcript: TranslatedTranscript) -> bool:
+        """Check if transcript has valid romanization"""
+        return (transcript.translated_language.romanization_method and
+                transcript.translated_language.romanization_method.lower() != "none")
+
+    @staticmethod
+    def _format_segment(index: int, start_time: float, end_time: float, text: str) -> str:
+        """Format a single SRT subtitle segment"""
+        return (
+            f"{index}\n"
+            f"{SubtitleTimeFormatter.format_time_srt(start_time)} --> "
+            f"{SubtitleTimeFormatter.format_time_srt(end_time)}\n"
+            f"{text}"
+        )
+
+    @staticmethod
+    def _format_transcription(transcript: TranscriptionVerbose) -> str:
+        """Format a basic transcription into SRT"""
+        srt_segments = []
+
+        for index, segment in enumerate(transcript.segments, 1):
+            srt_segments.append(
+                SrtSubtitleFormatter._format_segment(
+                    index=index,
+                    start_time=segment.start,
+                    end_time=segment.end,
+                    text=segment.text.strip()
+                )
             )
-        subtitle_types[SubtitleTypes.translation_only] = "\n\n".join(base_srt)
 
-        # Romanized version if applicable
-        if isinstance(transcript, TranslatedTranscript) and language_config.romanization_method:
-            subtitle_types[SubtitleTypes.translation_with_romanization] = self._format_romanized(transcript)
+        return "\n\n".join(srt_segments)
 
-        return subtitle_types
+    @staticmethod
+    def _format_translation(transcript: TranslatedTranscript) -> str:
+        """Format a translation into SRT"""
+        srt_segments = []
+
+        for index, segment in enumerate(transcript.segments, 1):
+            srt_segments.append(
+                SrtSubtitleFormatter._format_segment(
+                    index=index,
+                    start_time=segment.start,
+                    end_time=segment.end,
+                    text=segment.translated_text.translated_text.strip()
+                )
+            )
+
+        return "\n\n".join(srt_segments)
 
     @staticmethod
     def _format_romanized(translated_transcript: TranslatedTranscript) -> str:
-        """
-        Format transcript with both translated and romanized text
+        """Format transcript with both translated and romanized text in SRT"""
+        srt_segments = []
 
-        Args:
-            translated_transcript: Transcript containing translations and romanization
-
-        Returns:
-            SRT formatted string with both translated and romanized text
-        """
-        romanized_srt = []
-        for index, segment in enumerate(translated_transcript.translated_segments, 1):
+        for index, segment in enumerate(translated_transcript.segments, 1):
+            # Adjust start time slightly if it's at 0 to prevent timing issues
             start = segment.start + 0.01 if segment.start == 0 else segment.start
-            romanized_text = segment.translated_text.romanized_text.strip()
-            translated_text = segment.translated_text.translated_text.strip()
 
-            romanized_srt.append(
-                f"{index}\n"
-                f"{SubtitleTimeFormatter.format_time_srt(start)} --> "
-                f"{SubtitleTimeFormatter.format_time_srt(segment.end)}\n"
-                f"{translated_text}\n{romanized_text}"
+            text = (
+                f"{segment.translated_text.translated_text.strip()}\n"
+                f"{segment.translated_text.romanized_text.strip()}"
             )
-        return "\n\n".join(romanized_srt)
+
+            srt_segments.append(
+                SrtSubtitleFormatter._format_segment(
+                    index=index,
+                    start_time=start,
+                    end_time=segment.end,
+                    text=text
+                )
+            )
+
+        return "\n\n".join(srt_segments)
+
+    @staticmethod
+    def _format_multi_language(translated_transcript: TranslatedTranscript) -> str:
+        """Format transcript with original, translated, and romanized text in SRT"""
+        srt_segments = []
+
+        for index, segment in enumerate(translated_transcript.segments, 1):
+            text_parts = [
+                segment.original_segment_text.strip(),
+                segment.translated_text.translated_text.strip()
+            ]
+
+            if SrtSubtitleFormatter._has_romanization(translated_transcript):
+                text_parts.append(segment.translated_text.romanized_text.strip())
+
+            srt_segments.append(
+                SrtSubtitleFormatter._format_segment(
+                    index=index,
+                    start_time=segment.start,
+                    end_time=segment.end,
+                    text="\n".join(text_parts)
+                )
+            )
+
+        return "\n\n".join(srt_segments)

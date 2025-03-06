@@ -12,3 +12,10 @@ class TranslatedTranscriptSegment(BaseModel):
     end: float = Field(
         description="The end time of the segment in the recording when the segment was spoken in seconds since the start of the recording. Should match the start time of the next segment or the end time of the recording for the last segment.")
     duration: float = Field(description="The duration of the segment in seconds")
+
+    @property
+    def text(self) -> str:
+        """
+        Helper so we can use the same api as the TranslationVerbose class
+        """
+        return self.translated_text.translated_text

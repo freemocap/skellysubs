@@ -6,7 +6,7 @@ from openai.types.audio.transcription_segment import TranscriptionSegment
 from pydantic import BaseModel, field_validator
 
 from skellysubs.core.subtitles.subtitle_types import SrtFormattedString, VttFormattedString, SsaFormattedString, \
-    MdFormattedString, FormattedSubtitleStringsByType
+    MdFormattedString, FormattedSubtitleStringsByType, SubtitleFormattedString, SubtitleTypes
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
 from skellysubs.core.translation.models.translated_transcript_segment import TranslatedTranscriptSegment
 
@@ -21,30 +21,17 @@ class FormattedSubtitles(BaseModel):
     Container for all supported subtitle format variants of a translation
 
     Attributes:
-        type: The type of subtitle content (original, translated, etc)
         srt: SubRip format subtitles
-        vtt: WebVTT format subtitles
-        ssa: SubStation Alpha format subtitles
-        md: Markdown format subtitles with aligned translations
+        # vtt: WebVTT format subtitles
+        # ssa: SubStation Alpha format subtitles
+        md: Markdown format transcription text and segments
     """
-    srt: SrtFormattedString
-    vtt: VttFormattedString
-    ssa: SsaFormattedString
-    md: MdFormattedString
+    srt: dict[SubtitleTypes, SrtFormattedString]
+    # vtt: VttFormattedString
+    # ssa: SsaFormattedString
+    md: dict[SubtitleTypes, MdFormattedString]
 
-    @field_validator('srt')
-    def validate_srt_format(cls, v):
-        if not v.strip():
-            raise ValueError("SRT content cannot be empty")
-        if not v.replace('\n', '').replace('\r', '').strip():
-            raise ValueError("SRT content cannot be only whitespace")
-        return v
 
-    @field_validator('vtt')
-    def validate_vtt_format(cls, v):
-        if not v.startswith('WEBVTT'):
-            raise ValueError("VTT content must start with WEBVTT header")
-        return v
 
     class Config:
         frozen = True
@@ -101,5 +88,27 @@ class SubtitleFormatter(ABC):
 
         Returns:
             Dictionary mapping subtitle types to formatted subtitle strings
+        """
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def _format_romanized(translated_transcript: TranslatedTranscript) -> SubtitleFormattedString:
+        """
+        Format subtitles with both translated and romanized text
+
+        Args:
+            translated_transcript: Transcript containing translations and romanization
+
+        Returns:
+            Subtitle formatted string with both translated and romanized text
+        """
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def _format_multi_language(translated_transcript: TranslatedTranscript) -> SubtitleFormattedString:
+        """
+        Format subtitles with both original and translated text (and romanization if applicable)
         """
         pass

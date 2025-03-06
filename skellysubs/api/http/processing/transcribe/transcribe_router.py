@@ -5,9 +5,10 @@ import uuid
 from fastapi import APIRouter, File, UploadFile, HTTPException, Form
 from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel
-from skellysubs.core.subtitles.srt_format_subtitle_generator import convert_transcript_to_srt
 
 from skellysubs.ai_clients.openai_client import get_or_create_openai_client
+from skellysubs.core.subtitles.formatters.base_subtitle_formatter import FormattedSubtitles
+from skellysubs.core.subtitles.subtitle_generator import SubtitleGenerator
 
 logger = logging.getLogger(__name__)
 transcribe_router = APIRouter()
@@ -20,7 +21,7 @@ class ValidationResult(BaseModel):
 
 class TranscriptionResponse(BaseModel):
     transcript: TranscriptionVerbose
-    srt_subtitles_string: str
+    formatted_subtitles: FormattedSubtitles
 
 
 @transcribe_router.post("/transcribe", response_model=TranscriptionResponse)
@@ -31,6 +32,8 @@ async def transcribe_endpoint(
 ) -> TranscriptionResponse | None:
     logger.info(f"Transcription request received for file: {audio_file.filename}")
     audio_temp_filename = f"temp_{uuid.uuid4()}_{audio_file.filename}"
+    subtitle_generator = SubtitleGenerator()
+
     try:
         with open(audio_temp_filename, "wb") as incoming_f:
             incoming_f.write(audio_file.file.read())
@@ -50,4 +53,4 @@ async def transcribe_endpoint(
         os.remove(audio_temp_filename)
     logger.info(f"Returning transcription: {transcription_result}")
     return TranscriptionResponse(transcript=transcription_result,
-                                 srt_subtitles_string=convert_transcript_to_srt(transcription_result))
+                                 formatted_subtitles=subtitle_generator.generate_all_formats(transcription_result))

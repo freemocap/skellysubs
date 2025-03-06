@@ -68,7 +68,7 @@ async def translate_transcript_endpoint(
         f"Translation request received for transcription with {len(transcript.segments)} segments and target languages: {[key for key in target_languages.keys()]}")
     translated_transcripts = {}
     subtitles_by_language: [LanguageNameString, FormattedSubtitles] = {}
-    processor = SubtitleGenerator()
+    subtitle_generator = SubtitleGenerator()
 
     try:
         full_text_prompts, full_text_translations = await text_translation(text=transcript.text,
@@ -91,7 +91,7 @@ async def translate_transcript_endpoint(
                                                                         language]
                                                                     )
 
-            subtitles_by_language[language] = processor.generate_all_formats(translated_transcripts[language])
+            subtitles_by_language[language] = subtitle_generator.generate_all_formats(translated_transcripts[language])
 
 
     except ValueError as e:

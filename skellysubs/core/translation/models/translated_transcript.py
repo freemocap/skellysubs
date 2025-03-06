@@ -12,3 +12,18 @@ class TranslatedTranscript(BaseModel):
     original_language: LanguageNameString
     translated_language: LanguageConfig
     translated_segments: list[TranslatedTranscriptSegment]
+
+    @property
+    def segments(self):
+        """
+        Helper so we can use the same api as the TranslationVerbose class
+        """
+        return self.translated_segments
+
+    @property
+    def text(self):
+        return self.translated_full_text.translated_text
+
+    @property
+    def language(self):
+        return self.translated_language.language_name
