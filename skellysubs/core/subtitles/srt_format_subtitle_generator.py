@@ -1,6 +1,6 @@
 from openai.types.audio import TranscriptionVerbose
 
-from skellysubs.core.translation_pipeline.models.translated_text_models import TranslatedTranscript
+from skellysubs.core.translation_pipeline.models.translated_transcript import TranslatedTranscript
 
 SrtFormatedString = str
 def convert_transcript_to_srt(transcription_verbose: TranscriptionVerbose) -> SrtFormatedString:
@@ -62,6 +62,7 @@ def convert_translated_transcript_to_srt(translated_transcript: TranslatedTransc
         srt_dict['translated_with_romanization'] = "\n\n".join(romanized_srt)
 
     return srt_dict
+
 if __name__ == "__main__":
     import json
     from skellysubs import SAMPLE_DATA_TRANSCRIPT_PATH

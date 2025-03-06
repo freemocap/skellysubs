@@ -25,3 +25,7 @@ code {
 .monaco-editor .monaco-editor-background {
   /*background-color: #0a6c00 !important;*/
 }
+.active-subtitle-line {
+  background-color: rgba(255, 255, 150, 0.3);
+  border-left: 2px solid #ffeb3b;
+}

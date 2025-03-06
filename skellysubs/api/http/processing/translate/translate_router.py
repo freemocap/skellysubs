@@ -8,7 +8,8 @@ from pydantic import BaseModel
 from skellysubs.core.subtitles.srt_format_subtitle_generator import SrtFormatedString, \
     convert_translated_transcript_to_srt
 from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation_pipeline.models.translated_text_models import TranslatedText, TranslatedTranscript
+from skellysubs.core.translation_pipeline.models.translated_text import TranslatedText
+from skellysubs.core.translation_pipeline.models.translated_transcript import TranslatedTranscript
 from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
 from skellysubs.core.translation_pipeline.translation_subtasks.translate_full_text import text_translation
 from skellysubs.core.translation_pipeline.translation_subtasks.translate_transcript_segments import \

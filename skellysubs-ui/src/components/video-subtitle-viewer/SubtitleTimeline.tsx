@@ -18,8 +18,7 @@ export const SubtitleTimeline = ({
                 key={index}
                 variant={currentSubtitle === subtitle ? "contained" : "outlined"}
                 size="small"
-                onClick={() => onSeek(subtitle.start)}
-            >
+                onClick={() => onSeek(subtitle.end)}>
                 {index + 1}
             </Button>
         ))}

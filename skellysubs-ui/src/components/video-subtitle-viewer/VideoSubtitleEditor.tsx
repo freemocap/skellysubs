@@ -27,10 +27,10 @@ import { SubtitleTimeline } from "./SubtitleTimeline"
 export const VideoSubtitleEditor = () => {
   const [currentTime, setCurrentTime] = useState(0)
   const [parsedSubtitles, setParsedSubtitles] = useState<Subtitle[]>([])
-  const { originalFile, mp3Audio, transcription } = useAppSelector(
+  const { originalFile,  transcription } = useAppSelector(
     selectProcessingContext,
   )
-  const mediaFile = originalFile || mp3Audio
+  const mediaFile = originalFile
   const subtitles = useAppSelector(selectSubtitles)
   const selectedSubtitle = useAppSelector(selectSelectedSubtitle)
   const dispatch = useAppDispatch()
@@ -86,6 +86,8 @@ export const VideoSubtitleEditor = () => {
               currentSubtitle={currentSubtitle}
               selectedSubtitle={selectedSubtitle}
               onTimeUpdate={setCurrentTime}
+              currentTime={currentTime}
+
             />
             <CurrentSubtitleCard currentSubtitle={currentSubtitle} />
           </Card>
@@ -99,13 +101,13 @@ export const VideoSubtitleEditor = () => {
           />
           <Card sx={{ border: "1px solid #cff", borderRadius: 1 }}>
             <CardHeader
-              title="Subtitle Editor"
-              subheader="Edit the WebVTT file directly. Changes apply in real-time."
+              subheader="Edit the subtitles directly. Changes apply in real-time."
             />
             <Box sx={{ height: 400 }}>
               <SubtitleEditor
                 vttContent={selectedSubtitle?.vttContent || ""}
                 currentSubtitle={currentSubtitle}
+                parsedSubtitles={parsedSubtitles}
                 onContentChange={value =>
                   selectedSubtitle &&
                   dispatch(
@@ -118,18 +120,15 @@ export const VideoSubtitleEditor = () => {
               />
             </Box>
           </Card>
-        </Grid>
-
-        <Grid item xs={12}>
           <Card>
             <CardContent>
               <Typography variant="subtitle1" gutterBottom>
                 Subtitle Timeline
               </Typography>
               <SubtitleTimeline
-                subtitles={parsedSubtitles}
-                currentSubtitle={currentSubtitle}
-                onSeek={time => setCurrentTime(time)}
+                  subtitles={parsedSubtitles}
+                  currentSubtitle={currentSubtitle}
+                  onSeek={time => setCurrentTime(time)}
               />
             </CardContent>
           </Card>
