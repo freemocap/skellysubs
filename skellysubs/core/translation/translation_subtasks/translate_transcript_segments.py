@@ -5,10 +5,10 @@ from openai.types.audio import TranscriptionVerbose
 from openai.types.audio.transcription_segment import TranscriptionSegment
 
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
-from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation_pipeline.models.translated_text import TranslatedText
-from skellysubs.core.translation_pipeline.models.translated_transcript_segment import TranslatedTranscriptSegment
-from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
+from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
+from skellysubs.core.translation.models.translated_text import TranslatedText
+from skellysubs.core.translation.models.translated_transcript_segment import TranslatedTranscriptSegment
+from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 
 logger = logging.getLogger(__name__)
 

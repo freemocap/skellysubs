@@ -1,12 +1,12 @@
 import logging
 
-from skellysubs.core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
-from skellysubs.core.translation_pipeline.models.translated_transcript_model import \
+from skellysubs.core.transcription.whisper_transcript_result_model import WhisperTranscriptionResult
+from skellysubs.core.translation.models.translated_transcript_model import \
     OldTranslatedTranscription
-from skellysubs.core.translation_pipeline.translation_subtasks.match_translated_words import \
+from skellysubs.core.translation.translation_subtasks.match_translated_words import \
     word_level_translation_and_matching
-from skellysubs.core.translation_pipeline.translation_subtasks.translate_full_text import text_translation
-from skellysubs.core.translation_pipeline.translation_subtasks.translate_transcript_segments import \
+from skellysubs.core.translation.translation_subtasks.translate_full_text import text_translation
+from skellysubs.core.translation.translation_subtasks.translate_transcript_segments import \
     transcript_translation
 
 logger = logging.getLogger(__name__)

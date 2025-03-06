@@ -6,7 +6,7 @@ import ffmpeg
 import numpy as np
 from PIL.Image import Image
 
-from skellysubs.core.audio_transcription.get_or_compute_video_transcription import scrape_and_save_audio_from_video
+from skellysubs.core.transcription.get_or_compute_video_transcription import scrape_and_save_audio_from_video
 
 
 def get_video_properties(video_path):

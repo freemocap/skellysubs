@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from skellysubs.core.translation_pipeline.models.translated_text import TranslatedText
+from skellysubs.core.translation.models.translated_text import TranslatedText
 
 
 class TranslatedTranscriptSegment(BaseModel):

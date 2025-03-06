@@ -5,7 +5,7 @@ import yaml
 from PIL import ImageFont
 
 from skellysubs.utilities.frozen_model import FrozenModel
-from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
+from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 
 FONT_BASE_PATH = Path(__file__).parent.parent.parent.parent.parent / 'fonts'
 if not FONT_BASE_PATH.exists():

@@ -4,9 +4,9 @@ import logging
 import re
 
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
-from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation_pipeline.models.translated_text import TranslatedText
-from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
+from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
+from skellysubs.core.translation.models.translated_text import TranslatedText
+from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 
 from skellysubs.utilities.get_wikipedia_article_contents import get_wikipedia_texts
 

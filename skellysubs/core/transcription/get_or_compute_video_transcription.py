@@ -3,8 +3,8 @@ from pathlib import Path
 
 from moviepy import VideoFileClip
 
-from skellysubs.core.audio_transcription.whisper_transcript_result_model import WhisperTranscriptionResult
-from skellysubs.core.audio_transcription.whisper_audio_transcription import transcribe_audio
+from skellysubs.core.transcription.whisper_transcript_result_model import WhisperTranscriptionResult
+from skellysubs.core.transcription.whisper_audio_transcription import transcribe_audio
 
 
 async def get_or_compute_video_transcription(video_path: str,

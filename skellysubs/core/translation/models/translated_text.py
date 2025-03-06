@@ -1,8 +1,8 @@
 import jieba
 from pydantic import BaseModel, Field
 
-from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation_pipeline.models.translation_typehints import TranslatedTextString, RomanizedTextString, \
+from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
+from skellysubs.core.translation.models.translation_typehints import TranslatedTextString, RomanizedTextString, \
     LanguageNameString, RomanizationMethodString, NOT_TRANSLATED_YET_TEXT
 from skellysubs.utilities.strip_punctuation_and_whitespace import strip_punctuation_and_whitespace
 

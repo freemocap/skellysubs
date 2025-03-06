@@ -3,13 +3,13 @@ import logging
 from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel, Field
 
-from skellysubs.core.audio_transcription.whisper_transcript_result_model import \
+from skellysubs.core.transcription.whisper_transcript_result_model import \
     WhisperTranscriptionResult
-from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation_pipeline.models.translated_segment_models import MatchedTranslatedWord, \
+from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
+from skellysubs.core.translation.models.translated_segment_models import MatchedTranslatedWord, \
     MatchedTranslatedSegment, TranslatedWhisperWordTimestamp, TranslatedTranscriptSegmentWithMatchedWords, CurrentSegmentAndMatchedWord
-from skellysubs.core.translation_pipeline.models.translated_text_models import TranslationsCollection
-from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString, \
+from skellysubs.core.translation.models.translated_text_models import TranslationsCollection
+from skellysubs.core.translation.models.translation_typehints import LanguageNameString, \
     OriginalTextString
 
 logger = logging.getLogger(__name__)

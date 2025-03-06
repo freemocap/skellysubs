@@ -7,12 +7,12 @@ from arabic_reshaper import arabic_reshaper
 from bidi.algorithm import get_display
 from tqdm import tqdm
 
-from skellysubs.core.translation_pipeline.language_configs.annotation_configs import get_annotation_configs, \
+from skellysubs.core.translation.language_configs.annotation_configs import get_annotation_configs, \
     LanguageAnnotationConfig, get_default_text_height, get_default_font
-from skellysubs.core.translation_pipeline.models.translated_segment_models import TranslatedTranscriptSegmentWithMatchedWords
-from skellysubs.core.translation_pipeline.models.translated_transcript_model import \
+from skellysubs.core.translation.models.translated_segment_models import TranslatedTranscriptSegmentWithMatchedWords
+from skellysubs.core.translation.models.translated_transcript_model import \
     OldTranslatedTranscription
-from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
+from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 from skellysubs.core.video_annotator.video_reader_writer_methods import \
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
 

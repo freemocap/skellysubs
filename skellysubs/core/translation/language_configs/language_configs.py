@@ -3,8 +3,8 @@ from typing import Dict, List
 
 import yaml
 
-from skellysubs.core.translation_pipeline.language_configs.annotation_configs import LanguageAnnotationConfig
-from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
+from skellysubs.core.translation.language_configs.annotation_configs import LanguageAnnotationConfig
+from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 from skellysubs.utilities.frozen_model import FrozenModel
 
 
