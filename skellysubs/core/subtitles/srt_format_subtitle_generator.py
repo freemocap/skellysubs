@@ -1,5 +1,7 @@
 from openai.types.audio import TranscriptionVerbose
 
+from skellysubs.core.translation_pipeline.models.translated_text_models import TranslatedTranscript
+
 SrtFormatedString = str
 def convert_transcript_to_srt(transcription_verbose: TranscriptionVerbose) -> SrtFormatedString:
     def format_time(seconds):
@@ -23,6 +25,43 @@ def convert_transcript_to_srt(transcription_verbose: TranscriptionVerbose) -> Sr
     return "\n".join(srt_output)
 
 
+def format_time(seconds: float) -> str:
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds_remainder = seconds % 60
+    milliseconds = int((seconds_remainder - int(seconds_remainder)) * 1000)
+    return f"{hours:02}:{minutes:02}:{int(seconds_remainder):02},{milliseconds:03}"
+
+
+def convert_translated_transcript_to_srt(translated_transcript: TranslatedTranscript) -> dict[str, SrtFormatedString]:
+    srt_dict = {}
+    lang_config = translated_transcript.translated_language
+
+    # Always create base translated version
+    base_srt = []
+    for idx, segment in enumerate(translated_transcript.translated_segments, 1):
+        start = segment.start + 0.01 if segment.start == 0 else segment.start
+        base_srt.append(
+            f"{idx}\n{format_time(start)} --> {format_time(segment.end)}\n"
+            f"{segment.translated_text.translated_text.strip()}"
+        )
+    srt_dict['translated'] = "\n\n".join(base_srt)
+
+    # Create romanized version if needed
+    if lang_config.romanization_method:
+        romanized_srt = []
+        for idx, segment in enumerate(translated_transcript.translated_segments, 1):
+            start = segment.start + 0.01 if segment.start == 0 else segment.start
+            romanized_text = segment.translated_text.romanized_text.strip()
+            translated_text = segment.translated_text.translated_text.strip()
+
+            romanized_srt.append(
+                f"{idx}\n{format_time(start)} --> {format_time(segment.end)}\n"
+                f"{translated_text}\n{romanized_text}"
+            )
+        srt_dict['translated_with_romanization'] = "\n\n".join(romanized_srt)
+
+    return srt_dict
 if __name__ == "__main__":
     import json
     from skellysubs import SAMPLE_DATA_TRANSCRIPT_PATH

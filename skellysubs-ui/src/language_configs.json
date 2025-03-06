@@ -238,7 +238,7 @@
   "vietnamese": {
     "language_name": "Vietnamese",
     "language_code": "vi",
-    "romanization_method": "NOE",
+    "romanization_method": "NONE",
     "background": {
       "family_tree": [
         "Austroasiatic",

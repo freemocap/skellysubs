@@ -128,6 +128,7 @@ export interface TranslatedTranscript {
 export interface TranslateTranscriptionResponse {
   translated_transcripts: Record<string, TranslatedTranscript>
   segment_prompts_by_language: Record<string, string[]>
+  translated_srt_subtitles: Record<string, Record<string, string>>
 }
 
 export interface ProcessingStage {

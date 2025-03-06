@@ -1,7 +1,7 @@
-// src/components/processing-panel/translation/TranslationPanel.tsx
-
-import { Box, Button, IconButton, Typography } from "@mui/material"
+import { Box, Button, IconButton, Typography, Tooltip } from "@mui/material"
 import AddCircleIcon from "@mui/icons-material/AddCircle"
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+import ExpandLessIcon from "@mui/icons-material/ExpandLess"
 import {
   ProcessingButton,
   ProcessingPanelLayout,
@@ -11,10 +11,9 @@ import {
   selectIsTranslateReady,
   selectProcessingContext,
 } from "../../../store/slices/processing-status/processingStatusSlice"
-import { useContext, useEffect } from "react"
+import { useContext, useEffect, useState } from "react"
 import type { LanguageConfig } from "../../../schemas/languageConfigSchemas"
 import { logger } from "../../../utils/logger"
-import { translationTextThunk } from "../../../store/slices/processing-status/thunks/translationTextThunk"
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 import SettingsIcon from "@mui/icons-material/Settings"
 import Chip from "@mui/material/Chip"
@@ -39,6 +38,7 @@ const TranslationPanel: React.FC = () => {
   )
   const selectedTargetLanguages = useAppSelector(selectSelectedTargetLanguages)
   const { toggleRightPanel } = useContext(RightPanelContext)
+  const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(false)
 
   useEffect(() => {
     dispatch(fetchLanguageConfigs())
@@ -47,7 +47,6 @@ const TranslationPanel: React.FC = () => {
   const handleTranslateClick = () => {
     if (!processingContext.transcription) return
 
-    // Match selected languages by their actual config keys
     const targetLanguagesConfig = selectedTargetLanguages.reduce(
       (acc, configKey) => {
         const language = availableTargetLanguages[configKey]
@@ -68,6 +67,7 @@ const TranslationPanel: React.FC = () => {
     )
     dispatch(translationTranscriptThunk(translateThunkArgs))
   }
+
   const handleDownloadJSONClick = () => {
     logger(`[TranslationPanel] Downloading translation results...`)
     const json = JSON.stringify(processingContext.translation, null, 2)
@@ -78,7 +78,6 @@ const TranslationPanel: React.FC = () => {
     a.href = url
     a.download = `${processingContext.originalFile?.name}_translation.json`
     a.click()
-
     URL.revokeObjectURL(url)
   }
 
@@ -122,14 +121,7 @@ const TranslationPanel: React.FC = () => {
         </IconButton>
       </Box>
 
-      <Box
-        sx={{
-          position: "absolute",
-          top: 8,
-          right: 8,
-          zIndex: 1,
-        }}
-      >
+      <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}>
         <IconButton onClick={toggleRightPanel}>
           <SettingsIcon />
         </IconButton>
@@ -143,10 +135,40 @@ const TranslationPanel: React.FC = () => {
       />
       {processingContext.translation && (
         <>
-          <Typography sx={{ mb: 2, textAlign: "center" }}>
-            Original text: <br />
-            {processingContext.transcription?.transcript?.text}
-          </Typography>
+          <Box sx={{ mb: 2, textAlign: "center", width: "100%" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
+              <Typography component="span">Original text:</Typography>
+              <Tooltip
+                title={
+                  isTranscriptExpanded ? "Hide transcript" : "Show transcript"
+                }
+              >
+                <IconButton
+                  onClick={() => setIsTranscriptExpanded(!isTranscriptExpanded)}
+                  size="small"
+                >
+                  {isTranscriptExpanded ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Box>
+            {isTranscriptExpanded && (
+              <Typography sx={{ mt: 1, wordBreak: "break-word" }}>
+                {processingContext.transcription?.transcript?.text}
+              </Typography>
+            )}
+          </Box>
+
           <Typography variant="h6" sx={{ mb: 1 }}>
             Translations:
           </Typography>

@@ -5,6 +5,8 @@ from fastapi import Body, Query
 from openai.types.audio import TranscriptionVerbose
 from pydantic import BaseModel
 
+from skellysubs.core.subtitles.srt_format_subtitle_generator import SrtFormatedString, \
+    convert_translated_transcript_to_srt
 from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation_pipeline.models.translated_text_models import TranslatedText, TranslatedTranscript
 from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
@@ -27,10 +29,10 @@ class TextTranslationResponse(BaseModel):
     translations: dict[LanguageNameString, TranslatedText]
 
 
-
 class TranscriptTranslationResponse(BaseModel):
     translated_transcripts: dict[LanguageNameString, TranslatedTranscript]
     segment_prompts_by_language: dict[LanguageNameString, list[str]]
+    translated_srt_subtitles: dict[LanguageNameString, dict[str, SrtFormatedString]]
 
 
 @translate_router.post("/translate/text", response_model=TextTranslationResponse)
@@ -64,6 +66,7 @@ async def translate_transcript_endpoint(
     logger.info(
         f"Translation request received for transcription with {len(transcript.segments)} segments and target languages: {[key for key in target_languages.keys()]}")
     translated_transcripts = {}
+    translated_srt_subtitles = {}
     try:
         full_text_prompts, full_text_translations = await text_translation(text=transcript.text,
                                                                            target_languages=target_languages,
@@ -83,6 +86,11 @@ async def translate_transcript_endpoint(
                                                                     translated_segments=translated_segments_by_language[
                                                                         language]
                                                                     )
+
+        # Generate SRTs for each translation
+        for language, translated_transcript in translated_transcripts.items():
+            srt_variants = convert_translated_transcript_to_srt(translated_transcript)
+            translated_srt_subtitles[language] = srt_variants
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -90,4 +98,6 @@ async def translate_transcript_endpoint(
         raise HTTPException(status_code=500, detail="Internal server error")
     logger.info(f"Transcription translation complete!")
     return TranscriptTranslationResponse(translated_transcripts=translated_transcripts,
-                                         segment_prompts_by_language=segment_prompts_by_language)
+                                         segment_prompts_by_language=segment_prompts_by_language,
+                                         translated_srt_subtitles=translated_srt_subtitles
+                                         )

@@ -134,8 +134,7 @@ async def text_translation(text: str, original_language: str,
     language_addresses = []
 
     for language, system_prompts in system_prompts_by_language.items():
-        if original_language.lower() in language.lower():
-            continue
+
 
         for prompt in system_prompts:
             task = asyncio.create_task(
