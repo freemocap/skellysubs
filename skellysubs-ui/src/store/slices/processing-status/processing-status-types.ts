@@ -32,6 +32,7 @@ export interface TranscriptionResult {
   transcript: TranscriptionVerbose
   srt_subtitles_string: string
 }
+
 interface MatchedTranslatedWord {
   original_language: string
   start_time: number
@@ -89,19 +90,45 @@ interface TranslationsCollection {
   >
 }
 
-export interface TranslationResponse {
-  prompts: Record<string, string>;
+export interface TranslatedTextResponse {
+  prompts: Record<string, string>
   translations: Record<
-      string,
-      {
-        translated_text: string;
-        romanized_text: string;
-        translated_language_name: string;
-        romanization_method: string;
-      }
-  >;
+    string,
+    {
+      translated_text: string
+      romanized_text: string
+      translated_language_name: string
+      romanization_method: string
+    }
+  >
 }
-export class MatchingResult {}
+
+export interface TranslatedText {
+  translated_text: string
+  romanized_text: string | null
+  translated_language_name: string
+  romanization_method: string | null
+}
+
+export interface TranslatedTranscriptSegment {
+  original_segment_text: string
+  translated_text: TranslatedText
+  start: number
+  end: number
+}
+
+export interface TranslatedTranscript {
+  original_full_text: string
+  translated_full_text: TranslatedText
+  original_language: string
+  translated_language: string
+  translated_segments: Record<string, TranslatedTranscriptSegment>
+}
+
+export interface TranslateTranscriptionResponse {
+  translated_transcripts: Record<string, TranslatedTranscript>
+  segment_prompts_by_language: Record<string, string[]>
+}
 
 export interface ProcessingStage {
   name: string
@@ -115,8 +142,9 @@ export interface ProcessingContext {
   originalFile?: AudioVisualFile
   mp3Audio?: AudioVisualFile
   transcription?: TranscriptionResult
-  translation?: TranslationResponse
+  translation?: TranslateTranscriptionResponse
 }
+
 export interface ProcessingState {
   context: ProcessingContext
   stages: Record<string, ProcessingStage>

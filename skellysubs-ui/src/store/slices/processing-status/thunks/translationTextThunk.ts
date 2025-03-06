@@ -42,7 +42,9 @@ export const translationTextThunk = createProcessingThunk<
     })
 
     if (!translationResponse.ok) {
-      throw new Error(`HTTP error ${translationResponse.status}`)
+      const errorBody = await translationResponse.text()
+      logger(`Translation error response: ${errorBody}`)
+      throw new Error(`HTTP error ${translationResponse.status}: ${errorBody}`)
     }
 
     const result = await translationResponse.json()

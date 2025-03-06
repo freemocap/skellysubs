@@ -1,19 +1,16 @@
 import { getApiBaseUrl } from "../../../../utils/getApiBaseUrl"
 import { logger } from "../../../../utils/logger"
-import type { ProcessingContext } from "../processing-status-types"
-import { createProcessingThunk } from "./createProcessingThunk"
-import { getLanguageConfigs } from "../../../../utils/getLanguageConfigs"
 import type {
-  LanguageConfig,
-  LanguageConfigSchema,
-} from "../../../../schemas/languageConfigSchemas"
-import type { z } from "zod"
+  ProcessingContext,
+  TranscriptionVerbose,
+} from "../processing-status-types"
+import { createProcessingThunk } from "./createProcessingThunk"
+import type { LanguageConfig } from "../../../../schemas/languageConfigSchemas"
 
 export const translationTranscriptThunk = createProcessingThunk<
   {
-    text: string
+    transcript: TranscriptionVerbose
     targetLanguages: Record<string, LanguageConfig>
-    originalLanguage: string
   },
   ProcessingContext["translation"]
 >("translation", async (context, params) => {
@@ -25,7 +22,7 @@ export const translationTranscriptThunk = createProcessingThunk<
     const translationEndpointUrl = `${getApiBaseUrl()}/processing/translate/transcript`
     const requestBody = JSON.stringify(
       {
-        text: params.text,
+        transcript: params.transcript,
         target_languages: params.targetLanguages,
       },
       null,
@@ -41,7 +38,9 @@ export const translationTranscriptThunk = createProcessingThunk<
     })
 
     if (!translationResponse.ok) {
-      throw new Error(`HTTP error ${translationResponse.status}`)
+      const errorBody = await translationResponse.text()
+      logger(`Translation error response: ${errorBody}`)
+      throw new Error(`HTTP error ${translationResponse.status}: ${errorBody}`)
     }
 
     const result = await translationResponse.json()

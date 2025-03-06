@@ -75,8 +75,7 @@ async def format_full_text_translation_system_prompt(
     total_segments = len(text_segments)
 
     for language, config in target_languages.items():
-        if original_language.lower() in language.lower():
-            continue
+
         # wikipedia_link_info = json.dumps({link: await get_wikipedia_texts(config.background.wikipedia_links) for link in
         #                                   config.background.wikipedia_links}, indent=2)
 

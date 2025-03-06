@@ -43,7 +43,7 @@ class OpenaiClient(AiClientABC):
         )
         output = prompt_model(**json.loads(response.choices[0].message.content))
 
-        logger.trace(f"OpenAI JSON Mode request completed!  Output: {output.translated_language_name}")#__class__.__name__}")
+        logger.trace(f"OpenAI JSON Mode request completed!  Output: {output.__class__.__name__}")
         return output
 
     async def make_text_generation_request(self,

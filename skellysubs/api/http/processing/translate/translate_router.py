@@ -39,8 +39,8 @@ async def translate_text_endpoint(
         target_languages: dict[LanguageNameString, LanguageConfig] = Body(...),
         original_language: str = Query("english")
 ) -> TextTranslationResponse:
-    logger.info(
-        f"Translation request received for transcription ({len(text.split(' '))} words) for target languages: {[key for key in target_languages.keys()]}")
+    logger.api(
+        f"`/translate/text` - Translation request received for transcription ({len(text.split(' '))} words) for target languages: {[key for key in target_languages.keys()]}")
 
     try:
 

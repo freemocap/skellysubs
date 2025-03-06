@@ -25,6 +25,7 @@ import {
   toggleLanguage,
 } from "../../../store/slices/processing-configs/translationConfigSlice"
 import { RightPanelContext } from "../../../layout/BasePanelLayout"
+import { translationTranscriptThunk } from "../../../store/slices/processing-status/thunks/translationTranscriptThunk"
 
 const TranslationPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -59,14 +60,13 @@ const TranslationPanel: React.FC = () => {
     )
 
     const translateThunkArgs = {
-      text: processingContext.transcription.transcript.text,
+      transcript: processingContext.transcription.transcript,
       targetLanguages: targetLanguagesConfig,
-      originalLanguage: processingContext.transcription.transcript.language,
     }
     logger(
-      `Translate button clicked with parameters - targetLanguages: ${JSON.stringify(translateThunkArgs, null, 2)}`,
+      `Translate transcript button clicked with parameters - targetLanguages: ${JSON.stringify(translateThunkArgs, null, 2)}`,
     )
-    dispatch(translationTextThunk(translateThunkArgs))
+    dispatch(translationTranscriptThunk(translateThunkArgs))
   }
   const handleDownloadJSONClick = () => {
     logger(`[TranslationPanel] Downloading translation results...`)
@@ -150,53 +150,101 @@ const TranslationPanel: React.FC = () => {
           <Typography variant="h6" sx={{ mb: 1 }}>
             Translations:
           </Typography>
-          {Object.entries(processingContext.translation.translations).map(
-            ([key, translation], i) => (
-              <Box
-                key={i}
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  border: "1px solid #ddd",
-                  borderRadius: 1,
-                  width: "100%",
-                  textAlign: "left",
-                }}
-              >
-                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                  {translation.translated_language_name}:
-                </Typography>
-                <Typography variant="body1">
-                  {translation.translated_text}
-                </Typography>
-                <br />
+          {Object.entries(
+            processingContext.translation.translated_transcripts,
+          ).map(([languageCode, translatedTranscript]) => (
+            <Box
+              key={languageCode}
+              sx={{
+                mb: 2,
+                p: 2,
+                border: "1px solid #ddd",
+                borderRadius: 1,
+                width: "100%",
+                textAlign: "left",
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                {
+                  translatedTranscript.translated_full_text
+                    .translated_language_name
+                }
+                :
+              </Typography>
+              <Typography variant="body1">
+                {translatedTranscript.translated_full_text.translated_text}
+              </Typography>
 
-                {!(translation.romanization_method === "NONE") && (
-                  <>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mt: 1,
-                        color: extendedPaperbaseTheme.palette.text.secondary,
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      Romanized ({translation.romanization_method}):
+              {translatedTranscript.translated_full_text.romanization_method !==
+                "NONE" && (
+                <>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mt: 1,
+                      color: extendedPaperbaseTheme.palette.text.secondary,
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    Romanized (
+                    {
+                      translatedTranscript.translated_full_text
+                        .romanization_method
+                    }
+                    ):
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: extendedPaperbaseTheme.palette.text.secondary,
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    {translatedTranscript.translated_full_text.romanized_text}
+                  </Typography>
+                </>
+              )}
+
+              <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                Segments:
+              </Typography>
+
+              {Object.entries(translatedTranscript.translated_segments).map(
+                ([segmentId, segment]) => (
+                  <Box
+                    key={segmentId}
+                    sx={{
+                      mb: 2,
+                      p: 1,
+                      borderLeft: "3px solid #00aa3c",
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: "#666" }}>
+                      [{segment.start.toFixed(2)}s - {segment.end.toFixed(2)}s]
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: extendedPaperbaseTheme.palette.text.secondary,
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      {translation.romanized_text}
+                    <Typography variant="body1" sx={{ mb: 1 }}>
+                      {segment.original_segment_text}
                     </Typography>
-                  </>
-                )}
-              </Box>
-            ),
-          )}
+                    <Typography variant="body1">
+                      {segment.translated_text.translated_text}
+                    </Typography>
+
+                    {segment.translated_text.romanized_text && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: extendedPaperbaseTheme.palette.text.secondary,
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        ({segment.translated_text.romanized_text})
+                      </Typography>
+                    )}
+                  </Box>
+                ),
+              )}
+            </Box>
+          ))}
           <Button
             variant="contained"
             onClick={handleDownloadJSONClick}

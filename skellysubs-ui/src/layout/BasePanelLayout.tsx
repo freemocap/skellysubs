@@ -81,7 +81,7 @@ export const BasePanelLayout = ({
           style={{ height: "100%", width: "100%" }}
         >
           {/* Main Content Area */}
-          <Panel defaultSize={80} minSize={30}>
+          <Panel defaultSize={100} minSize={30}>
             <PanelGroup
               direction="vertical"
               style={{ height: "100%", width: "100%" }}
@@ -129,6 +129,7 @@ export const BasePanelLayout = ({
             onResize={handleRightPanelResize}
             minSize={15}
             collapsedSize={0}
+            defaultSize={0}
             style={{
               overflow: isRightPanelCollapsed ? "visible" : "auto",
               backgroundColor: extendedPaperbaseTheme.palette.background.paper,
