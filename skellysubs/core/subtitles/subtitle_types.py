@@ -4,6 +4,9 @@ SubtitleFormattedString = str
 SrtFormattedString = SubtitleFormattedString
 VttFormattedString = SubtitleFormattedString
 SsaFormattedString = SubtitleFormattedString
+AssFormattedString = SubtitleFormattedString  # lol ((
+SccFormattedString = SubtitleFormattedString  # YouTube's preference -https://support.google.com/youtube/answer/2734698?hl=en
+TtmlFormattedString = SubtitleFormattedString
 MdFormattedString = SubtitleFormattedString
 
 
@@ -11,6 +14,9 @@ class SubtitleFormats(enum.Enum):
     SRT: SrtFormattedString = "srt"
     VTT: VttFormattedString = "vtt"
     SSA: SsaFormattedString = "ssa"
+    ASS: AssFormattedString = "ass"
+    SCC: SccFormattedString = "scc"
+    TTML: TtmlFormattedString = "ttml"
     MD: MdFormattedString = "md"
 
 

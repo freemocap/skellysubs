@@ -27,8 +27,11 @@ class FormattedSubtitles(BaseModel):
         md: Markdown format transcription text and segments
     """
     srt: dict[SubtitleVariant, SrtFormattedString]
-    # vtt: VttFormattedString
-    # ssa: SsaFormattedString
+    vtt: dict[SubtitleVariant, VttFormattedString]
+    # ssa: dict[SubtitleVariant, SsaFormattedString]
+    # ass: dict[SubtitleVariant, AssFormattedString]
+    # ttml: dict[SubtitleVariant, TtmlFormattedString]
+    # scc : dict[SubtitleVariant, SccFormattedString]
     md: dict[SubtitleVariant, MdFormattedString]
 
 

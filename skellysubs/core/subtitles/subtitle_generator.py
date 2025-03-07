@@ -4,6 +4,7 @@ from openai.types.audio import TranscriptionVerbose
 from skellysubs.core.subtitles.formatters.base_subtitle_formatter import FormattedSubtitles
 from skellysubs.core.subtitles.formatters.md_subtitle_formatter import MDFormatter
 from skellysubs.core.subtitles.formatters.srt_subtitle_formatter import SrtSubtitleFormatter
+from skellysubs.core.subtitles.formatters.vtt_subtitle_formatter import VttSubtitleFormatter
 from skellysubs.core.subtitles.subtitle_types import SubtitleFormats
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
 
@@ -34,7 +35,8 @@ class SubtitleGenerator:
     def __init__(self):
         self._formatters = {
             SubtitleFormats.SRT: SrtSubtitleFormatter(),
-            SubtitleFormats.MD: MDFormatter()
+            SubtitleFormats.MD: MDFormatter(),
+            SubtitleFormats.VTT: VttSubtitleFormatter()
         }
 
     def generate_all_formats(
@@ -58,4 +60,5 @@ class SubtitleGenerator:
             formatted_subtitles[format_type.value] = formatter.format_transcript(transcript)
 
         return FormattedSubtitles(srt= formatted_subtitles[SubtitleFormats.SRT.value],
+                                  vtt= formatted_subtitles[SubtitleFormats.VTT.value],
                                   md= formatted_subtitles[SubtitleFormats.MD.value])

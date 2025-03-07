@@ -40,10 +40,10 @@ export const availableSubtitlesSlice = createSlice({
         },
         updateAvailableSubtitles: (
             state,
-            action: PayloadAction<{ id: string; vttContent: string }>
+            action: PayloadAction<{ id: string; content: string }>
         ) => {
             const subtitle = state.availableSubtitles.find(s => s.id === action.payload.id);
-            if (subtitle) subtitle.content = action.payload.vttContent;
+            if (subtitle) subtitle.content = action.payload.content;
         },
         selectAvailableSubtitles: (state, action: PayloadAction<string>) => {
             if (state.availableSubtitles.some(s => s.id === action.payload)) {

@@ -11,8 +11,8 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks"
 import { selectProcessingContext } from "../../store/slices/processing-status/processingStatusSlice"
 import {
   addAvailableSubtitles,
-  selectSelectedSubtitle,
   selectAvailableSubtitles,
+  selectSelectedSubtitle,
   selectSubtitles,
   updateAvailableSubtitles,
 } from "../../store/slices/available-subtitles/availableSubtitlesSlice"
@@ -27,7 +27,7 @@ import { SubtitleTimeline } from "./SubtitleTimeline"
 export const VideoSubtitleEditor = () => {
   const [currentTime, setCurrentTime] = useState(0)
   const [parsedSubtitles, setParsedSubtitles] = useState<Subtitle[]>([])
-  const { originalFile,  transcription } = useAppSelector(
+  const { originalFile, transcription } = useAppSelector(
     selectProcessingContext,
   )
   const mediaFile = originalFile
@@ -37,7 +37,7 @@ export const VideoSubtitleEditor = () => {
 
   useEffect(() => {
     if (selectedSubtitle) {
-      setParsedSubtitles(parseVTT(selectedSubtitle.vttContent))
+      setParsedSubtitles(parseVTT(selectedSubtitle.content))
     }
   }, [selectedSubtitle])
 
@@ -50,9 +50,10 @@ export const VideoSubtitleEditor = () => {
           addAvailableSubtitles({
             id: "original",
             name: "Original Transcript",
-            type: "original",
+            variant: "original_spoken",
             language: "en",
-            vttContent,
+            content: vttContent,
+            format: "vtt",
           }),
         )
         dispatch(selectAvailableSubtitles("original"))
@@ -87,7 +88,6 @@ export const VideoSubtitleEditor = () => {
               selectedSubtitle={selectedSubtitle}
               onTimeUpdate={setCurrentTime}
               currentTime={currentTime}
-
             />
             <CurrentSubtitleCard currentSubtitle={currentSubtitle} />
           </Card>
@@ -95,17 +95,15 @@ export const VideoSubtitleEditor = () => {
 
         <Grid item xs={12} md={6}>
           <SubtitleVersionSelector
-            subtitles={subtitles }
+            subtitles={subtitles}
             selectedId={selectedSubtitle?.id}
             onSelect={id => dispatch(selectAvailableSubtitles(id))}
           />
           <Card sx={{ border: "1px solid #cff", borderRadius: 1 }}>
-            <CardHeader
-              subheader="Edit the subtitles directly. Changes apply in real-time."
-            />
+            <CardHeader subheader="Edit the subtitles directly. Changes apply in real-time." />
             <Box sx={{ height: 400 }}>
               <SubtitleEditor
-                vttContent={selectedSubtitle?.vttContent || ""}
+                content={selectedSubtitle?.content || ""}
                 currentSubtitle={currentSubtitle}
                 parsedSubtitles={parsedSubtitles}
                 onContentChange={value =>
@@ -113,7 +111,7 @@ export const VideoSubtitleEditor = () => {
                   dispatch(
                     updateAvailableSubtitles({
                       id: selectedSubtitle.id,
-                      vttContent: value,
+                      content: value,
                     }),
                   )
                 }
@@ -126,9 +124,9 @@ export const VideoSubtitleEditor = () => {
                 Subtitle Timeline
               </Typography>
               <SubtitleTimeline
-                  subtitles={parsedSubtitles}
-                  currentSubtitle={currentSubtitle}
-                  onSeek={time => setCurrentTime(time)}
+                subtitles={parsedSubtitles}
+                currentSubtitle={currentSubtitle}
+                onSeek={time => setCurrentTime(time)}
               />
             </CardContent>
           </Card>

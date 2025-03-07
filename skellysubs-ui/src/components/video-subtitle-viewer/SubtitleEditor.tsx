@@ -3,14 +3,14 @@ import { Editor } from "@monaco-editor/react";
 import type {Subtitle} from "./video-subtitle-viewer-types";
 
 interface SubtitleEditorProps {
-    vttContent: string;
+    content: string;
     currentSubtitle?: Subtitle | null;
     parsedSubtitles: Subtitle[]
     onContentChange: (value: string) => void;
 }
 
 export const SubtitleEditor = ({
-                                   vttContent,
+                                   content,
                                    currentSubtitle,
                                    parsedSubtitles,
                                    onContentChange
@@ -34,7 +34,7 @@ export const SubtitleEditor = ({
 
         if (cueIndex === -1) return
 
-        const blocks = vttContent.split(/\n\n+/g)
+        const blocks = content.split(/\n\n+/g)
         let lineNumber = 0
         for (let i = 0; i < cueIndex; i++) {
             lineNumber += blocks[i].split('\n').length + 1
@@ -47,13 +47,13 @@ export const SubtitleEditor = ({
             }
         ])
         setActiveDecoration(newDecoration)
-    }, [currentSubtitle, vttContent])
+    }, [currentSubtitle, content])
     return (
         <Editor
             height="100%"
             language="plaintext"
             theme="vs-dark"
-            value={vttContent}
+            value={content}
             onChange={(value) => value && onContentChange(value)}
             onMount={handleEditorDidMount}
             options={{

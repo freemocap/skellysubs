@@ -1,5 +1,5 @@
 import { Select, MenuItem, Typography, CardContent, Button, Stack } from "@mui/material";
-import {SubtitleCue} from "./video-subtitle-viewer-types";
+import type {SubtitleCue} from "./video-subtitle-viewer-types";
 import { Save as SaveIcon } from "@mui/icons-material"
 
 interface SubtitleVersionSelectorProps {
@@ -17,7 +17,7 @@ export const SubtitleVersionSelector = ({
         const selectedSub = subtitles.find(sub => sub.id === selectedId)
         if (!selectedSub) return
 
-        const blob = new Blob([selectedSub.vttContent], { type: "text/vtt" })
+        const blob = new Blob([selectedSub.content], { type: "text/vtt" })
         const url = URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
