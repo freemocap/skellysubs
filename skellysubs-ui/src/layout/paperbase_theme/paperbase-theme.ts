@@ -1,5 +1,6 @@
 // theme.ts
 import { createTheme } from "@mui/material/styles"
+import {darken} from "@mui/material";
 
 export const paperbaseTheme = createTheme({
   palette: {
@@ -41,6 +42,14 @@ export const paperbaseTheme = createTheme({
 const extendedPaperbaseTheme = {
   ...paperbaseTheme,
   components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: darken(paperbaseTheme.palette.primary.light, 0.2),
+          color: paperbaseTheme.palette.text.primary,
+        }
+      }
+    },
     MuiButton: {
       styleOverrides: {
         root: {

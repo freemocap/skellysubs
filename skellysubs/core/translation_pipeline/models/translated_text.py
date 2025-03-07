@@ -1,10 +1,9 @@
 import jieba
 from pydantic import BaseModel, Field
 
-from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig, \
-    get_language_configs
-from skellysubs.core.translation_pipeline.models.translation_typehints import TranslatedTextString, \
-    LanguageNameString, RomanizationMethodString, RomanizedTextString, NOT_TRANSLATED_YET_TEXT
+from skellysubs.core.translation_pipeline.language_configs.language_configs import LanguageConfig
+from skellysubs.core.translation_pipeline.models.translation_typehints import TranslatedTextString, RomanizedTextString, \
+    LanguageNameString, RomanizationMethodString, NOT_TRANSLATED_YET_TEXT
 from skellysubs.utilities.strip_punctuation_and_whitespace import strip_punctuation_and_whitespace
 
 
@@ -40,23 +39,3 @@ class TranslatedText(BaseModel):
         cleaned_characters = [character for character in stripped_characters if character != ""]
 
         return cleaned_characters
-
-
-class TranslationsCollection(BaseModel):
-    translations: dict[LanguageNameString, TranslatedText] = Field(default_factory=dict)
-
-    @property
-    def has_translations(self) -> bool:
-        return not any(
-            [translation.translated_text == NOT_TRANSLATED_YET_TEXT for translation in self.translations.values()])
-
-    @classmethod
-    def create(cls, original_language: LanguageNameString):
-        # Load language configurations from YAML
-        translations = {language.lower(): TranslatedText.initialize(language_config=config)
-                        for language, config in get_language_configs().items() if
-                        original_language.lower() not in language.lower()}
-        return cls(translations=translations)
-
-    def languages_and_romanizations(self) -> dict[LanguageNameString, RomanizationMethodString]:
-        return {language: text.romanization_method for language, text in self.translations.items()}

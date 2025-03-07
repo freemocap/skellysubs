@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class OpenAIClientConfig(AiClientConfigABC):
-    model_name: str = "gpt-4o-mini"
+    model_name: str = "gpt-4o"
     max_context_length: int = 128_000
 
 
@@ -27,7 +27,7 @@ class OpenaiClient(AiClientABC):
                                      temperature: float | None = None,
                                      user_input: str | None = None) -> BaseModel:
         logger.trace(
-            f"make_openai_json_mode_ai_request: prompt_model={prompt_model.__class__.__name__}, llm_model={llm_model}")
+            f"Making OpenAI JSON mode request -  prompt_model={prompt_model.__class__.__name__}, llm_model={llm_model}")
         messages = [
             AiSystemMessage(role="system", content=system_prompt).model_dump()
         ]
@@ -43,23 +43,24 @@ class OpenaiClient(AiClientABC):
         )
         output = prompt_model(**json.loads(response.choices[0].message.content))
 
-        logger.trace(f"make_openai_json_mode_ai_request: output={output.__class__.__name__}")
+        logger.trace(f"OpenAI JSON Mode request completed!  Output: {output.__class__.__name__}")
         return output
 
     async def make_text_generation_request(self,
                                            system_prompt: str,
                                            llm_model: str | None = None,
-                                           temperature: float | None = None,
-                                           user_input: str | None = None) -> str:
+                                           temperature: float | None = None) -> str:
         messages = [
             AiSystemMessage(role="system", content=system_prompt).model_dump()
         ]
+        logger.debug("Making OpenAI text generation request")
         response = await self.client.beta.chat.completions.parse(
-            model=self.config.default_llm if llm_model is None else llm_model,
+            model=self.config.model_name if llm_model is None else llm_model,
             messages=messages,
             temperature=self.config.temperature if temperature is None else temperature,
         )
         output = response.choices[0].message.content
+        logger.debug(f"OpenAI text generation request completed!")
         return output
 
     async def make_whisper_transcription_request(self,

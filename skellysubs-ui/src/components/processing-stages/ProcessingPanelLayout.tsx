@@ -2,12 +2,10 @@ import {Box, BoxProps, Button, CircularProgress} from "@mui/material"
 import type React from "react"
 
 type ProcessingPanelLayoutProps = BoxProps & {
-    borderColor: string
     children: React.ReactNode
 }
 
 export const ProcessingPanelLayout = ({
-                                          borderColor,
                                           children,
                                           ...props
                                       }: ProcessingPanelLayoutProps) => (

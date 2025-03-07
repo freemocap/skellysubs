@@ -15,3 +15,17 @@ code {
 .MuiBox-root {
   will-change: transform;
 }
+
+.current-subtitle-highlight {
+  background-color: rgba(220, 7, 209, 0.75);
+}
+
+/* Monaco Editor overrides to match paperbase theme */
+.monaco-editor .margin,
+.monaco-editor .monaco-editor-background {
+  /*background-color: #0a6c00 !important;*/
+}
+.active-subtitle-line {
+  background-color: rgba(255, 255, 150, 0.3);
+  border-left: 2px solid #ffeb3b;
+}

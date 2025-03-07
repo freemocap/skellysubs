@@ -12,6 +12,7 @@ class LanguageBackground(FrozenModel):
     family_tree: List[str]
     alphabet: str
     sample_text: str
+    wikipedia_links: List[str]
 
 
 class LanguageConfig(FrozenModel):

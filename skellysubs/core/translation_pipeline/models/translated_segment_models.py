@@ -42,7 +42,6 @@ class MatchedTranslatedSegment(BaseModel):
         description="The translated text of the segment in the target language, using the target language's script, characters, and/or alphabet")
     romanized_translated_text: RomanizedTextString | None = Field(default=None,
                                                                   description="The romanized version of the translated text, if applicable")
-
     original_words_list: list[str] = Field(
         description="The original words in the segment, with the index in the list matching the index of the word in the segment string")
     translated_words_list: list[str] = Field(
@@ -76,7 +75,7 @@ class TranslatedWhisperWordTimestamp(BaseModel):
                    )
 
 
-class TranscriptSegment(BaseModel):
+class TranslatedTranscriptSegmentWithMatchedWords(BaseModel):
     original_segment_text: OriginalTextString = Field(
         description="The original text of the segment in its original language")
     original_language: LanguageNameString = Field(description="The name of the original language of the segment")
@@ -114,7 +113,7 @@ class TranscriptSegment(BaseModel):
 
 
 class CurrentSegmentAndMatchedWord(BaseModel):
-    current_segment: TranscriptSegment
+    current_segment: TranslatedTranscriptSegmentWithMatchedWords
     current_word: TranslatedWhisperWordTimestamp
     matched_segment_by_language: dict[LanguageNameString, MatchedTranslatedSegment]
     matched_word_by_language: dict[str, MatchedTranslatedWord]

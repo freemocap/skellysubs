@@ -9,9 +9,9 @@ from tqdm import tqdm
 
 from skellysubs.core.translation_pipeline.language_configs.annotation_configs import get_annotation_configs, \
     LanguageAnnotationConfig, get_default_text_height, get_default_font
-from skellysubs.core.translation_pipeline.models.translated_segment_models import TranscriptSegment
+from skellysubs.core.translation_pipeline.models.translated_segment_models import TranslatedTranscriptSegmentWithMatchedWords
 from skellysubs.core.translation_pipeline.models.translated_transcript_model import \
-    TranslatedTranscription
+    OldTranslatedTranscription
 from skellysubs.core.translation_pipeline.models.translation_typehints import LanguageNameString
 from skellysubs.core.video_annotator.video_reader_writer_methods import \
     create_video_reader_and_writer, write_frame_to_video_file, finish_video_and_attach_audio_from_original
@@ -25,7 +25,7 @@ NEWLINE_RATIO = 1.25
 
 
 def annotate_video_with_subtitles(video_path: str,
-                                  translated_transcript: TranslatedTranscription,
+                                  translated_transcript: OldTranslatedTranscription,
                                   subtitled_video_path: str,
                                   show_while_annotating: bool = True,
                                   transpose_for_vertical_video: bool = True
@@ -110,7 +110,7 @@ def annotate_video_with_subtitles(video_path: str,
 def annotate_image_with_subtitles(language_name: LanguageNameString,
                                   config: LanguageAnnotationConfig,
                                   image_annotator: ImageDraw,
-                                  current_segment: TranscriptSegment,
+                                  current_segment: TranslatedTranscriptSegmentWithMatchedWords,
                                   highlighted_word_index: int,
                                   multiline_y_start: int,
                                   video_width: int,

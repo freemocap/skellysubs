@@ -4,6 +4,7 @@ import { Provider } from "react-redux"
 import { AppStateStore } from "./store/AppStateStore"
 import { FfmpegContextProvider } from "./services/FfmpegService/FfmpegContext"
 import { initializeLogger } from "./utils/logger"
+
 initializeLogger(AppStateStore)
 const App: React.FC = () => {
   return (

@@ -17,7 +17,7 @@ def generate_vtt_files(transcription, file_basename: str, save_directory: str):
         td = timedelta(seconds=seconds)
         return str(td)[:-3] + '.000'
 
-    for language_name in transcription.translations.translations.keys():
+    for language_name in transcription.full_text_translations.full_text_translations.keys():
         vtt_content = ["WEBVTT\n"]
         vtt_content_with_romanization = ["WEBVTT\n"]
         for index, segment in enumerate(transcription.segments, start=1):
@@ -57,7 +57,7 @@ def generate_ttml_files(transcription, file_basename: str, save_directory: str):
         minutes, seconds = divmod(remainder, 60)
         return f"{hours:02}:{minutes:02}:{seconds:02}.{td.microseconds // 1000:03}"
 
-    for language_name in transcription.translations.translations.keys():
+    for language_name in transcription.full_text_translations.full_text_translations.keys():
         ttml_content = [
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<tt xmlns="http://www.w3.org/ns/ttml">',
