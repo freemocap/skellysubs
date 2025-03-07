@@ -23,31 +23,51 @@ export const SubtitleEditor = ({
         editorRef.current = editor;
         monacoRef.current = monaco;
     };
-
     useEffect(() => {
-        const editor = editorRef.current
-        if (!editor || !currentSubtitle) return
+        const editor = editorRef.current;
+        if (!editor || !currentSubtitle) return;
 
         const cueIndex = parsedSubtitles.findIndex(
             sub => sub.start === currentSubtitle.start && sub.end === currentSubtitle.end
-        )
+        );
 
-        if (cueIndex === -1) return
+        if (cueIndex === -1) return;
 
-        const blocks = vttContent.split(/\n\n+/g)
-        let lineNumber = 0
+        const blocks = vttContent.split(/\n\n+/g);
+
+        // Add safety check for blocks array
+        if (cueIndex >= blocks.length) {
+            console.warn('Cue index out of bounds:', cueIndex, 'blocks length:', blocks.length);
+            return;
+        }
+
+        let lineNumber = 0;
         for (let i = 0; i < cueIndex; i++) {
-            lineNumber += blocks[i].split('\n').length + 1
+            // Add safety check for blocks[i]
+            if (blocks[i]) {
+                lineNumber += blocks[i].split('\n').length + 1;
+            }
+        }
+
+        // Add safety check for blocks[cueIndex]
+        if (!blocks[cueIndex]) {
+            console.warn('Block at cueIndex is undefined:', cueIndex);
+            return;
         }
 
         const newDecoration = editor.deltaDecorations(activeDecoration, [
             {
-                range: new monacoRef.current.Range(lineNumber + 1, 1, lineNumber + blocks[cueIndex].split('\n').length + 1, 1),
+                range: new monacoRef.current.Range(
+                    lineNumber + 1,
+                    1,
+                    lineNumber + blocks[cueIndex].split('\n').length + 1,
+                    1
+                ),
                 options: { className: 'active-subtitle-line' }
             }
-        ])
-        setActiveDecoration(newDecoration)
-    }, [currentSubtitle, vttContent])
+        ]);
+        setActiveDecoration(newDecoration);
+    }, [currentSubtitle, vttContent, parsedSubtitles]);
     return (
         <Editor
             height="100%"
