@@ -1,5 +1,6 @@
 // skellysubs-ui/src/components/video-subtitle-viewer/SubtitleVersionSelector.tsx
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
     Box,
     Button,

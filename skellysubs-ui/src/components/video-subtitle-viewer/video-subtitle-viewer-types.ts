@@ -10,6 +10,7 @@ export interface SubtitleCue {
     id: string;
     name: string;
     variant: SubtitleVariant;
+    format: string;
     language: string;
     content: string;
 }
