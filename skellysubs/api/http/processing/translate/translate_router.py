@@ -69,7 +69,9 @@ async def translate_transcript_endpoint(
     translated_transcripts = {}
     subtitles_by_language: [LanguageNameString, FormattedSubtitles] = {}
     subtitle_generator = SubtitleGenerator()
-
+    for segment in transcript.segments:
+        if len(segment.text) == 0:
+            segment.text = "..."
     try:
         full_text_prompts, full_text_translations = await text_translation(text=transcript.text,
                                                                            target_languages=target_languages,
