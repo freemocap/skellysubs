@@ -1,10 +1,10 @@
-// Generic stage thunk creator
+// createProcessingThunk.ts
 import type {
   ProcessingContext,
   ProcessingState,
 } from "../slices/processing-status/processing-status-types"
 import { createAsyncThunk } from "@reduxjs/toolkit"
-import type {AppDispatch} from "../AppStateStore";
+import type { AppDispatch, RootState } from "../AppStateStore"
 
 export function createProcessingThunk<InputType, OutputType>(
   stageName: string,
@@ -14,13 +14,20 @@ export function createProcessingThunk<InputType, OutputType>(
     thunkAPI?: { dispatch: AppDispatch }
   ) => Promise<OutputType>,
 ) {
-  return createAsyncThunk(
+  return createAsyncThunk<
+    OutputType,
+    InputType,
+    {
+      state: RootState;
+      dispatch: AppDispatch;
+      extra: undefined;
+    }
+  >(
     `processing/${stageName}`,
-    async (input: InputType, { getState, rejectWithValue, dispatch  }) => {
-      const state = getState() as { processing: ProcessingState }
+    async (input: InputType, { getState, rejectWithValue, dispatch }) => {
+      const state = getState()
       const stage = state.processing.stages[stageName]
 
-      // Check requirements
       const missingRequirements = stage.requirements.filter(
         req => !state.processing.context[req],
       )
