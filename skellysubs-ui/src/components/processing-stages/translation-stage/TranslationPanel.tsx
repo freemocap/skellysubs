@@ -147,7 +147,10 @@ const TranslationPanel: React.FC = () => {
               startIcon={<RefreshIcon />}
               onClick={handleRandomSelection}
               size="small"
-              color={extendedPaperbaseTheme.palette.text.secondary}
+              sx={{ color: theme => theme.palette.text.secondary,
+                  border: theme => `1px solid ${theme.palette.text.secondary}`
+            }}
+
             >
               Random Selection
             </Button>
@@ -159,7 +162,9 @@ const TranslationPanel: React.FC = () => {
               startIcon={<SettingsIcon />}
               onClick={toggleRightPanel}
               size="small"
-              color={extendedPaperbaseTheme.palette.text.secondary}
+              sx={{  color: theme => theme.palette.text.secondary,
+                      border: theme => `1px solid ${theme.palette.text.secondary}`
+                  }}
             >
               Open Language Panel
             </Button>
