@@ -5,7 +5,6 @@ from skellysubs.api.http.processing.translate.translate_router import translate_
 from skellysubs.api.http.ui.ui_router import ui_router
 from skellysubs.api.websocket.websocket_connect import skellysubs_websocket_router
 
-
 SKELLYSUBS_ROUTERS = {
     "/ui": {
         "ui": ui_router

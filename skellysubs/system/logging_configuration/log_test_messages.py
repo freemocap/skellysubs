@@ -20,7 +20,8 @@ def log_test_messages(logger: logging.Logger):
 def print_log_level_messages(logger):
     logger.loop("This is (an example of) a LOOP message, value `4` ->  For logs that are printed in a loop")
     logger.trace("This is (an example of) a TRACE message, value `5` -> Low level logs for deep debugging")
-    logger.debug("This is (an example of) a DEBUG message, value `10` -> Detailed information for devs and curious folk")
+    logger.debug(
+        "This is (an example of) a DEBUG message, value `10` -> Detailed information for devs and curious folk")
     logger.info("This is (an example of) an INFO message, value `20` -> General information about the program")
     logger.success("This is (an example of) a SUCCESS message, value `22` ->  OMG, something worked :O")
     logger.api("This is (an example of) an API message, value `25` -> About API calls/responses")

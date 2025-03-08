@@ -18,7 +18,6 @@ logging.getLogger("numba").setLevel(logging.WARNING)
 logging.getLogger("jieba").setLevel(logging.WARNING)
 logging.getLogger("python_multipart").setLevel(logging.WARNING)
 
-
 # Add custom log levels
 logging.addLevelName(LogLevels.GUI.value, "GUI")
 logging.addLevelName(LogLevels.LOOP.value, "LOOP")
@@ -44,7 +43,6 @@ def configure_logging(level: LogLevels = LogLevels.DEBUG):
 
     builder = LoggerBuilder(level)
     builder.configure()
-
 
 
 if __name__ == "__main__":

@@ -18,6 +18,7 @@ logger.trace(f"Running {skellysubs.__package_name__} package, version: {skellysu
 
 print("hiiiii")
 
+
 def run_skellysubs_server(global_kill_flag: multiprocessing.Value):
     server_manager = create_server_manager(global_kill_flag=global_kill_flag)
     server_manager.start_server()

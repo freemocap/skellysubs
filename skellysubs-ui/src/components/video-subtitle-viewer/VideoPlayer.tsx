@@ -181,11 +181,11 @@ export const VideoPlayer = ({
               Audio Visualization
             </Typography>
           )}
-          {selectedSubtitle?.vttContent && (
+          {selectedSubtitle?.content && (
             <track
               kind="subtitles"
               src={URL.createObjectURL(
-                new Blob([selectedSubtitle.vttContent], {
+                new Blob([selectedSubtitle.content], {
                   type: "text/vtt",
                 }),
               )}

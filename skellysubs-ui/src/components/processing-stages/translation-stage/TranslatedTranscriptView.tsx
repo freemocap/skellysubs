@@ -1,73 +1,72 @@
 import { RichTreeView } from "@mui/x-tree-view"
-import {TranslatedTranscript} from "../../../store/slices/processing-status/processing-status-types";
+import type { TranslatedTranscript } from "../../../store/slices/processing-status/processing-status-types"
+import { Box, Typography } from "@mui/material"
+import { SubtitleDownloadSelector } from "./SubtitleDownloadSelector"
 
 interface TranslatedTranscriptViewProps {
-  laguageName: string
+  languageName: string
   translation: TranslatedTranscript
 }
 
 const TranslatedTranscriptView: React.FC<TranslatedTranscriptViewProps> = ({
-  laguageName,
-  translation
+  languageName,
+  translation,
 }) => {
   const { translated_full_text, translated_segments } = translation
-  const hasRomanization = !(translated_full_text.romanization_method?.toLowerCase() === "none")
+  const hasRomanization = !(
+    translated_full_text.romanization_method?.toLowerCase() === "none"
+  )
 
   const treeItems = [
     {
-      id: laguageName,
-      label: translated_full_text.translated_language_name,
+      id: `${languageName}-full`,
+      label: "Full Translation",
       children: [
         {
-          id: `${laguageName}-full`,
-          label: "Full Translation",
-          children: [
-            {
-              id: `${laguageName}-full-text`,
-              label: translated_full_text.translated_text,
-              ...(hasRomanization && {
+          id: `${languageName}-full-text`,
+          label: translated_full_text.translated_text,
+          ...(hasRomanization && {
+            children: [
+              {
+                id: `${languageName}-romanized`,
+                label: `Romanized (${translated_full_text.romanization_method})`,
                 children: [
                   {
-                    id: `${laguageName}-romanized`,
-                    label: `Romanized (${translated_full_text.romanization_method})`,
-                    children: [
-                      {
-                        id: `${laguageName}-romanized-text`,
-                        label: translated_full_text.romanized_text,
-                      },
-                    ],
+                    id: `${languageName}-romanized-text`,
+                    label: translated_full_text.romanized_text,
                   },
                 ],
-              }),
-            },
-          ],
+              },
+            ],
+          }),
         },
+
         {
-          id: `${laguageName}-segments`,
+          id: `${languageName}-segments`,
           label: `Segments (${Object.keys(translated_segments).length})`,
           children: Object.entries(translated_segments).map(
             ([segmentId, segment]) => ({
-              id: `${laguageName}-${segmentId}`,
+              id: `${languageName}-${segmentId}`,
               label: `[${segment.start.toFixed(2)}s - ${segment.end.toFixed(2)}s]`,
               children: [
                 {
-                  id: `${laguageName}-${segmentId}-original`,
+                  id: `${languageName}-${segmentId}-original`,
                   label: segment.original_segment_text,
                 },
                 {
-                  id: `${laguageName}-${segmentId}-translated`,
+                  id: `${languageName}-${segmentId}-translated`,
                   label: segment.translated_text.translated_text,
                 },
                 ...(segment.translated_text.romanized_text
                   ? [
                       {
-                        id: `${laguageName}-${segmentId}-romanized`,
+                        id: `${languageName}-${segmentId}-romanized`,
                         label: `Romanized: ${segment.translated_text.romanized_text}`,
                       },
                     ]
                   : []),
               ],
-            })
+            }),
           ),
         },
       ],
@@ -75,29 +74,52 @@ const TranslatedTranscriptView: React.FC<TranslatedTranscriptViewProps> = ({
   ]
 
   const defaultExpandedItems = [
-    laguageName,
-    `${laguageName}-full`,
-    `${laguageName}-full-text`,
-    ...(hasRomanization ? [`${laguageName}-romanized`] : []),
+    languageName,
+    `${languageName}-full`,
+    `${languageName}-full-text`,
+    ...(hasRomanization ? [`${languageName}-romanized`] : []),
   ]
 
   return (
-    <RichTreeView
-      items={treeItems}
-      aria-label={`translation-${laguageName}`}
-      sx={{ width: "100%", my: 2 }}
-      defaultExpandedItems={defaultExpandedItems}
-      slotProps={{
-        item: {
-          sx: {
-            "& .MuiTreeItem-label": {
-              fontSize: "0.875rem",
-              paddingLeft: 1,
+      <Box sx={{ width: "100%" }}>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderBottom: 1,
+          borderColor: 'divider',
+          pb: 1,
+          mb: 2
+        }}>
+          <Typography
+              variant="h6"
+              component="h2"
+              sx={{
+                textTransform: 'capitalize',
+                color: 'primary.contrastText'
+              }}
+          >
+            {languageName}
+          </Typography>
+          <SubtitleDownloadSelector language={languageName} />
+        </Box>
+      <RichTreeView
+        items={treeItems}
+        aria-label={`translation-${languageName}`}
+        sx={{ width: "100%", my: 2 }}
+        defaultExpandedItems={defaultExpandedItems}
+        slotProps={{
+          item: {
+            sx: {
+              "& .MuiTreeItem-label": {
+                fontSize: "0.875rem",
+                paddingLeft: 1,
+              },
             },
           },
-        },
-      }}
-    />
+        }}
+      />
+    </Box>
   )
 }
 

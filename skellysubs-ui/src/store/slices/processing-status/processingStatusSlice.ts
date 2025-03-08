@@ -1,12 +1,12 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
-import { translationTextThunk } from "./thunks/translationTextThunk"
+import { translationTextThunk } from "../../thunks/translationTextThunk"
 import type {
   ProcessingContext,
   ProcessingState,
 } from "./processing-status-types"
-import { prepareFileThunk } from "./thunks/prepareFileThunk"
-import { transcriptionThunk } from "./thunks/transcriptionThunk"
+import { prepareFileThunk } from "../../thunks/prepareFileThunk"
+import { transcriptionThunk } from "../../thunks/transcriptionThunk"
 
 // Updated initial state
 const initialState: ProcessingState = {

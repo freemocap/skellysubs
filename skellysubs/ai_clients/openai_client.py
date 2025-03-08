@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Type, Literal
+from typing import Type
 
 from openai import AsyncOpenAI, BaseModel
 from openai.types.audio import TranscriptionVerbose
@@ -67,7 +67,7 @@ class OpenaiClient(AiClientABC):
                                                  audio_file,
                                                  language: str | None = None,
                                                  prompt: str | None = None,
-                                                 response_format:str= "verbose_json",
+                                                 response_format: str = "verbose_json",
                                                  temperature: float = 0.0,
                                                  timestamp_granularity=None,
                                                  ) -> TranscriptionVerbose:
