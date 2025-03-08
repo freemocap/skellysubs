@@ -14,6 +14,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs
 
 RUN npm cache clean --force
+RUN npm install @rollup/rollup-linux-x64-gnu
+
 # Copy the app to the container
 ADD . /app
 
