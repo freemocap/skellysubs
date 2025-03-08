@@ -45,7 +45,11 @@ class SubtitleFormatter(ABC):
     Concrete implementations should handle specific subtitle format requirements.
     """
 
-
+    @staticmethod
+    def _has_romanization(transcript: TranslatedTranscript) -> bool:
+        """Check if transcript has valid romanization"""
+        return (transcript.translated_language.romanization_method and
+                transcript.translated_language.romanization_method.lower() != "none")
 
     @abstractmethod
     def format_transcript(

@@ -32,7 +32,7 @@ export const RightSideConfigPanel = ({
 
           <List component="nav">
             <ConfigSection
-              title="Target Languages"
+              title="Target Languages (Max 5 at a time)"
               open={openSections.translation}
               onToggle={() => handleSectionToggle("translation")}
             >

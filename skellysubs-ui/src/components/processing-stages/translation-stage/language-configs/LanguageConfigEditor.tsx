@@ -60,8 +60,9 @@ export const LanguageConfigEditor = ({
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <DialogContent>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
+                required
                 label="Language Name"
                 fullWidth
                 margin="dense"
@@ -72,7 +73,7 @@ export const LanguageConfigEditor = ({
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Language Code"
+                label="Language Code (optional)"
                 fullWidth
                 margin="dense"
                 {...register("language_code")}
@@ -80,19 +81,19 @@ export const LanguageConfigEditor = ({
                 helperText={errors.language_code?.message}
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Family Tree (comma-separated)"
-                fullWidth
-                margin="dense"
-                {...register("background.family_tree")}
-                error={!!errors.background?.family_tree}
-                helperText={errors.background?.family_tree?.message}
-              />
-            </Grid>
+            {/*<Grid item xs={12}>*/}
+            {/*  <TextField*/}
+            {/*    label="Family Tree (optional, comma-separated)"*/}
+            {/*    fullWidth*/}
+            {/*    margin="dense"*/}
+            {/*    {...register("background.family_tree")}*/}
+            {/*    error={!!errors.background?.family_tree}*/}
+            {/*    helperText={errors.background?.family_tree?.message}*/}
+            {/*  />*/}
+            {/*</Grid>*/}
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Alphabet"
+                label="Alphabet (optional)"
                 fullWidth
                 margin="dense"
                 {...register("background.alphabet")}
@@ -102,7 +103,7 @@ export const LanguageConfigEditor = ({
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Sample Text"
+                label="Sample Text (optional)"
                 fullWidth
                 margin="dense"
                 {...register("background.sample_text")}

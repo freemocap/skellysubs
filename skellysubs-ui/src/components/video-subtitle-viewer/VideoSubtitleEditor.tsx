@@ -90,7 +90,11 @@ export const VideoSubtitleEditor = () => {
               onTimeUpdate={setCurrentTime}
               currentTime={currentTime}
             />
-            <CurrentSubtitleCard currentSubtitle={currentSubtitle} />
+            <CurrentSubtitleCard
+                currentSubtitle={currentSubtitle}
+                selectedSubtitleId={selectedSubtitle?.id}
+                subtitleContent={selectedSubtitle?.content || ""}
+            />
           </Card>
         </Grid>
 

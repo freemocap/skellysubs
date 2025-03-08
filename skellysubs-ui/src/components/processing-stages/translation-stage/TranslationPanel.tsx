@@ -1,4 +1,12 @@
-import { Box, IconButton, Typography } from "@mui/material"
+import {
+  Box,
+  IconButton,
+  Typography,
+  TextField,
+  Button,
+  Tooltip,
+  Stack,
+} from "@mui/material"
 import {
   ProcessingButton,
   ProcessingPanelLayout,
@@ -8,20 +16,25 @@ import {
   selectIsTranslateReady,
   selectProcessingContext,
 } from "../../../store/slices/processing-status/processingStatusSlice"
-import { useContext, useEffect } from "react"
+import { useContext, useEffect, useState } from "react"  // Added useState
 import type { LanguageConfig } from "../../../store/slices/translation-config/languageConfigSchemas"
 import { logger } from "../../../utils/logger"
 import SettingsIcon from "@mui/icons-material/Settings"
+import RefreshIcon from '@mui/icons-material/Refresh'
+import { Search } from "@mui/icons-material"
 import {
   fetchLanguageConfigs,
   selectAvailableTargetLanguages,
   selectSelectedTargetLanguages,
+  toggleLanguage,
 } from "../../../store/slices/translation-config/translationConfigSlice"
 import { RightPanelContext } from "../../../layout/BasePanelLayout"
 import { translationTranscriptThunk } from "../../../store/thunks/translationTranscriptThunk"
 import { LanguageChipsPanel } from "./LanguageChipsPanel"
 import TranslatedTranscriptView from "./TranslatedTranscriptView"
 import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
+import {LanguageSearchField} from "./language-configs/LanguageSearchField";
+import {LanguageAutocompleteField} from "./language-configs/LanguageAutocompleteField";
 
 const TranslationPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -35,6 +48,7 @@ const TranslationPanel: React.FC = () => {
   )
   const selectedTargetLanguages = useAppSelector(selectSelectedTargetLanguages)
   const { toggleRightPanel } = useContext(RightPanelContext)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     dispatch(fetchLanguageConfigs())
@@ -64,6 +78,33 @@ const TranslationPanel: React.FC = () => {
     dispatch(translationTranscriptThunk(translateThunkArgs))
   }
 
+  const handleRandomSelection = () => {
+    // Clear current selection
+    selectedTargetLanguages.forEach(lang => {
+      dispatch(toggleLanguage(lang))
+    })
+
+    // Get all available languages
+    const availableLanguages = Object.keys(availableTargetLanguages)
+
+    // Randomly select 3 unique languages
+    const randomLanguages = []
+    while (randomLanguages.length < 3 && availableLanguages.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableLanguages.length)
+      const selectedLang = availableLanguages.splice(randomIndex, 1)[0]
+      randomLanguages.push(selectedLang)
+      dispatch(toggleLanguage(selectedLang))
+    }
+  }
+
+  const filteredTranslations = processingContext.translation
+    ? Object.entries(processingContext.translation.translated_transcripts)
+        .filter(([languageName]) =>
+          languageName.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    : []
+
+
   return (
     <ProcessingPanelLayout
       sx={{
@@ -71,27 +112,72 @@ const TranslationPanel: React.FC = () => {
         p: 3,
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "stretch",
         borderStyle: "solid",
         borderColor: "#00aa22",
         borderWidth: "1px",
         borderRadius: 2,
       }}
     >
-      <Typography variant="body1" color="text.disabled" sx={{ m: 2 }}>
+      {/* Header Section */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          position: "relative",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            color: theme => theme.palette.primary.contrastText,
+            fontWeight: "bold",
+            mr: 2,
+          }}
+        >
+          Translation Panel
+        </Typography>
+
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Tooltip title="Randomly select 3 languages">
+            <Button
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={handleRandomSelection}
+              size="small"
+              color={extendedPaperbaseTheme.palette.text.secondary}
+            >
+              Random Selection
+            </Button>
+          </Tooltip>
+
+          <Tooltip title="Configure languages">
+            <Button
+              variant="outlined"
+              startIcon={<SettingsIcon />}
+              onClick={toggleRightPanel}
+              size="small"
+              color={extendedPaperbaseTheme.palette.text.secondary}
+            >
+              Open Language Panel
+            </Button>
+          </Tooltip>
+        </Stack>
+      </Box>
+
+      <LanguageAutocompleteField
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        placeholder="Search available languages..."
+      />
+
+      <LanguageChipsPanel />
+      <Typography variant="body1" color="text.disabled" sx={{ mb: 2 }}>
         {!processingContext.transcription &&
           "No transcript available, transcribe audio first."}
       </Typography>
-
-      <LanguageChipsPanel />
-
-      <IconButton
-        onClick={toggleRightPanel}
-        sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
-      >
-        <SettingsIcon />
-      </IconButton>
-
       <ProcessingButton
         status={translationStatus}
         isReady={isReady}
@@ -101,31 +187,43 @@ const TranslationPanel: React.FC = () => {
 
       {processingContext.translation && (
         <>
-          {processingContext.translation &&
-            Object.entries(
-              processingContext.translation.translated_transcripts,
-            ).map(([languageName, translation]) => (
-              <Box
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mt: 4,
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6" color="primary">
+              Translated Transcript(s)
+            </Typography>
+          </Box>
+
+          {filteredTranslations.map(([languageName, translation]) => (
+            <Box
+              key={languageName}
+              sx={{
+                width: "100%",
+                border: 1,
+                borderColor: extendedPaperbaseTheme.palette.primary.light,
+                borderRadius: 1,
+                p: 1,
+                my: 1,
+              }}
+            >
+              <TranslatedTranscriptView
                 key={languageName}
-                sx={{
-                  width: "100%",
-                  border: 1,
-                  borderColor: extendedPaperbaseTheme.palette.primary.light,
-                  borderRadius: 1,
-                  p: 1,
-                  my: 1,
-                }}
-              >
-                <TranslatedTranscriptView
-                  key={languageName}
-                  languageName={languageName}
-                  translation={translation}
-                />
-              </Box>
-            ))}
+                languageName={languageName}
+                translation={translation}
+              />
+            </Box>
+          ))}
         </>
       )}
     </ProcessingPanelLayout>
   )
 }
+
 export default TranslationPanel

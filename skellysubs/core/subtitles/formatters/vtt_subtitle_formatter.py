@@ -141,11 +141,6 @@ class VttSubtitleFormatter(SubtitleFormatter):
 
         raise ValueError("Invalid transcript type!")
 
-    @staticmethod
-    def _has_romanization(transcript: TranslatedTranscript) -> bool:
-        """Check if romanization is available"""
-        return (transcript.translated_language.romanization_method and
-                transcript.translated_language.romanization_method.lower() != "none")
 
     def _format_transcription(self, transcript: TranscriptionVerbose) -> str:
         """Format basic transcription with VTT header"""

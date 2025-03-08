@@ -15,6 +15,9 @@ export const SubtitleTimeline = ({
     <Stack direction="row" flexWrap="wrap" gap={1}>
         {subtitles.map((subtitle, index) => (
             <Button
+                sx={{ color: "#fafafa",
+                    border: "1px solid #aaa",
+            }}
                 key={index}
                 variant={currentSubtitle === subtitle ? "contained" : "outlined"}
                 size="small"

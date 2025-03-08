@@ -25,7 +25,9 @@ import {
 } from "../../../../store/slices/translation-config/translationConfigSlice"
 import { LanguageConfigEditor } from "./LanguageConfigEditor"
 import extendedPaperbaseTheme from "../../../../layout/paperbase_theme/paperbase-theme"
+import {LanguageSearchField} from "./LanguageSearchField";
 
+export const MAX_LANGUAGES = 5
 export const LanguageConfigList = () => {
   const dispatch = useAppDispatch()
   const languageOptions = useAppSelector(selectAvailableTargetLanguages)
@@ -39,6 +41,9 @@ export const LanguageConfigList = () => {
   const [searchQuery, setSearchQuery] = useState("")
 
   const handleToggle = (code: string) => () => {
+      if (!selectedTargetLanguages.includes(code) && selectedTargetLanguages.length >= MAX_LANGUAGES) {
+          return
+      }
     dispatch(toggleLanguage(code))
   }
 
@@ -69,34 +74,26 @@ export const LanguageConfigList = () => {
     const searchTerm = searchQuery.toLowerCase()
     return (
         lang.language_name.toLowerCase().includes(searchTerm) ||
-        lang.language_code.toLowerCase().includes(searchTerm) ||
-        lang.background.sample_text.toLowerCase().includes(searchTerm) ||
-        lang.background.family_tree.some(family =>
+        lang.language_code?.toLowerCase().includes(searchTerm) ||
+        lang.background?.sample_text?.toLowerCase().includes(searchTerm) ||
+        lang.background?.family_tree?.some(family =>
             family.toLowerCase().includes(searchTerm)
         )
     )
   })
 
-  return (
-      <Box
-          sx={{
+    return (
+        <Box sx={{
             width: "100%",
             backgroundColor: extendedPaperbaseTheme.palette.primary.light,
             color: extendedPaperbaseTheme.palette.text.primary,
-              borderRadius:2
-          }}
-      >
-        <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Search languages by name, code, or sample text..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: <Search sx={{ color: 'action.active', mr: 1 }} />,
-            }}
-            sx={{ mb: 2 }}
-        />
+            borderRadius: 2
+        }}>
+            <LanguageSearchField
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                placeholder="Search languages by name, code, or sample text..."
+            />
 
         <List dense>
           {filteredLanguages.map(([key, lang]) => (
@@ -105,6 +102,10 @@ export const LanguageConfigList = () => {
                   <Checkbox
                       checked={selectedTargetLanguages.includes(key)}
                       onChange={handleToggle(key)}
+                      disabled={
+                          !selectedTargetLanguages.includes(key) &&
+                          selectedTargetLanguages.length >= MAX_LANGUAGES
+                      }
                       sx={{ mr: 1 }}
                   />
                   <ListItemText
@@ -126,11 +127,11 @@ export const LanguageConfigList = () => {
                               WebkitBoxOrient: 'vertical',
                             }}
                         >
-                          {lang.background.sample_text}
+                          {lang.background?.sample_text}
                           {lang.romanization_method !== "NONE" && (
                               <>
                                 <br />
-                                {lang.background.sample_romanized_text}
+                                {lang.background?.sample_romanized_text}
                               </>
                           )}
                         </Typography>
@@ -152,13 +153,13 @@ export const LanguageConfigList = () => {
                     >
                       <Typography variant="subtitle2">Language Details</Typography>
                       <Typography variant="body2">
-                        Family Tree: {lang.background.family_tree.join(" → ")}
+                        Family Tree: {lang.background?.family_tree?.join(" → ")}
                       </Typography>
                       <Typography variant="body2">
-                        Alphabet: {lang.background.alphabet}
+                        Alphabet: {lang.background?.alphabet}
                       </Typography>
                       <Typography variant="body2">
-                        Sample Text: {lang.background.sample_text}
+                        Sample Text: {lang.background?.sample_text}
                       </Typography>
                       {lang.romanization_method !== "NONE" && (
                           <>
@@ -166,7 +167,7 @@ export const LanguageConfigList = () => {
                               Romanization Method: {lang.romanization_method}
                             </Typography>
                             <Typography variant="body2">
-                              Romanization Sample: {lang.background.sample_romanized_text}
+                              Romanization Sample: {lang.background?.sample_romanized_text}
                             </Typography>
                           </>
                       )}

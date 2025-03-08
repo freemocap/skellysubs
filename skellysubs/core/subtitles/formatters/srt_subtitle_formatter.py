@@ -39,11 +39,6 @@ class SrtSubtitleFormatter(SubtitleFormatter):
 
         raise ValueError("Invalid transcript type!")
 
-    @staticmethod
-    def _has_romanization(transcript: TranslatedTranscript) -> bool:
-        """Check if transcript has valid romanization"""
-        return (transcript.translated_language.romanization_method and
-                transcript.translated_language.romanization_method.lower() != "none")
 
     @staticmethod
     def _format_segment(index: int, start_time: float, end_time: float, text: str) -> str:

@@ -30,12 +30,16 @@ class MDFormatter(SubtitleFormatter):
         base_md = ["# Transcript"]
         if isinstance(transcript, TranslatedTranscript):
             base_md.append(f"## Original Language: {transcript.original_language}")
+            base_md.append(f"\n{transcript.original_full_text}")
             base_md.append(f"## Translated Language: {transcript.translated_language.language_name}")
+            base_md.append(f"\n{transcript.translated_full_text}")
             if  transcript.translated_language.romanization_method and transcript.translated_language.romanization_method.lower() != "none":
                 base_md.append(f"## Romanization Method: {transcript.translated_language.romanization_method}")
+                base_md.append(f"\n{transcript.romanized_full_text}")
 
         elif isinstance(transcript, TranscriptionVerbose):
             base_md.append(f"## Spoken Language: {transcript.language}")
+            base_md.append(f"\n{transcript.text}")
         else:
             raise ValueError("Invalid transcript type!")
 
@@ -47,7 +51,7 @@ class MDFormatter(SubtitleFormatter):
 
         if isinstance(transcript, TranslatedTranscript):
             subtitle_types[SubtitleVariant.translation_only] = "\n".join(base_md)
-            if  transcript.translated_language.romanization_method and transcript.translated_language.romanization_method.lower() != "none":
+            if  self._has_romanization(transcript):
                 subtitle_types[SubtitleVariant.translation_with_romanization] = self._format_romanized(transcript)
             subtitle_types[SubtitleVariant.multi_language] = self._format_multi_language(transcript)
         if isinstance(transcript, TranscriptionVerbose):
