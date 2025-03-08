@@ -88,7 +88,7 @@ A full-stack web application with:
 ## Key Architectural Components
 
 ### Client-Side (`skellysubs-ui/`)
-```typescript App.tsx
+>  see - [typescript App.tsx](./skellysubs-ui/src/App.tsx)
 - **Core Stack**: React + TypeScript + Vite + TailwindCSS
 - **State Management**:
   - Redux Toolkit with slices for processing status, subtitles, logs
@@ -102,7 +102,7 @@ A full-stack web application with:
   - Real-time logging terminal
 
 ### Backend Service (`skellysubs/`)
-```python server_manager.py
+> see - [server_manager.py](./skellysubs/__main__.py)
 - **Core Framework**: FastAPI with REST/WS endpoints
 - **Key Modules**:
   - AI Service integration (OpenAI/HuggingFace/Ollama)
@@ -116,27 +116,29 @@ A full-stack web application with:
 ## Notable Architectural Patterns
 
 ### Client-Side Video Processing
-```typescript useFfmpeg.ts
+> see - [useFfmpeg.ts](./skellysubs-ui/src/services/useFfmpeg.ts)
 - FFmpeg.wasm for browser-based processing
 - Avoids server-side resource usage
 - Enables offline-capable workflows
 
 ### AI Service Abstraction
-```python ai_client_strategy.py
+> see - [ai_client_strategy.py](./skellysubs/ai_clients/ai_client_strategy.py)
 - Strategy pattern implementation
 - Unified interface for multiple providers
 - Easy integration of new AI services
+- Currently focused on OpenAI API, but has the beginnings an Ollama, HuggingFace, Deepseek, and others
 
 ### Real-Time Updates
-```typescript useWebSocket.ts
+> see [useWebSocket.ts](./skellysubs-ui/src/services/useWebSocket.ts)
 - WebSocket service for:
   - Processing progress
   - Log streaming
   - System status
-- Redux middleware integration
+  - NOT ACTIVE YET
+
 
 ## Deployment Architecture
-```dockerfile Dockerfile
+> see [Dockerfile](./Dockerfile)
 - Single container deployment:
   - Python backend (UVicorn)
   - Pre-built React frontend
@@ -149,13 +151,13 @@ A full-stack web application with:
 ## Key Dependencies
 
 ### Frontend
-```json package.json
+> see - [package.json](./skellysubs-ui/package.json)
 - @ffmpeg/ffmpeg - WASM video processing
 - @mui/material - UI components
 - react-resizable-panels - Layout system
 
 ### Backend
-```toml pyproject.toml
+> see - [pyproject.toml](./pyproject.toml)
 - fastapi - Web framework
 - openai - AI integrations
-- moviepy - Video processing
+
