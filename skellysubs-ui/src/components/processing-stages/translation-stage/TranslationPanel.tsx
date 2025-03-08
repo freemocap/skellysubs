@@ -1,4 +1,4 @@
-import {IconButton, Paper, Typography} from "@mui/material"
+import { Box, IconButton, Typography } from "@mui/material"
 import {
   ProcessingButton,
   ProcessingPanelLayout,
@@ -20,10 +20,8 @@ import {
 import { RightPanelContext } from "../../../layout/BasePanelLayout"
 import { translationTranscriptThunk } from "../../../store/thunks/translationTranscriptThunk"
 import { LanguageChipsPanel } from "./LanguageChipsPanel"
-import { DownloadTranslationButton } from "./DownloadTranslationButton"
-import { RichTreeView } from "@mui/x-tree-view"
-import TranslatedTranscriptView from "./TranslatedTranscriptView";
-import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme";
+import TranslatedTranscriptView from "./TranslatedTranscriptView"
+import extendedPaperbaseTheme from "../../../layout/paperbase_theme/paperbase-theme"
 
 const TranslationPanel: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -66,32 +64,19 @@ const TranslationPanel: React.FC = () => {
     dispatch(translationTranscriptThunk(translateThunkArgs))
   }
 
-  const handleDownloadJSONClick = () => {
-    logger(`[TranslationPanel] Downloading translation results...`)
-    const json = JSON.stringify(processingContext.translation, null, 2)
-    const blob = new Blob([json], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `${processingContext.originalFile?.name}_translation.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   return (
     <ProcessingPanelLayout
-        sx={{
-          m: 3,
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          borderStyle: "solid",
-          borderColor: "#00aa22",
-          borderWidth: "1px",
-          borderRadius: 2,
-        }}
+      sx={{
+        m: 3,
+        p: 3,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        borderStyle: "solid",
+        borderColor: "#00aa22",
+        borderWidth: "1px",
+        borderRadius: 2,
+      }}
     >
       <Typography variant="body1" color="text.disabled" sx={{ m: 2 }}>
         {!processingContext.transcription &&
@@ -117,31 +102,27 @@ const TranslationPanel: React.FC = () => {
       {processingContext.translation && (
         <>
           {processingContext.translation &&
-              Object.entries(processingContext.translation.translated_transcripts).map(
-                  ([languageName, translation]) => (
-                      <Paper
-                        key={languageName}
-                        sx={{
-                            width: "100%",
-                            m: 2,
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "flex-start",
-                          borderStyle: "solid",
-                            borderColor: extendedPaperbaseTheme.palette.primary.light,
-                            backgroundColor : extendedPaperbaseTheme.palette.primary.dark,
-                        }
-                        }>
-                      <TranslatedTranscriptView
-                          key={languageName}
-                          laguageName={languageName}
-                          translation={translation}
-                      />
-                        </Paper>
-                  )
-              )}
-
-          <DownloadTranslationButton onClick={handleDownloadJSONClick} />
+            Object.entries(
+              processingContext.translation.translated_transcripts,
+            ).map(([languageName, translation]) => (
+              <Box
+                key={languageName}
+                sx={{
+                  width: "100%",
+                  border: 1,
+                  borderColor: extendedPaperbaseTheme.palette.primary.light,
+                  borderRadius: 1,
+                  p: 1,
+                  my: 1,
+                }}
+              >
+                <TranslatedTranscriptView
+                  key={languageName}
+                  languageName={languageName}
+                  translation={translation}
+                />
+              </Box>
+            ))}
         </>
       )}
     </ProcessingPanelLayout>

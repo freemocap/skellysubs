@@ -286,6 +286,1145 @@
         "https://en.wikipedia.org/wiki/Esperanto"
       ]
     }
+  },
+  "korean": {
+    "language_name": "Korean",
+    "language_code": "ko",
+    "romanization_method": "REVISED_ROMANIZATION",
+    "background": {
+      "family_tree": [
+        "Language isolate",
+        "Korean"
+      ],
+      "alphabet": "Hangul",
+      "sample_text": "빠른 갈색 여우가 게으른 개를 뛰어넘었다.",
+      "sample_romanized_text": "Ppareun galsaek yeou-ga ge-eureon gae-reul ttwieoneomeotta.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Korean_language"
+      ]
+    }
+  },
+  "russian": {
+    "language_name": "Russian",
+    "language_code": "ru",
+    "romanization_method": "ISO_9",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "East Slavic"
+      ],
+      "alphabet": "Cyrillic",
+      "sample_text": "Быстрая коричневая лиса прыгает через ленивую собаку.",
+      "sample_romanized_text": "Bystraya korichnevaya lisa prygaet cherez lenivuyu sobaku.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Russian_language"
+      ]
+    }
+  },
+  "greek": {
+    "language_name": "Greek",
+    "language_code": "el",
+    "romanization_method": "ISO_843",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Hellenic",
+        "Greek"
+      ],
+      "alphabet": "Greek",
+      "sample_text": "Η γρήγορη καφέ αλεπού πηδά πάνω από το τεμπέλικο σκυλί.",
+      "sample_romanized_text": "I grígori kafé alepoú pidá páno apó to tempéliko skylí.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Greek_language"
+      ]
+    }
+  },
+  "turkish": {
+    "language_name": "Turkish",
+    "language_code": "tr",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Turkic",
+        "Common Turkic",
+        "Oghuz"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Hızlı kahverengi tilki tembel köpeğin üstünden atlar.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Turkish_language"
+      ]
+    }
+  },
+  "persian": {
+    "language_name": "Persian",
+    "language_code": "fa",
+    "romanization_method": "DMG",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Iranian",
+        "Western Iranian"
+      ],
+      "alphabet": "Persian-Arabic",
+      "sample_text": "روباه قهوه‌ای سریع از روی سگ تنبل می‌پرد.",
+      "sample_romanized_text": "Rūbāh-e qahve'ī-ye sarī' az rū-ye sag-e tanbal mīparad.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Persian_language"
+      ]
+    }
+  },
+  "swahili": {
+    "language_name": "Swahili",
+    "language_code": "sw",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Niger-Congo",
+        "Atlantic-Congo",
+        "Volta-Congo",
+        "Benue-Congo",
+        "Bantu"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Mbweha mwepesi kahawia anaruka juu ya mbwa mvivu.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Swahili_language"
+      ]
+    }
+  },
+  "polish": {
+    "language_name": "Polish",
+    "language_code": "pl",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "West Slavic",
+        "Lechitic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Szybki brązowy lis przeskakuje nad leniwym psem.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Polish_language"
+      ]
+    }
+  },
+  "indonesian": {
+    "language_name": "Indonesian",
+    "language_code": "id",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Austronesian",
+        "Malayo-Polynesian",
+        "Malayic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Rubah cokelat yang cepat melompat di atas anjing yang malas.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Indonesian_language"
+      ]
+    }
+  },
+  "danish": {
+    "language_name": "Danish",
+    "language_code": "da",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Germanic",
+        "North Germanic",
+        "East Scandinavian"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Den hurtige brune ræv springer over den dovne hund.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Danish_language"
+      ]
+    }
+  },
+  "tamil": {
+    "language_name": "Tamil",
+    "language_code": "ta",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Dravidian",
+        "South Dravidian",
+        "Tamil-Kannada"
+      ],
+      "alphabet": "Tamil",
+      "sample_text": "விரைவான பழுப்பு நரி சோம்பேறி நாய் மீது தாவுகிறது.",
+      "sample_romanized_text": "Viraivāṉa paḻuppu nari cōmpēṟi nāy mītu tāvukiṟatu.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Tamil_language"
+      ]
+    }
+  },
+  "finnish": {
+    "language_name": "Finnish",
+    "language_code": "fi",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Uralic",
+        "Finno-Ugric",
+        "Finnic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Nopea ruskea kettu hyppää laiskan koiran yli.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Finnish_language"
+      ]
+    }
+  },
+  "czech": {
+    "language_name": "Czech",
+    "language_code": "cs",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "West Slavic",
+        "Czech-Slovak"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Rychlá hnědá liška skáče přes líného psa.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Czech_language"
+      ]
+    }
+  },
+  "bengali": {
+    "language_name": "Bengali",
+    "language_code": "bn",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Indo-Aryan",
+        "Eastern"
+      ],
+      "alphabet": "Bengali",
+      "sample_text": "দ্রুত বাদামী শেয়াল অলস কুকুরের উপর লাফিয়ে যায়।",
+      "sample_romanized_text": "Druta bādāmī śēẏāla alasa kukurēra upara lāphiẏē yāẏa.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Bengali_language"
+      ]
+    }
+  },
+  "hungarian": {
+    "language_name": "Hungarian",
+    "language_code": "hu",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Uralic",
+        "Finno-Ugric",
+        "Ugric"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "A gyors barna róka átugorja a lusta kutyát.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Hungarian_language"
+      ]
+    }
+  },
+  "amharic": {
+    "language_name": "Amharic",
+    "language_code": "am",
+    "romanization_method": "ALA_LC",
+    "background": {
+      "family_tree": [
+        "Afro-Asiatic",
+        "Semitic",
+        "South Semitic"
+      ],
+      "alphabet": "Geʽez",
+      "sample_text": "በፍጥነት የሚሄድ ቡናማ ቀበሮ በአሰልቺ ውሻ ላይ ይዘልላል።",
+      "sample_romanized_text": "Befetʼineti yemīhēdi bunama k’ebēro be’āselichi wisha layi yizelilali.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Amharic"
+      ]
+    }
+  },
+  "belarusian": {
+    "language_name": "Belarusian",
+    "language_code": "be",
+    "romanization_method": "ALA_LC",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "East Slavic"
+      ],
+      "alphabet": "Cyrillic",
+      "sample_text": "Хуткі карычневы ліс пераскоквае праз лянівага сабаку.",
+      "sample_romanized_text": "Khurtki karyčnievy lis peraskokvaje praz lianivaha sabaku.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Belarusian_language"
+      ]
+    }
+  },
+  "estonian": {
+    "language_name": "Estonian",
+    "language_code": "et",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Uralic",
+        "Finnic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Virtske pruun rebane hüppab üle laisa koera.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Estonian_language"
+      ]
+    }
+  },
+  "icelandic": {
+    "language_name": "Icelandic",
+    "language_code": "is",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Germanic",
+        "North Germanic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Fljótur brúnn refur hoppar yfir latur hundur.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Icelandic_language"
+      ]
+    }
+  },
+  "kazakh": {
+    "language_name": "Kazakh",
+    "language_code": "kk",
+    "romanization_method": "BGN/PCGN",
+    "background": {
+      "family_tree": [
+        "Turkic",
+        "Kipchak"
+      ],
+      "alphabet": "Cyrillic",
+      "sample_text": "Жылдам қоңыр түлкі жалқау иттің үстінен секіреді.",
+      "sample_romanized_text": "Jıldam qoñır tülki jalqaw ittiñ üstinen sekiredi.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Kazakh_language"
+      ]
+    }
+  },
+  "macedonian": {
+    "language_name": "Macedonian",
+    "language_code": "mk",
+    "romanization_method": "ISO_9",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "South Slavic"
+      ],
+      "alphabet": "Cyrillic",
+      "sample_text": "Брзата кафеава лисица скока над мрзливиот куче.",
+      "sample_romanized_text": "Brzata kafeava lisica skoka nad mrzliviot kuče.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Macedonian_language"
+      ]
+    }
+  },
+  "malay": {
+    "language_name": "Malay",
+    "language_code": "ms",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Austronesian",
+        "Malayo-Polynesian"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Musang perang yang cepat melompat atas anjing malas.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Malay_language"
+      ]
+    }
+  },
+  "nepali": {
+    "language_name": "Nepali",
+    "language_code": "ne",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Indo-Aryan"
+      ],
+      "alphabet": "Devanagari",
+      "sample_text": "द्रुत खैरो फ्याक्सले आलसी कुकुरमाथि उफ्रिन्छ।",
+      "sample_romanized_text": "Druta khairō phyāksalē ālasī kukuramāthi uphrincha.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Nepali_language"
+      ]
+    }
+  },
+  "norwegian_bokmal": {
+    "language_name": "Norwegian (Bokmål)",
+    "language_code": "nb",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Germanic",
+        "North Germanic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Den raske brune reven hopper over den late hunden.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Norwegian_language"
+      ]
+    }
+  },
+  "pashto": {
+    "language_name": "Pashto",
+    "language_code": "ps",
+    "romanization_method": "ALA_LC",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Iranian"
+      ],
+      "alphabet": "Pashto",
+      "sample_text": "چټک نړۍ د تنبل سپي په سر بړسېږي.",
+      "sample_romanized_text": "Chatak naṛəy də tanbal spi pə sar bṛseǵi.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Pashto"
+      ]
+    }
+  },
+  "sinhala": {
+    "language_name": "Sinhala",
+    "language_code": "si",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Indo-Aryan"
+      ],
+      "alphabet": "Sinhala",
+      "sample_text": "දුර්වල බළලා කෙනෙක් ඉක්මනින් පැනලා ගියා.",
+      "sample_romanized_text": "Durvala baḷalā kenek im̆kanin pænalā giyā.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Sinhala_language"
+      ]
+    }
+  },
+  "slovak": {
+    "language_name": "Slovak",
+    "language_code": "sk",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "West Slavic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Rýchla hnedá líška preskakuje lenivého psa.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Slovak_language"
+      ]
+    }
+  },
+  "tagalog": {
+    "language_name": "Tagalog",
+    "language_code": "tl",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Austronesian",
+        "Malayo-Polynesian",
+        "Philippine"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Ang mabilis na kayumangging soro ay tumalon sa ibabaw ng tamad na aso.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Tagalog_language"
+      ]
+    }
+  },
+  "urdu": {
+    "language_name": "Urdu",
+    "language_code": "ur",
+    "romanization_method": "ALA_LC",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Indo-Aryan"
+      ],
+      "alphabet": "Urdu",
+      "sample_text": "تیز بھوری لومڑی سست کتے کے اوپر سے کودتی ہے۔",
+      "sample_romanized_text": "Tez bhūrī lomṛī sust kutte ke ūpar se kūdtī hai.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Urdu"
+      ]
+    }
+  },
+  "telugu": {
+    "language_name": "Telugu",
+    "language_code": "te",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Dravidian",
+        "South-Central Dravidian",
+        "Telugu"
+      ],
+      "alphabet": "Telugu",
+      "sample_text": "వేగవంతమైన గోధుమ రంగు నక్క సోమరి కుక్క పైగా దూకుతుంది.",
+      "sample_romanized_text": "Vēgavantamaina gōdhuma raṅgu nakka sōmari kukka paigā dūkutundi.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Telugu_language"
+      ]
+    }
+  },
+  "marathi": {
+    "language_name": "Marathi",
+    "language_code": "mr",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Indo-Aryan"
+      ],
+      "alphabet": "Devanagari",
+      "sample_text": "जलद तपकिरी कोल्हा आळशी कुत्र्याच्या वरून उडी मारतो.",
+      "sample_romanized_text": "Jalad tapakirī kōlhā āḷaśī kutryācyā varūn uḍī māratō.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Marathi_language"
+      ]
+    }
+  },
+  "gujarati": {
+    "language_name": "Gujarati",
+    "language_code": "gu",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Indo-Aryan"
+      ],
+      "alphabet": "Gujarati",
+      "sample_text": "ઝડપી ભૂરી લોમડી આળસુ કૂતરા ઉપરથી કૂદે છે.",
+      "sample_romanized_text": "Jhaḍapī bhūrī lōmaḍī āḷasu kūtarā uparathī kūdē chē.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Gujarati_language"
+      ]
+    }
+  },
+  "burmese": {
+    "language_name": "Burmese",
+    "language_code": "my",
+    "romanization_method": "BGN/PCGN",
+    "background": {
+      "family_tree": [
+        "Sino-Tibetan",
+        "Tibeto-Burman",
+        "Lolo-Burmese"
+      ],
+      "alphabet": "Burmese",
+      "sample_text": "မြန်မြန်ပြေးတဲ့ အညိုရောင်မြေခွေးက ပျင်းရိတဲ့ ခွေးကို ခုန်ကျော်တယ်။",
+      "sample_romanized_text": "Myan myan pyay teh a-nyo yaung mye khway ga pyin yay teh khway go khon kyaw teh.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Burmese_language"
+      ]
+    }
+  },
+  "kannada": {
+    "language_name": "Kannada",
+    "language_code": "kn",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Dravidian",
+        "South Dravidian",
+        "Tamil-Kannada"
+      ],
+      "alphabet": "Kannada",
+      "sample_text": "ವೇಗವಾದ ಕಂದು ನರಿಯು ಮೈಗಳ್ಳ ನಾಯಿಯ ಮೇಲೆ ಜಿಗಿಯುತ್ತದೆ.",
+      "sample_romanized_text": "Vēgavāda kandu nariyu maigaḷḷa nāyiya mēle jigiyuttade.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Kannada_language"
+      ]
+    }
+  },
+  "malayalam": {
+    "language_name": "Malayalam",
+    "language_code": "ml",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Dravidian",
+        "South Dravidian",
+        "Tamil-Malayalam"
+      ],
+      "alphabet": "Malayalam",
+      "sample_text": "വേഗത്തിൽ ഓടുന്ന തവിട്ടുനിറമുള്ള കുറുക്കൻ മടിയനായ നായയുടെ മുകളിലൂടെ ചാടുന്നു.",
+      "sample_romanized_text": "Vēgattil ōṭunna taviṭṭuniṟamuḷḷa kuṟukkan maṭiyanāya nāyayuṭe mukaḷilūṭe cāṭunnu.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Malayalam_language"
+      ]
+    }
+  },
+  "khmer": {
+    "language_name": "Khmer",
+    "language_code": "km",
+    "romanization_method": "UN",
+    "background": {
+      "family_tree": [
+        "Austroasiatic",
+        "Mon-Khmer",
+        "Khmeric"
+      ],
+      "alphabet": "Khmer",
+      "sample_text": "ក្រោធខ្ញុំបានរត់លឿនហើយលោតពីលើឆ្កែដែលដេកស្ងៀម។",
+      "sample_romanized_text": "Kroth khnhom ban rot leun haey lot pi leu chhkae del dek sngiem.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Khmer_language"
+      ]
+    }
+  },
+  "lao": {
+    "language_name": "Lao",
+    "language_code": "lo",
+    "romanization_method": "BGN/PCGN",
+    "background": {
+      "family_tree": [
+        "Kra-Dai",
+        "Tai",
+        "Southwestern Tai"
+      ],
+      "alphabet": "Lao",
+      "sample_text": "ໝາໄວສີນ້ຳຕານກະໂດດຂ້າມໝາຂີ້ຄ້ານ.",
+      "sample_romanized_text": "Ma vai si nam tan ka dot kham ma khi khan.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Lao_language"
+      ]
+    }
+  },
+  "tibetan": {
+    "language_name": "Tibetan",
+    "language_code": "bo",
+    "romanization_method": "WYLIE",
+    "background": {
+      "family_tree": [
+        "Sino-Tibetan",
+        "Tibeto-Burman",
+        "Bodish"
+      ],
+      "alphabet": "Tibetan",
+      "sample_text": "མགྱོགས་པོའི་ཝ་སྨུག་པོ་དེས་ཁྱི་ལེ་ལོ་ཅན་གྱི་སྟེང་ནས་མཆོངས།",
+      "sample_romanized_text": "mgyogs po'i wa smug po des khyi le lo can gyi steng nas mchongs.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Tibetan_language"
+      ]
+    }
+  },
+  "portuguese": {
+    "language_name": "Portuguese",
+    "language_code": "pt",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Italic",
+        "Romance"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "A rápida raposa marrom salta sobre o cão preguiçoso.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Portuguese_language"
+      ]
+    }
+  },
+  "dutch": {
+    "language_name": "Dutch",
+    "language_code": "nl",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Germanic",
+        "West Germanic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "De snelle bruine vos springt over de luie hond.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Dutch_language"
+      ]
+    }
+  },
+  "romanian": {
+    "language_name": "Romanian",
+    "language_code": "ro",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Italic",
+        "Romance",
+        "Eastern Romance"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Vulpea maronie rapidă sare peste câinele leneș.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Romanian_language"
+      ]
+    }
+  },
+  "serbian": {
+    "language_name": "Serbian",
+    "language_code": "sr",
+    "romanization_method": "ISO_9",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "South Slavic"
+      ],
+      "alphabet": "Cyrillic/Latin",
+      "sample_text": "Брза смеђа лисица скаче преко лењог пса.",
+      "sample_romanized_text": "Brza smeđa lisica skače preko lenjog psa.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Serbian_language"
+      ]
+    }
+  },
+  "croatian": {
+    "language_name": "Croatian",
+    "language_code": "hr",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "South Slavic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Brza smeđa lisica skače preko lijenog psa.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Croatian_language"
+      ]
+    }
+  },
+  "albanian": {
+    "language_name": "Albanian",
+    "language_code": "sq",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Albanian"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Dhelpra e shpejtë kafe kërcen mbi qenin e përtuar.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Albanian_language"
+      ]
+    }
+  },
+  "bulgarian": {
+    "language_name": "Bulgarian",
+    "language_code": "bg",
+    "romanization_method": "ISO_9",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Slavic",
+        "South Slavic"
+      ],
+      "alphabet": "Cyrillic",
+      "sample_text": "Бързата кафява лисица прескача мързеливото куче.",
+      "sample_romanized_text": "Bǎrzata kafâva lisica preskača mǎrzelivoto kuče.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Bulgarian_language"
+      ]
+    }
+  },
+  "german": {
+    "language_name": "German",
+    "language_code": "de",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Germanic",
+        "West Germanic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Der schnelle braune Fuchs springt über den faulen Hund.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/German_language"
+      ]
+    }
+  },
+  "italian": {
+    "language_name": "Italian",
+    "language_code": "it",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Italic",
+        "Romance"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "La volpe marrone rapida salta sopra il cane pigro.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Italian_language"
+      ]
+    }
+  },
+  "swedish": {
+    "language_name": "Swedish",
+    "language_code": "sv",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Germanic",
+        "North Germanic",
+        "East Scandinavian"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Den snabba bruna räven hoppar över den lata hunden.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Swedish_language"
+      ]
+    }
+  },
+  "azerbaijani": {
+    "language_name": "Azerbaijani",
+    "language_code": "az",
+    "romanization_method": "ISO_9",
+    "background": {
+      "family_tree": [
+        "Turkic",
+        "Oghuz",
+        "Western Oghuz"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Cəld qonur tülkü tənbəl itin üstündən atılır.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Azerbaijani_language"
+      ]
+    }
+  },
+  "hausa": {
+    "language_name": "Hausa",
+    "language_code": "ha",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Afro-Asiatic",
+        "Chadic",
+        "West Chadic"
+      ],
+      "alphabet": "Latin/Ajami",
+      "sample_text": "Wata saura ta gaggawa ta tsallaka bisa wani kare mai ragwanci.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Hausa_language"
+      ]
+    }
+  },
+  "yoruba": {
+    "language_name": "Yoruba",
+    "language_code": "yo",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Niger-Congo",
+        "Atlantic-Congo",
+        "Volta-Congo",
+        "Benue-Congo",
+        "Defoid"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Kolokolo àwọn búráùn yára fo lori ajá ọ̀lẹ kan.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Yoruba_language"
+      ]
+    }
+  },
+  "punjabi": {
+    "language_name": "Punjabi",
+    "language_code": "pa",
+    "romanization_method": "ISO_15919",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Indo-Iranian",
+        "Indo-Aryan"
+      ],
+      "alphabet": "Gurmukhi/Shahmukhi",
+      "sample_text": "ਤੇਜ਼ ਭੂਰਾ ਲੂੰਬੜੀ ਆਲਸੀ ਕੁੱਤੇ ਦੇ ਉੱਪਰ ਛਾਲ ਮਾਰਦਾ ਹੈ।",
+      "sample_romanized_text": "Tēz bhūrā lūṁbaṛī ālasī kuttē dē uppar chāl māradā hai.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Punjabi_language"
+      ]
+    }
+  },
+  "chinese_traditional": {
+    "language_name": "Chinese (Traditional)",
+    "language_code": "zh-Hant",
+    "romanization_method": "PINYIN",
+    "background": {
+      "family_tree": [
+        "Sino-Tibetan",
+        "Sinitic"
+      ],
+      "alphabet": "Traditional Chinese characters",
+      "sample_text": "快速的棕色狐狸跳過懶惰的狗。",
+      "sample_romanized_text": "Kuàisù de zōngsè húli tiào guò lǎnduò de gǒu.",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Traditional_Chinese"
+      ]
+    }
+  },
+  "lithuanian": {
+    "language_name": "Lithuanian",
+    "language_code": "lt",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Baltic",
+        "Eastern Baltic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Greita ruda lapė šokinėja per tingų šunį.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Lithuanian_language"
+      ]
+    }
+  },
+  "latvian": {
+    "language_name": "Latvian",
+    "language_code": "lv",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Indo-European",
+        "Balto-Slavic",
+        "Baltic",
+        "Eastern Baltic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Ātrā brūnā lapsa lec pāri slinkajam sunim.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Latvian_language"
+      ]
+    }
+  },
+  "kikuyu": {
+    "language_name": "Kikuyu",
+    "language_code": "ki",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Niger-Congo",
+        "Atlantic-Congo",
+        "Volta-Congo",
+        "Benue-Congo",
+        "Bantu"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Mbwe ya rangi ya kahwiri ikuruka iguru ria ngui kiri.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Kikuyu_language"
+      ]
+    }
+  },
+  "luo": {
+    "language_name": "Luo",
+    "language_code": "luo",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Nilo-Saharan",
+        "Western Nilotic",
+        "Luo"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Ojwang' maratong' olworo guok ma ole.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Dholuo_language"
+      ]
+    }
+  },
+  "kamba": {
+    "language_name": "Kamba",
+    "language_code": "kam",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Niger-Congo",
+        "Atlantic-Congo",
+        "Volta-Congo",
+        "Benue-Congo",
+        "Bantu"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Kimengi kya rangi ya uuki kivaruka igulu wa ngiti mwolu.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Kamba_language"
+      ]
+    }
+  },
+  "somali": {
+    "language_name": "Somali",
+    "language_code": "so",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Afro-Asiatic",
+        "Cushitic",
+        "East Cushitic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Dawaco dhakhso leh oo bunni ah ayaa ka booday eey caajis ah.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Somali_language"
+      ]
+    }
+  },
+  "zulu": {
+    "language_name": "Zulu",
+    "language_code": "zu",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Niger-Congo",
+        "Atlantic-Congo",
+        "Volta-Congo",
+        "Benue-Congo",
+        "Bantu"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Impungushe ensundu esheshayo yeqa phezu kwenja eyivilaphu.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Zulu_language"
+      ]
+    }
+  },
+  "xhosa": {
+    "language_name": "Xhosa",
+    "language_code": "xh",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Niger-Congo",
+        "Atlantic-Congo",
+        "Volta-Congo",
+        "Benue-Congo",
+        "Bantu"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Impungutye emnyama ekhawulezayo itsiba phezu kwenja eyonqenayo.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Xhosa_language"
+      ]
+    }
+  },
+  "oromo": {
+    "language_name": "Oromo",
+    "language_code": "om",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Afro-Asiatic",
+        "Cushitic",
+        "East Cushitic"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Waraabessi ariifachiisaan saree daqqala irra utaale.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Oromo_language"
+      ]
+    }
+  },
+  "malagasy": {
+    "language_name": "Malagasy",
+    "language_code": "mg",
+    "romanization_method": "NONE",
+    "background": {
+      "family_tree": [
+        "Austronesian",
+        "Malayo-Polynesian",
+        "Barito"
+      ],
+      "alphabet": "Latin",
+      "sample_text": "Ny amboahaolo maika dia mitsambikina ny alika kamo.",
+      "sample_romanized_text": "NONE",
+      "wikipedia_links": [
+        "https://en.wikipedia.org/wiki/Malagasy_language"
+      ]
+    }
   }
 }
-

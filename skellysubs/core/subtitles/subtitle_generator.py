@@ -1,4 +1,3 @@
-# skellysubs/core/subtitles/subtitle_processor.py
 from openai.types.audio import TranscriptionVerbose
 
 from skellysubs.core.subtitles.formatters.base_subtitle_formatter import FormattedSubtitles

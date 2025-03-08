@@ -72,6 +72,7 @@ export const VideoSubtitleEditor = () => {
         width: "100%",
         margin: "0 auto",
         border: "2px solid red",
+
         borderRadius: 2,
       }}
     >
