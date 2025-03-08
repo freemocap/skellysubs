@@ -23,7 +23,6 @@ WORKDIR /app/skellysubs-ui
 
 # Install dependencies and build the UI
 RUN npm install
-RUN npm install @rollup/rollup-linux-x64-gnu
 
 RUN npm run build
 
