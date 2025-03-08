@@ -124,7 +124,6 @@ class VttSubtitleFormatter(SubtitleFormatter):
             transcript: TranslatedTranscript | TranscriptionVerbose
     ) -> FormattedSubtitleStringsByVariant:
         """Format transcript into WebVTT with variants"""
-        self.validate_segments(transcript.segments)
         subtitle_types = {}
 
         if isinstance(transcript, TranscriptionVerbose):

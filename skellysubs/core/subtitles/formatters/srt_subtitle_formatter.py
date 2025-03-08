@@ -22,7 +22,6 @@ class SrtSubtitleFormatter(SubtitleFormatter):
             transcript: TranslatedTranscript | TranscriptionVerbose
     ) -> FormattedSubtitleStringsByVariant:
         """Format a translated transcript into SRT format with variants"""
-        self.validate_segments(transcript.segments)
         subtitle_types = {}
 
         if isinstance(transcript, TranscriptionVerbose):

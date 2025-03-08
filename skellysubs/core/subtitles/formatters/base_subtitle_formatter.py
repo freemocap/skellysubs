@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Sequence
 
 from openai.types.audio import TranscriptionVerbose
-from openai.types.audio.transcription_segment import TranscriptionSegment
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
-from skellysubs.core.subtitles.subtitle_types import SrtFormattedString, VttFormattedString, SsaFormattedString, \
-    MdFormattedString, FormattedSubtitleStringsByVariant, SubtitleFormattedString, SubtitleVariant
+from skellysubs.core.subtitles.subtitle_types import SrtFormattedString, VttFormattedString, MdFormattedString, \
+    FormattedSubtitleStringsByVariant, SubtitleFormattedString, SubtitleVariant
 from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
-from skellysubs.core.translation.models.translated_transcript_segment import TranslatedTranscriptSegment
 
 
 class SubtitleValidationError(Exception):
@@ -48,35 +45,7 @@ class SubtitleFormatter(ABC):
     Concrete implementations should handle specific subtitle format requirements.
     """
 
-    def validate_segments(self, segments: Sequence[TranslatedTranscriptSegment | TranscriptionSegment]) -> None:
-        """
-        Validate subtitle timing and format constraints
 
-        Args:
-            segments: Sequence of translated segments to validate
-
-        Raises:
-            SubtitleValidationError: If any timing or format constraints are violated
-        """
-        if not segments:
-            raise SubtitleValidationError("No segments provided")
-
-        previous_end = 0
-
-        for segment in segments:
-            # Validate start/end logic
-            if segment.end <= segment.start:
-                raise SubtitleValidationError(
-                    f"Invalid timing: end ({segment.end}) must be after start ({segment.start})"
-                )
-
-            # Check for overlaps and minimum gaps
-            if segment.start < previous_end:
-                raise SubtitleValidationError(
-                    f"Subtitle overlap detected at {segment.start}s"
-                )
-
-            previous_end = segment.end
 
     @abstractmethod
     def format_transcript(
