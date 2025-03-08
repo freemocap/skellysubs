@@ -4,16 +4,35 @@ import {darken} from "@mui/material";
 
 export const paperbaseTheme = createTheme({
   palette: {
+    mode: "dark",
     primary: {
       light: "#00597f",
       main: "#002335",
       dark: "#000b10",
+    },
+    secondary: {
+      light: "#f675b1",
+      main: "#961d6d",
+      dark: "#79009a",
     },
     text: {
       primary: "#f5f5f5",
       secondary: "#bdbdbd",
       disabled: "#888888",
     },
+    background: {
+      default: "#042f39",  // Dark background
+      paper: "#0b1d3e",  // Dark paper background
+    },
+    action: {
+      active: "#ffffff",  // White for active icons
+      hover: "rgba(0,191,234,0.75)",
+      selected: "rgba(234,0,152,0.4)",
+      disabled: "rgba(255, 255, 255, 0.3)",
+      disabledBackground: "rgba(255, 255, 255, 0.12)",
+    },
+    divider: "rgba(255, 255, 255, 0.12)",
+
   },
   typography: {
     // h5: {
