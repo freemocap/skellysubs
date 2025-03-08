@@ -1,6 +1,5 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
-import { translationTextThunk } from "../../thunks/translationTextThunk"
 import type {
   ProcessingContext,
   ProcessingState,
@@ -83,17 +82,6 @@ export const processingSlice = createSlice({
       .addCase(transcriptionThunk.rejected, (state, action) => {
         state.stages.transcription.status = "failed"
         state.stages.transcription.error = action.payload as string
-      })
-      .addCase(translationTextThunk.pending, state => {
-        state.stages.translation.status = "processing"
-      })
-      .addCase(translationTextThunk.fulfilled, (state, action) => {
-        state.context.translation = action.payload
-        state.stages.translation.status = "completed"
-      })
-      .addCase(translationTextThunk.rejected, (state, action) => {
-        state.stages.translation.status = "failed"
-        state.stages.translation.error = action.payload as string
       })
   },
 })
