@@ -33,9 +33,9 @@ class MDFormatter(SubtitleFormatter):
             base_md.append(f"\n{transcript.original_full_text}")
             base_md.append(f"## Translated Language: {transcript.translated_language.language_name}")
             base_md.append(f"\n{transcript.translated_full_text}")
-            if  transcript.has_romanization:
+            if  transcript.translated_language.romanization_method and transcript.translated_language.romanization_method.lower() != "none":
                 base_md.append(f"## Romanization Method: {transcript.translated_language.romanization_method}")
-                base_md.append(f"\n{transcript.romanized_text}")
+                base_md.append(f"\n{transcript.romanized_full_text}")
 
         elif isinstance(transcript, TranscriptionVerbose):
             base_md.append(f"## Spoken Language: {transcript.language}")
