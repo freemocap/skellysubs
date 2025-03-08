@@ -82,6 +82,11 @@ class OpenaiClient(AiClientABC):
                                                                             temperature=temperature,
                                                                             language=language,
                                                                             )
+
+        for segment in transcript_response.segments:
+            if len(segment.text) == 0:
+                segment.text = "..."
+
         return transcript_response
 
 
