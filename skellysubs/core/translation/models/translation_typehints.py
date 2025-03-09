@@ -1,8 +1,9 @@
 NOT_TRANSLATED_YET_TEXT = "NOT-TRANSLATED-YET"
 LanguageNameString = str
+LanguageISO6391CodeString = str
 RomanizationMethodString = str
 RomanizedTextString = str
 TranslatedTextString = str
-OriginalTextString = str
+OriginalLanguageTextString = str
 StartingTimestamp = float
 EndingTimestamp = float

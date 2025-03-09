@@ -5,7 +5,7 @@ from skellysubs.core.subtitles.formatters.md_subtitle_formatter import MDFormatt
 from skellysubs.core.subtitles.formatters.srt_subtitle_formatter import SrtSubtitleFormatter
 from skellysubs.core.subtitles.formatters.vtt_subtitle_formatter import VttSubtitleFormatter
 from skellysubs.core.subtitles.subtitle_types import SubtitleFormats
-from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
+from skellysubs.core.translation.models.transcript_models import TranslatedTranscript
 
 
 class SubtitleGenerator:

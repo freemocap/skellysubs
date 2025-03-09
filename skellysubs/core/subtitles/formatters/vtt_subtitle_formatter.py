@@ -6,7 +6,7 @@ from openai.types.audio import TranscriptionVerbose
 from skellysubs.core.subtitles.formatters.base_subtitle_formatter import SubtitleFormatter
 from skellysubs.core.subtitles.formatters.subtitle_time_formatter import SubtitleTimeFormatter
 from skellysubs.core.subtitles.subtitle_types import SubtitleVariant, FormattedSubtitleStringsByVariant
-from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
+from skellysubs.core.translation.models.transcript_models import TranslatedTranscript
 
 
 class VttConfiguration(BaseModel):

@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from skellysubs.core.translation.language_configs.annotation_configs import get_annotation_configs, \
     LanguageAnnotationConfig, get_default_text_height, get_default_font
-from skellysubs.core.translation.models.translated_segment_models import TranslatedTranscriptSegmentWithMatchedWords
+from skellysubs.core.translation.models.old_transcript_models import TranslatedTranscriptSegmentWithMatchedWords
 from skellysubs.core.translation.models.translated_transcript_model import \
     OldTranslatedTranscription
 from skellysubs.core.translation.models.translation_typehints import LanguageNameString

@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from skellysubs.ai_clients.openai_client import get_or_create_openai_client
 from skellysubs.core.subtitles.formatters.base_subtitle_formatter import FormattedSubtitles
 from skellysubs.core.subtitles.subtitle_generator import SubtitleGenerator
+from skellysubs.core.translation.models.transcript_models import OriginalLanguageTranscript
 
 logger = logging.getLogger(__name__)
 transcribe_router = APIRouter()
@@ -20,7 +21,8 @@ class ValidationResult(BaseModel):
 
 
 class TranscriptionResponse(BaseModel):
-    transcript: TranscriptionVerbose
+    transcript: OriginalLanguageTranscript
+    transcription_verbose: TranscriptionVerbose
     formatted_subtitles: FormattedSubtitles
 
 
@@ -52,5 +54,8 @@ async def transcribe_endpoint(
     finally:
         os.remove(audio_temp_filename)
     logger.info(f"Returning transcription! {len(transcription_result.text.strip(' '))} words")
-    return TranscriptionResponse(transcript=transcription_result,
-                                 formatted_subtitles=subtitle_generator.generate_all_formats(transcription_result))
+    return TranscriptionResponse(
+        transcript=OriginalLanguageTranscript.from_openai_transcript(transcript=transcription_result),
+        transcription_verbose=transcription_result,
+        formatted_subtitles=subtitle_generator.generate_all_formats(transcription_result)
+    )

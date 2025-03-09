@@ -6,8 +6,8 @@ from openai.types.audio.transcription_segment import TranscriptionSegment
 
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation.models.translated_text import TranslatedText
-from skellysubs.core.translation.models.translated_transcript_segment import TranslatedTranscriptSegment
+from skellysubs.core.translation.models.text_models import TranslatedTextModel
+from skellysubs.core.translation.models.transcript_segment_models import TranslatedTranscriptSegment
 from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ Your answer must match the form of the JSON schema provided.
 
 def format_segment_prompts(
         original_full_text: str,
-        translated_full_text: TranslatedText,
+        translated_full_text: TranslatedTextModel,
         segments: list[TranscriptionSegment],
         target_language: LanguageConfig,
         original_language: LanguageNameString) -> list[str]:
@@ -98,7 +98,7 @@ def format_segment_prompts(
 
 
 async def transcript_translation(original_transcript: TranscriptionVerbose,
-                                 full_text_translations: dict[LanguageNameString, TranslatedText],
+                                 full_text_translations: dict[LanguageNameString, TranslatedTextModel],
                                  target_languages: dict[LanguageNameString, LanguageConfig],
                                  ) -> tuple[
     dict[LanguageNameString, list[str]], dict[LanguageNameString, list[TranslatedTranscriptSegment]]]:

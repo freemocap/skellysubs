@@ -375,6 +375,15 @@ wheels = [
 ]
 
 [[package]]
+name = "iso639-lang"
+version = "2.6.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a2/92/0d76a4df7af8b0b9d2d567c473815d574a7ad0a6a1163245f77bc42e547d/iso639_lang-2.6.0.tar.gz", hash = "sha256:ab491ec83d35bc094a00702547249db56ea2eaf780af0c890bad06c9ff3da352", size = 319383 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/06/46/b00e5bed0699c3ccbec03c01f871d154bdf7af617bf3d303a29c003c4d31/iso639_lang-2.6.0-py3-none-any.whl", hash = "sha256:e49908d63ae67903503cb0cc35b78af16eb3c91ba8b55167f7003574b6349edc", size = 324798 },
+]
+
+[[package]]
 name = "jieba"
 version = "0.42.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1045,6 +1054,7 @@ dependencies = [
     { name = "beautifulsoup4" },
     { name = "fastapi", extra = ["standard"] },
     { name = "ffmpeg-python" },
+    { name = "iso639-lang" },
     { name = "jieba" },
     { name = "lxml" },
     { name = "moviepy" },
@@ -1067,6 +1077,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.13.3" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.7" },
     { name = "ffmpeg-python", specifier = ">=0.2.0" },
+    { name = "iso639-lang", specifier = ">=2.6.0" },
     { name = "jieba", specifier = ">=0.42.1" },
     { name = "lxml", specifier = ">=5.3.1" },
     { name = "moviepy", specifier = ">=2.1.2" },

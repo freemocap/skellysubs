@@ -6,7 +6,7 @@ from skellysubs.core.subtitles.subtitle_types import (
     SubtitleVariant,
     FormattedSubtitleStringsByVariant
 )
-from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
+from skellysubs.core.translation.models.transcript_models import TranslatedTranscript
 
 
 class SrtSubtitleFormatter(SubtitleFormatter):

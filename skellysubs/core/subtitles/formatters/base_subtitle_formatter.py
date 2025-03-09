@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from skellysubs.core.subtitles.subtitle_types import SrtFormattedString, VttFormattedString, MdFormattedString, \
     FormattedSubtitleStringsByVariant, SubtitleFormattedString, SubtitleVariant
-from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
+from skellysubs.core.translation.models.transcript_models import TranslatedTranscript
 
 
 class SubtitleValidationError(Exception):
@@ -48,8 +48,8 @@ class SubtitleFormatter(ABC):
     @staticmethod
     def _has_romanization(transcript: TranslatedTranscript) -> bool:
         """Check if transcript has valid romanization"""
-        return (transcript.translated_language.romanization_method and
-                transcript.translated_language.romanization_method.lower() != "none")
+        return (transcript.translated_language_config.romanization_method and
+                transcript.translated_language_config.romanization_method.lower() != "none")
 
     @abstractmethod
     def format_transcript(

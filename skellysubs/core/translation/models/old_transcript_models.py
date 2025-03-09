@@ -4,7 +4,7 @@ from skellysubs.core.translation.models.translated_text_models import Translatio
 from skellysubs.core.transcription.whisper_transcript_result_model import WhisperWordTimestamp
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation.models.translation_typehints import StartingTimestamp, \
-    EndingTimestamp, OriginalTextString, TranslatedTextString, RomanizedTextString, LanguageNameString
+    EndingTimestamp, OriginalLanguageTextString, TranslatedTextString, RomanizedTextString, LanguageNameString
 from skellysubs.utilities.strip_punctuation_and_whitespace import strip_punctuation_and_whitespace
 
 
@@ -37,7 +37,7 @@ class MatchedTranslatedSegment(BaseModel):
     target_language_config: LanguageConfig = Field(
         description="The target language config for the translation, including any romanization methods if applicable")
 
-    original_segment_text: OriginalTextString = Field(
+    original_segment_text: OriginalLanguageTextString = Field(
         description="The original text of the segment in its original language")
     translated_segment_text: TranslatedTextString = Field(
         description="The translated text of the segment in the target language, using the target language's script, characters, and/or alphabet")
@@ -58,7 +58,7 @@ class TranslatedWhisperWordTimestamp(BaseModel):
         description="The start time of the period in the segment when the word was spoken, in seconds since the start of the recording. Should match the end time of the previous word in the segment or the start time of the segment for the first word.")
     end: EndingTimestamp = Field(
         description="The end time of the period in the recording when the word was spoken, in seconds since the start of the recording. Should match the start time of the next word in the segment or the end time of the segment for the last word.")
-    original_word: OriginalTextString = Field(
+    original_word: OriginalLanguageTextString = Field(
         description="The original word spoken in the segment, in its original language")
     matched_words: dict[LanguageNameString, MatchedTranslatedWord] = Field(
         description="The translated words in each target language, with their romanizations")
@@ -77,7 +77,7 @@ class TranslatedWhisperWordTimestamp(BaseModel):
 
 
 class TranslatedTranscriptSegmentWithMatchedWords(BaseModel):
-    original_segment_text: OriginalTextString = Field(
+    original_segment_text: OriginalLanguageTextString = Field(
         description="The original text of the segment in its original language")
     original_language: LanguageNameString = Field(description="The name of the original language of the segment")
     translations: TranslationsCollection = Field(

@@ -6,7 +6,7 @@ from skellysubs.core.subtitles.subtitle_types import (
     SubtitleVariant,
     FormattedSubtitleStringsByVariant
 )
-from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
+from skellysubs.core.translation.models.transcript_models import TranslatedTranscript
 
 
 class MDFormatter(SubtitleFormatter):
@@ -31,11 +31,11 @@ class MDFormatter(SubtitleFormatter):
         if isinstance(transcript, TranslatedTranscript):
             base_md.append(f"## Original Language: {transcript.original_language}")
             base_md.append(f"\n{transcript.original_full_text}")
-            base_md.append(f"## Translated Language: {transcript.translated_language.language_name}")
+            base_md.append(f"## Translated Language: {transcript.translated_language_config.language_name}")
             base_md.append(f"\n{transcript.translated_full_text}")
-            if  transcript.translated_language.romanization_method and transcript.translated_language.romanization_method.lower() != "none":
-                base_md.append(f"## Romanization Method: {transcript.translated_language.romanization_method}")
-                base_md.append(f"\n{transcript.translated_language.romanization_method}")
+            if  transcript.translated_language_config.romanization_method and transcript.translated_language_config.romanization_method.lower() != "none":
+                base_md.append(f"## Romanization Method: {transcript.translated_language_config.romanization_method}")
+                base_md.append(f"\n{transcript.translated_language_config.romanization_method}")
 
         elif isinstance(transcript, TranscriptionVerbose):
             base_md.append(f"## Spoken Language: {transcript.language}")
@@ -103,7 +103,7 @@ class MDFormatter(SubtitleFormatter):
             md_lines.append(f"\n> Segment#{segment_number} of {len(translated_transcript.segments)} " + SubtitleTimeFormatter.format_time_markdown(segment.start))
             md_lines.append(f"\n> {segment.original_segment_text.strip()}")
             md_lines.append(f"\n> {segment.translated_text.translated_text.strip()}")
-            if translated_transcript.translated_language.romanization_method and translated_transcript.translated_language.romanization_method.lower() != "none":
+            if translated_transcript.translated_language_config.romanization_method and translated_transcript.translated_language_config.romanization_method.lower() != "none":
                 md_lines.append("\n> "+segment.translated_text.romanized_text.strip())
 
         return "\n".join(md_lines)

@@ -82,11 +82,9 @@ A full-stack web application with:
 - **React/TypeScript** frontend
 - **Redux** state management
 - **FFmpeg.wasm** client-side video processing
-- **WebSocket** communication
 - **Containerized** deployment (Docker + Cloud Run)
 
 ## Key Architectural Components
-
 ### Client-Side (`skellysubs-ui/`)
 >  see - [typescript App.tsx](./skellysubs-ui/src/App.tsx)
 - **Core Stack**: React + TypeScript + Vite + TailwindCSS
@@ -107,11 +105,10 @@ A full-stack web application with:
 - **Key Modules**:
   - AI Service integration (OpenAI/HuggingFace/Ollama)
   - Video processing pipeline (transcription/translation/subtitles)
-  - WebSocket server for real-time updates
 - **Main Components**:
   - `core/`: Business logic
   - `api/`: Endpoint routers
-  - `ai_clients/`: Provider strategies
+  - `ai_clients/`: AI Provider strategies
 
 ## Notable Architectural Patterns
 
@@ -127,14 +124,6 @@ A full-stack web application with:
 - Unified interface for multiple providers
 - Easy integration of new AI services
 - Currently focused on OpenAI API, but has the beginnings an Ollama, HuggingFace, Deepseek, and others
-
-### Real-Time Updates
-> see [useWebSocket.ts](./skellysubs-ui/src/services/useWebSocket.ts)
-- WebSocket service for:
-  - Processing progress
-  - Log streaming
-  - System status
-  - NOT ACTIVE YET
 
 
 ## Deployment Architecture

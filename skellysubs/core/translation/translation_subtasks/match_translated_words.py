@@ -3,7 +3,7 @@ import logging
 
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
 from skellysubs.core.translation.language_configs.language_configs import get_language_configs
-from skellysubs.core.translation.models.translated_segment_models import MatchedTranslatedSegment
+from skellysubs.core.translation.models.old_transcript_models import MatchedTranslatedSegment
 from skellysubs.core.translation.models.translated_transcript_model import \
     OldTranslatedTranscription
 

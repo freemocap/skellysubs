@@ -9,6 +9,7 @@ dependencies = [
     "beautifulsoup4>=4.13.3",
     "fastapi[standard]>=0.115.7",
     "ffmpeg-python>=0.2.0",
+    "iso639-lang>=2.6.0",
     "jieba>=0.42.1",
     "lxml>=5.3.1",
     "moviepy>=2.1.2",

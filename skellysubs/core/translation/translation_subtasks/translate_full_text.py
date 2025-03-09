@@ -3,8 +3,8 @@ import logging
 
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation.models.translated_text import TranslatedText
-from skellysubs.core.translation.models.translated_transcript_segment import TranslatedTranscriptSegment
+from skellysubs.core.translation.models.text_models import TranslatedTextModel
+from skellysubs.core.translation.models.transcript_segment_models import TranslatedTranscriptSegment
 from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 
 logger = logging.getLogger(__name__)
@@ -119,7 +119,7 @@ def split_text_into_segments(text, max_word_length=150):
 
 async def text_translation(text: str, original_language: str,
                            target_languages: dict[LanguageNameString, LanguageConfig]) -> tuple[
-    dict[LanguageNameString, list[str]], dict[LanguageNameString, TranslatedText]]:
+    dict[LanguageNameString, list[str]], dict[LanguageNameString, TranslatedTextModel]]:
     # Full-text translation
     system_prompts_by_language = await format_full_text_translation_system_prompt(
         text=text,
@@ -137,7 +137,7 @@ async def text_translation(text: str, original_language: str,
             task = asyncio.create_task(
                 get_ai_client().make_json_mode_request(
                     system_prompt=prompt,
-                    prompt_model=TranslatedText,
+                    prompt_model=TranslatedTextModel,
                 )
             )
             all_translation_tasks.append(task)
@@ -150,7 +150,7 @@ async def text_translation(text: str, original_language: str,
 
     # Organize results by language
     translations = {}
-    results_by_language: dict[LanguageNameString, list[TranslatedText]] = {}
+    results_by_language: dict[LanguageNameString, list[TranslatedTextModel]] = {}
     for language, translated_segment in zip(language_addresses, results):
         if language not in results_by_language:
             results_by_language[language] = []
@@ -158,12 +158,12 @@ async def text_translation(text: str, original_language: str,
 
     for language, translated_segments in results_by_language.items():
         # Reassemble the translated segments into the full text
-        if any([not isinstance(segment, TranslatedText) for segment in translated_segments]):
+        if any([not isinstance(segment, TranslatedTextModel) for segment in translated_segments]):
             logger.error(f"Received unexpected response from AI model for language: {language} - {translated_segments}")
             continue
         translated_full_text = ' '.join([segment.translated_text for segment in translated_segments])
         romanized_full_text = ' '.join([segment.romanized_text for segment in translated_segments])
-        translations[language] = TranslatedText(
+        translations[language] = TranslatedTextModel(
             **translated_segments[0].model_dump(exclude={'translated_text', 'romanized_text'}),
             translated_text=translated_full_text,
             romanized_text=romanized_full_text

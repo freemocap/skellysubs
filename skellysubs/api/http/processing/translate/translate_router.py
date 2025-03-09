@@ -8,8 +8,8 @@ from pydantic import BaseModel
 from skellysubs.core.subtitles.formatters.base_subtitle_formatter import FormattedSubtitles
 from skellysubs.core.subtitles.subtitle_generator import SubtitleGenerator
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
-from skellysubs.core.translation.models.translated_text import TranslatedText
-from skellysubs.core.translation.models.translated_transcript import TranslatedTranscript
+from skellysubs.core.translation.models.text_models import TranslatedTextModel
+from skellysubs.core.translation.models.transcript_models import TranslatedTranscript
 from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 from skellysubs.core.translation.translation_subtasks.translate_full_text import text_translation
 from skellysubs.core.translation.translation_subtasks.translate_transcript_segments import \
@@ -27,7 +27,7 @@ class TextTranslationRequest(BaseModel):
 
 class TextTranslationResponse(BaseModel):
     prompts: dict[LanguageNameString, list[str]]
-    translations: dict[LanguageNameString, TranslatedText]
+    translations: dict[LanguageNameString, TranslatedTextModel]
 
 
 class TranscriptTranslationResponse(BaseModel):
@@ -35,29 +35,6 @@ class TranscriptTranslationResponse(BaseModel):
     segment_prompts_by_language: dict[LanguageNameString, list[str]]
     subtitles_by_language: dict[LanguageNameString, FormattedSubtitles]
 
-
-@translate_router.post("/translate/text", response_model=TextTranslationResponse)
-async def translate_text_endpoint(
-        text: str = Body(...),
-        target_languages: dict[LanguageNameString, LanguageConfig] = Body(...),
-        original_language: str = Query("english")
-) -> TextTranslationResponse:
-    logger.api(
-        f"`/translate/text` - Translation request received for transcription ({len(text.split(' '))} words) for target languages: {[key for key in target_languages.keys()]}")
-
-    try:
-
-        prompts, translations = await text_translation(text=text,
-                                                       target_languages=target_languages,
-                                                       original_language=original_language)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.exception(f"Transcription initialization failed - {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-    logger.info(f"Returning translations: {translations}")
-    return TextTranslationResponse(prompts=prompts,
-                                   translations=translations)
 
 
 @translate_router.post("/translate/transcript", response_model=TranscriptTranslationResponse)
@@ -86,7 +63,7 @@ async def translate_transcript_endpoint(
         for language, language_config in target_languages.items():
             translated_transcripts[language] = TranslatedTranscript(original_language=transcript.language,
                                                                     original_full_text=transcript.text,
-                                                                    translated_language=language_config,
+                                                                    translated_language_config=language_config,
                                                                     translated_full_text=full_text_translations[
                                                                         language],
                                                                     translated_segments=translated_segments_by_language[
