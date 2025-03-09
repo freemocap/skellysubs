@@ -4,6 +4,7 @@ import logging
 from skellysubs.ai_clients.ai_client_strategy import get_ai_client
 from skellysubs.core.translation.language_configs.language_configs import LanguageConfig
 from skellysubs.core.translation.models.translated_text import TranslatedText
+from skellysubs.core.translation.models.translated_transcript_segment import TranslatedTranscriptSegment
 from skellysubs.core.translation.models.translation_typehints import LanguageNameString
 
 logger = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ async def format_full_text_translation_system_prompt(
         "==================================\n\n"
         f"Formatted system prompts: \n\n"
         f" FULL TEXT/SEGMENT LEVEL SYSTEM PROMPT: \n"
-        f"{full_text_translation_prompts_by_language}\n\n"
+        f"{full_text_translation_prompts_by_language.keys()}\n\n"
         "==================================\n\n"
     )
 
@@ -157,6 +158,9 @@ async def text_translation(text: str, original_language: str,
 
     for language, translated_segments in results_by_language.items():
         # Reassemble the translated segments into the full text
+        if any([not isinstance(segment, TranslatedText) for segment in translated_segments]):
+            logger.error(f"Received unexpected response from AI model for language: {language} - {translated_segments}")
+            continue
         translated_full_text = ' '.join([segment.translated_text for segment in translated_segments])
         romanized_full_text = ' '.join([segment.romanized_text for segment in translated_segments])
         translations[language] = TranslatedText(

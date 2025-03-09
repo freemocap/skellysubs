@@ -48,9 +48,9 @@ async def transcribe_endpoint(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.exception(f"Transcription initialization failed - {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
     finally:
         os.remove(audio_temp_filename)
-    logger.info(f"Returning transcription: {transcription_result}")
+    logger.info(f"Returning transcription! {len(transcription_result.text.strip(' '))} words")
     return TranscriptionResponse(transcript=transcription_result,
                                  formatted_subtitles=subtitle_generator.generate_all_formats(transcription_result))
