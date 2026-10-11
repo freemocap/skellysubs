@@ -25,7 +25,7 @@ impl Drop for ConsumerGuard {
         self.request.cancel();
         let settled = (|| {
             let mut store = self.state.lock()?;
-            if store.snapshot()?.learner.id != self.request.install_id {
+            if store.learner_id()? != self.request.install_id {
                 return Ok(());
             }
             generation_receipts::cancel(&mut store, &self.request)
@@ -66,7 +66,7 @@ pub(super) async fn execute<T: Send + 'static>(
             ));
             let settled = (|| {
                 let mut store = state.lock()?;
-                if store.snapshot()?.learner.id != request.install_id {
+                if store.learner_id()? != request.install_id {
                     return Ok(());
                 }
                 generation_receipts::finish(

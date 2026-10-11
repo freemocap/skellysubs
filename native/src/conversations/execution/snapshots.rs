@@ -267,7 +267,8 @@ impl Store {
         let speech = self.graph_runtime.speech_request_view(db, &id)?;
         let owner: Option<String> = db.query_row("SELECT t.conversation_id FROM turns t JOIN turn_execution_owners o ON o.turn_id=t.id WHERE t.id=?1 AND o.executor='graph'",[&id],|r|r.get(0)).optional()?;
         let native_graph = owner
-            .map(|conversation| self.graph_runtime.inspection(db, &conversation, &id))
+            .as_deref()
+            .map(|conversation| self.graph_runtime.inspection(db, conversation, &id))
             .transpose()?
             .flatten();
         let native_surfaces = native_graph
@@ -281,15 +282,13 @@ impl Store {
             native_surfaces,
             award_sources: Some(db.prepare("SELECT award_source FROM conversation_graph_effects WHERE turn_id=?1 ORDER BY rowid")?.query_map([&id], |row| row.get(0))?.collect::<rusqlite::Result<Vec<String>>>()?),
             native_execution_available: {
-                let owner: Option<String> = db.query_row("SELECT t.conversation_id FROM turns t JOIN turn_execution_owners o ON o.turn_id=t.id WHERE t.id=?1 AND o.executor='graph'",[&id],|r|r.get(0)).optional()?;
-                owner
-                    .map(|conversation| self.graph_runtime.owns(db, &conversation, &id))
+                owner.as_deref()
+                    .map(|conversation| self.graph_runtime.owns(db, conversation, &id))
                     .transpose()?
             },
             native_response: {
-                let owner: Option<String> = db.query_row("SELECT t.conversation_id FROM turns t JOIN turn_execution_owners o ON o.turn_id=t.id WHERE t.id=?1 AND o.executor='graph'",[&id],|r|r.get(0)).optional()?;
-                owner
-                    .map(|conversation| self.graph_runtime.response(db, &conversation, &id))
+                owner.as_deref()
+                    .map(|conversation| self.graph_runtime.response(db, conversation, &id))
                     .transpose()?
                     .flatten()
             },
@@ -301,9 +300,8 @@ impl Store {
                 )
                 .optional()?,
             native_preview: {
-                let owner: Option<String> = db.query_row("SELECT t.conversation_id FROM turns t JOIN turn_execution_owners o ON o.turn_id=t.id WHERE t.id=?1 AND o.executor='graph'",[&id],|r|r.get(0)).optional()?;
-                owner
-                    .map(|conversation| self.graph_runtime.preview(db, &conversation, &id))
+                owner.as_deref()
+                    .map(|conversation| self.graph_runtime.preview(db, conversation, &id))
                     .transpose()?
                     .flatten()
             },

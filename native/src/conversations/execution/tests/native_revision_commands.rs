@@ -19,6 +19,31 @@ fn bind(store: &Store) {
         Arc::new(|_, _| Box::pin(async { Ok(None) })),
     );
 }
+
+fn assert_batched_statuses_match_individual_sources(store: &Store, conversation: &str) {
+    let page = store.conversation_snapshot(conversation, None).unwrap();
+    let mut individual = page.messages.clone();
+    for message in &mut individual {
+        store
+            .graph_runtime
+            .message_statuses(&store.connection, std::slice::from_mut(message))
+            .unwrap();
+    }
+    assert_eq!(
+        serde_json::to_value(&page.messages).unwrap(),
+        serde_json::to_value(&individual).unwrap()
+    );
+    individual.reverse();
+    store
+        .graph_runtime
+        .message_statuses(&store.connection, &mut individual)
+        .unwrap();
+    individual.reverse();
+    assert_eq!(
+        serde_json::to_value(&page.messages).unwrap(),
+        serde_json::to_value(&individual).unwrap()
+    );
+}
 async fn tick(store: &mut Store) -> bool {
     let Some(claim) = store
         .graph_runtime
@@ -355,6 +380,7 @@ async fn native_revision_commands_retry_gloss_uses_exact_native_operation() {
         .unwrap()
         .entity_id;
     drive(&mut store).await;
+    assert_batched_statuses_match_individual_sources(&store, &conversation);
     let message = store
         .conversation_snapshot(&conversation, None)
         .unwrap()
@@ -377,6 +403,9 @@ async fn native_revision_commands_retry_gloss_uses_exact_native_operation() {
         .unwrap()
         .unwrap();
     assert_eq!(after.nodes["learner_gloss"], Disposition::Ready);
+    assert_batched_statuses_match_individual_sources(&store, &conversation);
+    drive(&mut store).await;
+    assert_batched_statuses_match_individual_sources(&store, &conversation);
     assert_eq!(
         count(
             &store,

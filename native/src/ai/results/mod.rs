@@ -94,6 +94,9 @@ pub fn initialize(db: &Connection) -> Result<()> {
         ))?;
     }
     db.execute_batch(include_str!("../../storage/schemas/ai_content.sql"))?;
+    db.execute_batch(include_str!(
+        "../../storage/schemas/inference_blob_references.sql"
+    ))?;
     recover(db)
 }
 
@@ -118,24 +121,40 @@ pub(crate) fn tick(db: &Connection) -> Result<i64> {
 }
 
 pub fn settings(db: &Connection) -> Result<CacheSettings> {
+    let (capacity_bytes, used_bytes) = byte_usage(db)?;
     Ok(CacheSettings {
-        capacity_bytes: db.query_row(
-            "SELECT capacity_bytes FROM inference_cache_settings WHERE singleton=1",
-            [],
-            |r| r.get::<_, i64>(0),
-        )? as u64,
-        used_bytes: (db.query_row(
-            "SELECT COALESCE(SUM(length(payload)),0) FROM inference_blobs",
-            [],
-            |r| r.get::<_, i64>(0),
-        )? + crate::speech::analysis::signal_cache::bytes(db, "inference")?)
-            as u64,
-        // Reusable result count retains its existing meaning; private source/body
-        // records share byte accounting but are not reusable inference results.
+        capacity_bytes,
+        used_bytes,
+        // Reusable result count excludes private originals.
         result_count: db.query_row("SELECT (SELECT count(*) FROM native_graph_audio_cache)+(SELECT count(*) FROM workspace_reading_cache)+(SELECT count(*) FROM workspace_transcription_cache)", [], |r| {
             r.get::<_, i64>(0)
         })? as u64,
     })
+}
+
+fn byte_usage(db: &Connection) -> Result<(u64, u64)> {
+    Ok((
+        db.query_row(
+            "SELECT capacity_bytes FROM inference_cache_settings WHERE singleton=1",
+            [],
+            |r| r.get::<_, i64>(0),
+        )? as u64,
+        (db.query_row(
+            "SELECT COALESCE(SUM(length(payload)),0) FROM inference_blobs",
+            [],
+            |r| r.get::<_, i64>(0),
+        )? + crate::speech::analysis::signal_cache::bytes(db, "inference")?) as u64,
+    ))
+}
+
+/// Add-only writes need eviction only when the byte budget is exceeded. Startup,
+/// owner cleanup and capacity changes still use full reachability maintenance.
+pub(crate) fn enforce_capacity(db: &Connection) -> Result<()> {
+    let (capacity, used) = byte_usage(db)?;
+    if used > capacity {
+        prune(db)?;
+    }
+    Ok(())
 }
 
 pub fn set_capacity(db: &Connection, bytes: u64) -> Result<CacheSettings> {
@@ -163,8 +182,8 @@ pub(crate) fn prune(db: &Connection) -> Result<()> {
         for id in removed {
             crate::speech::analysis::signal_cache::release(db, "inference", &id)?;
         }
-        let current = settings(db)?;
-        if current.used_bytes <= current.capacity_bytes {
+        let (capacity, used) = byte_usage(db)?;
+        if used <= capacity {
             return Ok(());
         }
         let (native, id): (i32, String) = db.query_row("SELECT native,id FROM (SELECT 1 AS native,receipt_id AS id,last_used FROM graph_audio_cache UNION ALL SELECT 2 AS native,run_id AS id,last_used FROM workspace_reading_cache UNION ALL SELECT 3 AS native,receipt_id AS id,last_used FROM workspace_graph_audio_cache UNION ALL SELECT 4 AS native,run_id AS id,last_used FROM workspace_transcription_cache UNION ALL SELECT 5 AS native,id,last_used FROM ai_content_records WHERE EXISTS(SELECT 1 FROM ai_content_chunks WHERE record_id=ai_content_records.id)) ORDER BY last_used,id,native LIMIT 1", [], |r| Ok((r.get(0)?,r.get(1)?)))?;

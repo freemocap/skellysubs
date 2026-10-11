@@ -44,7 +44,7 @@ pub(super) async fn load(
         let prompt = store.config.guide_translation_prompt().to_string();
         let key = results::digest(&serde_json::to_vec(&json!([
             "skill-guide-translation-1",
-            store.snapshot()?.learner.id,
+            store.learner_id()?,
             source,
             explanation,
             variety,

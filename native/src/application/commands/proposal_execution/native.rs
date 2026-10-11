@@ -126,7 +126,7 @@ pub(super) async fn produce<T>(
                         })
                         .await;
                     let mut guard = state.lock()?;
-                    if guard.snapshot()?.learner.id != request.install_id {
+                    if guard.learner_id()? != request.install_id {
                         return Err(AppError::new(
                             ErrorCode::SessionExpired,
                             "Workspace changed during proposal generation.",
@@ -226,7 +226,7 @@ pub(super) async fn produce<T>(
     if let Err(failure) = &mut outcome {
         let cancellation = (|| -> Result<()> {
             let mut guard = state.lock()?;
-            if guard.snapshot()?.learner.id == request.install_id {
+            if guard.learner_id()? == request.install_id {
                 let store: &mut Store = &mut guard;
                 store
                     .workspace_graphs

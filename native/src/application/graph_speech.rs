@@ -12,6 +12,20 @@ fn fault() -> graph::Fault {
         path: "speech".into(),
     }
 }
+
+/// PCM delivery is independent of metadata persistence. Remember only successful
+/// observations, so a failed persistence attempt is never mistaken for a cache hit.
+fn observe_changed(
+    previous: &mut Option<graph::ResponseEvidence>,
+    response: graph::ResponseEvidence,
+    persist: impl FnOnce(&graph::ResponseEvidence) -> Result<()>,
+) -> Result<()> {
+    if previous.as_ref() != Some(&response) {
+        persist(&response)?;
+        *previous = Some(response);
+    }
+    Ok(())
+}
 pub(super) fn evidence(
     outcome: &audio::SpeechOutcome,
     model: &str,
@@ -75,20 +89,20 @@ async fn provide(
                 .append(&stream, pcm, alignment)?;
             let response = evidence(outcome, &request.settings.target.model, &[&key, &source]);
             let mut last = observed.lock().map_err(|_| internal())?;
-            if last.as_ref() != Some(&response) {
+            observe_changed(&mut last, response, |response| {
                 invocation
                     .observe(response.clone())
                     .map_err(execution::graph_runtime::error)?;
-                *last = Some(response);
-            }
-            let mut guard = state.lock()?;
-            let store: &mut Store = &mut guard;
-            store.graph_runtime.observe(
-                &mut store.connection,
-                invocation
-                    .snapshot()
-                    .map_err(execution::graph_runtime::error)?,
-            )
+                let mut guard = state.lock()?;
+                let store: &mut Store = &mut guard;
+                store.graph_runtime.observe(
+                    &mut store.connection,
+                    invocation
+                        .snapshot()
+                        .map_err(execution::graph_runtime::error)?,
+                )?;
+                Ok(())
+            })
         };
         let input = request.speech_input();
         let transport = audio::synthesize_stream(
@@ -171,6 +185,31 @@ pub(super) fn bind(state: &Arc<Application>, store: &Store, client: &reqwest::Cl
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn repeated_pcm_metadata_persists_once_and_changes_and_failures_are_retained() {
+        let mut previous = None;
+        let mut commits = 0;
+        let mut outcome = audio::SpeechOutcome::empty();
+        for _ in 0..1000 {
+            observe_changed(&mut previous, evidence(&outcome, "model", &[]), |_| {
+                commits += 1;
+                Ok(())
+            })
+            .unwrap();
+        }
+        assert_eq!(commits, 1);
+        outcome.input_tokens = Some(7);
+        let response = evidence(&outcome, "model", &[]);
+        assert!(observe_changed(&mut previous, response.clone(), |_| Err(internal())).is_err());
+        assert_ne!(previous.as_ref(), Some(&response));
+        observe_changed(&mut previous, response.clone(), |_| {
+            commits += 1;
+            Ok(())
+        })
+        .unwrap();
+        assert_eq!(commits, 2);
+        assert_eq!(previous, Some(response));
+    }
     #[test]
     fn native_speech_evidence_retains_partial_usage_and_billing_without_source_content() {
         let mut outcome = audio::SpeechOutcome::empty();

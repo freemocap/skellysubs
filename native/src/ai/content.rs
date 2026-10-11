@@ -69,6 +69,7 @@ fn owner_exists(db: &Connection, owner: &Owner) -> Result<bool> {
 
 pub fn write(db: &Connection, owner: &Owner, event: Write) -> Result<()> {
     let tx = db.unchecked_transaction()?;
+    let mut grew = false;
     let exists = owner_exists(&tx, owner)?;
     if !exists {
         return Err(AppError::new(
@@ -94,7 +95,7 @@ pub fn write(db: &Connection, owner: &Owner, event: Write) -> Result<()> {
             if state != "pending" || size as usize + bytes.len() > 64 * 1024 * 1024 { return Err(invalid()); }
             if !bytes.is_empty() && availability == "retained" {
                 let digest = super::results::digest(&bytes);
-                tx.execute("INSERT OR IGNORE INTO inference_blobs(digest,payload) VALUES(?1,?2)", params![digest,bytes])?;
+                grew = tx.execute("INSERT OR IGNORE INTO inference_blobs(digest,payload) VALUES(?1,?2)", params![digest,bytes])? != 0;
                 tx.execute("INSERT INTO ai_content_chunks(record_id,sequence,blob_digest) SELECT ?1,COALESCE(MAX(sequence)+1,0),?2 FROM ai_content_chunks WHERE record_id=?1", params![id,digest])?;
             }
             tx.execute("UPDATE ai_content_records SET byte_count=byte_count+?2,last_used=?3 WHERE id=?1", params![id,bytes.len() as i64,super::results::tick(&tx)?])?;
@@ -103,7 +104,11 @@ pub fn write(db: &Connection, owner: &Owner, event: Write) -> Result<()> {
             if tx.execute("UPDATE ai_content_records SET state=?2,digest=?3,credentials_removed=?4 WHERE id=?1 AND state='pending'", params![id,if complete {"complete"} else {"partial"},digest,credentials_removed])? != 1 { return Err(invalid()); }
         }
     }
-    super::results::prune(&tx)?;
+    // Metadata and new references to existing bytes cannot exceed the budget.
+    // Keep every chunk durable, but do not sweep all historical references for it.
+    if grew {
+        super::results::enforce_capacity(&tx)?;
+    }
     tx.commit()?;
     Ok(())
 }

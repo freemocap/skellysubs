@@ -32,6 +32,7 @@ mod v71_cache;
 mod v72_streaks;
 mod v73_motion;
 mod v74_content;
+mod v75_blob_references;
 
 const MIN_VERSION: i32 = 45;
 const BASELINE: &str = include_str!("v45.sql");
@@ -188,6 +189,11 @@ const STEPS: &[Step] = &[
         from: 73,
         apply: v74_content::apply,
         validate: v74_content::validate,
+    },
+    Step {
+        from: 74,
+        apply: v75_blob_references::apply,
+        validate: v75_blob_references::validate,
     },
 ];
 

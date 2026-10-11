@@ -67,7 +67,7 @@ impl Request {
             brief,
             target,
             credential,
-            install_id: store.snapshot()?.learner.id,
+            install_id: store.learner_id()?,
             attempt,
             operation,
             created: Instant::now(),
@@ -118,9 +118,7 @@ impl Request {
     }
     /// Submission authority is independent of a closed proposal after dispatch.
     pub(crate) fn validate_execution(&self, store: &Store) -> Result<()> {
-        if self.install_id != store.snapshot()?.learner.id
-            || self.config_hash != store.config.hash()
-        {
+        if self.install_id != store.learner_id()? || self.config_hash != store.config.hash() {
             return Err(self.stopped("language configuration changed"));
         }
         let config = crate::ai::connections::configuration::config(&store.connection)?;

@@ -111,7 +111,7 @@ pub(super) fn begin(
                     let owner = host(&state, context.identity())?;
                     let store = state.lock()?;
                     // Cache lookup needs valid captured access, but may run while paused.
-                    if store.snapshot()?.learner.id != request.settings.install_id {
+                    if store.learner_id()? != request.settings.install_id {
                         return Err(internal());
                     }
                     crate::ai::connections::speech_routing::validate_access(
@@ -183,7 +183,7 @@ pub(super) fn begin(
     .map_err(error)?;
     inputs.insert("regenerate".into(), json!(false));
     let mut guard = state.lock()?;
-    if guard.snapshot()?.learner.id != install {
+    if guard.learner_id()? != install {
         return Err(AppError::new(
             ErrorCode::SessionExpired,
             "Workspace changed before speech.",
@@ -232,7 +232,7 @@ pub(super) async fn execute(
     prepared.payload.lock().map_err(|_| internal())?.take();
     if result.is_err() {
         let mut guard = state.lock()?;
-        if guard.snapshot()?.learner.id == install {
+        if guard.learner_id()? == install {
             let store: &mut Store = &mut guard;
             store
                 .workspace_graphs
@@ -257,7 +257,7 @@ async fn execute_inner(
     loop {
         let progress = {
             let mut guard = state.lock()?;
-            if guard.snapshot()?.learner.id != install {
+            if guard.learner_id()? != install {
                 return Err(AppError::new(
                     ErrorCode::SessionExpired,
                     "Workspace changed during speech.",
@@ -306,7 +306,7 @@ async fn execute_inner(
                     })
                     .await;
                 let mut guard = state.lock()?;
-                if guard.snapshot()?.learner.id != install {
+                if guard.learner_id()? != install {
                     return Err(AppError::new(
                         ErrorCode::SessionExpired,
                         "Workspace changed during speech.",

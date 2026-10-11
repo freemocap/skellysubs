@@ -66,7 +66,7 @@ pub(super) fn begin(
         .map_err(error)?,
     );
     let mut guard = state.lock()?;
-    if guard.snapshot()?.learner.id != install {
+    if guard.learner_id()? != install {
         return Err(AppError::new(
             ErrorCode::SessionExpired,
             "Workspace changed before transcription.",
@@ -117,7 +117,7 @@ pub(super) async fn execute(
     let result = execute_inner(state, install, producer, &prepared).await;
     if result.is_err() {
         let mut guard = state.lock()?;
-        if guard.snapshot()?.learner.id == install {
+        if guard.learner_id()? == install {
             let store: &mut Store = &mut guard;
             store
                 .workspace_graphs
@@ -137,7 +137,7 @@ async fn execute_inner(
     loop {
         let progress = {
             let mut guard = state.lock()?;
-            if guard.snapshot()?.learner.id != install {
+            if guard.learner_id()? != install {
                 return Err(AppError::new(
                     ErrorCode::SessionExpired,
                     "Workspace changed during transcription.",
@@ -188,7 +188,7 @@ async fn execute_inner(
                     })
                     .await;
                 let mut guard = state.lock()?;
-                if guard.snapshot()?.learner.id != install {
+                if guard.learner_id()? != install {
                     return Err(AppError::new(
                         ErrorCode::SessionExpired,
                         "Workspace changed during transcription.",

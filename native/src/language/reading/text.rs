@@ -55,10 +55,5 @@ pub(super) fn current_scope(store: &Store) -> Result<String> {
         &crate::ai::connections::configuration::config(&store.connection)?.fast_model,
     )
     .model;
-    access_scope(
-        &store.snapshot()?.learner.id,
-        &target,
-        &model,
-        store.config.hash(),
-    )
+    access_scope(&store.learner_id()?, &target, &model, store.config.hash())
 }

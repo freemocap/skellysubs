@@ -26,6 +26,7 @@ pub(super) fn state(disposition: &Disposition) -> Option<String> {
         .into(),
     )
 }
+#[derive(Clone)]
 pub struct SourceStatus {
     pub operation: Contract,
     pub state: Option<String>,
@@ -33,7 +34,7 @@ pub struct SourceStatus {
     pub attempt: Option<String>,
     pub node_id: String,
 }
-type SourceInputs = BTreeMap<(String, String), Vec<Option<serde_json::Value>>>;
+type SourceStatuses = BTreeMap<(String, String), Vec<(SourceText, SourceStatus)>>;
 impl Runtime {
     pub fn source_status(
         &self,
@@ -41,15 +42,15 @@ impl Runtime {
         turn: &str,
         expected: &SourceText,
     ) -> Result<Vec<SourceStatus>> {
-        self.source_status_with_inputs(db, turn, expected, &mut SourceInputs::new())
+        self.source_status_with_cache(db, turn, expected, &mut SourceStatuses::new())
     }
 
-    fn source_status_with_inputs(
+    fn source_status_with_cache(
         &self,
         db: &Connection,
         turn: &str,
         expected: &SourceText,
-        inputs_by_run: &mut SourceInputs,
+        statuses_by_run: &mut SourceStatuses,
     ) -> Result<Vec<SourceStatus>> {
         let mut statuses = Vec::new();
         let owner:Option<(String,String)> = db.query_row("SELECT engine_id,run_id FROM turn_execution_owners WHERE turn_id=?1 AND executor='graph'",[turn],|r|Ok((r.get(0)?,r.get(1)?))).optional()?;
@@ -59,6 +60,15 @@ impl Runtime {
             let Some(engine) = self.engines.get(&engine_id) else {
                 continue;
             };
+            if let Some(cached) = statuses_by_run.get(&(engine_id.clone(), run.clone())) {
+                statuses.extend(
+                    cached
+                        .iter()
+                        .filter(|(source, _)| source == expected)
+                        .map(|(_, status)| status.clone()),
+                );
+                continue;
+            }
             let view = engine.inspect(&run).map_err(error)?;
             let tx = db.unchecked_transaction()?;
             let mut reader = graph_store::BorrowedReadStore::new(&tx, self.partition(&engine_id)?)
@@ -88,24 +98,18 @@ impl Runtime {
                 .iter()
                 .map(|(node, _)| (node.as_str(), "source"))
                 .collect();
-            // Both messages of a turn use the same immutable artifact/selectors.
-            // Reuse their resolved sources only within this protected page read.
-            let sources = match inputs_by_run.entry((engine_id.clone(), run.clone())) {
-                std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
-                std::collections::btree_map::Entry::Vacant(entry) => entry.insert(
-                    engine
-                        .read_node_inputs(&run, &inputs, &mut reader)
-                        .map_err(error)?,
-                ),
-            };
+            // A page holds an immutable runtime view. Resolve and project each run
+            // once, including the status/dependency work shared by both messages.
+            let sources = engine
+                .read_node_inputs(&run, &inputs, &mut reader)
+                .map_err(error)?;
+            let mut run_statuses = Vec::new();
             for ((node, definition), source) in nodes.into_iter().zip(sources.iter()) {
                 let operation = &definition.operation;
                 let Some(source) = source else {
                     continue;
                 };
-                if serde_json::from_value::<SourceText>(source.clone())? != *expected {
-                    continue;
-                }
+                let source: SourceText = serde_json::from_value(source.clone())?;
                 let dependencies = ancestors(&view, node)?;
                 let status = if view.nodes[node] == Disposition::Waiting
                     && dependencies
@@ -139,28 +143,38 @@ impl Runtime {
                     }
                     failure=Some(serde_json::json!({"message":"Requested assistance did not complete.","diagnostics":{"engine":engine_id,"run":run,"node":node,"state":view.nodes[node],"responses":responses}}).to_string());
                 }
-                statuses.push(SourceStatus {
-                    operation: operation.clone(),
-                    state: status,
-                    error: failure,
-                    attempt: view
-                        .attempts
-                        .get(node)
-                        .and_then(|items| items.last())
-                        .map(|item| serde_json::to_string(&item.id))
-                        .transpose()?,
-                    node_id: format!(
-                        "graph:{}",
-                        serde_json::to_string(&(&engine_id, &run, node))?
-                    ),
-                });
+                run_statuses.push((
+                    source,
+                    SourceStatus {
+                        operation: operation.clone(),
+                        state: status,
+                        error: failure,
+                        attempt: view
+                            .attempts
+                            .get(node)
+                            .and_then(|items| items.last())
+                            .map(|item| serde_json::to_string(&item.id))
+                            .transpose()?,
+                        node_id: format!(
+                            "graph:{}",
+                            serde_json::to_string(&(&engine_id, &run, node))?
+                        ),
+                    },
+                ));
             }
+            statuses.extend(
+                run_statuses
+                    .iter()
+                    .filter(|(source, _)| source == expected)
+                    .map(|(_, status)| status.clone()),
+            );
+            statuses_by_run.insert((engine_id, run), run_statuses);
         }
         Ok(statuses)
     }
 
     pub fn message_statuses(&self, db: &Connection, messages: &mut [ChatMessage]) -> Result<()> {
-        let mut inputs = SourceInputs::new();
+        let mut inputs = SourceStatuses::new();
         for message in messages {
             self.message_status(db, message, &mut inputs)?;
         }
@@ -171,13 +185,13 @@ impl Runtime {
         &self,
         db: &Connection,
         message: &mut ChatMessage,
-        inputs: &mut SourceInputs,
+        inputs: &mut SourceStatuses,
     ) -> Result<()> {
         let expected = SourceText {
             id: message.id.clone(),
             text: message.text.clone(),
         };
-        for value in self.source_status_with_inputs(db, &message.turn_id, &expected, inputs)? {
+        for value in self.source_status_with_cache(db, &message.turn_id, &expected, inputs)? {
             if value.operation == translation_graph::operation_contract() {
                 message.translation_state = value.state;
             } else if value.operation == gloss_graph::operation_contract() {

@@ -13,10 +13,7 @@ pub(in crate::application) async fn hosted_sign_in(
     let epoch = state.auth_epoch.load(std::sync::atomic::Ordering::SeqCst);
     let (revision, install) = {
         let store = state.lock()?;
-        (
-            store.connection_config()?.revision,
-            store.snapshot()?.learner.id,
-        )
+        (store.connection_config()?.revision, store.learner_id()?)
     };
     let authenticate = async {
         let token = hosted::sign_in(&app).await?;
@@ -101,11 +98,7 @@ pub(in crate::application) async fn hosted_account(
                 "Sign in with Google to see your account.",
             )
         })?;
-        (
-            id,
-            store.snapshot()?.learner.id,
-            store.connection_config()?.revision,
-        )
+        (id, store.learner_id()?, store.connection_config()?.revision)
     };
     let token = read_secret(credential).await?;
     let account = hosted::account(&token, &install).await?;

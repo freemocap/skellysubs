@@ -37,7 +37,7 @@ pub(super) async fn provide(
                 &work,
                 graph_identity::load_workspace(&store.connection, invocation.identity())?,
             )?;
-            if store.snapshot()?.learner.id != prepared.request.install_id {
+            if store.learner_id()? != prepared.request.install_id {
                 return Err(AppError::new(
                     ErrorCode::SessionExpired,
                     "Workspace changed during execution.",

@@ -108,7 +108,7 @@ pub(super) async fn produce(
                         })
                         .await;
                     let mut guard = state.lock()?;
-                    if guard.snapshot()?.learner.id != request.install_id {
+                    if guard.learner_id()? != request.install_id {
                         return Err(AppError::new(
                             ErrorCode::SessionExpired,
                             "Workspace changed during guide generation.",
@@ -166,7 +166,7 @@ pub(super) async fn produce(
     }.await;
     if outcome.is_err() {
         let mut guard = state.lock()?;
-        if guard.snapshot()?.learner.id == request.install_id {
+        if guard.learner_id()? == request.install_id {
             let store: &mut Store = &mut guard;
             store
                 .workspace_graphs

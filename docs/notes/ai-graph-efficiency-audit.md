@@ -902,3 +902,123 @@ requires a fresh recording using the current layout. Item 2 remains unchecked.
 The concurrent Activity UI work currently blocks the fast gate with missing
 translation keys; no Activity UI file was edited in this batch. No PR, commit,
 version change, tag, publication or deployment was performed.
+
+## Read/write amplification review — 2026-10-11
+
+This pass continues the completed Activity-panel work at commit `05783658`.
+It is a measured performance batch, not a replacement graph architecture.
+
+Implemented changes:
+
+- Original capture still commits every chunk and retains the same bytes, digest,
+  state and eviction provenance. Begin/Finish and appends without new blob bytes
+  no longer run global maintenance. New bytes check capacity; overflow retains
+  the existing eviction policy. Pruning no longer counts reusable results merely
+  to obtain the byte budget. Format 75 adds five reference indexes; no historical
+  row is rewritten.
+- Conversation speech delivers and authorizes every PCM chunk but persists a
+  diagnostic observation only when the evidence changes. A failed persistence
+  operation is never remembered as success. Completion/settlement is unchanged.
+- Workspace identity-only checks use the existing narrow learner-ID query instead
+  of building full workspace/UI snapshots, including speech/transcription loops,
+  recordings, generation, access and reading-cache identity.
+- Inspection cache retention uses its 16 MiB budget, including key and entry
+  overhead, instead of a 32-entry ceiling that cannot hold a 50-recording page.
+  Keys and ownership/corruption validation are unchanged.
+- Conversation message projection resolves each run's source statuses once within
+  one protected page read. Turn projection reuses its authoritative owner lookup.
+  No cross-request cache or alternate runtime interpretation was added.
+
+Regressions reproduced before implementation: a streamed append alongside 1,000
+retained chunks used 2,043,365 SQLite VM instructions (actual bundled SQLite and
+production write path); the 50-receipt cache test failed on the second sweep.
+Instrumented VM elapsed time is not an application-latency measurement.
+
+Measurement method: isolated workflow desktop runner; disposable copies of
+`.local/activity-diagnostics-workspace-20261011`; empty provider tape and network
+verification; same 19 messages/10 turns; ten forced conversation reads plus five
+queued workspace reads. No compiler or test process runs during timing. The
+ignored `.local/review-conversation-profile.ts` harness retains content-free
+latencies, output digest and native lock timings with the executable/UI identity.
+The saved seven-action recording is replayed independently to verify actual
+provider-tape, rendered and playback checkpoints. That short recording does not
+represent every learner workflow or prove click-to-paint acceptance.
+
+The first probe exposed a stale prepared executable (`dd87dbd...`); its 886–1,083 ms
+results are excluded. A freshly compiled committed baseline (`bc45bde...`) measured
+191–208 ms per conversation read and 150–160 ms for queued workspace reads
+(receipt `.local/workflow/9c027ad0-6321-43a9-9f6d-64ebbccd0672`). Baseline saved-session
+replay passed at `.local/workflow/795f5c2d-dfbb-413e-83f2-7d7bbb5f0f53`.
+
+The fixed append uses 4,240 VM instructions (99.79% less). The same regression
+verifies retained output. A fresh-workspace identity lookup uses 10 VM instructions
+versus 74 for the full snapshot; larger workspace projections do additional work.
+The cache regression retains all 50 small receipts through repeated sweeps. Speech
+observation coverage verifies 1,000 identical metadata emissions persist once,
+changed metadata persists again, and failed persistence remains retryable.
+
+Native capture-enabled library verification: 992 passed, zero failed, five ignored
+(725.44 seconds). This includes supported migrations, rollback/reopen, original
+retention, corruption rejection and failed/retried source-status parity. Clippy
+with the capture feature, library and tests, warnings denied: passed. Final
+code-state fast gate, production binary checks and generated-contract checks:
+passed. Documentation links and whitespace checks passed. No UI source changed.
+
+### Final alternating desktop measurements
+
+Two fresh baseline/candidate pairs ran sequentially, with no builds or tests in
+progress. Each variant has 20 conversation reads and ten queued workspace reads.
+Candidate combined build identity:
+`17303fc1008876d7ffa0e29bbe45e9591cfc7fadb6e0e592c37bd9d6f1c01293`.
+All four runs produced the same conversation output SHA-256:
+`5ffefcde7a570949149a1c13a8c24ca9721ea561de2024cacb39681aa7a33343`.
+
+| Measurement | Committed baseline | Candidate |
+| --- | ---: | ---: |
+| Conversation read median | 420.10 ms | 386.90 ms |
+| Conversation read p95 | 447.30 ms | 445.90 ms |
+| Queued workspace read median | 355.55 ms | 327.30 ms |
+| Queued workspace read p95 | 382.00 ms | 387.70 ms |
+| Stream append, 1,000 retained chunks | 2,043,365 VM steps | 4,240 VM steps |
+
+Interpretation: the targeted database-work reduction is established. The desktop
+median improved about 8%, but the tail did not improve reliably. The earlier
+191–208 ms pilot and these slower matched runs also demonstrate substantial
+session/environment variability. Do not combine that pilot with candidate samples
+or claim consistent sub-300-ms reads, general UI responsiveness, or a measured
+click-to-paint improvement. These samples justify further profiling, not a claim
+that conversation latency is solved.
+
+Content-free aggregate: `.local/review-performance-comparison.json`. Raw paired
+receipts are `.local/workflow/f29d18ce-f2cc-4efb-9e77-b4a55bf08992`,
+`dce1654e-717e-4268-a620-eb86957965a2`,
+`aa1e4644-e08b-451f-81d9-2c066eb6b642` and
+`ecb848cf-6487-40f5-b19e-6555eaf440f6`.
+
+The candidate saved-session replay passed all seven actions, tape consumption,
+rendered and playback checkpoints at
+`.local/workflow/ebc1082b-213c-43e9-ae9d-0dbd0c8daeb9`. Comparing the two isolated
+application databases verified identical original-content metadata, lengths and
+SHA-256 digests, and recomputed digests from ordered retained chunks: complete
+5,083-byte request and 610-byte response. The restored-workspace directory is the
+input backup; verification reads the final isolated application database.
+
+Changes remain uncommitted. No application release version, tag, publication or
+deployment changed. The prepared workflow executable is the tested candidate;
+the normal running application was not replaced.
+
+Remaining targets, not implemented or claimed fixed: prepared-history caching
+above the protected core with explicit mutation invalidation; repeated history
+capture across recordings sharing an engine; scheduler rescans; full checkpoint
+serialization per useful transition; incremental byte accounting and eviction
+batching for very large caches. Stamp-only caching is insufficient: same-stamp
+payload corruption must still invalidate and fail. These require separate
+measurements and regression evidence, not speculative cache layers.
+
+Separate PR-readiness finding (static, not dynamically reproduced): changing AI
+access while a partner helper is in flight can leave its turn marked `succeeded`
+without cancelling the graph. A late successful helper can reach publication,
+fail captured-access validation, and propagate through the scheduler to
+`Application::stop`. This is not introduced or repaired by this performance
+batch. Reproduce and handle authority revocation as a local execution outcome
+before treating the branch as merge-ready.

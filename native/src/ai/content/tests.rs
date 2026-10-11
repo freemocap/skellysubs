@@ -12,6 +12,82 @@ fn owner() -> Owner {
         execution: "42".into(),
     }
 }
+#[test]
+fn streaming_append_does_not_sweep_retained_history() {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    let db = database();
+    // One real streamed response, then another stream alongside its retained chunks.
+    write(
+        &db,
+        &owner(),
+        Write::Begin {
+            id: "history".into(),
+            kind: "response".into(),
+            media_type: "text/plain".into(),
+        },
+    )
+    .unwrap();
+    for i in 0u32..1000 {
+        write(
+            &db,
+            &owner(),
+            Write::Append {
+                id: "history".into(),
+                bytes: i.to_le_bytes().to_vec(),
+            },
+        )
+        .unwrap();
+    }
+    write(
+        &db,
+        &owner(),
+        Write::Begin {
+            id: "next".into(),
+            kind: "response".into(),
+            media_type: "text/plain".into(),
+        },
+    )
+    .unwrap();
+    let count = Arc::new(AtomicUsize::new(0));
+    let observed = count.clone();
+    db.progress_handler(
+        1,
+        Some(move || {
+            observed.fetch_add(1, Ordering::Relaxed);
+            false
+        }),
+    )
+    .unwrap();
+    let started = std::time::Instant::now();
+    write(
+        &db,
+        &owner(),
+        Write::Append {
+            id: "next".into(),
+            bytes: b"next".to_vec(),
+        },
+    )
+    .unwrap();
+    db.progress_handler(0, None::<fn() -> bool>).unwrap();
+    let instructions = count.load(Ordering::Relaxed);
+    eprintln!(
+        "retained_chunks=1000 append_vm_steps={instructions} instrumented_elapsed={:?}",
+        started.elapsed()
+    );
+    assert_eq!(
+        prepare(&db, "next")
+            .unwrap()
+            .finish()
+            .unwrap()
+            .text
+            .as_deref(),
+        Some("next")
+    );
+    assert!(
+        instructions < 20_000,
+        "one append swept retained history: {instructions} VM steps"
+    );
+}
 fn save(db: &Connection, id: &str, bytes: &[u8]) {
     write(
         db,

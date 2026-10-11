@@ -73,7 +73,7 @@ pub(super) async fn provide(
                 context.observe(response.clone()).map_err(error)?;
                 *previous = Some(response);
                 let mut guard = state.lock()?;
-                if guard.snapshot()?.learner.id != request.settings.install_id {
+                if guard.learner_id()? != request.settings.install_id {
                     return Err(AppError::new(
                         ErrorCode::SessionExpired,
                         "Workspace changed during speech.",

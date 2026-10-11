@@ -473,6 +473,9 @@ identify a result. No text normalization, audio preprocessing or recognition
 settings change accompanies reuse. Validated text and timing are evictable local
 payloads. Format 74 also retains the accepted source WAV and original transport
 content in the private shared inference cache, independently of normalized results.
+Format 75 adds blob-reference indexes without changing retained records. Stream
+chunks still commit individually; metadata-only capture events skip cache pruning,
+and new blob bytes trigger eviction only when the shared capacity is exceeded.
 Hidden server processing changes are not discovered by local request identity.
 
 `speech/recording/voice.rs` retains per-recording inspection, Chat/Drill ownership,

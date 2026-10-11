@@ -409,3 +409,18 @@ shared blobs. Normal cache maintenance reclaims unreferenced blobs after commit.
 The step changes transactional database structures only. Its regression verifies
 failure rollback and byte-for-byte preservation of graph cache rows and settings.
 The migration, rollback, schema-equivalence and supported-start regressions passed.
+
+## Format 75: cache reference indexes
+
+Implementation: five additive indexes support blob reachability lookups for
+original-content chunks, conversation/workspace speech, reading and transcription.
+The consecutive 74-to-75 step changes no row, serialized contract, identity,
+ownership relationship, source bytes, evidence or awards. Format 74's schema and
+all earlier migration steps remain unchanged. Fresh databases create the same
+indexes. This is a workspace format change, not an application release bump.
+
+Verification is recorded with the performance batch in
+[the efficiency audit](ai-graph-efficiency-audit.md). The regression covers
+transaction rollback, preservation of original records/chunks and reopening;
+the existing migration suite covers all supported starting formats and schema
+equivalence.

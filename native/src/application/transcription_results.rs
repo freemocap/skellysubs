@@ -12,7 +12,7 @@ impl Application {
         install: &str,
     ) -> Result<()> {
         let store = self.lock()?;
-        if store.snapshot()?.learner.id != install {
+        if store.learner_id()? != install {
             return Err(AppError::new(
                 ErrorCode::SessionExpired,
                 "Workspace changed during transcription.",

@@ -1,5 +1,8 @@
 use super::*;
 
+#[path = "blob_reference_tests.rs"]
+mod blob_references;
+
 #[path = "assessment_tests.rs"]
 mod assessment;
 #[path = "execution_tests.rs"]
@@ -704,7 +707,7 @@ fn original_content_migration_preserves_history_and_rolls_back_atomically() {
     run_chain(&mut db, 45, 73, &STEPS[..28], |_| Ok(())).unwrap();
     let before = rows(&db, "learner");
     assert!(
-        run_chain(&mut db, 73, 74, STEPS, |_| Err(AppError::new(
+        run_chain(&mut db, 73, 74, &STEPS[..29], |_| Err(AppError::new(
             ErrorCode::Storage,
             "fixture"
         )))
@@ -715,7 +718,7 @@ fn original_content_migration_preserves_history_and_rolls_back_atomically() {
     assert!(db.prepare("SELECT id FROM ai_content_records").is_err());
     drop(db);
     let store = Store::open(&path).unwrap();
-    assert_eq!(version(&store.connection), 74);
+    assert_eq!(version(&store.connection), SCHEMA_VERSION);
     assert_eq!(rows(&store.connection, "learner"), before);
     assert_eq!(
         store
