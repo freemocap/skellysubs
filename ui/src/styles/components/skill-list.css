@@ -12,4 +12,4 @@
 .skill-list-row progress::-webkit-progress-bar { background: var(--line-soft); border-radius: var(--radius-pill); }
 .skill-list-row progress::-webkit-progress-value { background: currentColor; border-radius: var(--radius-pill); transition: width var(--dur-deliberate) var(--ease-out); }
 .skill-list-row progress::-moz-progress-bar { background: currentColor; border-radius: var(--radius-pill); }
-@media (prefers-reduced-motion: reduce) { .skill-list-row progress::-webkit-progress-value { transition: none; } }
+:where(:root[data-motion="reduced"]) .skill-list-row progress::-webkit-progress-value { transition: none; }

@@ -20,7 +20,7 @@
   animation: activity-spin var(--dur-spin) linear infinite;
 }
 
-@media (prefers-reduced-motion: reduce) { .activity-spinner { border-style: dotted; animation: none; } }
+:where(:root[data-motion="reduced"]) .activity-spinner { border-style: dotted; animation: none; }
 
 .activity-indicator .sr-only {
   position: absolute;
@@ -106,10 +106,9 @@
 
 .hydrating-waiting { color: var(--ink-3); font-size: var(--type-meta); }
 
-@media (prefers-reduced-motion: reduce) {
-  .is-hydrating::after { animation: none; background: var(--interaction-ink); }
-  .stream-caret, .hydrating-slot[data-phase=running] .hydrating-line, .reply-received { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .is-hydrating::after { animation: none; background: var(--interaction-ink); }
+
+:where(:root[data-motion="reduced"]) .stream-caret, :where(:root[data-motion="reduced"]) .hydrating-slot[data-phase=running] .hydrating-line, :where(:root[data-motion="reduced"]) .reply-received { animation: none; }
 
 /* The AI pill at every recorder (components/feedback/AiStatusPill.tsx). It
    follows the reply-help and coach pills in neutral grey: a chip at rest with
@@ -152,10 +151,8 @@
 .ai-status-measure > span { display: block; width: max-content; white-space: nowrap; }
 .ai-status-announce { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (pointer: coarse) { .ai-status-pill { min-height: var(--control-height); } }
-@media (prefers-reduced-motion: reduce) {
-  .ai-status[data-busy] .ai-status-pill::after { animation: none; background: var(--interaction-ink); }
-  .ai-status-text { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .ai-status[data-busy] .ai-status-pill::after { animation: none; background: var(--interaction-ink); }
+:where(:root[data-motion="reduced"]) .ai-status-text { animation: none; }
 @media (forced-colors: active) { .ai-status[data-busy] .ai-status-pill { outline: var(--border-width-strong) solid Highlight; } }
 
 /* A line of work in progress in page or panel flow: the spinner and what is happening. */

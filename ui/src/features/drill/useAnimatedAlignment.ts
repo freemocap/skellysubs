@@ -1,3 +1,4 @@
+import { reducedMotion } from '../../platform/appearance/motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 /** Interpolate normalized positions so changing durations never causes a jump. */
@@ -11,7 +12,7 @@ export function useAnimatedAlignment(alignment: ((seconds: number) => number) | 
   useEffect(() => {
     const from = identity.current === recordingId ? shown.current : (fraction: number) => fraction
     identity.current = recordingId
-    if (typeof requestAnimationFrame !== 'function' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    if (typeof requestAnimationFrame !== 'function' || reducedMotion()) {
       shown.current = target; setMapping(() => target); return
     }
     let frame = 0

@@ -85,9 +85,9 @@ describe('SkillLevelsPanel', () => {
     const stage = document.querySelector('.skill-chart-stage')!
     expect(bar.compareDocumentPosition(stage) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
-  it('folds type, scale and zoom into a settings button when the row cannot hold them, keeping the points-shown switch in the row', () => {
+  it('fits chart controls independently of the second scope row, folding only when chart controls cannot fit', () => {
     localStorage.clear()
-    let width = 300
+    let width = 400
     const callbacks = new Set<() => void>()
     vi.stubGlobal('ResizeObserver', class {
       constructor(callback: () => void) { callbacks.add(callback) }
@@ -99,9 +99,16 @@ describe('SkillLevelsPanel', () => {
     })
     try {
       render(<SkillLevelsPanel languageName="Spanish" snapshot={snapshotWithPoints([9, 6, 11, 5, 7, 5, 13, 8])} conversation={conversationWith([1, 0, 2, 1, 1, 0, 2, 0])} onInspect={null} />)
-      // Four switches need 480px; a 300px card keeps only the points-shown switch and a settings button in the row.
+      // Three chart switches fit at 400px, even though all four would need 480px.
       const bar = screen.getByRole('group', { name: 'Chart controls' })
-      expect(within(bar).getByRole('group', { name: 'Points shown' })).toBeTruthy()
+      const scope = screen.getByRole('group', { name: 'Points shown' })
+      expect(bar).not.toContainElement(scope)
+      expect(bar.compareDocumentPosition(scope) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      expect(within(bar).getByRole('button', { name: 'Bars' })).toBeTruthy()
+      expect(screen.queryByRole('button', { name: 'Chart settings' })).toBeNull()
+      width = 300
+      act(() => { for (const callback of callbacks) callback() })
+      expect(scope).toBeVisible()
       expect(screen.queryByRole('button', { name: 'Bars' })).toBeNull()
       fireEvent.click(screen.getByRole('button', { name: 'Chart settings' }))
       const menu = screen.getByRole('group', { name: 'Chart settings' })

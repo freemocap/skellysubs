@@ -19,7 +19,5 @@
 @keyframes level-up-enter { from { opacity: 0; transform: translateY(var(--space-4)); } }
 @keyframes level-up-settle { 0% { transform: scale(1.08); filter: drop-shadow(0 0 var(--space-8) var(--progress-mark)); } 60% { filter: drop-shadow(0 0 var(--space-4) var(--progress-mark)); } 100% { transform: scale(1); filter: none; } }
 @keyframes level-up-roll { to { transform: translateY(-50%); } }
-@media (prefers-reduced-motion: reduce) {
-  .level-up, .level-up-skills li, .level-up-radar .skill-radar-glyph { animation: none; }
-  .level-up-roll { animation: none; transform: translateY(-50%); }
-}
+:where(:root[data-motion="reduced"]) .level-up, :where(:root[data-motion="reduced"]) .level-up-skills li, :where(:root[data-motion="reduced"]) .level-up-radar .skill-radar-glyph { animation: none; }
+:where(:root[data-motion="reduced"]) .level-up-roll { animation: none; transform: translateY(-50%); }

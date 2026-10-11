@@ -638,6 +638,7 @@ pub fn bindings() -> String {
         crate::learning::learner::learner_state::ConstructState::decl(&config),
         ConnectionRoute::decl(&config),
         crate::configuration::appearance::SurfacePalette::decl(&config),
+        crate::configuration::appearance::MotionPreference::decl(&config),
         crate::configuration::appearance::AppearancePreferences::decl(&config),
         crate::configuration::execution::ExecutionMode::decl(&config),
         crate::configuration::execution::ExecutionPreferences::decl(&config),

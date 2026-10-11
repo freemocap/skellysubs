@@ -217,9 +217,7 @@
 }
 @keyframes voice-blink { 50% { opacity: 0.35; } }
 @keyframes voice-soon-in { from { opacity: 0; transform: translateY(var(--space-2)); } }
-@media (prefers-reduced-motion: reduce) {
-  .voice-pad[data-live='true'], .voice-dot, .voice-soon, .voice-face-notice, .voice-face-card { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .voice-pad[data-live='true'], :where(:root[data-motion="reduced"]) .voice-dot, :where(:root[data-motion="reduced"]) .voice-soon, :where(:root[data-motion="reduced"]) .voice-face-notice, :where(:root[data-motion="reduced"]) .voice-face-card { animation: none; }
 
 /* Compact and narrow: the same grid, smaller. */
 @media (max-width: 860px) {

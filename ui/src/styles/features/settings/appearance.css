@@ -2,6 +2,7 @@
 .appearance-settings { display: grid; gap: var(--space-8); }
 .appearance-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
 .appearance-choice { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); font: var(--type-ui)/var(--leading-normal) var(--font-sans); color: var(--ink-2); }
+.appearance-motion { grid-column: 1 / -1; }
 .appearance-sample { padding: var(--space-11); border: var(--border-width) solid var(--line); border-radius: var(--radius-lg); background: var(--sheet); box-shadow: var(--shadow-surface); }
 .appearance-sample .target-text { margin-block: var(--space-6); }
 .appearance-sample small { font-size: var(--type-meta); color: var(--ink-3); }

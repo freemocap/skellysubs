@@ -73,7 +73,6 @@
 .skill-levels-chip svg { width: var(--space-8); height: var(--space-8); fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .skill-levels-chip > span:last-child { color: var(--ink-2); font-family: var(--font-mono); font-size: var(--type-meta); font-weight: var(--weight-regular); }
 
-@media (prefers-reduced-motion: reduce) {
-  .skill-levels-focus-body { animation: none; }
-  .skill-levels-focus, .skill-levels-row { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .skill-levels-focus-body { animation: none; }
+
+:where(:root[data-motion="reduced"]) .skill-levels-focus, :where(:root[data-motion="reduced"]) .skill-levels-row { transition: none; }

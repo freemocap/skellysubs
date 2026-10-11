@@ -1,4 +1,8 @@
 {
+  "Animation": "动画",
+  "Follow system": "跟随系统",
+  "Full animation": "完整动画",
+  "Reduced motion": "减少动态效果",
   "App streak: {value0}": "应用连续天数：{value0}",
   "Step": "单步执行",
   "Explain this selection.": "解释所选内容。",

@@ -126,6 +126,18 @@ it('shows the total across languages behind a globe, and every language with its
   expect(within(card).getByRole('button', { name: 'Practice' })).toBeVisible()
 })
 
+it('groups the app streak with global XP and identifies the selected language skill level without duplicate effort totals', async () => {
+  evidence.snapshot = { ...skillDemo, target: 'spanish' }
+  render(<TopBar />)
+  fireEvent.click(screen.getByRole('button', { name: 'Language XP' }))
+  const card = screen.getByRole('dialog', { name: 'All languages' })
+  await waitFor(() => expect(card.querySelector('.progress-card-levels')).toHaveTextContent('Spanish'))
+  expect(card.querySelector('.progress-card-levels')).toHaveTextContent('Skill level 0')
+  expect(card.querySelector('.progress-card-heading .streak-count')).toHaveAccessibleName('App streak: 1')
+  expect(card.querySelector('.progress-card-units')).toBeNull()
+  expect(card.querySelectorAll('.streak-count')).toHaveLength(1)
+})
+
 /// jsdom has no layout. In this model the language's own name needs 60px; its
 /// box has `room` pixels while the XP number shows, and 40px more once the pill
 /// folds to the skill level. A folded XP button has no boxes, as under display: none.

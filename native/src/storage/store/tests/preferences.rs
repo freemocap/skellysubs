@@ -228,6 +228,7 @@ fn appearance_survives_restart_without_changing_conversation_settings() {
     let before = store.snapshot().unwrap();
     let mut preferences = before.learner.preferences.clone();
     preferences.appearance.palette = SurfacePalette::Warm;
+    preferences.appearance.motion = crate::configuration::appearance::MotionPreference::Full;
     preferences.text_size = 160;
     apply(
         &mut store,

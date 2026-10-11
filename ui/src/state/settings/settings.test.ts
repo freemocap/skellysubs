@@ -48,10 +48,10 @@ it('counts a read of something another surface wrote as a change', async () => {
 
 it.each([
   { theme: 'dark' as const },
-  { appearance: { palette: 'warm' as const } },
+  { appearance: { palette: 'warm' as const, motion: 'system' as const } },
 ])('retains the evidence scope for appearance-only writes: %j', async change => {
   const scope = { sessionId: 'session', conversationId: 'chat', settingsRevision: 2, learnerRevision: 3, rewardRevision: 4 }
-  const current = record({ theme: 'light', appearance: { palette: 'cool' }, scope })
+  const current = record({ theme: 'light', appearance: { palette: 'cool', motion: 'system' as const }, scope })
   const saved = record({ ...current, ...change, scope: { ...scope, learnerRevision: 4 } })
   native.get.mockResolvedValue(current)
   await useSettingsStore.getState().load()

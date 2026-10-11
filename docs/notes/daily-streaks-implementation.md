@@ -1,6 +1,6 @@
 # App-wide daily streak
 
-Status: global-only source implementation complete; final verification in progress.
+Status: global-only source implementation and automated/browser verification complete.
 The user's latest design supersedes the earlier independent language/app counters.
 No language-specific streak is recorded, returned or displayed.
 
@@ -72,10 +72,10 @@ migration SQL and its validation chain remain readable from baseline format 45.
 - [x] Simplify presentation.
   - [x] One app streak; remove obsolete labels, tests and preview controls.
   - [x] Language XP spans left; global XP and streak stack right with a divider.
-- [ ] Verify cleanup.
+- [x] Verify cleanup.
   - [x] Inspect normal and narrow browser layouts.
   - [x] Pass affected UI tests (22).
-  - [ ] Complete final fast gate, builds, native tests, Clippy and full UI suite.
+  - [x] Complete final fast gate, builds, native tests, Clippy and full UI suite.
 
 ## Verification boundaries and history
 
@@ -99,3 +99,28 @@ bundle-size advisory is unrelated. No checks were weakened.
 Earlier work removed the unused Run timeline translation from eight locales after
 checking dynamic callers. Other unrelated shared-checkout changes are preserved.
 No commit, release, deployment or application version bump is authorized.
+
+## Global-only verification results
+
+- 22 affected UI regressions passed; the full UI suite passed 298 files and 2,044 tests.
+- Final fast validation, application build, Clippy, generated-contract consistency,
+  strict streak-preview types and documentation links passed.
+- Browser inspection confirmed one counter, the restored divider, full-height
+  language XP on the left, and global XP over the streak on the right.
+  Normal/narrow layouts and a single six-particle increment were observed.
+- Standards and spec re-review reported no remaining findings.
+- Full native suite passed: 951 tests, zero failures, five ignored. Native executable
+  build also passed. Streak migration/restart and inert retired-language rows are covered.
+
+## XP popover correction
+
+Implemented: the app streak shares the gold global-XP header. Removed the
+duplicate Bot/Explore summary and separate globe/streak row. The selected
+language name labels the skill-level section. Numeric table cells are centered;
+sort arrows no longer shift their header icons away from the column centers.
+The topbar's full-height language XP and stacked global XP/streak remain unchanged.
+
+Verified in the production-component browser preview: header placement, language
+label and numeric/header centers (within 0.3 CSS pixels). All 19 affected tests
+passed, as did the fast gate and application build. The existing bundle-size
+advisory remains. This UI-only correction was not observed in the native window.

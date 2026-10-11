@@ -30,6 +30,7 @@ mod v69_graph_helper_requests;
 mod v70_graph_assessment_owners;
 mod v71_cache;
 mod v72_streaks;
+mod v73_motion;
 
 const MIN_VERSION: i32 = 45;
 const BASELINE: &str = include_str!("v45.sql");
@@ -175,6 +176,11 @@ const STEPS: &[Step] = &[
     Step {
         from: 71,
         apply: v72_streaks::apply,
+        validate: v72_streaks::validate,
+    },
+    Step {
+        from: 72,
+        apply: v73_motion::apply,
         validate: v72_streaks::validate,
     },
 ];

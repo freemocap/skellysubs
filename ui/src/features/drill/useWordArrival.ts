@@ -1,3 +1,4 @@
+import { reducedMotion } from '../../platform/appearance/motion'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 /** Publication waits for the playback words to settle, then flies into history. */
@@ -8,7 +9,7 @@ export function useWordArrival(id: string | null, ready: boolean, scope: string 
   useEffect(() => { seen.current.clear(); setReleased(null); setFlight(null) }, [scope])
   useEffect(() => {
     if (!id || !ready || seen.current.has(id)) return
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const reduce = reducedMotion()
     const clipEnd = Number(document.querySelector<HTMLElement>('[data-attempt-spectrum]')?.dataset.clipFlightUntil ?? 0)
     const delay = Math.max(450, clipEnd - performance.now() + 450)
     const timer = setTimeout(() => {

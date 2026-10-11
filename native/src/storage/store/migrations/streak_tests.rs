@@ -26,7 +26,7 @@ fn streak_migration_is_empty_preserves_history_and_rolls_back() {
     run_chain(&mut db, 45, 71, &STEPS[..26], v71_cache::validate).unwrap();
     let before = rows(&db, "effort_awards");
     assert!(
-        run_chain(&mut db, 71, 72, STEPS, |_| Err(AppError::new(
+        run_chain(&mut db, 71, 72, &STEPS[..27], |_| Err(AppError::new(
             ErrorCode::Storage,
             "Injected validation failure."
         )))
@@ -35,7 +35,7 @@ fn streak_migration_is_empty_preserves_history_and_rolls_back() {
     assert_eq!(version(&db), 71);
     assert!(db.prepare("SELECT * FROM streak_days").is_err());
     assert_eq!(rows(&db, "effort_awards"), before);
-    run_chain(&mut db, 71, 72, STEPS, v72_streaks::validate).unwrap();
+    run_chain(&mut db, 71, 72, &STEPS[..27], v72_streaks::validate).unwrap();
     assert!(rows(&db, "streak_days").is_empty());
     assert_eq!(rows(&db, "effort_awards"), before);
     assert_eq!(

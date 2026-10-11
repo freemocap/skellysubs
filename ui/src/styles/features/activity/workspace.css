@@ -241,7 +241,6 @@
   .ai-node .ai-icon-button { width: var(--touch-target); height: var(--touch-target); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ai-edge-group[data-state=flowing] > .ai-edge, .ai-node-glyph[data-tone=running], .ai-caret, .ai-now-chip.is-running::before { animation: none; }
-  .ai-node { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .ai-edge-group[data-state=flowing] > .ai-edge, :where(:root[data-motion="reduced"]) .ai-node-glyph[data-tone=running], :where(:root[data-motion="reduced"]) .ai-caret, :where(:root[data-motion="reduced"]) .ai-now-chip.is-running::before { animation: none; }
+
+:where(:root[data-motion="reduced"]) .ai-node { transition: none; }

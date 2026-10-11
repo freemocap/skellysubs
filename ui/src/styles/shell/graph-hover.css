@@ -7,6 +7,4 @@
   background: var(--interaction-tint);
   animation: hydrate-arrive var(--dur-fast) var(--ease-out);
 }
-@media (prefers-reduced-motion: reduce) {
-  .graph-hover-box { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .graph-hover-box { animation: none; }

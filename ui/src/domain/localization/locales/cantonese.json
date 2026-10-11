@@ -1,4 +1,8 @@
 {
+  "Animation": "動畫",
+  "Follow system": "跟隨系統",
+  "Full animation": "完整動畫",
+  "Reduced motion": "減少動態效果",
   "App streak: {value0}": "應用程式連續日數：{value0}",
   "Step": "單步執行",
   "Explain this selection.": "解釋呢段選取嘅內容。",

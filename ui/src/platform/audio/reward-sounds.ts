@@ -1,3 +1,4 @@
+import { reducedMotion } from '../appearance/motion'
 import { COIN_SCALES, DEFAULT_COIN_VOICE, coinNotes, validateCoinVoice, type CoinVoice } from './coin-voice'
 import { reportFault } from '../diagnostics/faults'
 import { visibleRewardRect } from '../../domain/rewards/reward-anchors'
@@ -114,7 +115,7 @@ export function playRewardSound(cue: SoundCue, target: HTMLElement, timing: 'que
     oscillator.start(at)
     oscillator.stop(at + note.duration + 0.01)
   }
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true
+  if (reducedMotion()) return true
   const flashTarget = cue.kind === 'pop' ? target.closest<HTMLElement>('.msg') ?? target : target
   const glow = cssToken('--interaction-ink')
   const flash = flashTarget.animate([

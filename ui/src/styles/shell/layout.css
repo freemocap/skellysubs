@@ -302,9 +302,7 @@
 
 /* Remaining motion owners; graph scope also wins over lazily loaded vendor CSS. */
 
-@media (prefers-reduced-motion: reduce) {
-  .chat-history-delete { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .chat-history-delete { transition: none; }
 
 .configuration-error { white-space: pre-wrap; overflow-wrap: anywhere; }
 

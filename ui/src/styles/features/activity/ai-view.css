@@ -151,6 +151,4 @@
 .ai-view[data-mode=tray] .ai-view-head { flex-wrap: nowrap; gap: var(--space-3); padding: 0 var(--space-2) var(--space-1) var(--space-4); border-bottom-color: var(--line-soft); }
 .ai-view[data-mode=tray] .ai-view-title { flex: none; font-size: var(--type-meta); }
 
-@media (prefers-reduced-motion: reduce) {
-  .logs-panel:has(> .ai-view[data-mode=docked]), .logs-panel.ai-panel-expanded, .ai-tray { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .logs-panel:has(> .ai-view[data-mode=docked]), :where(:root[data-motion="reduced"]) .logs-panel.ai-panel-expanded, :where(:root[data-motion="reduced"]) .ai-tray { animation: none; }

@@ -96,11 +96,11 @@ export function TopBar({ languagePicker = <LearningPicker /> }: { languagePicker
         </button>
         <span id={streakDescription} hidden>{tr('App streak: {value0}', { value0: streaks.value?.app.count ?? 1 })}</span>
         {progressCard.open && <CardLayer anchor={progressAnchor} onClose={progressCard.close}>
-          <div {...progressCard.anchor}><ProgressCard title={tr("All languages")} icon="globe" xp={totals.globalXp} effort={totals.globalEffort} units={['explorations', 'bot']} error={totals.error} expandLabel="Open the Progress page" onExpand={() => { progressCard.close(); openProgress('xp') }}>
-            <div className="progress-card-streak"><ToolbarIcon name="globe" size={14} /><StreakCount value={streaks.value?.app} effects={false} /></div>
+          <div {...progressCard.anchor}><ProgressCard title={tr("All languages")} icon="globe" xp={totals.globalXp} effort={totals.globalEffort} units={[]} headerAccessory={<StreakCount value={streaks.value?.app} effects={false} />} error={totals.error} expandLabel="Open the Progress page" onExpand={() => { progressCard.close(); openProgress('xp') }}>
             {levels && <div className="progress-card-levels">
               <SkillRadarGlyph levels={levels} />
               <div>
+                {activeRow && <strong>{activeRow.name}</strong>}
                 <strong>{tr('Skill level {value0}', { value0: levels.level })}</strong>
                 <span>{levels.level === 0 && levels.ready === 0 ? tr('Get a skill point in each skill to reach level 1.') : tr('{value0} of {value1} skills at {value2} points for level {value3}', { value0: levels.ready, value1: levels.skills.length, value2: levels.target, value3: levels.level + 1 })}</span>
                 <ul>{holdingBack(levels).slice(0, 3).map(({ skill, needed }) => <li key={skill.id} style={{ color: skillColors(skill.id).ink }}>{tr(skill.label)}<span>{tr('{value0} more', { value0: needed })}</span></li>)}</ul>

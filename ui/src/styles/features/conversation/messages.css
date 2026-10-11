@@ -11,9 +11,7 @@
   animation: message-coaching-scan var(--dur-loop-slow) linear infinite;
 }
 @keyframes message-coaching-scan { to { background-position-x: 200%; } }
-@media (prefers-reduced-motion: reduce) {
-  .message-coaching-pending { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .message-coaching-pending { animation: none; }
 .msg {
   min-width: 0;
   overflow-wrap: anywhere;
@@ -170,7 +168,7 @@
 .msg.chat-message.me { border-bottom-right-radius: 0; }
 /* Admission fades in without moving or scaling the bubble's geometry. */
 .msg.chat-message[data-arriving] { animation: hydrate-arrive var(--dur-fast) var(--ease-out); }
-@media (prefers-reduced-motion: reduce) { .msg.chat-message[data-arriving] { animation: none; } }
+:where(:root[data-motion="reduced"]) .msg.chat-message[data-arriving] { animation: none; }
 .msg.chat-message.bot::before, .msg.chat-message.bot::after,
 .msg.chat-message.me::before, .msg.chat-message.me::after {
   content: ''; position: absolute; bottom: calc(-1 * var(--border-width));

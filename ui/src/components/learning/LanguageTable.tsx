@@ -44,7 +44,7 @@ export function LanguageTable({ rows, active, compact, onSelect }: {
     return <th key={id} scope="col" data-column={id} data-unit={unitColumn(id)} aria-sort={current ? (sort.descending ? 'descending' : 'ascending') : 'none'}>
       <button type="button" title={tr(description ?? label)} aria-label={tr(label)} onClick={() => setSort({ column: id, descending: current ? !sort.descending : id !== 'language' })}>
         {icon && <ToolbarIcon name={icon} size={14} />}{(!compact || !icon) && <span>{tr(label)}</span>}
-        {/* Every header reserves the arrow's space, so sorting never changes a column's width. */}
+        {/* Numeric headers center independently of their sort arrow. Sorting never changes column width. */}
         <span className="language-table-sort" data-shown={current || undefined} aria-hidden="true">{current && !sort.descending ? '▴' : '▾'}</span>
       </button>
     </th>

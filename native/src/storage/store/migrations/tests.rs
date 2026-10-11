@@ -660,3 +660,38 @@ fn cache_ownership_upgrade_is_atomic_and_preserves_graph_payloads() {
     assert!(db.prepare("SELECT * FROM inference_executions").is_err());
     v71_cache::validate(&db).unwrap();
 }
+
+#[test]
+fn motion_format_preserves_old_preferences_and_rolls_back() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("motion");
+    let mut db = baseline(&path, true);
+    run_chain(&mut db, 45, 72, &STEPS[..27], v72_streaks::validate).unwrap();
+    let before = rows(&db, "learner");
+    assert!(
+        run_chain(&mut db, 72, 73, &STEPS[..28], |_| Err(AppError::new(
+            ErrorCode::Storage,
+            "Injected failure."
+        )))
+        .is_err()
+    );
+    assert_eq!(version(&db), 72);
+    assert_eq!(rows(&db, "learner"), before);
+    drop(db);
+    let store = Store::open(&path).unwrap();
+    assert_eq!(version(&store.connection), 73);
+    assert_eq!(rows(&store.connection, "learner"), before);
+    assert_eq!(
+        store
+            .snapshot()
+            .unwrap()
+            .learner
+            .preferences
+            .appearance
+            .motion,
+        crate::configuration::appearance::MotionPreference::System
+    );
+    drop(store);
+    let store = Store::open(&path).unwrap();
+    assert_eq!(rows(&store.connection, "learner"), before);
+}

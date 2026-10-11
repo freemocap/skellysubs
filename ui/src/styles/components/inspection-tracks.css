@@ -28,7 +28,7 @@
 .timed-words[data-placement="track"] .timed-word:is([data-active], [data-selected]) > button { background: var(--chip); color: var(--interaction-ink); border-color: var(--interaction-ink); }
 .timed-words[data-placement="track"] .timed-word:has(> button:focus-visible) { z-index: var(--z-sticky); min-width: max-content; }
 @keyframes timed-words-arrive { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .timed-words[data-placement="overlay"] { animation: none; } }
+:where(:root[data-motion="reduced"]) .timed-words[data-placement="overlay"] { animation: none; }
 
 /* The time axis under a set of plots. */
 .time-axis { position: relative; height: var(--space-8); }

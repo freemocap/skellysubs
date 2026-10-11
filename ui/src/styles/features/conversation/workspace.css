@@ -105,6 +105,4 @@
   .mobile-conversation.surface-switched .coach-scrim { animation: hydrate-arrive var(--dur-slow) var(--ease-out); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .mobile-conversation.surface-switched .break, .mobile-conversation.surface-switched .coach-scrim { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .mobile-conversation.surface-switched .break, :where(:root[data-motion="reduced"]) .mobile-conversation.surface-switched .coach-scrim { animation: none; }
