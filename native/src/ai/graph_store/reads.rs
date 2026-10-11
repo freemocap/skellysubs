@@ -101,15 +101,15 @@ impl HistoryStore for ReadStore<'_> {
 
 pub(super) fn stamp(db: &Connection, partition: &Partition) -> Result<Option<Stamp>> {
     let row: Option<(String, String)> = db
-        .query_row(
-            &format!(
-                "SELECT id,stamp FROM {} WHERE {}=?1 AND catalog=?2",
-                partition.engines(),
-                partition.owner_column()
-            ),
-            params![partition.owner.key(), partition.catalog],
-            |r| Ok((r.get(0)?, r.get(1)?)),
-        )
+        .prepare_cached(&format!(
+            "SELECT id,stamp FROM {} WHERE {}=?1 AND catalog=?2",
+            partition.engines(),
+            partition.owner_column()
+        ))
+        .map_err(|e| sql(e, "stamp_read"))?
+        .query_row(params![partition.owner.key(), partition.catalog], |r| {
+            Ok((r.get(0)?, r.get(1)?))
+        })
         .optional()
         .map_err(|e| sql(e, "stamp_read"))?;
     row.map(|(id, raw)| {
@@ -195,8 +195,9 @@ pub(super) fn archive(
 }
 
 // Identifiers/clauses are module-private constants; source values are parameters.
-// Both queries run in the caller's read or owner transaction. CASE additionally
-// prevents allocating an oversized/non-BLOB body if a future caller breaks that.
+// One bounded query runs in the caller's read or owner transaction. CASE prevents
+// allocating oversized/non-BLOB bodies. Bind the limit so the prepared statement
+// is reusable across record sizes, without caching content or skipping validation.
 pub(super) fn blob(
     db: &Connection,
     table: &str,
@@ -205,18 +206,40 @@ pub(super) fn blob(
     values: &[&dyn rusqlite::ToSql],
     limit: usize,
 ) -> Result<Vec<u8>> {
-    let length: Option<i64> = db
-        .query_row(
-            &format!("SELECT length({column}) FROM {table} WHERE {clause}"),
-            values,
-            |r| r.get(0),
-        )
+    let limit_parameter = values.len() + 1;
+    let cap = i64::try_from(limit).unwrap_or(i64::MAX);
+    let mut parameters = values.to_vec();
+    parameters.push(&cap);
+    let row: Option<(i64, Option<Vec<u8>>)> = db
+        .prepare_cached(&format!("SELECT length({column}), CASE WHEN typeof({column})='blob' AND length({column})<=?{limit_parameter} THEN {column} ELSE NULL END FROM {table} WHERE {clause}"))
+        .map_err(|e| sql(e, "blob_read"))?
+        .query_row(parameters.as_slice(), |r| Ok((r.get(0)?, r.get(1)?)))
         .optional()
-        .map_err(|e| sql(e, "blob_length"))?;
-    let length = length.ok_or_else(|| fault("record_missing", "blob"))?;
+        .map_err(|e| sql(e, "blob_read"))?;
+    let (length, body) = row.ok_or_else(|| fault("record_missing", "blob"))?;
     if usize::try_from(length).ok().is_none_or(|n| n > limit) {
         return Err(fault("record_byte_limit", "blob"));
     }
-    let body: Option<Vec<u8>> = db.query_row(&format!("SELECT CASE WHEN typeof({column})='blob' AND length({column})={length} THEN {column} ELSE NULL END FROM {table} WHERE {clause}"), values, |r| r.get(0)).map_err(|e| sql(e, "blob_read"))?;
     body.ok_or_else(|| fault("record_mismatch", "blob"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bounded_blob_query_rechecks_limits_type_and_content_on_every_read() {
+        let db = Connection::open_in_memory().unwrap();
+        db.execute_batch("CREATE TABLE sample(id INTEGER PRIMARY KEY, payload); INSERT INTO sample VALUES(1,x'010203'),(2,zeroblob(1000000)),(3,'text'),(4,x'');").unwrap();
+        let read = |id: i32, limit| blob(&db, "sample", "payload", "id=?1", &[&id], limit);
+        assert_eq!(read(1, 3).unwrap(), vec![1, 2, 3]);
+        assert_eq!(read(1, 2).unwrap_err().code, "record_byte_limit");
+        assert_eq!(read(2, 2).unwrap_err().code, "record_byte_limit");
+        assert_eq!(read(3, 4).unwrap_err().code, "record_mismatch");
+        assert!(read(4, 0).unwrap().is_empty());
+        assert_eq!(read(5, 10).unwrap_err().code, "record_missing");
+        db.execute("UPDATE sample SET payload=x'040506' WHERE id=1", [])
+            .unwrap();
+        assert_eq!(read(1, 3).unwrap(), vec![4, 5, 6]);
+    }
 }

@@ -35,6 +35,14 @@ export function typeName(contract: string): string {
   return contractWords(contract).join(' ')
 }
 
+/// Whether a contract belongs to the `ai` namespace: credentials, install ids,
+/// model targets and sampling settings that let a model call happen. They are
+/// counted on a node, never shown as rows.
+export function isAccessContract(contract: string): boolean {
+  if (!contract) throw new Error('A contract must be a non-empty string.')
+  return contract.replace(/^\d+:/, '').startsWith('ai.')
+}
+
 /// An operation contract as the verb phrase its author gave it
 /// (`1:conversation.generate-prose` → `Generate prose`).
 export function operationVerb(contract: string): string {

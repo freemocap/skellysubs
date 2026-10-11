@@ -3,6 +3,38 @@
 use super::*;
 
 impl Runtime {
+    pub(crate) fn persisted_attempt_is_current(
+        &self,
+        db: &Connection,
+        engine: &str,
+        run: &str,
+        node: &str,
+        attempt: &str,
+    ) -> Result<Option<bool>> {
+        if let Some(view) = self.retained_view(engine, run) {
+            return Ok(Some(
+                view.nodes.get(node) == Some(&Disposition::Adopted)
+                    && view
+                        .attempts
+                        .get(node)
+                        .and_then(|a| a.last())
+                        .is_some_and(|a| a.id == attempt),
+            ));
+        }
+        let Some(host) = self.engines.get(engine) else {
+            return Ok(None);
+        };
+        let mut reader =
+            graph_store::BorrowedReadStore::new(db, self.partition(engine)?).map_err(error)?;
+        Ok(Some(
+            host.read_adopted_attempt(run, node, &mut reader)
+                .map_err(error)?
+                .map(|id| serde_json::to_string(&id))
+                .transpose()?
+                .as_deref()
+                == Some(attempt),
+        ))
+    }
     /// Current authoritative persisted state, without replaying historical events.
     /// The caller holds a domain read transaction; every record is stamp-checked.
     pub(crate) fn persisted_inspection(
@@ -11,6 +43,9 @@ impl Runtime {
         engine: &str,
         run: &str,
     ) -> Result<Option<InspectionSnapshot>> {
+        if let Some(view) = self.retained_view(engine, run) {
+            return Ok(Some(view));
+        }
         let Some(host) = self.engines.get(engine) else {
             return Ok(None);
         };
@@ -28,6 +63,7 @@ impl Runtime {
         .map_err(error)
     }
 
+    #[cfg(test)]
     pub fn history(
         &self,
         db: &Connection,
@@ -36,56 +72,8 @@ impl Runtime {
         before: Option<&str>,
         count: u32,
     ) -> Result<RunHistory> {
-        if !(1..=64).contains(&count) {
-            return Err(AppError::new(
-                ErrorCode::Validation,
-                "Graph history page size must be between 1 and 64.",
-            ));
-        }
-        let before = before
-            .map(|value| {
-                value
-                    .parse::<u64>()
-                    .ok()
-                    .filter(|n| n.to_string() == value)
-                    .ok_or_else(|| {
-                        AppError::new(ErrorCode::Validation, "Invalid graph history revision.")
-                    })
-            })
-            .transpose()?;
         let engine = self.owner_engine(db, conversation, run)?;
-        let catalog = db.query_row(
-            "SELECT catalog FROM graph_engines WHERE id=?1",
-            [&engine],
-            |r| r.get(0),
-        )?;
-        let mut reader = graph_store::ReadStore::from_transaction(
-            db.unchecked_transaction()?,
-            Partition {
-                owner: crate::ai::graph_store::Owner::Conversation(conversation.into()),
-                catalog,
-            },
-        );
-        let checkpoint = reader
-            .checkpoint(limits().checkpoint)
-            .map_err(error)?
-            .ok_or_else(|| AppError::new(ErrorCode::Storage, "Graph checkpoint missing."))?;
-        checkpoint
-            .run_history(
-                run,
-                before,
-                count as usize,
-                HistoricalLimits {
-                    history: limits().history,
-                    state: limits().state,
-                },
-                ExportLimits {
-                    bytes: 8 * 1024 * 1024,
-                    attempts: 4096,
-                },
-                &mut reader,
-            )
-            .map_err(error)
+        crate::ai::inspection::prepare(db, &engine, run)?.history(run, before, count)
     }
 
     pub(super) fn retained(

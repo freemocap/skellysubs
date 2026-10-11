@@ -1,28 +1,28 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { ToolbarIcon } from '../../../components/controls/ToolbarIcon'
 import { useI18n } from '../../../components/localization/i18n'
 import type { GraphOverlay } from '../../../domain/activity/graph-overlay'
 import type { GraphView } from '../../../domain/activity/graph-projection'
-import { humanizeId } from '../../../domain/activity/graph-types'
-import { cardMetrics, layoutWorkspace, type NodeLevel, type Orientation, type PlacedEdge, type Point, type WorkspaceGeometry, type WorkspaceState } from './layout'
+import { cardMetrics, layoutWorkspace, type Orientation, type PlacedEdge, type Point, type Station, type WorkspaceState } from './layout'
 import { typeColor, useWorkspaceGeometry } from './geometry'
-import { GroupBubble, GroupCard, GroupFrame, OperationBubble, OperationCard, type HoverTarget, type Interaction, type Preview, type ResizeEdge } from './NodeItems'
+import { GroupFrame, OperationBubble, OperationCard, StationCard, type HoverTarget, type Interaction, type Preview, type ResizeEdge, type StationView } from './NodeItems'
 import { nodeName } from './wording'
+import type { StepProduct } from '../../../domain/conversation/record-view'
 
 export interface WorkspaceProps {
   view: GraphView
   /// Facts of the selected revision; null shows structure only.
   overlay: GraphOverlay | null
-  /// Motion is reserved for the live revision.
+  /// Animate active states while following live execution or playing recorded revisions.
   live: boolean
   preview: Preview | null
+  /// What each step made, as the conversation shows it.
+  products: Readonly<Record<string, StepProduct[]>>
+  /// What feeds the artifact and what takes its results, outside the run.
+  stations: StationView[]
   state: WorkspaceState
   orientation: Orientation
   /// A step to bring into view, with a counter so the same step can be asked for again.
   focus: { id: string; serial: number } | null
-  onLevel: (id: string, level: NodeLevel) => void
-  onFold: (group: string, folded: boolean) => void
-  onLocalSteps: (shown: boolean) => void
   onOffset: (id: string, offset: Point) => void
   /// A resize commits the new size and, for a top or start edge, the new offset.
   onBox: (id: string, offset: Point, size: Point) => void
@@ -33,11 +33,11 @@ export interface WorkspaceProps {
 const DRAG_THRESHOLD = 4
 const MIN_SCALE = 0.55
 
-/// Edges keep their static binding identity. Motion indicates consumer activity,
+/// Wires keep their static binding identity. Motion indicates consumer activity,
 /// never per-port availability (optional outputs may be absent after success).
 function edgeState(edge: PlacedEdge, overlay: GraphOverlay | null, live: boolean): 'structure' | 'flowing' {
-  if (!overlay) return 'structure'
-  return live && edge.consumers.some(node => overlay.nodes[node].tone === 'running') ? 'flowing' : 'structure'
+  if (!overlay || !live) return 'structure'
+  return overlay.nodes[edge.target]?.tone === 'running' ? 'flowing' : 'structure'
 }
 
 type Gesture = { kind: 'drag' | 'resize'; id: string; edge: ResizeEdge | null; origin: Point; start: Point; baseOffset: Point; baseSize: Point; natural: Point; moved: boolean }
@@ -58,7 +58,7 @@ function resized(gesture: Gesture, delta: Point): { offset: Point; size: Point }
 /// The AI workspace canvas. Geometry comes only from structure and the viewer's
 /// presentation choices; the overlay changes colors, words and motion. The
 /// canvas scales down to fit its container so the whole run is visible at rest.
-export function Workspace({ view, overlay, live, preview, state, orientation, focus, onLevel, onFold, onLocalSteps, onOffset, onBox, onOpen, onHover }: WorkspaceProps) {
+export function Workspace({ view, overlay, live, preview, products, stations, state, orientation, focus, onOffset, onBox, onOpen, onHover }: WorkspaceProps) {
   const tr = useI18n()
   const geometry = useWorkspaceGeometry()
   const [gesture, setGesture] = useState<Gesture | null>(null)
@@ -75,7 +75,8 @@ export function Workspace({ view, overlay, live, preview, state, orientation, fo
     const next = resized(gesture, delta)
     return { ...state, offsets: { ...state.offsets, [gesture.id]: next.offset }, sizes: { ...state.sizes, [gesture.id]: next.size } }
   }, [state, gesture])
-  const layout = useMemo(() => layoutWorkspace(view, shown, geometry, orientation), [view, shown, geometry, orientation])
+  const stationShapes = useMemo<Station[]>(() => stations.map(station => ({ id: station.id, side: station.side, ports: station.ports, rows: station.rows.length })), [stations])
+  const layout = useMemo(() => layoutWorkspace(view, shown, geometry, orientation, stationShapes), [view, shown, geometry, orientation, stationShapes])
 
   useLayoutEffect(() => {
     const element = scrollRef.current
@@ -104,7 +105,8 @@ export function Workspace({ view, overlay, live, preview, state, orientation, fo
   const begin = useCallback((kind: Gesture['kind'], id: string, edge: ResizeEdge | null, event: ReactPointerEvent) => {
     if (event.button !== 0) return
     const point: Point = [event.clientX, event.clientY]
-    const natural = naturalSize(view, geometry, id)
+    const operation = view.operations[id]
+    const natural: Point = operation ? [geometry.cardWidth, cardMetrics(operation, geometry).height] : [geometry.cardWidth, 0]
     const next: Gesture = { kind, id, edge, origin: point, start: point, baseOffset: state.offsets[id] ?? [0, 0], baseSize: state.sizes[id] ?? natural, natural, moved: false }
     gestureRef.current = next
     setGesture(next)
@@ -150,48 +152,38 @@ export function Workspace({ view, overlay, live, preview, state, orientation, fo
   const [hovered, setHovered] = useState<HoverTarget | null>(null)
   const hover = (target: HoverTarget | null) => { setHovered(target); onHover(target) }
   const related = (edge: PlacedEdge) => hovered !== null && (edge.source === hovered.id || edge.target === hovered.id)
+  const stationById = new Map(stations.map(station => [station.id, station]))
+  const endName = (id: string) => stationById.get(id)?.name ?? nodeName(view, id)
   const edgeTitle = (edge: PlacedEdge) => {
-    const ends = `${nodeName(view, edge.producers[0])} → ${nodeName(view, edge.consumers[0])}`
-    return edge.via.length ? tr('{value0}, through {value1}', { value0: ends, value1: edge.via.map(step => nodeName(view, step)).join(', ') }) : ends
+    const ends = `${endName(edge.source)} → ${endName(edge.target)}`
+    if (edge.kind === 'control') return tr('{value0}: runs after', { value0: ends })
+    if (edge.kind === 'guard') return tr('{value0}: only if', { value0: ends })
+    if (edge.kind === 'hand') return tr('{value0}: hand-off outside the graph', { value0: ends })
+    return ends
   }
-  const localCount = view.ids.filter(id => view.operations[id].resource === 'Local').length
-  const localLabel = state.localSteps ? tr('Hide local steps') : tr('Show {value0} local steps', { value0: localCount })
 
   return <div className="ai-workspace" ref={scrollRef} data-orientation={orientation} data-live={live} data-focus={hovered ? 'true' : undefined} data-gesture={gesture?.kind} data-edge={gesture?.edge ?? undefined}>
-    <div className="ai-workspace-tools">
-      <button type="button" className="ai-chip" aria-pressed={state.localSteps} onClick={() => onLocalSteps(!state.localSteps)}
-        title={tr('Local steps move data around inside the app. AI steps call a model.')}>
-        <ToolbarIcon name="models" size={13} />{localLabel}
-      </button>
-      {layout.inlineGroups.length > 0 && <span className="ai-workspace-note">{tr('{value0} is drawn without a frame because its steps interleave with others.', { value0: layout.inlineGroups.map(group => humanizeId(group.slice(group.lastIndexOf('/') + 1))).join(', ') })}</span>}
-    </div>
     <div className="ai-workspace-scaler" style={{ width: layout.width * scale, height: layout.height * scale }}>
       <div className="ai-workspace-layer" style={{ width: layout.width, height: layout.height, transform: `scale(${scale})` }}>
+        {layout.frames.map(frame => <GroupFrame key={frame.id} frame={frame} />)}
         <svg className="ai-workspace-edges" width={layout.width} height={layout.height} aria-hidden="true">
           {layout.edges.map(edge => <g key={edge.id} className="ai-edge-group" data-kind={edge.kind} data-state={edgeState(edge, overlay, live)} data-related={related(edge) || undefined}>
             <path d={edge.path} className="ai-edge-halo" />
             <path d={edge.path} className="ai-edge" style={edge.contract ? { stroke: typeColor(edge.contract) } : undefined}><title>{edgeTitle(edge)}</title></path>
-            {edge.via.length > 0 && <circle className="ai-edge-via" cx={(edge.from[0] + edge.to[0]) / 2} cy={(edge.from[1] + edge.to[1]) / 2} r={3} />}
           </g>)}
         </svg>
         {layout.items.map(item => {
+          if (item.kind === 'station') {
+            const station = stationById.get(item.id)
+            if (!station) throw new Error(`The layout placed a station the workspace does not know: ${item.id}`)
+            return <StationCard key={item.id} item={item} station={station} interaction={interaction} onHover={hover} />
+          }
           const shared = { view, overlay, geometry, interaction, onHover: hover }
-          if (item.kind === 'block') return <GroupFrame key={`block:${item.id}`} item={item} onFold={() => onFold(item.id, true)} />
-          if (item.kind === 'group') return item.level === 'card'
-            ? <GroupCard key={`group:${item.id}`} {...shared} item={item} onUnfold={() => onFold(item.id, false)} onShrink={() => onLevel(item.id, 'bubble')} />
-            : <GroupBubble key={`group:${item.id}`} {...shared} item={item} onExpand={() => onLevel(item.id, 'card')} />
           return item.level === 'card'
-            ? <OperationCard key={item.id} {...shared} item={item} preview={preview} onOpen={() => onOpen(item.id)} onShrink={() => onLevel(item.id, 'bubble')} />
-            : <OperationBubble key={item.id} {...shared} item={item} onExpand={() => onLevel(item.id, 'card')} />
+            ? <OperationCard key={item.id} {...shared} item={item} preview={preview} products={products[item.id] ?? []} onOpen={() => onOpen(item.id)} />
+            : <OperationBubble key={item.id} {...shared} item={item} onOpen={() => onOpen(item.id)} />
         })}
       </div>
     </div>
   </div>
-}
-
-/// The size an operation card has before any resize.
-function naturalSize(view: GraphView, geometry: WorkspaceGeometry, id: string): Point {
-  const operation = view.operations[id]
-  if (!operation) throw new Error(`Cannot resize an item that is not an operation: ${id}`)
-  return [geometry.cardWidth, cardMetrics(view, operation, geometry).height]
 }

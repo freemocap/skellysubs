@@ -46,13 +46,18 @@ pub(super) fn current_using(
     else {
         return Ok(None);
     };
-    let live = runtime
-        .map(|runtime| runtime.persisted_inspection(db, &engine, &run))
+    if let Some(current) = runtime
+        .map(|runtime| runtime.persisted_attempt_is_current(db, &engine, &run, &node, &attempt))
         .transpose()?
-        .flatten();
-    let snapshot = if let Some(snapshot) = live {
-        snapshot
-    } else {
+        .flatten()
+    {
+        return if current {
+            Ok(Some((id, serde_json::from_str(&raw)?)))
+        } else {
+            Ok(None)
+        };
+    }
+    let snapshot = {
         let limits = graph_runtime::limits();
         let mut reader = graph_store::BorrowedReadStore::new(
             db,

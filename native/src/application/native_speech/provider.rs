@@ -107,6 +107,10 @@ pub(super) async fn provide(
             &request.settings.install_id,
             &emit,
         );
+        let transport = crate::ai::content::capture::scope(
+            state.content_writer(context.identity())?,
+            transport,
+        );
         tokio::pin!(transport);
         let completed = loop {
             tokio::select! {

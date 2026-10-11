@@ -253,7 +253,17 @@ impl crate::storage::store::Store {
 }
 
 /// One owner's recording receipts, newest first.
+#[cfg(test)]
 pub fn views(db: &Connection, owner: &RecordingOwner) -> Result<Vec<TranscriptionAttempt>> {
+    views_using(db, owner, |id| {
+        crate::ai::results::receipt_for_consumer(db, id)
+    })
+}
+pub(crate) fn views_using(
+    db: &Connection,
+    owner: &RecordingOwner,
+    mut receipt: impl FnMut(&str) -> Result<Option<serde_json::Value>>,
+) -> Result<Vec<TranscriptionAttempt>> {
     let (conversation, drill_item) = owner.columns();
     let rows = db.prepare("SELECT id,route,model,state,started_at,finished_at,error,diagnostics FROM transcription_attempts WHERE conversation_id IS ?1 AND drill_item_id IS ?2 ORDER BY rowid DESC LIMIT 50")?
         .query_map(params![conversation, drill_item], |r| Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?,r.get::<_,String>(2)?,r.get::<_,String>(3)?,r.get::<_,String>(4)?,r.get::<_,Option<String>>(5)?,r.get::<_,Option<String>>(6)?,crate::diagnostics::response::column(r,7)?)))?
@@ -261,7 +271,7 @@ pub fn views(db: &Connection, owner: &RecordingOwner) -> Result<Vec<Transcriptio
     rows.into_iter()
         .map(
             |(id, route, model, state, started_at, finished_at, error, mut diagnostics)| {
-                if let Some(execution) = crate::ai::results::receipt_for_consumer(db, &id)? {
+                if let Some(execution) = receipt(&id)? {
                     diagnostics.get_or_insert_with(|| serde_json::json!({}))["sourceExecution"] =
                         execution;
                 }
@@ -278,6 +288,28 @@ pub fn views(db: &Connection, owner: &RecordingOwner) -> Result<Vec<Transcriptio
             },
         )
         .collect()
+}
+
+/// A submitted message can combine several takes. Validate identities without
+/// pretending an edited message is identical to a recognizer's transcript.
+pub(crate) fn validate_sources(db: &Connection, conversation: &str, ids: &[String]) -> Result<()> {
+    let unique: std::collections::BTreeSet<_> = ids.iter().collect();
+    if ids.len() > 128 || unique.len() != ids.len() {
+        return Err(AppError::new(
+            ErrorCode::Validation,
+            "Invalid recording sources.",
+        ));
+    }
+    for id in ids {
+        let valid:bool=db.query_row("SELECT EXISTS(SELECT 1 FROM transcription_attempts WHERE id=?1 AND conversation_id=?2 AND state='succeeded')",params![id,conversation],|r|r.get(0))?;
+        if !valid {
+            return Err(AppError::new(
+                ErrorCode::Validation,
+                "Recording source does not belong to this conversation.",
+            ));
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]

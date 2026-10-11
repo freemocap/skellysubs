@@ -4,12 +4,13 @@ import {
   Keyboard, Layers, Lightbulb, LockKeyhole, Maximize2, Menu, MessageSquare, Mic,
   Minimize2, Moon, PanelTopClose, Pause, Pencil, Play, ScanSearch,
   Plus, RotateCw, Settings, SlidersHorizontal, Smile, Square,
-  Star, Sun, Telescope, Trash2, TriangleAlert, UserRound, Volume2, WholeWord,
+  Star, Sun, Telescope, Trash2, TriangleAlert, UserRound, Volume2, WholeWord, Workflow,
   X
 } from 'lucide-react'
 
 const LIBRARY_ICONS = {
   telescope: Telescope,
+  record: Workflow,
   bot: Bot,
   smile: Smile,
   practice: BicepsFlexed,

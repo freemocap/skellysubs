@@ -96,13 +96,17 @@ pub(super) async fn provide(
             generation_receipts::dispatch(&mut store, request)?;
             request.mark_submitted();
         }
-        let output = graph_request::execute(
+        let transport = graph_request::execute(
             &client,
             &key,
             &prepared.request,
             prepared.output(),
             &invocation,
             deltas,
+        );
+        let output = crate::ai::content::capture::scope(
+            state.content_writer(invocation.identity())?,
+            transport,
         )
         .await;
         if let Some(error) = output.capture_failure {

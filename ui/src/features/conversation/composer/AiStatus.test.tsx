@@ -28,7 +28,7 @@ function turn(id: string, nodes: Record<string, Disposition>): TurnView {
       stepping: null, step_available: false, attempts: {}, reasons: {} } }
 }
 
-const idle = { transcribing: false, scheduling: false, turns: [], synthesizing: false }
+const idle = { transcribing: false, scheduling: false, turns: [], synthesizing: false, beside: null }
 const glossing = turn('t1', { reply_gloss: 'Running' })
 const translating = turn('t1', { reply_translation: 'Running' })
 

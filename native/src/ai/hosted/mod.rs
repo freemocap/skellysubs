@@ -43,6 +43,7 @@ pub async fn body_with_private(
                 .with_refusal(crate::ai::policy::refusal::classify(None, retry_after, None))
                 .with_diagnostics(serde_json::json!({"stage":"hosted_limit_body","http":http,"bytes_read":bytes.len(),"cause":read.diagnostics}))
         })? {
+            crate::ai::content::capture::chunk(&chunk)?;
             if bytes.len() + chunk.len() > 65536 {
                 return Err(
                     fault("Hosted limit response exceeds its size limit.").with_refusal(
@@ -52,6 +53,7 @@ pub async fn body_with_private(
             }
             bytes.extend_from_slice(&chunk);
         }
+        crate::ai::content::capture::complete()?;
         let parsed = serde_json::from_slice::<serde_json::Value>(&bytes);
         let parse_error = parsed.as_ref().err().map(|cause| {
             crate::diagnostics::response::json_context(
@@ -107,11 +109,13 @@ pub async fn body_with_private(
             fault("Could not read the hosted response."),
         )
     })? {
+        crate::ai::content::capture::chunk(&chunk)?;
         if bytes.len() + chunk.len() > 65536 {
             return Err(fault("The hosted response exceeds its size limit."));
         }
         bytes.extend_from_slice(&chunk);
     }
+    crate::ai::content::capture::complete()?;
     Ok(bytes)
 }
 

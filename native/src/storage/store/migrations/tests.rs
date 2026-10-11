@@ -430,7 +430,7 @@ fn upgrade_preserves_conversation_graph_and_allows_continued_workspace_use() {
     // their version-45 contracts, while milestone receipts were introduced later.
     store
         .connection
-        .execute_batch("DROP TABLE graph_helper_requests; DROP TRIGGER graph_engine_helper_owners; DROP TABLE workspace_transcription_cache; DROP TABLE workspace_graph_consumers; DROP VIEW native_graph_audio_cache; DROP VIEW native_graph_audio_receipts; DROP TABLE workspace_graph_audio_cache; DROP TABLE workspace_graph_audio_receipts; DROP TABLE workspace_reading_cache; DROP TABLE workspace_graph_runs; DROP TABLE workspace_graph_transport_identities; DROP TABLE workspace_graph_archives; DROP TABLE workspace_graph_records; DROP TABLE workspace_graph_engines; DROP VIEW graph_conversation_runs; DROP TABLE graph_speech_requests; DROP TRIGGER graph_engine_speech_owners; DROP TABLE graph_audio_deliveries; DROP TABLE graph_audio_cache; DROP TABLE graph_audio_receipts; DROP TABLE conversation_graph_disclosures; DROP TABLE conversation_graph_assessments; DROP TABLE conversation_graph_reply_sources; DROP TRIGGER conversation_graph_publication_reserved; DROP TABLE graph_transport_identities; DROP TABLE conversation_graph_publications; DROP TABLE conversation_graph_effects; DROP TRIGGER turn_execution_conversation_fixed; DROP TABLE turn_execution_owners; DROP TABLE graph_archives; DROP TABLE graph_records; DROP TABLE graph_engines; DROP TABLE reading_dictionary; DROP TABLE reading_packages; DROP TABLE skill_level_events; UPDATE learner SET preferences=json_remove(preferences,'$.execution');")
+        .execute_batch("DROP TABLE ai_content_chunks; DROP TABLE ai_content_records; DROP TABLE graph_helper_requests; DROP TRIGGER graph_engine_helper_owners; DROP TABLE workspace_transcription_cache; DROP TABLE workspace_graph_consumers; DROP VIEW native_graph_audio_cache; DROP VIEW native_graph_audio_receipts; DROP TABLE workspace_graph_audio_cache; DROP TABLE workspace_graph_audio_receipts; DROP TABLE workspace_reading_cache; DROP TABLE workspace_graph_runs; DROP TABLE workspace_graph_transport_identities; DROP TABLE workspace_graph_archives; DROP TABLE workspace_graph_records; DROP TABLE workspace_graph_engines; DROP VIEW graph_conversation_runs; DROP TABLE graph_speech_requests; DROP TRIGGER graph_engine_speech_owners; DROP TABLE graph_audio_deliveries; DROP TABLE graph_audio_cache; DROP TABLE graph_audio_receipts; DROP TABLE conversation_graph_disclosures; DROP TABLE conversation_graph_assessments; DROP TABLE conversation_graph_reply_sources; DROP TRIGGER conversation_graph_publication_reserved; DROP TABLE graph_transport_identities; DROP TABLE conversation_graph_publications; DROP TABLE conversation_graph_effects; DROP TRIGGER turn_execution_conversation_fixed; DROP TABLE turn_execution_owners; DROP TABLE graph_archives; DROP TABLE graph_records; DROP TABLE graph_engines; DROP TABLE reading_dictionary; DROP TABLE reading_packages; DROP TABLE skill_level_events; UPDATE learner SET preferences=json_remove(preferences,'$.execution');")
         .unwrap();
     store.connection.execute_batch(OPTIONAL_BASELINE).unwrap();
     store
@@ -679,7 +679,7 @@ fn motion_format_preserves_old_preferences_and_rolls_back() {
     assert_eq!(rows(&db, "learner"), before);
     drop(db);
     let store = Store::open(&path).unwrap();
-    assert_eq!(version(&store.connection), 73);
+    assert_eq!(version(&store.connection), SCHEMA_VERSION);
     assert_eq!(rows(&store.connection, "learner"), before);
     assert_eq!(
         store
@@ -694,4 +694,37 @@ fn motion_format_preserves_old_preferences_and_rolls_back() {
     drop(store);
     let store = Store::open(&path).unwrap();
     assert_eq!(rows(&store.connection, "learner"), before);
+}
+
+#[test]
+fn original_content_migration_preserves_history_and_rolls_back_atomically() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("db");
+    let mut db = baseline(&path, true);
+    run_chain(&mut db, 45, 73, &STEPS[..28], |_| Ok(())).unwrap();
+    let before = rows(&db, "learner");
+    assert!(
+        run_chain(&mut db, 73, 74, STEPS, |_| Err(AppError::new(
+            ErrorCode::Storage,
+            "fixture"
+        )))
+        .is_err()
+    );
+    assert_eq!(version(&db), 73);
+    assert_eq!(rows(&db, "learner"), before);
+    assert!(db.prepare("SELECT id FROM ai_content_records").is_err());
+    drop(db);
+    let store = Store::open(&path).unwrap();
+    assert_eq!(version(&store.connection), 74);
+    assert_eq!(rows(&store.connection, "learner"), before);
+    assert_eq!(
+        store
+            .connection
+            .query_row("SELECT count(*) FROM ai_content_records", [], |r| r
+                .get::<_, i64>(0))
+            .unwrap(),
+        0
+    );
+    drop(store);
+    assert!(Store::open(&path).is_ok());
 }

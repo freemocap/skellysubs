@@ -43,7 +43,7 @@ if (typeof document !== 'undefined') {
   // tokens, so apply the stylesheet's own pixel-valued geometry tokens.
   const tokens = readFileSync(new FileUrl('../src/styles/foundations/tokens.css', import.meta.url), 'utf8')
   const root = tokens.slice(tokens.indexOf(':root {'), tokens.indexOf('}', tokens.indexOf(':root {')))
-  for (const [, name, value] of root.matchAll(/(--graph-[\w-]+|--border-width):\s*([\d.]+px);/g)) document.documentElement.style.setProperty(name, value)
+  for (const [, name, value] of root.matchAll(/(--graph-[\w-]+|--record-[\w-]+|--border-width):\s*([\d.]+px);/g)) document.documentElement.style.setProperty(name, value)
 
   // Nothing under test scrolls, but the chat stream asks the DOM to.
   Element.prototype.scrollIntoView ??= vi.fn()

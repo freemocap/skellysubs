@@ -471,7 +471,8 @@ The shared host supplies credentials, transport and classified response evidence
 model, endpoint/account/workspace, captured language/variety/tag and prompt context
 identify a result. No text normalization, audio preprocessing or recognition
 settings change accompanies reuse. Validated text and timing are evictable local
-payloads; the shared repository does not copy original recordings into its cache.
+payloads. Format 74 also retains the accepted source WAV and original transport
+content in the private shared inference cache, independently of normalized results.
 Hidden server processing changes are not discovered by local request identity.
 
 `speech/recording/voice.rs` retains per-recording inspection, Chat/Drill ownership,
@@ -489,6 +490,21 @@ and timing/confidence diagnostics survive success, failure and cache-write failu
 Views attach the current shared receipt, including settlement after owner departure.
 The existing capture/reservation pause and access checks remain in force; reuse
 does not authorize starting a new recording while execution is paused.
+
+### Private computation originals
+
+`ai/content.rs` stores original request/response bytes and accepted microphone WAVs
+under the learner's inference-cache capacity and LRU policy. Graph execution and
+recording identities remain durable when payloads are evicted; inspections disclose
+availability, byte count, digest, credential removal and complete/partial/interrupted
+state. Content reads validate immutable captured bytes after releasing the store lock.
+Transport capture is at the app-to-inference-service boundary. Transcription retains
+actual multipart field values and WAV bytes separately. It does not claim to contain
+an upstream provider exchange that the app never received. Actual credentials remain
+excluded, while prompts, transcripts and response content remain available privately.
+Diagnostic logs and exports retain their separate content-free policy. Older missing
+originals cannot be reconstructed by this migration. Conversation inputs retain all
+contributing recording IDs, including across restart and edited-message acceptance.
 
 ### Manual Drill storage
 

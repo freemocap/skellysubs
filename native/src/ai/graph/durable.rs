@@ -100,7 +100,8 @@ impl DurableEngine {
             evidence: &self.evidence,
             max_bytes: self.limits.checkpoint.bytes,
             store,
-        };
+        }
+        .with_resident(&self.engine.state);
         Ok(
             super::record_access::RecordAccess::execution(&mut records, execution)?
                 .work
@@ -119,7 +120,8 @@ impl DurableEngine {
             evidence: &self.evidence,
             max_bytes: self.limits.checkpoint.bytes,
             store,
-        };
+        }
+        .with_resident(&self.engine.state);
         Ok(
             super::record_access::RecordAccess::execution(&mut records, execution)?
                 .evidence
@@ -317,11 +319,14 @@ impl DurableEngine {
         let store = &mut BudgetedStore::new(store, self.limits.record_reads);
         self.check_live()?;
         self.engine.project_using(
-            &mut super::record_access::StoredAccess {
-                evidence: &self.evidence,
-                max_bytes: self.limits.checkpoint.bytes,
-                store,
-            },
+            &mut super::record_access::ReadAccess::new(
+                super::record_access::StoredAccess {
+                    evidence: &self.evidence,
+                    max_bytes: self.limits.checkpoint.bytes,
+                    store,
+                }
+                .with_resident(&self.engine.state),
+            ),
             self.stamp(),
             run,
             limits,
@@ -332,11 +337,14 @@ impl DurableEngine {
         let store = &mut BudgetedStore::new(store, self.limits.record_reads);
         self.check_live()?;
         self.engine.outputs_using(
-            &mut super::record_access::StoredAccess {
-                evidence: &self.evidence,
-                max_bytes: self.limits.checkpoint.bytes,
-                store,
-            },
+            &mut super::record_access::ReadAccess::new(
+                super::record_access::StoredAccess {
+                    evidence: &self.evidence,
+                    max_bytes: self.limits.checkpoint.bytes,
+                    store,
+                }
+                .with_resident(&self.engine.state),
+            ),
             run,
         )
     }
@@ -352,11 +360,14 @@ impl DurableEngine {
         self.check_live()?;
         let store = &mut BudgetedStore::new(store, self.limits.record_reads);
         self.engine.node_outputs_using(
-            &mut super::record_access::StoredAccess {
-                evidence: &self.evidence,
-                max_bytes: self.limits.checkpoint.bytes,
-                store,
-            },
+            &mut super::record_access::ReadAccess::new(
+                super::record_access::StoredAccess {
+                    evidence: &self.evidence,
+                    max_bytes: self.limits.checkpoint.bytes,
+                    store,
+                }
+                .with_resident(&self.engine.state),
+            ),
             run,
             node,
         )
@@ -374,14 +385,41 @@ impl DurableEngine {
         self.check_live()?;
         let store = &mut BudgetedStore::new(store, self.limits.record_reads);
         self.engine.node_input_using(
-            &mut super::record_access::StoredAccess {
-                evidence: &self.evidence,
-                max_bytes: self.limits.checkpoint.bytes,
-                store,
-            },
+            &mut super::record_access::ReadAccess::new(
+                super::record_access::StoredAccess {
+                    evidence: &self.evidence,
+                    max_bytes: self.limits.checkpoint.bytes,
+                    store,
+                }
+                .with_resident(&self.engine.state),
+            ),
             run,
             node,
             port,
+        )
+    }
+
+    /// Resolve several actual input bindings at the same stamp, calculating the
+    /// shared run state once. Protected content; never activates consumers.
+    pub fn read_node_inputs(
+        &self,
+        run: &str,
+        inputs: &[(&str, &str)],
+        store: &mut impl RecordStore,
+    ) -> Result<Vec<Option<serde_json::Value>>> {
+        self.check_live()?;
+        let store = &mut BudgetedStore::new(store, self.limits.record_reads);
+        self.engine.node_inputs_using(
+            &mut super::record_access::ReadAccess::new(
+                super::record_access::StoredAccess {
+                    evidence: &self.evidence,
+                    max_bytes: self.limits.checkpoint.bytes,
+                    store,
+                }
+                .with_resident(&self.engine.state),
+            ),
+            run,
+            inputs,
         )
     }
 
@@ -398,15 +436,66 @@ impl DurableEngine {
         self.check_live()?;
         let store = &mut BudgetedStore::new(store, self.limits.record_reads);
         self.engine.live_read(
-            &mut super::record_access::StoredAccess {
-                evidence: &self.evidence,
-                max_bytes: self.limits.checkpoint.bytes,
-                store,
-            },
+            &mut super::record_access::ReadAccess::new(
+                super::record_access::StoredAccess {
+                    evidence: &self.evidence,
+                    max_bytes: self.limits.checkpoint.bytes,
+                    store,
+                }
+                .with_resident(&self.engine.state),
+            ),
             self.stamp(),
             run,
             captures,
             limits,
+        )
+    }
+
+    /// Current adopted identity through the same disposition resolver as inspection.
+    pub fn read_adopted_attempt(
+        &self,
+        run: &str,
+        node: &str,
+        store: &mut impl RecordStore,
+    ) -> Result<Option<AttemptId>> {
+        self.check_live()?;
+        let store = &mut BudgetedStore::new(store, self.limits.record_reads);
+        self.engine.adopted_attempt_using(
+            &mut super::record_access::ReadAccess::new(
+                super::record_access::StoredAccess {
+                    evidence: &self.evidence,
+                    max_bytes: self.limits.checkpoint.bytes,
+                    store,
+                }
+                .with_resident(&self.engine.state),
+            ),
+            run,
+            node,
+        )
+    }
+
+    /// One retained preview through the same source/consumer rules as live inspection.
+    pub fn read_node_preview(
+        &self,
+        run: &str,
+        node: &str,
+        bytes: usize,
+        store: &mut impl RecordStore,
+    ) -> Result<Option<AttemptPreview>> {
+        self.check_live()?;
+        let store = &mut BudgetedStore::new(store, self.limits.record_reads);
+        self.engine.node_preview_using(
+            &mut super::record_access::ReadAccess::new(
+                super::record_access::StoredAccess {
+                    evidence: &self.evidence,
+                    max_bytes: self.limits.checkpoint.bytes,
+                    store,
+                }
+                .with_resident(&self.engine.state),
+            ),
+            run,
+            node,
+            bytes,
         )
     }
     pub fn poisoned(&self) -> bool {

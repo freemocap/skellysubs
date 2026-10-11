@@ -21,9 +21,38 @@ fn snapshot(f: &Fixture, sequence: u64, text: &str) -> EvidenceSnapshot {
     snapshot
 }
 fn read(f: &mut Fixture, run: &str, captures: &[EvidenceSnapshot]) -> LiveInspection {
-    f.host
+    let view = f
+        .host
         .read_live_inspection(run, captures, read_limits(), &mut f.store)
-        .unwrap()
+        .unwrap();
+    for (node, state) in &view.graph.nodes {
+        let adopted = f
+            .host
+            .read_adopted_attempt(run, node, &mut f.store)
+            .unwrap()
+            .map(|id| id.0.to_string());
+        let expected = if *state == Disposition::Adopted {
+            view.graph
+                .attempts
+                .get(node)
+                .and_then(|a| a.last())
+                .map(|a| a.id.clone())
+        } else {
+            None
+        };
+        assert_eq!(adopted, expected);
+        if captures.is_empty() {
+            let preview = f
+                .host
+                .read_node_preview(run, node, read_limits().export.bytes, &mut f.store)
+                .unwrap();
+            assert_eq!(
+                serde_json::to_value(preview).unwrap(),
+                serde_json::to_value(view.previews.get(node)).unwrap()
+            );
+        }
+    }
+    view
 }
 
 #[tokio::test]

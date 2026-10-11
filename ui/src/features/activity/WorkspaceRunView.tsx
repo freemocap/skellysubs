@@ -49,6 +49,6 @@ export function WorkspaceRunView({ entry, visible, orientation, compact, popover
   }, [visible, entry.engine, entry.run, entry.artifact])
   if (error) return <ErrorNotice as="p" className="ai-error" error={error}>{error}</ErrorNotice>
   if (!graph) return <p role="status" className="ai-muted">{tr('Loading…')}</p>
-  return <RunWorkspace graph={graph} preview={null} loadHistory={loadHistory} controls={null} orientation={orientation} compact={compact}
+  return <RunWorkspace graph={graph} preview={null} stations={[]} turn={null} messages={[]} loadHistory={loadHistory} controls={null} orientation={orientation} compact={compact}
     initialRevision={initialRevision} onRevision={onRevision} popover={popover} onPopover={onPopover} onHoverResults={onHoverResults} />
 }

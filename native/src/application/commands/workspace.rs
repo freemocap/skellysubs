@@ -304,14 +304,15 @@ pub(in crate::application) async fn read_graph_history(
 ) -> Result<crate::ai::graph::RunHistory> {
     let state = state.inner().clone();
     tauri::async_runtime::spawn_blocking(move || {
-        let store = state.lock()?;
-        store.graph_runtime.history(
-            &store.connection,
-            &conversation_id,
-            &run_id,
-            before.as_deref(),
-            limit,
-        )
+        let prepared = {
+            let store = state.lock()?;
+            let engine: String = store.connection.query_row(
+                "SELECT r.engine_id FROM graph_conversation_runs r JOIN turns t ON t.id=r.turn_id WHERE r.run_id=?1 AND t.conversation_id=?2",
+                rusqlite::params![run_id, conversation_id], |r| r.get(0))?;
+            crate::ai::inspection::prepare(&store.connection, &engine, &run_id)?
+        };
+        let key = serde_json::to_string(&(prepared.cache_identity()?, &run_id, &before, limit))?;
+        state.inspect_cached(key, || prepared.history(&run_id, before.as_deref(), limit))
     })
     .await
     .map_err(|cause| {
@@ -358,9 +359,74 @@ async fn read_conversation_since(
     force: bool,
 ) -> Result<Option<ConversationSnapshot>> {
     tauri::async_runtime::spawn_blocking(move || {
-        state
-            .lock()?
-            .conversation_snapshot_since(&conversation, before, revision, force)
+        for _ in 0..3 {
+            let sources = {
+                let store = state.lock()?;
+                let current: i32 =
+                    store
+                        .connection
+                        .query_row("SELECT revision FROM metadata", [], |r| r.get(0))?;
+                if !force && current == revision {
+                    return Ok(None);
+                }
+                store
+                    .graph_runtime
+                    .detached_views(&store.connection, &conversation)?
+            };
+            let mut stamps = Vec::new();
+            let mut views = std::collections::BTreeMap::new();
+            for source in sources {
+                let stamp = source.source.source.stamp().clone();
+                let key = serde_json::to_string(&(
+                    "conversation_read",
+                    source.source.cache_identity()?,
+                    &source.runs,
+                ))?;
+                let snapshots =
+                    state.inspect_cached(key, || source.source.current_snapshots(&source.runs))?;
+                views.insert(stamp.engine.clone(), snapshots);
+                stamps.push(stamp);
+            }
+            let mut guard = state.lock()?;
+            let store: &mut Store = &mut guard;
+            if !store
+                .graph_runtime
+                .install_read_views(&store.connection, &stamps, views)?
+            {
+                continue;
+            }
+            let result = (|| {
+                use rusqlite::OptionalExtension;
+                let current:i32=store.connection.query_row("SELECT revision FROM metadata",[],|r|r.get(0))?;
+                if !force && current==revision { return Ok(None); }
+                let snapshot=store.conversation_snapshot_receipts(&conversation,before,false)?;
+                let mut receipts=Vec::new();
+                for recording in &snapshot.transcription_attempts {
+                    let source:Option<(String,String,Option<String>)>=store.connection.query_row("SELECT r.engine_id,r.run_id,a.execution_id FROM workspace_graph_consumers c JOIN workspace_graph_runs r ON r.run_id=c.run_id LEFT JOIN native_graph_audio_receipts a ON a.id=c.stream_id WHERE c.consumer_id=?1",[&recording.id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?))).optional()?;
+                    if let Some((engine,run,execution))=source {
+                        let source=crate::ai::inspection::prepare(&store.connection,&engine,&run)?;
+                        receipts.push((recording.id.clone(),engine,run,execution,source));
+                    }
+                }
+                Ok::<_,AppError>(Some((snapshot,receipts)))
+            })();
+            store.graph_runtime.clear_read_views();
+            drop(guard);
+            let Some((mut snapshot,receipts))=result? else {return Ok(None)};
+            for (id,engine,run,execution,source) in receipts {
+                let key=serde_json::to_string(&("recording_receipt",source.cache_identity()?,&run,&execution))?;
+                let receipt=state.inspect_cached(key,||source.workspace_receipt(&engine,&run,execution.map(|v|serde_json::from_str(&v)).transpose()?))?;
+                if let Some(receipt)=receipt {
+                    let recording=snapshot.transcription_attempts.iter_mut().find(|r|r.id==id).ok_or_else(internal)?;
+                    recording.diagnostics.get_or_insert_with(||serde_json::json!({}))["sourceExecution"]=receipt;
+                }
+            }
+            return Ok(Some(snapshot));
+        }
+        Err(AppError::new(
+            ErrorCode::Conflict,
+            "Conversation changed during inspection. Refresh the view.",
+        ))
     })
     .await
     .map_err(|cause| {
@@ -511,14 +577,12 @@ pub(in crate::application) async fn read_native_graph_attempt(
 ) -> Result<crate::ai::inspection::NativeAttemptInspection> {
     let state = state.inner().clone();
     tauri::async_runtime::spawn_blocking(move || {
-        crate::ai::inspection::attempt(
-            &state.lock()?.connection,
-            &engine,
-            &run,
-            &revision,
-            &node,
-            &attempt,
-        )
+        let prepared = crate::ai::inspection::prepare(&state.lock()?.connection, &engine, &run)?;
+        let key =
+            serde_json::to_string(&(prepared.cache_identity()?, &run, &revision, &node, &attempt))?;
+        state.inspect_cached(key, || {
+            prepared.attempt(&engine, &run, &revision, &node, &attempt)
+        })
     })
     .await
     .map_err(|cause| {
@@ -549,7 +613,9 @@ pub(in crate::application) async fn read_native_run_history(
 ) -> Result<crate::ai::graph::RunHistory> {
     let state = state.inner().clone();
     tauri::async_runtime::spawn_blocking(move || {
-        crate::ai::inspection::history(&state.lock()?.connection, &engine, &run, before.as_deref())
+        let prepared = crate::ai::inspection::prepare(&state.lock()?.connection, &engine, &run)?;
+        let key = serde_json::to_string(&(prepared.cache_identity()?, &run, &before, 32))?;
+        state.inspect_cached(key, || prepared.history(&run, before.as_deref(), 32))
     })
     .await
     .map_err(|cause| {

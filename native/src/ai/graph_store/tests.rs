@@ -481,3 +481,71 @@ fn workspace_partition_uses_same_native_commit_protocol_without_conversation() {
         engine.stamp()
     );
 }
+
+#[test]
+fn detached_history_preserves_its_cut_after_source_changes_and_close() {
+    let mut db = db();
+    let graph = graph();
+    let p = partition(&graph, "one");
+    let mut adapter = store(&mut db, &p);
+    let engine =
+        DurableEngine::create_with_run([graph.clone()], limits(), begin(&graph), &mut adapter)
+            .unwrap();
+    let expected = engine.stamp().clone();
+    drop(adapter);
+    let tx = db.unchecked_transaction().unwrap();
+    let mut detached =
+        DetachedHistory::capture(&tx, &p, limits().checkpoint.bytes, limits().history).unwrap();
+    drop(tx);
+    db.execute("UPDATE graph_engines SET checkpoint=x'00'", [])
+        .unwrap();
+    let tx = db.unchecked_transaction().unwrap();
+    let corrupt =
+        DetachedHistory::capture(&tx, &p, limits().checkpoint.bytes, limits().history).unwrap();
+    assert_ne!(
+        detached.cache_identity().unwrap(),
+        corrupt.cache_identity().unwrap()
+    );
+    assert!(corrupt.checkpoint(limits().checkpoint).is_err());
+    drop(tx);
+    drop(db);
+    let checkpoint = detached.checkpoint(limits().checkpoint).unwrap();
+    assert_eq!(checkpoint.stamp(), &expected);
+    let cut = checkpoint
+        .historical_inspection(
+            expected.revision,
+            HistoricalLimits {
+                history: limits().history,
+                state: limits().state,
+            },
+            &mut detached,
+        )
+        .unwrap();
+    assert_eq!(
+        cut.snapshot(
+            "run",
+            ExportLimits {
+                bytes: 100_000,
+                attempts: 100
+            }
+        )
+        .unwrap()
+        .run,
+        "run"
+    );
+}
+
+#[test]
+fn detached_history_requires_transaction_and_bounds_before_copying() {
+    let mut db = db();
+    let graph = graph();
+    let p = partition(&graph, "one");
+    let mut adapter = store(&mut db, &p);
+    DurableEngine::create_with_run([graph.clone()], limits(), begin(&graph), &mut adapter).unwrap();
+    drop(adapter);
+    assert!(
+        DetachedHistory::capture(&db, &p, limits().checkpoint.bytes, limits().history).is_err()
+    );
+    let tx = db.unchecked_transaction().unwrap();
+    assert!(DetachedHistory::capture(&tx, &p, 1, limits().history).is_err());
+}

@@ -25,7 +25,7 @@ impl Engine {
                     Disposition::Waiting | Disposition::Blocked => {
                         if let Some(guard) = &node.guard
                             && !matches!(
-                                self.resolve_using(records, run, guard, states)?,
+                                self.resolve_presence_using(records, run, guard, states)?,
                                 Resolved::Value(_)
                             )
                         {
@@ -41,7 +41,7 @@ impl Engine {
                         }
                         for (port, source) in &node.inputs {
                             let availability = match self
-                                .resolve_using(records, run, source, states)?
+                                .resolve_presence_using(records, run, source, states)?
                             {
                                 Resolved::Value(_) => None,
                                 Resolved::Absent if graph.operation(id).inputs[port].optional => {

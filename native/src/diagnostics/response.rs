@@ -310,17 +310,28 @@ pub async fn http_error(
     let mut read_error = None;
     loop {
         match response.chunk().await {
-            Ok(Some(chunk)) if body.len() + chunk.len() <= LIMIT => body.extend_from_slice(&chunk),
-            Ok(Some(_)) => {
-                truncated = true;
-                break;
+            Ok(Some(chunk)) => {
+                if let Err(error) = crate::ai::content::capture::chunk(&chunk) {
+                    return error;
+                }
+                if body.len() + chunk.len() <= LIMIT {
+                    body.extend_from_slice(&chunk);
+                } else {
+                    truncated = true;
+                    break;
+                }
             }
             Err(cause) => {
                 unreadable = true;
                 read_error = network(&cause, "http_error_body").diagnostics;
                 break;
             }
-            Ok(None) => break,
+            Ok(None) => {
+                if let Err(error) = crate::ai::content::capture::complete() {
+                    return error;
+                }
+                break;
+            }
         }
     }
     let value = if truncated || unreadable {

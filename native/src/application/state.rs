@@ -1,6 +1,7 @@
 use super::*;
 
 pub(crate) struct Application {
+    inspection_cache: Mutex<crate::ai::inspection::cache::Cache>,
     #[cfg(feature = "workflow-capture")]
     pub(super) local_timings: super::local_timing::Measurements,
     pub(super) scheduler_wake: tokio::sync::Notify,
@@ -74,7 +75,32 @@ impl Drop for StoreGuard<'_> {
     }
 }
 impl Application {
+    pub(crate) fn inspect_cached<T: serde::Serialize + serde::de::DeserializeOwned>(
+        &self,
+        key: String,
+        read: impl FnOnce() -> Result<T>,
+    ) -> Result<T> {
+        let cached = self
+            .inspection_cache
+            .lock()
+            .map_err(|_| internal())?
+            .get(&key);
+        if let Some(bytes) = cached {
+            return Ok(serde_json::from_slice(&bytes)?);
+        }
+        let value = read()?;
+        let bytes = serde_json::to_vec(&value)?;
+        self.inspection_cache
+            .lock()
+            .map_err(|_| internal())?
+            .insert(key, bytes);
+        Ok(value)
+    }
     pub(crate) fn clear_graph_reports(&self) {
+        *self
+            .inspection_cache
+            .lock()
+            .unwrap_or_else(|p| p.into_inner()) = Default::default();
         self.graph_reports
             .lock()
             .unwrap_or_else(|poison| poison.into_inner())
@@ -95,6 +121,7 @@ impl Application {
             Err(error) => (None, Some(error)),
         };
         Arc::new(Self {
+            inspection_cache: Default::default(),
             #[cfg(feature = "workflow-capture")]
             local_timings: Default::default(),
             scheduler_wake: Default::default(),

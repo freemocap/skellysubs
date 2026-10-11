@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useSettingsStore } from '../../state/settings/settings'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AiExecutionSettings } from '../../components/controls/AiExecutionSettings'
 import { ErrorNotice } from '../../components/feedback/ErrorNotice'
+import { OriginalContent } from '../../components/feedback/OriginalContent'
 import { ResponseDetails } from '../../components/feedback/ResponseDetails'
 import { useI18n } from '../../components/localization/i18n'
 import type { GraphSurfaceKey } from '../../domain/activity/graph-surface'
@@ -15,6 +17,8 @@ import { useConversationActivity } from './useConversationActivity'
 import { useGraphHoverPublisher } from './useGraphHoverPublisher'
 import { WorkspaceRunView } from './WorkspaceRunView'
 import { RunWorkspace } from './workspace/RunWorkspace'
+import type { StationView } from './workspace/NodeItems'
+import { turnStations } from '../../domain/conversation/turn-stations'
 
 /// `screen` fills the phone; `tray` sits above the recording panel. Both stack
 /// the graph down the screen.
@@ -31,6 +35,8 @@ interface Selection {
 
 /// The AI workspace: one stable view of the selected run's executable graph.
 export function AiView({ mode, actions }: { mode: AiViewMode; actions: ReactNode }) {
+  const audioSettings = useSettingsStore(state => state.settings)
+  const playback = { rate: audioSettings?.tts_rate ?? 1, volume: audioSettings ? audioSettings.master_volume * audioSettings.voice_volume / 10000 : 0 }
   const tr = useI18n()
   const inspection = useNavigationStore(state => state.aiInspection)
   const executionPreferences = useExecutionPreferences()
@@ -101,6 +107,12 @@ export function AiView({ mode, actions }: { mode: AiViewMode; actions: ReactNode
   const onPopover = (node: string | null) => setSelection(current => ({ ...current, node }))
   const orientation = phone ? 'down' : 'across'
   const transcription = elsewhere?.kind === 'transcription' ? snapshot?.transcriptionAttempts.find(attempt => attempt.id === elsewhere.id) ?? null : null
+  const stations = useMemo<StationView[]>(() => {
+    if (!turn?.nativeGraph || !snapshot) return []
+    return turnStations(turn.nativeGraph, snapshot.messages.find(message => message.turnId === turn.id && message.role === 'user'), turn.speech)
+      .map(station => ({ id: station.id, side: station.side, name: tr(station.nameKey), tone: station.tone, ports: station.ports,
+        rows: station.rows.map(row => ({ label: tr(row.labelKey), value: row.value.kind === 'time' ? tr.dateTime(new Date(row.value.at)) : row.value.text })) }))
+  }, [tr, turn, snapshot])
 
   return <section className="ai-view" data-mode={mode} aria-label={tr('AI activity')}>
     <header className="ai-view-head">
@@ -119,11 +131,11 @@ export function AiView({ mode, actions }: { mode: AiViewMode; actions: ReactNode
     {elsewhere?.kind === 'workspace' ? <WorkspaceRunView key={JSON.stringify([elsewhere.entry.engine, elsewhere.entry.run])} entry={elsewhere.entry} visible orientation={orientation} compact={phone}
         initialRevision={selection.revision} onRevision={revision => setSelection(current => ({ ...current, revision, turnId: elsewhere ? current.turnId : turn?.id ?? current.turnId }))} popover={selection.node} onPopover={onPopover} onHoverResults={onHoverResults} />
       : elsewhere?.kind === 'transcription' ? <div className="ai-transcription">
-          {transcription ? <><p>{transcription.model} · {transcription.state}</p>{transcription.error && <ErrorNotice as="p" error={transcription.error}>{transcription.error}</ErrorNotice>}<ResponseDetails value={transcription.diagnostics} /></>
+          {transcription ? <><p>{transcription.model} · {transcription.state}</p>{transcription.error && <ErrorNotice as="p" error={transcription.error}>{transcription.error}</ErrorNotice>}<OriginalContent playback={playback} source={{ recording: transcription.id }} /><ResponseDetails value={transcription.diagnostics} /></>
             : <p className="ai-muted">{tr('No recorded AI operations.')}</p>}
         </div>
       : turn?.nativeGraph && conversationId
-        ? <RunWorkspace key={turn.id} graph={turn.nativeGraph} preview={turn.nativePreview ?? null} loadHistory={loadHistory}
+        ? <RunWorkspace key={turn.id} graph={turn.nativeGraph} preview={turn.nativePreview ?? null} stations={stations} turn={turn} messages={snapshot?.messages ?? []} loadHistory={loadHistory}
             controls={<NativeRunControls turn={turn} globallyPaused={snapshot?.connection.paused ?? false} />}
             orientation={orientation} compact={phone} initialRevision={selection.revision} onRevision={revision => setSelection(current => ({ ...current, revision, turnId: elsewhere ? current.turnId : turn?.id ?? current.turnId }))} popover={selection.node} onPopover={onPopover} onHoverResults={onHoverResults} />
         : <p className="ai-muted">{conversationId && !activity.error && !selectionError && (!selectionReady || (restoring && activity.hasOlder)) ? tr('Loading…') : tr('No recorded AI operations.')}</p>}

@@ -39,7 +39,9 @@ function laneName(view: GraphView, id: string): string {
   return operation.group ? `${humanizeId(operation.group.slice(operation.group.lastIndexOf('/') + 1))} / ${humanizeId(operation.name)}` : humanizeId(operation.name)
 }
 
-export function TimelineDrawer({ view, timeline, history, loading, error, selection, liveRevision, open, compact, onSelect, onToggle, onLoadEarlier, onRetry, onOpenNode }: {
+export function TimelineDrawer({ view, timeline, history, loading, error, selection, liveRevision, open, compact, onSelect, onToggle, onLoadEarlier, onRetry, onOpenNode, playing, onPlay }: {
+  playing: boolean
+  onPlay: () => void
   view: GraphView
   timeline: Timeline | null
   history: LoadedHistory | null
@@ -65,6 +67,7 @@ export function TimelineDrawer({ view, timeline, history, loading, error, select
     <div className="ai-timeline-row">
       <div className="ai-timeline-start">
         <button type="button" className="ai-chip" aria-expanded={open} onClick={onToggle} title={tr('Every change this run went through, step by step')}>{open ? tr('Hide history') : tr('History')}</button>
+        {open && <button type="button" className="ai-chip" disabled={loading || !!error || !timeline || timeline.revisions.length < 2} onClick={onPlay}>{playing ? tr('Stop') : tr('Play')}</button>}
         {open && history?.before != null && <button type="button" className="ai-chip" disabled={loading} onClick={onLoadEarlier}>{tr('Load earlier')}</button>}
       </div>
       <div className="ai-timeline-track">

@@ -87,6 +87,39 @@ pub(super) fn available_host(store: &mut SqlStore) -> (DurableEngine, AttemptId,
 }
 
 #[test]
+fn protected_input_read_verifies_each_record_once_and_never_reuses_a_previous_read() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut store = SqlStore::open(&dir.path().join("owner.db"));
+    let (mut host, attempt, _) = available_host(&mut store);
+    host.adopt("a", "first", attempt, &mut store).unwrap();
+    let mut observed = Observed {
+        store: &mut store,
+        reads: Vec::new(),
+        fail: None,
+        commits: 0,
+    };
+    assert_eq!(
+        host.read_node_input("a", "second", "value", &mut observed)
+            .unwrap(),
+        Some(json!(41))
+    );
+    let unique: std::collections::BTreeSet<_> = observed.reads.iter().collect();
+    assert_eq!(
+        observed.reads.len(),
+        unique.len(),
+        "one protected read repeatedly loads the same records"
+    );
+    observed.fail = Some(RecordKey::Attempt(attempt));
+    assert_eq!(
+        host.read_node_input("a", "second", "value", &mut observed)
+            .unwrap_err()
+            .code,
+        "read_injected"
+    );
+    assert_eq!(observed.commits, 0);
+}
+
+#[test]
 fn durable_adoption_reads_only_its_three_native_records_and_never_falls_back() {
     for missing_at in 0..3 {
         let dir = tempfile::tempdir().unwrap();
@@ -130,6 +163,38 @@ fn durable_adoption_reads_only_its_three_native_records_and_never_falls_back() {
             vec![serde_json::to_string(&values(41)).unwrap()]
         );
     }
+}
+
+#[test]
+fn batched_inputs_share_verified_records_and_preserve_unresolved_values() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut store = SqlStore::open(&dir.path().join("owner.db"));
+    let (mut host, attempt, _) = available_host(&mut store);
+    let inputs = [("first", "value"), ("second", "value"), ("second", "value")];
+    assert_eq!(
+        host.read_node_inputs("a", &inputs, &mut store).unwrap(),
+        vec![Some(json!(40)), None, None]
+    );
+    host.adopt("a", "first", attempt, &mut store).unwrap();
+    let mut observed = Observed {
+        store: &mut store,
+        reads: Vec::new(),
+        fail: None,
+        commits: 0,
+    };
+    assert_eq!(
+        host.read_node_inputs("a", &inputs, &mut observed).unwrap(),
+        vec![Some(json!(40)), Some(json!(41)), Some(json!(41))]
+    );
+    assert_eq!(observed.reads.len(), 3);
+    observed.fail = Some(RecordKey::Attempt(attempt));
+    assert_eq!(
+        host.read_node_inputs("a", &inputs, &mut observed)
+            .unwrap_err()
+            .code,
+        "read_injected"
+    );
+    assert_eq!(observed.commits, 0);
 }
 
 #[test]

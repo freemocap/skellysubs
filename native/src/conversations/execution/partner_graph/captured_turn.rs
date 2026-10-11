@@ -11,6 +11,13 @@ fn read<T: DeserializeOwned>(value: &Value, field: &str) -> Result<T> {
         path: field.into(),
     })
 }
+// Recording identities remain in the accepted turn's source provenance. The
+// version-1 reasoning context consumes modality/help flags, not host record IDs.
+fn reasoning_input(captured: &Value) -> Result<crate::learning::coaching::InputEvidence> {
+    let mut input: crate::learning::coaching::InputEvidence = read(captured, "input")?;
+    input.recording_ids = None;
+    Ok(input)
+}
 pub fn inputs(
     kind: context::Kind,
     captured: &Value,
@@ -65,7 +72,7 @@ pub fn inputs(
                 difficulty: read(&captured["practiceSettings"], "difficulty")?,
             },
             input: if matches!(kind, context::Kind::Reply) {
-                Some(read(captured, "input")?)
+                Some(reasoning_input(captured)?)
             } else {
                 None
             },
@@ -78,7 +85,7 @@ pub fn inputs(
         let assessment = AssessmentCapture {
             context: assessment_graph::Context {
                 messages: messages.clone(),
-                input: read(captured, "input")?,
+                input: reasoning_input(captured)?,
                 language: language.target_name.clone(),
                 variety: language.variety_name.clone(),
             },
@@ -110,7 +117,7 @@ pub fn inputs(
         let feedback = feedback::Captured {
             context: feedback_graph::Context {
                 messages: messages.clone(),
-                input: read(captured, "input")?,
+                input: reasoning_input(captured)?,
                 target_language: read(captured, "targetLanguage")?,
                 translation_language: read(captured, "translationLanguage")?,
                 candidate_constructs: candidates,

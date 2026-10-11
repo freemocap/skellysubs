@@ -13,7 +13,7 @@ export function AiDemo() {
   return <div className="demo-page">
     <section className="ai-view" data-mode="expanded" aria-label={tr('AI activity')}>
       <header className="ai-view-head"><h2 className="ai-view-title">{tr('AI activity')}</h2></header>
-      <RunWorkspace graph={graph} preview={null} loadHistory={null} controls={null} orientation="across" compact={false}
+      <RunWorkspace graph={graph} preview={null} stations={[]} turn={null} messages={[]} loadHistory={null} controls={null} orientation="across" compact={false}
         popover={popover} onPopover={setPopover} onHoverResults={() => {}} />
     </section>
   </div>

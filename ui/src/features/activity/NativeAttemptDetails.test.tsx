@@ -6,9 +6,17 @@ import { NativeAttemptDetails } from './NativeAttemptDetails'
 const api = vi.hoisted(() => ({ readNativeGraphAttempt: vi.fn(), recordBotInspection: vi.fn().mockResolvedValue(undefined) }))
 vi.mock('../../platform/ipc/window', () => api)
 vi.mock('../../platform/ipc/effort', () => api)
+vi.mock('../../platform/ipc/original-content', () => ({ listOriginalContent: vi.fn().mockResolvedValue([]) }))
 const graph = { engine: 'engine', run: 'run', artifact_id: 'artifact', revision: '8', attempts: { helper: [{ id: '1' }, { id: '2' }] } } as unknown as InspectionSnapshot
-const detail = (attempt: string, revision = '8') => ({ engine: 'engine', run: 'run', artifact: 'artifact', revision, node: 'helper', attempt, execution: 'execution', owner: 'owner', evidence: null, retainedText: 'retained ' + attempt })
+const detail = (attempt: string, revision = '8') => ({ engine: 'engine', run: 'run', artifact: 'artifact', revision, node: 'helper', attempt, execution: 'execution', owner: 'owner', evidence: null, retainedText: 'retained ' + attempt, inputs: { message: 'exact input' }, outcome: { Ok: { text: 'processed output' } } })
 beforeEach(() => vi.clearAllMocks())
+it('loads retained response evidence immediately inside an explicitly opened inspector', async () => {
+  api.readNativeGraphAttempt.mockResolvedValue(detail('2'))
+  render(<NativeAttemptDetails graph={graph} node="helper" expanded />)
+  expect(await screen.findByText('retained 2')).toBeVisible()
+  expect(api.readNativeGraphAttempt).toHaveBeenCalledWith('engine', 'run', '8', 'helper', '2')
+  expect(screen.queryByText('Response', { exact: true })).toBeNull()
+})
 function open(container: HTMLElement) {
   const details = container.querySelector('details')!
   details.open = true
@@ -81,4 +89,20 @@ it('renders evidence while inspection credit is pending and does not repeat it f
   view.rerender(<NativeAttemptDetails graph={{ ...graph, revision: '9' }} node="helper" />)
   await waitFor(() => expect(api.readNativeGraphAttempt).toHaveBeenCalledTimes(2))
   expect(api.recordBotInspection).toHaveBeenCalledOnce()
+})
+
+it('shows original input, retained response and processed output without opening more disclosures', async () => {
+  api.readNativeGraphAttempt.mockResolvedValue(detail('2'))
+  render(<NativeAttemptDetails graph={graph} node="helper" expanded />)
+  expect(await screen.findByText('exact input')).toBeVisible()
+  expect(screen.getByText('retained 2')).toBeVisible()
+  expect(screen.getByText('processed output')).toBeVisible()
+  fireEvent.click(screen.getByRole('button', {name:'Source'}))
+  expect(screen.getByText('retained 2').tagName).toBe('PRE')
+})
+it('distinguishes missing retained text and unfinished output from an empty response', async () => {
+  api.readNativeGraphAttempt.mockResolvedValue({...detail('2'),retainedText:null,outcome:null})
+  render(<NativeAttemptDetails graph={graph} node="helper" expanded />)
+  expect(await screen.findByText('No original text was retained for this attempt.')).toBeVisible()
+  expect(screen.getByText('No completed result at this revision.')).toBeVisible()
 })

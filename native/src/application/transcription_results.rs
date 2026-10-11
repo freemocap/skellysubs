@@ -41,13 +41,14 @@ impl Application {
         validate_consumer: impl Fn() -> Result<()>,
     ) -> Result<Retained> {
         validate_consumer()?;
-        audio::validate_transcription_language(&target, &input.language)?;
         if input.wav.is_empty() || input.wav.len() > 25 * 1024 * 1024 {
             return Err(AppError::new(
                 ErrorCode::Validation,
                 "Recording must contain audio and be at most 25 MB.",
             ));
         }
+        crate::ai::content::save_recording(&self.lock()?.connection, consumer, &input.wav)?;
+        audio::validate_transcription_language(&target, &input.language)?;
         let key = results::transcription::request_key(&target, &input, &install)?;
         let (subscription, producer) = self.transcription_pending.subscribe(key.clone())?;
         if let Some(producer) = producer {

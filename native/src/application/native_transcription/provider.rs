@@ -32,6 +32,7 @@ pub(super) async fn provide(
         validate()?;
         let client=crate::ai::transport::provider::client()?;
         let transport=audio::transcribe(&client,&owner.target,&key,owner.input.clone(),&owner.install);
+        let transport = crate::ai::content::capture::scope(state.content_writer(context.identity())?, transport);
         tokio::pin!(transport);
         let outcome=loop {tokio::select! {
             outcome=&mut transport=>break outcome?,

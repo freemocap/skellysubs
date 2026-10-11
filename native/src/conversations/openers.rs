@@ -130,6 +130,11 @@ fn accept_captured(
             &text,
             revision,
         )?;
+        crate::speech::recording::transcription::validate_sources(
+            db,
+            conversation,
+            input.recording_ids.as_deref().unwrap_or_default(),
+        )?;
         if !matches!(input.modality.as_str(), "text" | "speech_transcript") {
             return Err(AppError::new(
                 ErrorCode::Validation,

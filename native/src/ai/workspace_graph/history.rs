@@ -131,6 +131,14 @@ pub fn receipt(db: &Connection, run: &str) -> AppResult<Option<serde_json::Value
         return Ok(None);
     };
     let history = inspection(db, &engine)?;
+    receipt_from_history(&history, &engine, run)
+}
+
+pub(crate) fn receipt_from_history(
+    history: &HistoricalInspection,
+    engine: &str,
+    run: &str,
+) -> AppResult<Option<serde_json::Value>> {
     let view = history
         .snapshot(
             run,
@@ -163,7 +171,8 @@ pub fn receipt(db: &Connection, run: &str) -> AppResult<Option<serde_json::Value
             serde_json::json!({"nativeEngine":engine,"nativeRun":run,"state":state,"dispatched":false}),
         ));
     };
-    let mut receipt = execution_receipt(db, &engine, serde_json::from_str(&attempt.execution)?)?;
+    let mut receipt =
+        execution_receipt_from_history(history, engine, serde_json::from_str(&attempt.execution)?)?;
     receipt["nativeRun"] = serde_json::json!(run);
     Ok(Some(receipt))
 }
@@ -174,6 +183,14 @@ pub fn execution_receipt(
     execution: ExecutionId,
 ) -> AppResult<serde_json::Value> {
     let history = inspection(db, engine)?;
+    execution_receipt_from_history(&history, engine, execution)
+}
+
+pub(crate) fn execution_receipt_from_history(
+    history: &HistoricalInspection,
+    engine: &str,
+    execution: ExecutionId,
+) -> AppResult<serde_json::Value> {
     let producer = history.producer_receipt(execution).map_err(error)?;
     let evidence = history.execution_evidence(execution).map_err(error)?;
     let mut state = match producer.outcome {

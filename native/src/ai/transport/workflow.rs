@@ -14,6 +14,7 @@ pub(super) mod audio;
 mod cancellation;
 mod capture_state;
 mod identity;
+mod originals;
 pub(crate) use identity::conversation_identity;
 pub(super) mod text;
 pub(crate) mod unary;

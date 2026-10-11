@@ -305,19 +305,19 @@
   --touch-target: 44px;
   /* AI workspace geometry. The layout reads these resolved values, so drawn
      rows and computed connection anchors share one source. */
-  --graph-card-width: 236px;
-  --graph-bubble-width: 236px;
+  --graph-card-width: 200px;
   --graph-bubble-height: 30px;
   --graph-header: 30px;
   --graph-row: 22px;
   --graph-divider: 6px;
   --graph-slot: 84px;
   --graph-footer: 30px;
-  --graph-column-gap: 72px;
-  --graph-row-gap: 18px;
-  --graph-group-header: 28px;
-  --graph-group-pad: 12px;
+  --graph-column-gap: 48px;
+  --graph-row-gap: 14px;
+  --graph-lane: 6px;
   --graph-pin: 10px;
+  --record-bubble-width: 320px;
+  --record-field-width: 184px;
   --border-width: 1px;
   --border-width-strong: 2px;
   --border-width-thick: 3px;
@@ -375,6 +375,7 @@
   --reading-aid-rows: 1;
   --script-scale: 1;
   --word-spacing: 0px;
+  --content-source-max-height: min(40vh, 24rem);
   --ai-inspector-width: 40%;
   --chat-share: calc(100% - 360px);
   --node-color: var(--interaction-ink);

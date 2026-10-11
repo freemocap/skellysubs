@@ -94,21 +94,33 @@ pub(super) async fn synthesize_stream_live(
 ) -> SpeechOutcome {
     let mut outcome = SpeechOutcome::empty();
     outcome.audio = async {
-    #[cfg(feature = "workflow-capture")]
-    crate::ai::transport::workflow::require_live_network()?;
+        #[cfg(feature = "workflow-capture")]
+        crate::ai::transport::workflow::require_live_network()?;
         validate(input)?;
         // Display labels are not provider delivery instructions. The former
         // accent prefix caused v4 Turbo to repeat speech, including in complete
         // responses. Preserve source text for every supported model/variety.
         let prepared = &input.text;
-        let limit = if target.model == "eleven_v4_turbo" { 2_000 } else { 5_000 };
+        let limit = if target.model == "eleven_v4_turbo" {
+            2_000
+        } else {
+            5_000
+        };
         if prepared.len() > 16_384 || prepared.chars().count() > limit {
-            return Err(AppError::new(ErrorCode::Validation, "Prepared speech exceeds the provider input limit."));
+            return Err(AppError::new(
+                ErrorCode::Validation,
+                "Prepared speech exceeds the provider input limit.",
+            ));
         }
+        let body = serde_json::to_vec(
+            &serde_json::json!({"model": target.model, "text": prepared, "language_code": null}),
+        )?;
+        crate::ai::content::capture::request("speech", "application/json", &body, key)?;
         let mut request = client
             .post(&target.url)
             .header(reqwest::header::ACCEPT, "application/x-ndjson")
-            .json(&serde_json::json!({"model": target.model, "text": prepared, "language_code": null}));
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
+            .body(body);
         if !key.is_empty() {
             request = request.bearer_auth(key);
         }
@@ -122,8 +134,11 @@ pub(super) async fn synthesize_stream_live(
         let http = crate::diagnostics::response::headers(&response);
         let status = response.status();
         outcome.diagnostics = Some(serde_json::json!({"http":http}));
-        let streaming = response.headers().get(reqwest::header::CONTENT_TYPE)
-            .and_then(|v| v.to_str().ok()).is_some_and(|v| v.split(';').next().unwrap_or("").trim() == "application/x-ndjson");
+        let streaming = response
+            .headers()
+            .get(reqwest::header::CONTENT_TYPE)
+            .and_then(|v| v.to_str().ok())
+            .is_some_and(|v| v.split(';').next().unwrap_or("").trim() == "application/x-ndjson");
         let result = if status.is_success() && streaming {
             super::speech_stream::receive(response, &input.text, &mut outcome, emit).await
         } else {
@@ -143,7 +158,11 @@ pub(super) async fn synthesize_stream_live(
             })?;
             decode(&bytes, &input.text, &mut outcome)
         };
-        if outcome.alignment.as_ref().is_some_and(|a| a.source_text != input.text) {
+        if outcome
+            .alignment
+            .as_ref()
+            .is_some_and(|a| a.source_text != input.text)
+        {
             outcome.alignment = None;
             outcome.diagnostics.as_mut().unwrap()["alignmentValidation"] = serde_json::json!({
                 "status":"unavailable", "reason":"source_mismatch", "stage":"speech_alignment"});
@@ -269,6 +288,7 @@ mod tests {
         target.model = model.into();
         target.url = format!("http://{}/v1/audio/speech", listener.local_addr().unwrap());
         let body = body().to_string();
+        let expected_response = body.clone();
         let expected = serde_json::json!({"model":model,"text":source,"language_code":null});
         let worker = std::thread::spawn(move || {
             let (mut socket, _) = listener.accept().unwrap();
@@ -314,19 +334,32 @@ mod tests {
             )
             .unwrap();
         });
-        let outcome = synthesize(
-            &crate::ai::transport::provider::client().unwrap(),
-            &target,
-            "server-token",
-            &SpeechInput {
-                language_tag: "es-MX".into(),
-                text: source.into(),
-                voice: "alloy".into(),
-                language: "Spanish — Mexico".into(),
-            },
-            "install",
+        let (writer, events) = crate::ai::content::tests::capture_events();
+        let outcome = crate::ai::content::capture::scope(
+            writer,
+            synthesize(
+                &crate::ai::transport::provider::client().unwrap(),
+                &target,
+                "server-token",
+                &SpeechInput {
+                    language_tag: "es-MX".into(),
+                    text: source.into(),
+                    voice: "alloy".into(),
+                    language: "Spanish — Mexico".into(),
+                },
+                "install",
+            ),
         )
         .await;
+        let request = crate::ai::content::tests::captured(&events, "speech.request");
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&request).unwrap(),
+            serde_json::json!({"model":model,"text":source,"language_code":null})
+        );
+        assert_eq!(
+            crate::ai::content::tests::captured(&events, "speech.response"),
+            expected_response.as_bytes()
+        );
         worker.join().unwrap();
         assert!(outcome.audio.is_ok());
     }

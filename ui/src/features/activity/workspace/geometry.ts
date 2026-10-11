@@ -5,10 +5,10 @@ import { typeHue } from '../../../domain/activity/graph-types'
 /// Stylesheet tokens that define the workspace geometry. The layout uses their
 /// resolved pixel values so drawn rows and computed anchors cannot drift.
 const TOKENS = {
-  cardWidth: '--graph-card-width', bubbleWidth: '--graph-bubble-width', bubbleHeight: '--graph-bubble-height',
+  cardWidth: '--graph-card-width', bubbleHeight: '--graph-bubble-height',
   border: '--border-width', header: '--graph-header', row: '--graph-row',
   divider: '--graph-divider', slot: '--graph-slot', footer: '--graph-footer', columnGap: '--graph-column-gap',
-  rowGap: '--graph-row-gap', groupHeader: '--graph-group-header', groupPad: '--graph-group-pad',
+  rowGap: '--graph-row-gap', lane: '--graph-lane',
 } as const satisfies Record<keyof WorkspaceGeometry, string>
 
 export function readGeometry(element: Element): WorkspaceGeometry {

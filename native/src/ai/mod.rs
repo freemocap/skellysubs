@@ -14,3 +14,5 @@ pub(crate) mod results;
 pub(crate) mod workspace_graph;
 
 pub(crate) mod inspection;
+
+pub(crate) mod content;

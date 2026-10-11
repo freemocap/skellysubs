@@ -84,6 +84,11 @@ impl Handlers<'_> {
             &text,
             expected_revision,
         )?;
+        crate::speech::recording::transcription::validate_sources(
+            self.tx,
+            &conversation_id,
+            input.recording_ids.as_deref().unwrap_or_default(),
+        )?;
         if !matches!(input.modality.as_str(), "text" | "speech_transcript") {
             return Err(AppError::new(
                 ErrorCode::Validation,

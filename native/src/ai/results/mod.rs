@@ -93,12 +93,17 @@ pub fn initialize(db: &Connection) -> Result<()> {
             "../../storage/schemas/workspace_transcription_cache.sql"
         ))?;
     }
+    db.execute_batch(include_str!("../../storage/schemas/ai_content.sql"))?;
     recover(db)
 }
 
 pub(crate) fn recover(db: &Connection) -> Result<()> {
     crate::speech::analysis::signal_cache::recover(db)?;
     let transaction = db.unchecked_transaction()?;
+    transaction.execute(
+        "UPDATE ai_content_records SET state='interrupted' WHERE state='pending'",
+        [],
+    )?;
     prune(&transaction)?;
     transaction.commit()?;
     Ok(())
@@ -125,6 +130,8 @@ pub fn settings(db: &Connection) -> Result<CacheSettings> {
             |r| r.get::<_, i64>(0),
         )? + crate::speech::analysis::signal_cache::bytes(db, "inference")?)
             as u64,
+        // Reusable result count retains its existing meaning; private source/body
+        // records share byte accounting but are not reusable inference results.
         result_count: db.query_row("SELECT (SELECT count(*) FROM native_graph_audio_cache)+(SELECT count(*) FROM workspace_reading_cache)+(SELECT count(*) FROM workspace_transcription_cache)", [], |r| {
             r.get::<_, i64>(0)
         })? as u64,
@@ -150,7 +157,7 @@ pub fn set_capacity(db: &Connection, bytes: u64) -> Result<CacheSettings> {
 
 pub(crate) fn prune(db: &Connection) -> Result<()> {
     loop {
-        db.execute("DELETE FROM inference_blobs WHERE NOT EXISTS(SELECT 1 FROM native_graph_audio_cache WHERE blob_digest=inference_blobs.digest) AND NOT EXISTS(SELECT 1 FROM workspace_reading_cache WHERE blob_digest=inference_blobs.digest) AND NOT EXISTS(SELECT 1 FROM workspace_transcription_cache WHERE blob_digest=inference_blobs.digest)", [])?;
+        db.execute("DELETE FROM inference_blobs WHERE NOT EXISTS(SELECT 1 FROM native_graph_audio_cache WHERE blob_digest=inference_blobs.digest) AND NOT EXISTS(SELECT 1 FROM workspace_reading_cache WHERE blob_digest=inference_blobs.digest) AND NOT EXISTS(SELECT 1 FROM workspace_transcription_cache WHERE blob_digest=inference_blobs.digest) AND NOT EXISTS(SELECT 1 FROM ai_content_chunks WHERE blob_digest=inference_blobs.digest)", [])?;
         let removed = db.prepare("SELECT id FROM audio_signal_sources WHERE kind='inference' AND NOT EXISTS(SELECT 1 FROM native_graph_audio_cache g WHERE g.receipt_id=audio_signal_sources.id)")?
             .query_map([], |r| r.get::<_, String>(0))?.collect::<rusqlite::Result<Vec<_>>>()?;
         for id in removed {
@@ -160,7 +167,15 @@ pub(crate) fn prune(db: &Connection) -> Result<()> {
         if current.used_bytes <= current.capacity_bytes {
             return Ok(());
         }
-        let (native, id): (i32, String) = db.query_row("SELECT native,id FROM (SELECT 1 AS native,receipt_id AS id,last_used FROM graph_audio_cache UNION ALL SELECT 2 AS native,run_id AS id,last_used FROM workspace_reading_cache UNION ALL SELECT 3 AS native,receipt_id AS id,last_used FROM workspace_graph_audio_cache UNION ALL SELECT 4 AS native,run_id AS id,last_used FROM workspace_transcription_cache) ORDER BY last_used,id,native LIMIT 1", [], |r| Ok((r.get(0)?,r.get(1)?)))?;
+        let (native, id): (i32, String) = db.query_row("SELECT native,id FROM (SELECT 1 AS native,receipt_id AS id,last_used FROM graph_audio_cache UNION ALL SELECT 2 AS native,run_id AS id,last_used FROM workspace_reading_cache UNION ALL SELECT 3 AS native,receipt_id AS id,last_used FROM workspace_graph_audio_cache UNION ALL SELECT 4 AS native,run_id AS id,last_used FROM workspace_transcription_cache UNION ALL SELECT 5 AS native,id,last_used FROM ai_content_records WHERE EXISTS(SELECT 1 FROM ai_content_chunks WHERE record_id=ai_content_records.id)) ORDER BY last_used,id,native LIMIT 1", [], |r| Ok((r.get(0)?,r.get(1)?)))?;
+        if native == 5 {
+            db.execute(
+                "UPDATE ai_content_records SET availability='evicted' WHERE id=?1",
+                [&id],
+            )?;
+            db.execute("DELETE FROM ai_content_chunks WHERE record_id=?1", [&id])?;
+            continue;
+        }
         db.execute(
             if native == 4 {
                 "DELETE FROM workspace_transcription_cache WHERE run_id=?1"

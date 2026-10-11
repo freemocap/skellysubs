@@ -5,7 +5,57 @@ use super::{
     *,
 };
 use serde::de::DeserializeOwned;
+use std::collections::BTreeMap;
 use std::sync::Arc;
+
+/// Reuse verified native records only within one immutable protected read.
+/// The wrapped StoredAccess retains stamp/hash validation and its aggregate read
+/// budget bounds all newly loaded rows. No entry survives this operation, and
+/// this adapter must not span an effect decision or commit.
+pub(super) struct ReadAccess<R> {
+    inner: R,
+    runs: BTreeMap<String, Arc<Run>>,
+    attempts: BTreeMap<AttemptId, Arc<AttemptRecord>>,
+    executions: BTreeMap<ExecutionId, Arc<Execution>>,
+}
+
+impl<R> ReadAccess<R> {
+    pub fn new(inner: R) -> Self {
+        Self {
+            inner,
+            runs: BTreeMap::new(),
+            attempts: BTreeMap::new(),
+            executions: BTreeMap::new(),
+        }
+    }
+}
+
+impl<R: RecordAccess> RecordAccess for ReadAccess<R> {
+    fn run(&mut self, id: &str) -> Result<Arc<Run>> {
+        if let Some(row) = self.runs.get(id) {
+            return Ok(row.clone());
+        }
+        let row = self.inner.run(id)?;
+        self.runs.insert(id.into(), row.clone());
+        Ok(row)
+    }
+    fn attempt(&mut self, id: AttemptId) -> Result<Arc<AttemptRecord>> {
+        if let Some(row) = self.attempts.get(&id) {
+            return Ok(row.clone());
+        }
+        let row = self.inner.attempt(id)?;
+        self.attempts.insert(id, row.clone());
+        Ok(row)
+    }
+    fn execution(&mut self, id: ExecutionId) -> Result<Arc<Execution>> {
+        if let Some(row) = self.executions.get(&id) {
+            return Ok(row.clone());
+        }
+        let row = self.inner.execution(id)?;
+        self.executions.insert(id, row.clone());
+        Ok(row)
+    }
+}
 
 /// Typed native reads. Ownership is scoped to the caller; no hidden cache,
 /// missing-record fallback or alternative operation semantics live here.
@@ -91,8 +141,23 @@ pub(super) struct StoredAccess<'a, S> {
     pub store: &'a mut S,
 }
 
-impl<S: RecordStore> StoredAccess<'_, S> {
+impl<'a, S: RecordStore> StoredAccess<'a, S> {
+    /// The resident state and integrity evidence must belong to the same engine.
+    /// Still read and verify storage first; only redundant decoding is avoided.
+    pub fn with_resident(self, state: &'a RuntimeState) -> VerifiedRead<'a, S> {
+        VerifiedRead {
+            stored: self,
+            state,
+        }
+    }
     fn read<T: DeserializeOwned>(&mut self, key: RecordKey) -> Result<Arc<T>> {
+        self.read_resident(key, None)
+    }
+    fn read_resident<T: DeserializeOwned>(
+        &mut self,
+        key: RecordKey,
+        resident: Option<Arc<T>>,
+    ) -> Result<Arc<T>> {
         self.evidence.require(&key)?;
         let bytes = self
             .store
@@ -101,6 +166,9 @@ impl<S: RecordStore> StoredAccess<'_, S> {
             return Err(fault(CoreFaultCode::RecordByteLimit, "record"));
         }
         self.evidence.check(&key, &bytes)?;
+        if let Some(row) = resident {
+            return Ok(row);
+        }
         let row: Envelope<RecordKey, T> = serde_json::from_slice(&bytes)
             .map_err(|_| fault(CoreFaultCode::RecordMismatch, "record"))?;
         if !(row.format == 1
@@ -111,6 +179,27 @@ impl<S: RecordStore> StoredAccess<'_, S> {
             return Err(fault(CoreFaultCode::RecordMismatch, "record"));
         }
         Ok(Arc::new(row.value))
+    }
+}
+
+pub(super) struct VerifiedRead<'a, S> {
+    stored: StoredAccess<'a, S>,
+    state: &'a RuntimeState,
+}
+impl<S: RecordStore> RecordAccess for VerifiedRead<'_, S> {
+    fn run(&mut self, id: &str) -> Result<Arc<Run>> {
+        self.stored
+            .read_resident(RecordKey::Run(id.into()), self.state.runs.get_shared(id))
+    }
+    fn attempt(&mut self, id: AttemptId) -> Result<Arc<AttemptRecord>> {
+        self.stored
+            .read_resident(RecordKey::Attempt(id), self.state.attempts.get_shared(&id))
+    }
+    fn execution(&mut self, id: ExecutionId) -> Result<Arc<Execution>> {
+        self.stored.read_resident(
+            RecordKey::Execution(id),
+            self.state.executions.get_shared(&id),
+        )
     }
 }
 

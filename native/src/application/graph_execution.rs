@@ -73,6 +73,10 @@ async fn provide_text(
             &invocation,
             deltas,
         );
+        let transport = crate::ai::content::capture::scope(
+            state.content_writer(invocation.identity())?,
+            transport,
+        );
         tokio::pin!(transport);
         let mut retained = None;
         let outcome = loop {

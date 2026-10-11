@@ -10,6 +10,7 @@ import type { SkillLevelEvent, SkillLevelSummary } from '../../../generated/cont
 /// from anywhere without dragging the Tauri boundary along with it.
 
 export interface InputEvidence {
+  recording_ids?: string[]
   modality: 'text' | 'speech_transcript'
   suggestion: boolean
   scaffold: boolean

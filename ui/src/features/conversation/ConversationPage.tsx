@@ -534,7 +534,7 @@ export default function ConversationPage({
     setEditRevision(snapshot?.revision ?? null)
     setInput(selected.user ?? '')
     setError(null)
-    inputEvidence.current = unreportedInput()
+    inputEvidence.current = { ...unreportedInput(), recording_ids: snapshot?.turns.find(turn => turn.id === selected.turnId)?.recordingIds }
     // On phones, leave the microphone visible until the learner taps to type.
     if (!isMobile) composer.current?.querySelector('textarea')?.focus()
   }
@@ -570,7 +570,11 @@ export default function ConversationPage({
       if (text) {
         draftRecording.current = result.inspection.recordingId
         inputEvidence.current.modality = 'speech_transcript'
-        if (settingsRef.current?.auto_send && (!sending || editingTurnId !== null)) {
+        const autoSend = settingsRef.current?.auto_send && (!sending || editingTurnId !== null)
+        inputEvidence.current.recording_ids = autoSend
+          ? [result.inspection.recordingId]
+          : [...new Set([...(inputEvidence.current.recording_ids ?? []), result.inspection.recordingId])]
+        if (autoSend) {
           logInfo('[mic] auto-send enabled — sending transcription')
           void sendRef.current(text)
         } else {
@@ -671,7 +675,8 @@ export default function ConversationPage({
   const composerActivity = (
     <div className="composer-activity">
       <AiStatus transcribing={mic.transcribing} scheduling={sending && !pendingReply} turns={snapshot?.turns ?? []}
-        synthesizing={speech.phase === 'preparing'} buffering={speech.phase === 'buffering'} latest={latestTurn?.assistant ? latestTurn.execution ?? undefined : undefined} onInspectLatest={inspectLatest} />
+        synthesizing={speech.phase === 'preparing'} buffering={speech.phase === 'buffering'} latest={latestTurn?.assistant ? latestTurn.execution ?? undefined : undefined} onInspectLatest={inspectLatest}
+        beside={null} />
     </div>
   )
   const chatComposer = (

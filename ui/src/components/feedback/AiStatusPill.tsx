@@ -19,13 +19,15 @@ export interface AiPillAccess {
 /// green mark while AI is connected, circled by a moving edge while AI work
 /// runs, and beside it the step under way in the longest wording that fits
 /// (three words, two, one). `fallback` takes the line's place at rest.
-export function AiStatusPill({ access, open, onOpen, busy, line, fallback = null }: {
+export function AiStatusPill({ access, open, onOpen, busy, line, beside, fallback = null }: {
   access: AiPillAccess
   /// The AI View is showing, docked or in its own window.
   open: boolean
   onOpen: () => void
   busy: boolean
   line: AiStatusLine | null
+  /// Controls that sit right after the pill, before the step line.
+  beside: ReactNode
   fallback?: ReactNode
 }) {
   const tr = useI18n()
@@ -40,6 +42,7 @@ export function AiStatusPill({ access, open, onOpen, busy, line, fallback = null
       <span className="ai-status-pill-surface" aria-hidden="true" />
       <span aria-hidden="true">{tr('AI')}</span>
     </button>
+    {beside}
     {shown ? <FittedLine key={shown.id} wordings={wordings} detail={[...shown.kinds, ...shown.models].join(' · ') || undefined} /> : fallback}
     <span className="ai-status-announce" role="status">{shown?.announce ? wordings[0] : ''}</span>
   </div>

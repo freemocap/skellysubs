@@ -160,6 +160,31 @@ impl Fixture {
                 .read_inspection("a", export(), &mut meter)
                 .map(drop),
             "outputs" => self.host.read_outputs("a", &mut meter).map(drop),
+            "adopted" => self
+                .host
+                .read_adopted_attempt("a", "first", &mut meter)
+                .map(drop),
+            "preview" => self
+                .host
+                .read_node_preview("a", "first", export().bytes, &mut meter)
+                .map(drop),
+            "inputs" => self
+                .host
+                .read_node_inputs("a", &[("first", "value"), ("second", "value")], &mut meter)
+                .map(drop),
+            "live" => self
+                .host
+                .read_live_inspection(
+                    "a",
+                    &[],
+                    LiveReadLimits {
+                        export: export(),
+                        captures: 0,
+                        capture_bytes: 2,
+                    },
+                    &mut meter,
+                )
+                .map(drop),
             "compact" => self.host.compact(&mut meter).map(drop),
             "startup" => {
                 let checkpoint =
@@ -186,7 +211,7 @@ fn aggregate_limits_cover_owner_operations_and_refuse_atomically_at_exact_bounda
     for cold in [false, true] {
         for action in [
             "claim", "adopt", "settle", "advance", "pause", "cancel", "recover", "inspect",
-            "outputs", "compact", "startup",
+            "outputs", "inputs", "live", "adopted", "preview", "compact", "startup",
         ] {
             let mut reference = Fixture::new(action, cold);
             let (result, measured) = reference.run(action, record_read_limits());

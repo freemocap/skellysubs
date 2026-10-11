@@ -2,14 +2,33 @@ use super::{model::fault, record_access::RecordAccess, *};
 use std::collections::BTreeMap;
 
 #[derive(Debug, PartialEq)]
-pub(super) enum Resolved {
-    Value(serde_json::Value),
+pub(super) enum Resolved<V = serde_json::Value> {
+    Value(V),
     Absent,
     Waiting,
     Blocked,
 }
 
 impl Engine {
+    pub(super) fn adopted_attempt_using(
+        &self,
+        records: &mut impl RecordAccess,
+        run: &str,
+        node: &str,
+    ) -> Result<Option<AttemptId>> {
+        let owner = records.run(run)?;
+        if self.states_using(records, &owner)?.get(node) != Some(&Disposition::Adopted) {
+            return Ok(None);
+        }
+        let Some(id) = owner.current.get(node) else {
+            return Ok(None);
+        };
+        let row = records.attempt(*id)?;
+        if row.run != run || row.node != node || row.attempt.id != *id {
+            return Err(fault(CoreFaultCode::RecordMismatch, "attempt"));
+        }
+        Ok(Some(*id))
+    }
     pub(super) fn node_input_using(
         &self,
         records: &mut impl RecordAccess,
@@ -17,24 +36,44 @@ impl Engine {
         node: &str,
         port: &str,
     ) -> Result<Option<serde_json::Value>> {
+        Ok(self
+            .node_inputs_using(records, run, &[(node, port)])?
+            .remove(0))
+    }
+
+    pub(super) fn node_inputs_using(
+        &self,
+        records: &mut impl RecordAccess,
+        run: &str,
+        inputs: &[(&str, &str)],
+    ) -> Result<Vec<Option<serde_json::Value>>> {
         let owner = records.run(run)?;
         let artifact = &self.graphs[&owner.artifact].artifact;
-        let definition = artifact
-            .definition
-            .nodes
-            .get(node)
-            .ok_or_else(|| fault(CoreFaultCode::UnknownNode, node))?;
-        let source = definition
-            .inputs
-            .get(port)
-            .ok_or_else(|| fault(CoreFaultCode::UnknownInput, port))?;
+        let sources = inputs
+            .iter()
+            .map(|(node, port)| {
+                artifact
+                    .definition
+                    .nodes
+                    .get(*node)
+                    .ok_or_else(|| fault(CoreFaultCode::UnknownNode, node))?
+                    .inputs
+                    .get(*port)
+                    .ok_or_else(|| fault(CoreFaultCode::UnknownInput, port))
+            })
+            .collect::<Result<Vec<_>>>()?;
         let states = self.states_using(records, &owner)?;
-        Ok(
-            match self.resolve_using(records, &owner, source, &states)? {
-                Resolved::Value(value) => Some(value),
-                Resolved::Absent | Resolved::Waiting | Resolved::Blocked => None,
-            },
-        )
+        sources
+            .into_iter()
+            .map(|source| {
+                Ok(
+                    match self.resolve_using(records, &owner, source, &states)? {
+                        Resolved::Value(value) => Some(value),
+                        Resolved::Absent | Resolved::Waiting | Resolved::Blocked => None,
+                    },
+                )
+            })
+            .collect()
     }
     /// Protected adopted output from one node. Independent pending branches do
     /// not make an already adopted result unavailable to its product consumer.
@@ -82,13 +121,37 @@ impl Engine {
         source: &Source,
         states: &BTreeMap<String, Disposition>,
     ) -> Result<Resolved> {
+        self.resolve_mapped_using(records, run, source, states, serde_json::Value::clone)
+    }
+
+    pub(super) fn resolve_presence_using(
+        &self,
+        records: &mut impl RecordAccess,
+        run: &Run,
+        source: &Source,
+        states: &BTreeMap<String, Disposition>,
+    ) -> Result<Resolved<()>> {
+        self.resolve_mapped_using(records, run, source, states, |_| ())
+    }
+
+    // Resolve once, copying content only for a caller that actually needs it.
+    // Readiness/reasons observe presence; guards observe their boolean value.
+    fn resolve_mapped_using<V>(
+        &self,
+        records: &mut impl RecordAccess,
+        run: &Run,
+        source: &Source,
+        states: &BTreeMap<String, Disposition>,
+        value: impl FnOnce(&serde_json::Value) -> V,
+    ) -> Result<Resolved<V>> {
         Ok(match source {
             Source::Input(name) => run
                 .inputs
                 .get(name)
-                .cloned()
-                .map_or(Resolved::Absent, Resolved::Value),
-            Source::Constant { value, .. } => Resolved::Value(value.clone()),
+                .map_or(Resolved::Absent, |v| Resolved::Value(value(v))),
+            Source::Constant {
+                value: constant, ..
+            } => Resolved::Value(value(constant)),
             Source::Absent(_) => Resolved::Absent,
             Source::Output { node, port } => {
                 if let Some(id) = run.current.get(node) {
@@ -109,8 +172,7 @@ impl Engine {
                                 .ok_or_else(|| fault(CoreFaultCode::MissingResult, "execution"))?;
                             values
                                 .get(port)
-                                .cloned()
-                                .map_or(Resolved::Absent, Resolved::Value)
+                                .map_or(Resolved::Absent, |v| Resolved::Value(value(v)))
                         }
                         AttemptState::Failed(_)
                         | AttemptState::Unknown
@@ -189,8 +251,10 @@ impl Engine {
             return Ok(Disposition::Unrequested);
         }
         if let Some(guard) = &n.guard {
-            match self.resolve_using(records, run, guard, states)? {
-                Resolved::Value(v) if v == false => return Ok(Disposition::Skipped),
+            match self.resolve_mapped_using(records, run, guard, states, |v| {
+                v != &serde_json::Value::Bool(false)
+            })? {
+                Resolved::Value(false) => return Ok(Disposition::Skipped),
                 Resolved::Value(_) => (),
                 Resolved::Blocked | Resolved::Absent => return Ok(Disposition::Blocked),
                 Resolved::Waiting => return Ok(Disposition::Waiting),
@@ -210,7 +274,7 @@ impl Engine {
             }
         }
         for (port, source) in &n.inputs {
-            match self.resolve_using(records, run, source, states)? {
+            match self.resolve_presence_using(records, run, source, states)? {
                 Resolved::Value(_) => (),
                 Resolved::Absent if graph.operation(node).inputs[port].optional => (),
                 Resolved::Absent | Resolved::Blocked => return Ok(Disposition::Blocked),

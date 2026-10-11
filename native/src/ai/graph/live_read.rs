@@ -69,12 +69,42 @@ impl Engine {
             }
         }
         let graph = self.project_using(records, stamp, run, limits.export)?;
+        let previews = self.previews_using(records, run, &incoming, None)?;
+        let read = LiveInspection { graph, previews };
+        bounded_json(&read, limits.export.bytes, CoreFaultCode::InspectionLimit)?;
+        Ok(read)
+    }
+
+    pub(super) fn node_preview_using(
+        &self,
+        records: &mut impl RecordAccess,
+        run: &str,
+        node: &str,
+        bytes: usize,
+    ) -> Result<Option<AttemptPreview>> {
+        let preview = self
+            .previews_using(records, run, &BTreeMap::new(), Some(node))?
+            .remove(node);
+        bounded_json(&preview, bytes, CoreFaultCode::InspectionLimit)?;
+        Ok(preview)
+    }
+
+    fn previews_using(
+        &self,
+        records: &mut impl RecordAccess,
+        run: &str,
+        incoming: &BTreeMap<ExecutionId, &EvidenceSnapshot>,
+        selected: Option<&str>,
+    ) -> Result<BTreeMap<String, AttemptPreview>> {
         let owner = records.run(run)?;
         let artifact = self.graphs[&owner.artifact].artifact();
         let mut previews = BTreeMap::new();
         // Current consumers come from the run itself, never from attempt ordering
         // or an operation-name catalog. Dormant nodes remain in graph.artifact.
         for (node, id) in &owner.current {
+            if selected.is_some_and(|selected| selected != node) {
+                continue;
+            }
             let row = records.attempt(*id)?;
             if row.run != run || row.node != *node || row.attempt.id != *id {
                 return Err(fault(CoreFaultCode::RecordMismatch, "attempt"));
@@ -139,8 +169,6 @@ impl Engine {
                 );
             }
         }
-        let read = LiveInspection { graph, previews };
-        bounded_json(&read, limits.export.bytes, CoreFaultCode::InspectionLimit)?;
-        Ok(read)
+        Ok(previews)
     }
 }

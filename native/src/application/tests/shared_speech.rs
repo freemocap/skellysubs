@@ -245,8 +245,10 @@ async fn cancellation(cancel_all: bool, reject_blob: bool, streamed: bool) {
     if !cancel_all && !reject_blob {
         results::set_capacity(&state.lock().unwrap().connection, 0).unwrap();
     }
+    // Fail derived audio publication after transport capture, not the new
+    // original request write that must succeed before any provider dispatch.
     if reject_blob {
-        state.lock().unwrap().connection.execute_batch("CREATE TRIGGER reject_speech_blob BEFORE INSERT ON inference_blobs BEGIN SELECT RAISE(ABORT,'fixture cache failure'); END").unwrap();
+        state.lock().unwrap().connection.execute_batch("CREATE TRIGGER reject_speech_cache BEFORE INSERT ON workspace_graph_audio_cache BEGIN SELECT RAISE(ABORT,'fixture cache failure'); END").unwrap();
     }
     let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let (target, install) = {

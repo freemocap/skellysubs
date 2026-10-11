@@ -423,7 +423,7 @@ impl Runtime {
     }
 }
 
-mod history;
+pub(crate) mod history;
 #[cfg(any(test, feature = "workflow-capture"))]
 pub(crate) use history::inspection;
 pub use history::{execution_receipt, receipt, usage, usage_for_kind};

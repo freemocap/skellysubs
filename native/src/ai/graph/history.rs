@@ -4,7 +4,7 @@ use ts_rs::TS;
 
 /// Chronological native state changes. Topology and overlays are projected
 /// by the same exporter as live inspection, without executable handlers.
-#[derive(Serialize, TS)]
+#[derive(Serialize, Deserialize, TS)]
 pub struct RunHistory {
     pub engine: String,
     pub run: String,
@@ -202,6 +202,20 @@ pub struct ProducerReceipt {
     pub outcome: Option<Result<()>>,
 }
 impl HistoricalInspection {
+    /// Protected source values at this exact cut. This is deliberate private
+    /// inspection, not the content-free automatic graph projection.
+    pub fn execution_content(
+        &self,
+        execution: ExecutionId,
+    ) -> Result<(Work, Option<Result<Values>>)> {
+        let producer = self
+            .engine
+            .state
+            .executions
+            .get(&execution)
+            .ok_or_else(|| fault(CoreFaultCode::UnknownExecution, "execution"))?;
+        Ok((producer.work.clone(), producer.outcome.clone()))
+    }
     pub fn producer_receipt(&self, execution: ExecutionId) -> Result<ProducerReceipt> {
         let producer = self
             .engine

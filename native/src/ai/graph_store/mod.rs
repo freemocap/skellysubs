@@ -4,7 +4,9 @@ use super::graph::*;
 use rusqlite::{Connection, OptionalExtension, Transaction, params};
 use sha2::{Digest, Sha256};
 
+mod detached;
 mod reads;
+pub use detached::DetachedHistory;
 #[cfg(test)]
 mod tests;
 pub use reads::{BorrowedReadStore, ReadStore};

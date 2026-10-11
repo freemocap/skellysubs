@@ -1,0 +1,65 @@
+/* The conversation's record, exploded, over the whole screen: the chat's own
+   bubbles down the middle, every field the app has filled beside them, and the
+   recorder kept at the bottom. The board is placed from measured heights and
+   scaled down to fit the screen's width. */
+
+.record-screen { position: fixed; inset: 0; z-index: var(--z-modal); display: flex; flex-direction: column; background: var(--bg); color: var(--ink); }
+.record-head {
+  flex: none; display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-6);
+  border-bottom: var(--border-width) solid var(--line); background: var(--sheet);
+}
+.record-head h2 { margin: 0; font-size: var(--type-body); font-weight: var(--weight-semibold); }
+.record-head-note { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-3); }
+.record-composer { flex: none; border-top: var(--border-width) solid var(--line); background: var(--sheet); }
+.record-composer > .composer { max-width: none; }
+
+.record { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; background-color: color-mix(in srgb, var(--interaction-fill) 5%, var(--bg));
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ink) 4%, transparent) var(--border-width), transparent var(--border-width)),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 4%, transparent) var(--border-width), transparent var(--border-width));
+  background-size: var(--space-13) var(--space-13);
+}
+.record-scaler { position: relative; margin-inline: auto; }
+.record-board { position: absolute; inset-block-start: 0; inset-inline-start: 0; transform-origin: 0 0; }
+.record:not([data-placed]) .record-board > * { visibility: hidden; }
+.record-chat-column { position: absolute; inset-block: 0; border-inline: var(--border-width) dashed var(--line); pointer-events: none; }
+.record-chat-column > span { position: absolute; inset-block-start: var(--space-2); inset-inline-start: 50%; transform: translateX(-50%); font-size: var(--type-meta); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-3); }
+.record-wires { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.record-wires path { fill: none; stroke-width: var(--border-width-thick); stroke-linecap: round; stroke-linejoin: round; }
+.record-wires path[data-role=user] { stroke: var(--bubble-learner-line); }
+.record-wires path[data-role=assistant] { stroke: var(--bubble-partner-line); }
+
+/* Bubbles: the chat's own bubble styles, at one fixed width, with the record's
+   facts above and below the text. */
+.record-msg.msg.chat-message { position: absolute; box-sizing: border-box; width: var(--record-bubble-width); max-width: none; cursor: default; }
+.record-msg-who { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-block-end: var(--space-2); font: var(--weight-regular) var(--type-meta) var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-3); }
+.record-msg-text { overflow-wrap: anywhere; }
+.record-msg-turn { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-block-start: var(--space-3); color: var(--ink-3); font: var(--weight-regular) var(--type-meta) var(--font-mono); }
+
+/* Fields: one card per filled field, named as the data model names it; the
+   head opens the whole value in place. */
+.record-field-slot { position: absolute; width: var(--record-field-width); }
+.record-field { box-sizing: border-box; border: var(--border-width) solid var(--line); border-radius: var(--radius-md); background: var(--sheet); font-size: var(--type-ui); box-shadow: var(--shadow-bubble); }
+.record-field[data-error] { border-color: var(--danger-line); }
+.record-field[data-open] { border-color: var(--interaction-line); }
+.record-field-head {
+  display: flex; align-items: center; gap: var(--space-3); width: 100%; padding: var(--space-2) var(--space-4);
+  border: 0; border-bottom: var(--border-width) solid var(--line-soft); background: transparent; color: var(--ink); font-family: var(--font-mono); font-size: var(--type-meta); text-align: start; cursor: pointer;
+}
+.record-field-head:hover { background: var(--chrome); }
+.record-field-head > svg { flex: none; color: var(--ink-3); transition: transform var(--dur-fast) var(--ease-out); }
+.record-field[data-open] .record-field-head > svg { transform: rotate(180deg); }
+.record-field-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-semibold); }
+.record-field-state { flex: none; color: var(--ink-3); }
+.record-field-state[data-state=succeeded], .record-field-state[data-state=ready], .record-field-state[data-state=adopted] { color: var(--success-ink); }
+.record-field-state[data-state=failed], .record-field-state[data-state=unknown] { color: var(--danger-ink); }
+.record-field-state[data-state=running] { color: var(--interaction-ink); }
+.record-field-body { padding: var(--space-2) var(--space-4); color: var(--ink); overflow-wrap: anywhere; }
+.record-field-body .content-text { font-size: var(--type-ui); }
+.record-field-error { padding: var(--space-2) var(--space-4); color: var(--danger-ink); font-family: var(--font-mono); font-size: var(--type-meta); overflow-wrap: anywhere; }
+.record-field-results { padding: var(--space-1) var(--space-4) var(--space-2); color: var(--interaction-ink); font-family: var(--font-mono); font-size: var(--type-meta); }
+
+/* The pill beside the AI pill that opens the record. */
+.record-pill { flex: none; }
+.record-pill::before { display: none; }
+.record-pill[aria-pressed=true] { border-color: var(--interaction-ink); background: var(--interaction-tint); color: var(--interaction-ink); }

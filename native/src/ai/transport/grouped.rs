@@ -389,6 +389,7 @@ pub(super) async fn request_streaming_live(
             "Operation group exceeds its input limit.",
         ));
     }
+    crate::ai::content::capture::request("text", "application/json", &body, key)?;
     let request = client
         .post(&first.target.url)
         .header(reqwest::header::CONTENT_TYPE, "application/json")
@@ -415,9 +416,11 @@ pub(super) async fn request_streaming_live(
             "Chat",
             response.status().as_u16(),
         ) {
+            crate::ai::content::capture::rejected(response).await?;
             return Err(AppError::new(ErrorCode::Provider, message));
         }
         if response.status().is_server_error() {
+            crate::ai::content::capture::rejected(response).await?;
             return Err(unknown());
         }
         return Err(crate::ai::hosted::body(response)
@@ -432,6 +435,7 @@ pub(super) async fn request_streaming_live(
         .and_then(|v| v.split(';').next())
         != Some("application/x-ndjson")
     {
+        crate::ai::content::capture::rejected(response).await?;
         return Err(unknown());
     }
     let mut decoder = if deltas {
@@ -450,6 +454,7 @@ pub(super) async fn request_streaming_live(
         .await
         .map_err(|error| network(&error, "grouped_response"))?
     {
+        crate::ai::content::capture::chunk(&chunk)?;
         decoder.push_with_deltas(
             &chunk,
             |operation, result| publish(index(operation)?, result),
@@ -459,6 +464,7 @@ pub(super) async fn request_streaming_live(
             },
         )?;
     }
+    crate::ai::content::capture::complete()?;
     decoder.finish()
 }
 

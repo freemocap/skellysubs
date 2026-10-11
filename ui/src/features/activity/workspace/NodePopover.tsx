@@ -9,13 +9,17 @@ import type { GraphOverlay } from '../../../domain/activity/graph-overlay'
 import type { GraphView } from '../../../domain/activity/graph-projection'
 import { typeName } from '../../../domain/activity/graph-types'
 import { NativeAttemptDetails } from '../NativeAttemptDetails'
+import { ContentValue } from '../../../components/feedback/ContentValue'
+import type { StepProduct } from '../../../domain/conversation/record-view'
 import { typeColor, typeInk } from './geometry'
 import type { Preview } from './NodeItems'
 import { attemptWord, dispositionWord, faultText, nodeName, operationMeta, reasonText, summaryText } from './wording'
 
-/// Everything recorded about one operation at the selected revision. Opening it
-/// reads nothing; response evidence is read only from its own explicit control.
-export function NodePopover({ view, node, overlay, snapshot, timeline, preview, onClose }: {
+/// Everything recorded about one operation at the selected revision: first what
+/// it made, then the response evidence the provider adapter retained, then its
+/// ports, tries and reasons. Deliberately opening the inspector loads evidence
+/// for the selected attempt and revision.
+export function NodePopover({ view, node, overlay, snapshot, timeline, preview, products, onClose, onSelectNode }: {
   view: GraphView
   node: string
   overlay: GraphOverlay | null
@@ -23,7 +27,10 @@ export function NodePopover({ view, node, overlay, snapshot, timeline, preview, 
   snapshot: InspectionSnapshot | null
   timeline: Timeline | null
   preview: Preview | null
+  /// What the step made, as the conversation shows it.
+  products: StepProduct[]
   onClose: () => void
+  onSelectNode: (node: string) => void
 }) {
   const tr = useI18n()
   const [copyError, setCopyError] = useState<string | null>(null)
@@ -52,6 +59,24 @@ export function NodePopover({ view, node, overlay, snapshot, timeline, preview, 
     <p className="ai-popover-summary">{summaryText(tr, view, node, facts)}</p>
     <p className="ai-popover-meta">{operationMeta(tr, operation, facts?.activation ?? operation.activation)}</p>
 
+    {(products.length > 0 || shown) && <section aria-labelledby="ai-made" className="ai-popover-made">
+      <h3 id="ai-made">{tr('What it made')}</h3>
+      {shown && <div className="ai-popover-preview">
+        <span className="ai-card-slot-label">{shown.live ? tr('Live preview · not used yet') : tr('Retained text')}</span>
+        <p dir="auto">{shown.text}{shown.live && <span className="ai-caret" aria-hidden="true" />}</p>
+      </div>}
+      {products.map(product => <div key={`${product.role}:${product.field}`} className="ai-popover-product">
+        <span className="ai-popover-product-name">{product.role === 'user' ? tr('your message') : tr('partner message')} · {product.field}</span>
+        <ContentValue value={product.value} compact={false} />
+      </div>)}
+    </section>}
+
+    {snapshot && <section aria-labelledby="ai-evidence">
+      <h3 id="ai-evidence">{tr('Response evidence')}</h3>
+      <p className="ai-popover-meta">{tr('Retained inputs, outputs and response metadata for this attempt.')}</p>
+      <NativeAttemptDetails key={JSON.stringify([snapshot.engine, snapshot.run, node])} graph={snapshot} node={node} expanded />
+    </section>}
+
     <div className="ai-popover-columns">
       <section aria-labelledby="ai-went-in">
         <h3 id="ai-went-in">{tr('What went in')}</h3>
@@ -60,9 +85,9 @@ export function NodePopover({ view, node, overlay, snapshot, timeline, preview, 
             <dt><span className="ai-pin-mark" style={input.kind === 'wired' ? { background: typeColor(input.contract) } : undefined} data-kind={input.kind} />{input.port}</dt>
             <dd>
               <span className="ai-port-type" style={{ color: typeInk(input.contract) }} title={input.contract}>{typeName(input.contract)}</span>
-              <span className="ai-popover-source">{input.kind === 'wired' ? tr('From {value0}.{value1} · {value2}', { value0: nodeName(view, input.producer.node), value1: input.producer.port, value2: ready(input.producer.node) })
-                : input.kind === 'captured' ? tr('Captured when the run started · content hidden')
-                : input.kind === 'constant' ? tr('Fixed in the graph · value hidden')
+              <span className="ai-popover-source">{input.kind === 'wired' ? <button type="button" className="inspection-action" onClick={() => onSelectNode(input.producer.node)}>{tr('From {value0}.{value1} · {value2}', { value0: nodeName(view, input.producer.node), value1: input.producer.port, value2: ready(input.producer.node) })}</button>
+                : input.kind === 'captured' ? tr('Inputs fixed when the run started')
+                : input.kind === 'constant' ? tr('Fixed in the graph')
                 : tr('Absent for this run')}</span>
             </dd>
           </div>)}
@@ -70,12 +95,12 @@ export function NodePopover({ view, node, overlay, snapshot, timeline, preview, 
             <dt><span className="ai-pin-mark is-guard" style={operation.guard.kind === 'wired' ? { background: typeColor(operation.guard.contract) } : undefined} data-kind={operation.guard.kind} />{tr('guard')}</dt>
             <dd>
               <span className="ai-port-type" style={{ color: typeInk(operation.guard.contract) }} title={operation.guard.contract}>{typeName(operation.guard.contract)}</span>
-              <span className="ai-popover-source">{operation.guard.kind === 'wired' ? tr('From {value0}.{value1} · {value2}', { value0: nodeName(view, operation.guard.producer.node), value1: operation.guard.producer.port, value2: ready(operation.guard.producer.node) }) : tr('Fixed in the graph · value hidden')}</span>
+              <span className="ai-popover-source">{operation.guard.kind === 'wired' ? tr('From {value0}.{value1} · {value2}', { value0: nodeName(view, operation.guard.producer.node), value1: operation.guard.producer.port, value2: ready(operation.guard.producer.node) }) : tr('Fixed in the graph')}</span>
             </dd>
           </div>}
           {operation.after.map(parent => <div key={`after:${parent}`} className="ai-popover-port">
             <dt><span className="ai-pin-mark" data-kind="control" />{tr('runs after')}</dt>
-            <dd><span className="ai-popover-source">{nodeName(view, parent)}{overlay ? ` · ${dispositionWord(tr, overlay.nodes[parent].disposition)}` : ''}</span></dd>
+            <dd><span className="ai-popover-source"><button type="button" className="inspection-action" onClick={() => onSelectNode(parent)}>{nodeName(view, parent)}</button>{overlay ? ` · ${dispositionWord(tr, overlay.nodes[parent].disposition)}` : ''}</span></dd>
           </div>)}
         </dl>
       </section>
@@ -87,10 +112,6 @@ export function NodePopover({ view, node, overlay, snapshot, timeline, preview, 
             <dd><span className="ai-port-type" style={{ color: typeInk(output.contract) }} title={output.contract}>{typeName(output.contract)}</span></dd>
           </div>)}
         </dl>
-        {shown && <div className="ai-popover-preview">
-          <span className="ai-card-slot-label">{shown.live ? tr('Live preview · not used yet') : tr('Retained text')}</span>
-          <p dir="auto">{shown.text}{shown.live && <span className="ai-caret" aria-hidden="true" />}</p>
-        </div>}
       </section>
     </div>
 
@@ -133,7 +154,6 @@ export function NodePopover({ view, node, overlay, snapshot, timeline, preview, 
         {snapshot && <button type="button" className="ai-chip" onClick={() => copy(JSON.stringify(snapshot, null, 2))}>{tr('Copy snapshot JSON')}</button>}
       </div>
       {copyError && <ErrorNotice as="p" error={copyError}>{copyError}</ErrorNotice>}
-      {snapshot && <NativeAttemptDetails key={JSON.stringify([snapshot.engine, snapshot.run, node])} graph={snapshot} node={node} />}
     </details>
   </DetailDialog>
 }

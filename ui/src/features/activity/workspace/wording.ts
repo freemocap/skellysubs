@@ -42,7 +42,7 @@ export function attemptWord(tr: Translate, state: AttemptStateKind): string {
 export function nodeName(view: { operations: Record<string, ProjectedOperation> }, node: string): string {
   const operation = view.operations[node]
   if (!operation) throw new Error(`Unknown operation: ${node}`)
-  return humanizeId(operation.name)
+  return humanizeId(node.split('/').join(' '))
 }
 
 /// The verb phrase the artifact's author gave the operation.

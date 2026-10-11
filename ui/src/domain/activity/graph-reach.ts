@@ -1,4 +1,4 @@
-import { groupMembers, type GraphView } from './graph-projection'
+import type { GraphView } from './graph-projection'
 
 /// Graph results structurally downstream of an operation: results whose value
 /// is bound to an output of the operation itself or of anything it feeds
@@ -8,11 +8,6 @@ import { groupMembers, type GraphView } from './graph-projection'
 export function downstreamResults(view: GraphView, node: string): string[] {
   if (!view.operations[node]) throw new Error(`Unknown operation: ${node}`)
   return resultsFed(view, new Set([node]))
-}
-
-/// The same for a composition group: the union over all its members.
-export function groupDownstreamResults(view: GraphView, group: string): string[] {
-  return resultsFed(view, new Set(groupMembers(view, group)))
 }
 
 function resultsFed(view: GraphView, start: Set<string>): string[] {

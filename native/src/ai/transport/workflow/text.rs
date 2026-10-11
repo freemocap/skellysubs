@@ -62,6 +62,9 @@ pub(in crate::ai::transport) async fn request(
                 return Err(error());
             }
             call.wait(&mut previous, time).await?;
+            if super::originals::restore(&payload)? {
+                continue;
+            }
             match serde_json::from_value(payload).map_err(|_| error())? {
                 TextFrame::Delta { index, text } => {
                     if index >= dispatches.len() {
@@ -90,38 +93,39 @@ pub(in crate::ai::transport) async fn request(
     }
     // Delta callback cannot return an error; capture failure is surfaced at end.
     let delta_error = std::sync::Mutex::new(None);
-    let result = grouped::request_streaming_live(
-        client,
-        key,
-        dispatches,
-        outputs,
-        deltas,
-        |index, result| {
-            push(
-                &call,
-                TextFrame::Item {
-                    index,
-                    result: result.clone(),
-                },
-                key,
-            )?;
-            publish(index, result)
-        },
-        |index, text| {
-            if let Err(error) = push(
-                &call,
-                TextFrame::Delta {
-                    index,
-                    text: text.into(),
-                },
-                key,
-            ) {
-                *delta_error.lock().unwrap_or_else(|e| e.into_inner()) = Some(error);
-            }
-            on_delta(index, text);
-        },
-    )
-    .await;
+    let result = call
+        .originals(grouped::request_streaming_live(
+            client,
+            key,
+            dispatches,
+            outputs,
+            deltas,
+            |index, result| {
+                push(
+                    &call,
+                    TextFrame::Item {
+                        index,
+                        result: result.clone(),
+                    },
+                    key,
+                )?;
+                publish(index, result)
+            },
+            |index, text| {
+                if let Err(error) = push(
+                    &call,
+                    TextFrame::Delta {
+                        index,
+                        text: text.into(),
+                    },
+                    key,
+                ) {
+                    *delta_error.lock().unwrap_or_else(|e| e.into_inner()) = Some(error);
+                }
+                on_delta(index, text);
+            },
+        ))
+        .await;
     if let Some(error) = delta_error.into_inner().unwrap_or_else(|e| e.into_inner()) {
         return Err(error);
     }

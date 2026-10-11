@@ -465,6 +465,25 @@ async fn selected_native_attempt_inspection_is_read_only_and_revision_bound() {
     )
     .unwrap();
     assert_eq!(detail.execution, attempt.execution);
+    assert!(
+        detail
+            .inputs
+            .as_object()
+            .is_some_and(|inputs| !inputs.is_empty())
+    );
+    assert!(
+        detail
+            .outcome
+            .as_ref()
+            .unwrap()
+            .to_string()
+            .contains("Retained inspection reply.")
+    );
+    assert!(
+        !serde_json::to_string(&snapshot)
+            .unwrap()
+            .contains("Retained inspection reply.")
+    );
     assert_eq!(detail.owner, conversation);
     assert_eq!(detail.artifact, snapshot.artifact_id);
     assert!(

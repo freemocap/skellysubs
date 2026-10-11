@@ -28,6 +28,7 @@ mod sql_records;
 mod state_limits;
 mod stepping;
 mod stored_records;
+mod targeted_reads;
 mod transition_reads;
 mod validation;
 mod value_types;

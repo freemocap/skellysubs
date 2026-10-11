@@ -29,6 +29,7 @@ mod playback;
 mod speech_requests;
 pub use speech_requests::SpeechCommand;
 mod reply_validation;
+mod retained_views;
 mod routing;
 mod speech;
 mod status;
@@ -38,6 +39,7 @@ pub use execution::Claim;
 pub use usage::Usage;
 
 pub struct Runtime {
+    retained_views: BTreeMap<String, BTreeMap<String, InspectionSnapshot>>,
     pub partner: partner_host::PartnerHost,
     pub graph: Arc<Executable>,
     pub catalog: String,
@@ -105,6 +107,7 @@ impl Runtime {
         let catalog = graph_store::catalog_id([graph.identity()]).map_err(error)?;
         let mut runtime = Self {
             partner: partner_host::PartnerHost::new()?,
+            retained_views: BTreeMap::new(),
             catalogs: BTreeMap::new(),
             partitions: BTreeMap::new(),
             graph,
@@ -135,6 +138,10 @@ impl Runtime {
         conversation: &str,
         run: &str,
     ) -> Result<Option<InspectionSnapshot>> {
+        let engine = self.owner_engine(db, conversation, run)?;
+        if let Some(view) = self.retained_view(&engine, run) {
+            return Ok(Some(view));
+        }
         if !self.owns(db, conversation, run)? {
             return self
                 .retained(db, conversation, run)?
@@ -187,22 +194,9 @@ impl Runtime {
             db.unchecked_transaction()?,
             self.partition(&engine_id)?,
         );
-        let mut snapshot = engine
-            .read_live_inspection(
-                run,
-                &[],
-                LiveReadLimits {
-                    export: ExportLimits {
-                        bytes: 4 * 1024 * 1024,
-                        attempts: 4096,
-                    },
-                    captures: 0,
-                    capture_bytes: 2,
-                },
-                &mut reader,
-            )
-            .map_err(error)?;
-        Ok(snapshot.previews.remove(coach_graph::REPLY))
+        engine
+            .read_node_preview(run, coach_graph::REPLY, 4 * 1024 * 1024, &mut reader)
+            .map_err(error)
     }
 
     pub fn prune(&mut self, db: &Connection) -> Result<()> {

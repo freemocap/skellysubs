@@ -327,11 +327,13 @@ pub async fn response_bytes(
             error(format!("{label}: response interrupted.")),
         )
     })? {
+        crate::ai::content::capture::chunk(&chunk)?;
         if body.len() + chunk.len() > limit {
             return Err(error(format!("{label}: response exceeds the size limit.")));
         }
         body.extend_from_slice(&chunk);
     }
+    crate::ai::content::capture::complete()?;
     Ok(body)
 }
 #[tauri::command]

@@ -395,6 +395,13 @@ async fn leaving_one_or_all_consumers_does_not_abandon_submitted_recognition() {
     for keep_second in [true, false] {
         let (url, ready, release, worker) = server(reply());
         let (_dir, app, recording, input) = setup(&url);
+        // Each consumer now owns an independently retained source recording.
+        for id in ["a", "b", "later"] {
+            app.lock()
+                .unwrap()
+                .begin_transcription(id, &recording.owner, &recording.target)
+                .unwrap();
+        }
         let alive = AtomicBool::new(true);
         let validate = || {
             if alive.load(Ordering::SeqCst) {
@@ -633,6 +640,10 @@ async fn cache_write_failure_retains_provider_metadata_and_admission_failure_is_
     assert_eq!(receipt["state"], "failed");
     assert!(receipt.to_string().contains("recognition-fixture"));
     assert!(!receipt.to_string().contains("Hola"));
+    app.lock()
+        .unwrap()
+        .begin_transcription("held", &recording.owner, &recording.target)
+        .unwrap();
     app.lock()
         .unwrap()
         .connection

@@ -70,3 +70,35 @@ The originally proposed React Flow comparison spike was not performed.
 
 Worked in the shared checkout and preserved unrelated changes. No commit, push,
 release, version bump, deployment or persisted workspace migration was made.
+
+
+## Usability correction after refactor review (2026-10-11)
+
+Implemented in the shared checkout; the earlier collapse/expand interaction
+verification above describes the preceding UI, not the revised controls.
+
+- Across columns share a vertical midpoint, and the canvas centers the graph in
+  available space while retaining overflow scrolling.
+- A single Compact toggle controls visual density. Compact nodes open inspection
+  directly; expanded cards have a visible Details label and no shrink control.
+- Deliberately opening an operation inspector immediately reads retained attempt
+  evidence. Other callers retain their explicit Response disclosure. Inspection
+  still validates engine/run/artifact/revision/node/attempt identity.
+- History has Play/Stop for the loaded revisions, at 900ms per revision (not
+  wall-clock execution timing). It stops at the last loaded revision. Earlier
+  pages remain explicitly loadable; playback never dispatches native work.
+- Running states animate while live or during replay. A stopped historical view
+  remains still. Current conversation products and external stations are omitted
+  from historical/structure views because they are not captured revision evidence.
+- Control prerequisites remain visible at reduced opacity rather than appearing
+  only on hover. Runtime topology and semantics are unchanged.
+
+The column-centering test first failed (centers 109 versus 67) and passed after
+layout correction. Activity/domain and affected conversation regressions passed:
+17 files, 192 tests. The production build and fast gate passed. Repo-wide preview
+types remain blocked by the previously listed stale previews, plus record-preview
+using an obsolete gloss coverage value. Browser checks used synthetic data:
+centered desktop flow, live edge animation, revision playback to completion, and
+one-click compact-node inspection. No live provider/native-window smoke test was
+performed. Raw request prompts and response bodies remain unavailable under the
+existing retention policy; this UI change does not introduce payload storage.

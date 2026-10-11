@@ -43,6 +43,9 @@ pub const SUGGESTIONS: &str = "coach_suggestions";
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(deny_unknown_fields)]
 pub struct InputEvidence {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub recording_ids: Option<Vec<String>>,
     pub modality: String,
     pub suggestion: bool,
     pub scaffold: bool,
@@ -51,6 +54,7 @@ pub struct InputEvidence {
 impl Default for InputEvidence {
     fn default() -> Self {
         Self {
+            recording_ids: None,
             modality: "text".into(),
             suggestion: false,
             scaffold: false,

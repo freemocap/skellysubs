@@ -4,15 +4,17 @@ import type { AttemptPreview, DefinitionSnapshot, InspectionSnapshot, RunHistory
 import { buildTimeline } from '../../../domain/activity/graph-history'
 import { overlayGraph, previewNode, type GraphOverlay } from '../../../domain/activity/graph-overlay'
 import { projectGraph, type GraphView } from '../../../domain/activity/graph-projection'
-import { downstreamResults, groupDownstreamResults } from '../../../domain/activity/graph-reach'
+import { downstreamResults } from '../../../domain/activity/graph-reach'
 import type { Orientation } from './layout'
 import { NodePopover } from './NodePopover'
-import type { HoverTarget, Preview } from './NodeItems'
+import type { HoverTarget, Preview, StationView } from './NodeItems'
 import { TimelineDrawer, type RevisionSelection } from './TimelineDrawer'
 import { useRunHistory } from './useRunHistory'
 import { useWorkspaceState } from './useWorkspaceState'
 import { Workspace } from './Workspace'
 import { nodeName } from './wording'
+import { stepProducts, type StepProduct } from '../../../domain/conversation/record-view'
+import type { ChatMessage, TurnView } from '../../../generated/contracts'
 
 const NO_HISTORY = () => Promise.reject(new Error('This graph has no recorded run history.'))
 
@@ -30,6 +32,12 @@ export interface RunWorkspaceProps {
   /// The live snapshot of a run, or a definition with no run.
   graph: DefinitionSnapshot | InspectionSnapshot
   preview: AttemptPreview | null
+  /// What feeds the artifact and what takes its results, outside the run.
+  stations: StationView[]
+  /// The conversation turn this run belongs to and its messages, so each step
+  /// can show what it made; null for a run outside a conversation.
+  turn: TurnView | null
+  messages: ChatMessage[]
   loadHistory: ((before: string | null) => Promise<RunHistory>) | null
   /// Execution controls, shown only while the live revision is selected.
   controls: ReactNode
@@ -67,7 +75,7 @@ function NowLine({ view, overlay, preview, selection, onFocus }: {
   </div>
 }
 
-export function RunWorkspace({ graph, preview, loadHistory, controls, orientation, compact, popover, onPopover, onHoverResults, initialRevision, onRevision }: RunWorkspaceProps) {
+export function RunWorkspace({ graph, preview, stations, turn, messages, loadHistory, controls, orientation, compact, popover, onPopover, onHoverResults, initialRevision, onRevision }: RunWorkspaceProps) {
   const tr = useI18n()
   const view = useProjection(graph)
   const live = 'nodes' in graph ? graph : null
@@ -75,6 +83,7 @@ export function RunWorkspace({ graph, preview, loadHistory, controls, orientatio
   const selectionKey = JSON.stringify(initialRevision ?? null)
   useEffect(() => { setSelection(initialRevision ?? (live ? { kind: 'live' } : { kind: 'structure' })) }, [selectionKey])
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [playing, setPlaying] = useState(false)
   const [focus, setFocus] = useState<{ id: string; serial: number } | null>(null)
   const workspace = useWorkspaceState()
   const history = useRunHistory(live?.engine ?? '', live?.run ?? '', graph.artifact_id, loadHistory ?? NO_HISTORY,
@@ -94,11 +103,33 @@ export function RunWorkspace({ graph, preview, loadHistory, controls, orientatio
     return node ? { node, text: preview.capture.text, live: preview.live } : null
   }, [selection.kind, live, preview])
 
+  const products = useMemo<Record<string, StepProduct[]>>(() => turn ? Object.fromEntries(view.ids.map(id => [id, stepProducts(view, turn, messages, id)])) : {}, [view, turn, messages])
+
   const hover = (target: HoverTarget | null) => {
-    if (!target || selection.kind !== 'live' || !live) { onHoverResults(null); return }
-    onHoverResults(target.kind === 'group' ? groupDownstreamResults(view, target.id) : downstreamResults(view, target.id))
+    if (!target || target.kind === 'station' || selection.kind !== 'live' || !live) { onHoverResults(null); return }
+    onHoverResults(downstreamResults(view, target.id))
   }
-  const select = (next: RevisionSelection) => { onHoverResults(null); setSelection(next); onRevision?.(next) }
+  const select = (next: RevisionSelection) => { setPlaying(false); onHoverResults(null); setSelection(next); onRevision?.(next) }
+  useEffect(() => {
+    if (!playing || selection.kind !== 'revision' || !timeline) return
+    const index = timeline.revisions.indexOf(selection.revision)
+    const next = timeline.revisions[index + 1]
+    if (index < 0 || !next) { setPlaying(false); return }
+    const timer = window.setTimeout(() => {
+      const revision: RevisionSelection = { kind: 'revision', revision: next }
+      setSelection(revision)
+      onRevision?.(revision)
+    }, 900)
+    return () => window.clearTimeout(timer)
+  }, [playing, selection, timeline, onRevision])
+  useEffect(() => { setPlaying(false) }, [graph.artifact_id, live?.engine, live?.run])
+  const play = () => {
+    if (playing) { setPlaying(false); return }
+    const first = timeline?.revisions[0]
+    if (!first) return
+    select({ kind: 'revision', revision: first })
+    setPlaying(true)
+  }
   const focusNode = (node: string) => {
     const operation = view.operations[node]
     if (!operation) throw new Error(`Cannot focus an unknown step: ${node}`)
@@ -111,19 +142,20 @@ export function RunWorkspace({ graph, preview, loadHistory, controls, orientatio
     <div className="ai-run-toolbar">
       <NowLine view={view} overlay={overlay} preview={previewShown} selection={selection} onFocus={focusNode} />
       <div className="ai-run-actions">
-        <button type="button" className="ai-chip" onClick={() => workspace.setAll([...view.ids, ...Object.keys(view.groups)], 'bubble')}>{tr('Collapse all')}</button>
-        <button type="button" className="ai-chip" onClick={() => workspace.setAll([...view.ids, ...Object.keys(view.groups)], 'card')}>{tr('Expand all')}</button>
+        <button type="button" className="ai-chip" aria-pressed={view.ids.every(id => workspace.state.levels[id] === 'bubble')}
+          onClick={() => workspace.setAll(view.ids, view.ids.every(id => workspace.state.levels[id] === 'bubble') ? 'card' : 'bubble')}>{tr('Compact')}</button>
         {(Object.keys(workspace.state.offsets).length > 0 || Object.keys(workspace.state.sizes).length > 0) && <button type="button" className="ai-chip" onClick={workspace.tidy}>{tr('Tidy up')}</button>}
         {selection.kind === 'live' && controls}
       </div>
     </div>
     {selection.kind === 'revision' && !shown && <p role="status">{tr(history.history && !history.history.before && !history.loading ? 'No recorded AI operations.' : 'Loading…')}</p>}
-    <Workspace view={view} overlay={overlay} live={selection.kind === 'live'} preview={previewShown} state={workspace.state} orientation={orientation} focus={focus}
-      onLevel={workspace.setLevel} onFold={workspace.setFolded} onLocalSteps={workspace.setLocalSteps} onOffset={workspace.setOffset} onBox={workspace.setBox}
-      onOpen={node => { onHoverResults(null); onPopover(node) }} onHover={hover} />
+    <Workspace view={view} overlay={overlay} live={selection.kind === 'live' || playing} preview={previewShown} products={selection.kind === 'live' ? products : {}} stations={selection.kind === 'live' ? stations : []} state={workspace.state} orientation={orientation} focus={focus}
+      onOffset={workspace.setOffset} onBox={workspace.setBox}
+      onOpen={node => { setPlaying(false); onHoverResults(null); onPopover(node) }} onHover={hover} />
     {live && loadHistory && <TimelineDrawer view={view} timeline={timeline} history={history.history} loading={history.loading} error={history.error}
       selection={selection} liveRevision={live.revision} open={historyOpen} compact={compact} onSelect={select}
-      onToggle={() => setHistoryOpen(open => !open)} onLoadEarlier={history.loadEarlier} onRetry={history.retry} onOpenNode={onPopover} />}
-    {popoverNode && <NodePopover view={view} node={popoverNode} overlay={overlay} snapshot={shown} timeline={timeline} preview={previewShown} onClose={() => onPopover(null)} />}
+      playing={playing} onPlay={play}
+      onToggle={() => { setPlaying(false); setHistoryOpen(open => !open) }} onLoadEarlier={history.loadEarlier} onRetry={history.retry} onOpenNode={node => { setPlaying(false); onPopover(node) }} />}
+    {popoverNode && <NodePopover view={view} node={popoverNode} overlay={overlay} snapshot={shown} timeline={timeline} preview={previewShown} products={selection.kind === 'live' ? products[popoverNode] ?? [] : []} onClose={() => onPopover(null)} onSelectNode={onPopover} />}
   </div>
 }

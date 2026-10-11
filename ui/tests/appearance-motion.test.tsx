@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { useAppearance } from './useAppearance'
-import { reducedMotion, useReducedMotion } from './motion'
-import { useReplyReveal } from '../../features/conversation/messages/useReplyReveal'
-import { DEFAULT_APPEARANCE, type MotionPreference } from '../../generated/contracts'
-import type { Settings } from '../../types'
+import { useAppearance } from '../src/platform/appearance/useAppearance'
+import { reducedMotion, useReducedMotion } from '../src/platform/appearance/motion'
+import { useReplyReveal } from '../src/features/conversation/messages/useReplyReveal'
+import { DEFAULT_APPEARANCE, type MotionPreference } from '../src/generated/contracts'
+import type { Settings } from '../src/types'
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.useRealTimers() })
 

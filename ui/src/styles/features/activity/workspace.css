@@ -51,20 +51,19 @@
   background-size: var(--space-13) var(--space-13);
 }
 .ai-workspace[data-gesture] { cursor: grabbing; user-select: none; }
-.ai-workspace-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-5); margin: 0 0 var(--space-5); }
-.ai-workspace-note { font-size: var(--type-meta); color: var(--warning-ink); }
-.ai-workspace-scaler { position: relative; flex: none; margin: 0 auto; }
+.ai-workspace-scaler { position: relative; flex: none; margin: auto; }
 .ai-workspace-layer { position: absolute; inset-block-start: 0; inset-inline-start: 0; transform-origin: 0 0; }
 .ai-workspace-edges { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
 
-/* Connections: a light halo under a type-colored line; local plumbing it passes through is a dot. */
-.ai-edge-halo { fill: none; stroke: var(--sheet); stroke-width: calc(var(--border-width-thick) * 2); stroke-linecap: round; opacity: .9; }
-.ai-edge { fill: none; stroke: var(--ink-3); stroke-width: var(--border-width-thick); stroke-linecap: round; pointer-events: stroke; transition: opacity var(--dur-base) var(--ease-out); }
-.ai-edge-via { fill: var(--sheet); stroke: var(--ink-3); stroke-width: var(--border-width-strong); }
+/* Wires: a light halo under a type-colored line. A wire that skips columns is
+   an elbow through the gutters and the gaps between nodes. */
+.ai-edge-halo { fill: none; stroke: var(--sheet); stroke-width: calc(var(--border-width-thick) * 2); stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+.ai-edge { fill: none; stroke: var(--ink-3); stroke-width: var(--border-width-thick); stroke-linecap: round; stroke-linejoin: round; pointer-events: stroke; transition: opacity var(--dur-base) var(--ease-out); }
 [data-kind=control] > .ai-edge { stroke: var(--ink-3); stroke-width: var(--border-width-strong); stroke-dasharray: 2 6; }
 [data-kind=control] > .ai-edge-halo { display: none; }
-.ai-edge-group[data-kind=control]:not([data-related]) { opacity: 0; }
-[data-kind=guard] > .ai-edge { stroke-dasharray: 1 6; }
+.ai-edge-group[data-kind=control]:not([data-related]) { opacity: .45; }
+[data-kind=guard] > .ai-edge { stroke-width: var(--border-width-strong); stroke-dasharray: 5 4; }
+[data-kind=hand] > .ai-edge { stroke-dasharray: 8 5; }
 .ai-edge-group[data-state=flowing] > .ai-edge { stroke-dasharray: 8 6; animation: ai-flow var(--dur-loop-fast) linear infinite; }
 .ai-workspace[data-focus] .ai-edge-group { opacity: .15; }
 .ai-workspace[data-focus] .ai-edge-group[data-related] { opacity: 1; }
@@ -90,6 +89,8 @@
 .ai-workspace[data-gesture] .ai-node { transition: none; }
 .ai-node[data-moved] { z-index: var(--z-raised); }
 .ai-node[data-tone=running] { box-shadow: 0 0 0 var(--space-2) var(--interaction-tint), var(--shadow-surface); }
+.ai-workspace[data-live=true] .ai-node[data-tone=running] > .ai-node-head, .ai-workspace[data-live=true] .ai-node.is-collapsed[data-tone=running] { animation: ai-working var(--dur-loop) ease-in-out infinite; }
+.ai-workspace[data-live=true] .ai-node[data-tone=done] { animation: ai-settle var(--dur-slow) var(--ease-out); }
 .ai-node[data-tone=ask] { border-style: dashed; }
 .ai-node[data-tone=ended] { opacity: .7; }
 .ai-node-head {
@@ -99,19 +100,18 @@
   background: var(--interaction-fill); color: var(--ink-on-fill); font-weight: var(--weight-semibold); cursor: grab;
 }
 .ai-node[data-resource=Local] .ai-node-head { background: var(--chip); color: var(--ink); }
-.ai-node.is-group .ai-node-head { background: var(--chip); color: var(--ink); }
+/* A station outside the artifact: dashed, on the ground, no fill. */
+.ai-node.is-station { border-style: dashed; background: color-mix(in srgb, var(--sheet) 40%, transparent); box-shadow: none; }
+.ai-node.is-station .ai-node-head { background: transparent; color: var(--ink); border-bottom: var(--border-width) dashed var(--line); }
 .ai-node-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-body); }
 .ai-node-glyph { flex: none; font-family: var(--font-mono); font-size: var(--type-ui); line-height: var(--leading-none); }
 .ai-node-glyph[data-tone=done] { color: var(--success-line); }
-.ai-node[data-resource=Local] .ai-node-glyph[data-tone=done], .ai-node.is-group .ai-node-glyph[data-tone=done] { color: var(--success-ink); }
-.ai-node-glyph[data-tone=running] { color: inherit; animation: inside-pulse var(--dur-loop-fast) ease-in-out infinite; }
+.ai-node[data-resource=Local] .ai-node-glyph[data-tone=done], .ai-node.is-station .ai-node-glyph[data-tone=done] { color: var(--success-ink); }
+.ai-node-glyph[data-tone=running] { color: inherit; }
+.ai-workspace[data-live=true] .ai-node-glyph[data-tone=running] { animation: inside-pulse var(--dur-loop-fast) ease-in-out infinite; }
 .ai-node-glyph[data-tone=problem] { color: var(--danger-line); }
 .ai-node-glyph[data-tone=held] { color: var(--warning-line); }
 .ai-node-glyph:is([data-tone=ask], [data-tone=waiting], [data-tone=ended]) { opacity: .8; }
-.ai-row .ai-node-glyph, .ai-node-members .ai-node-glyph { color: var(--ink-2); }
-.ai-row .ai-node-glyph[data-tone=done], .ai-node-members .ai-node-glyph[data-tone=done] { color: var(--success-ink); }
-.ai-row .ai-node-glyph[data-tone=running], .ai-node-members .ai-node-glyph[data-tone=running] { color: var(--interaction-mark); }
-.ai-node-members { display: flex; gap: var(--space-1); }
 
 /* Collapsed: the header alone is the node. */
 .ai-node.is-collapsed {
@@ -119,7 +119,6 @@
   background: var(--interaction-fill); color: var(--ink-on-fill); font: inherit; font-size: var(--type-ui); font-weight: var(--weight-semibold); text-align: start; cursor: grab;
 }
 .ai-node.is-collapsed[data-resource=Local] { background: var(--chip); color: var(--ink); }
-.ai-node.is-collapsed.is-group { background: var(--chip); color: var(--ink); }
 .ai-node.is-collapsed:hover { box-shadow: var(--shadow-surface); }
 .ai-node.is-collapsed:focus-visible, .ai-node:focus-within { outline: var(--border-width-strong) solid var(--interaction-mark); outline-offset: 2px; }
 
@@ -130,7 +129,11 @@
 }
 .ai-row.is-out { justify-content: flex-end; }
 .ai-row-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.ai-row.is-member .ai-row-name { flex: 1; }
+/* An input read in place: a marker instead of a socket, and the graph input it reads. */
+.ai-row.is-mark, .ai-row.is-fact { color: var(--ink-2); }
+.ai-mark { flex: none; font-size: var(--type-meta); line-height: var(--leading-none); }
+.ai-row-detail { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-align: end; font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-3); }
+.ai-row.is-fact .ai-row-detail { color: var(--ink); font-family: inherit; font-size: inherit; }
 .ai-socket {
   position: absolute; top: 50%; width: var(--graph-pin); height: var(--graph-pin); box-sizing: border-box; transform: translateY(-50%);
   border-radius: var(--radius-circle); background: var(--line); border: var(--border-width) solid var(--ink); box-shadow: 0 0 0 var(--border-width) var(--sheet);
@@ -146,6 +149,12 @@
 }
 .ai-node-slot[data-empty] { background: var(--chrome); opacity: .5; }
 .ai-node-text { flex: 1; min-width: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-3) var(--space-4); font-size: var(--type-ui); line-height: var(--leading-snug); overflow-wrap: anywhere; }
+.ai-node-slot[role=button] { cursor: pointer; }
+.ai-node-slot[role=button]:hover { outline: var(--border-width) solid var(--interaction-line); }
+.ai-node-product { display: flex; flex-direction: column; gap: var(--space-1); }
+.ai-node-product + .ai-node-product { margin-block-start: var(--space-3); }
+.ai-node-product-name { font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-3); }
+.ai-node-product .content-text { font-size: var(--type-ui); }
 .ai-caret { display: inline-block; width: var(--border-width-strong); height: 1em; margin-inline-start: var(--space-1); vertical-align: text-bottom; background: var(--ink); animation: stream-caret var(--dur-loop) steps(1) infinite; }
 .ai-node-foot {
   flex: none; box-sizing: border-box; height: var(--graph-footer); margin-top: auto;
@@ -165,8 +174,7 @@
   margin: var(--space-1) 0 0; padding: var(--space-3) var(--space-5); list-style: none; display: flex; flex-direction: column; gap: var(--space-1);
   border: var(--border-width) solid var(--line); border-radius: var(--radius-md); background: var(--sheet); box-shadow: var(--shadow-menu); color: var(--ink-2); white-space: nowrap;
 }
-.ai-node .ai-icon-button { width: var(--control-height-xs); height: var(--control-height-xs); color: var(--ink-3); }
-.ai-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ai-node .ai-icon-button { min-width: var(--control-height-xs); width: auto; height: var(--control-height-xs); color: var(--ink-3); }
 
 /* Resize: every edge and corner of an open node. */
 .ai-node-edge { position: absolute; z-index: var(--z-raised); }
@@ -184,18 +192,17 @@
 .ai-workspace[data-gesture=resize][data-edge=n], .ai-workspace[data-gesture=resize][data-edge=s] { cursor: ns-resize; }
 .ai-workspace[data-gesture=resize][data-edge=e], .ai-workspace[data-gesture=resize][data-edge=w] { cursor: ew-resize; }
 
-/* Unfolded composition: a frame around its members. */
+/* Composition: a frame around its members, named once at the top edge. */
 .ai-group-frame {
-  position: absolute; box-sizing: border-box;
-  border: var(--border-width) dashed var(--ink-3); border-radius: var(--radius-xl);
-  background: color-mix(in srgb, var(--sheet) 55%, transparent);
+  position: absolute; box-sizing: border-box; pointer-events: none;
+  border: var(--border-width) solid var(--line); border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 .ai-group-head {
-  box-sizing: border-box; height: var(--graph-group-header); width: 100%;
-  display: flex; align-items: center; gap: var(--space-3); padding-inline: var(--space-6);
-  border: 0; background: transparent; color: var(--ink-2); font: inherit; font-weight: var(--weight-semibold); text-align: start; cursor: pointer;
+  position: absolute; inset-block-start: calc(-1 * var(--space-3)); inset-inline-start: var(--space-5); padding-inline: var(--space-3);
+  border-radius: var(--radius-pill); background: var(--bg); color: var(--ink-3);
+  font-size: var(--type-meta); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-label); text-transform: uppercase;
 }
-.ai-group-action { margin-inline-start: auto; font-size: var(--type-meta); font-weight: var(--weight-regular); color: var(--interaction-ink); }
 
 /* Popover: everything recorded about one step. */
 .ai-popover { display: flex; flex-direction: column; gap: var(--space-8); }
@@ -219,6 +226,11 @@
 .ai-pin-mark[data-kind=control] { border-style: dotted; }
 .ai-pin-mark.is-guard { border-radius: var(--radius-xs); transform: rotate(45deg); }
 .ai-popover-preview { margin-top: var(--space-5); padding: var(--space-5) var(--space-6); border-radius: var(--radius-lg); background: var(--chrome); }
+.ai-popover-made { display: flex; flex-direction: column; gap: var(--space-5); }
+.ai-popover-product { padding: var(--space-5) var(--space-6); border-radius: var(--radius-lg); background: var(--chrome); display: flex; flex-direction: column; gap: var(--space-3); }
+.ai-popover-product-name { font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-3); }
+.ai-popover-product .content-text { font-size: var(--type-body); line-height: var(--leading-normal); }
+.ai-evidence { margin-block: var(--space-4); padding: var(--space-4) var(--space-5); border: var(--border-width) solid var(--line-soft); border-radius: var(--radius-md); }
 .ai-popover-preview p { margin: var(--space-2) 0 0; font-size: var(--type-body); line-height: var(--leading-normal); }
 .ai-tries { margin: 0 0 var(--space-5); padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-4); }
 .ai-try { display: flex; flex-direction: column; gap: var(--space-1); min-width: 12rem; padding: var(--space-4) var(--space-5); border: var(--border-width) solid var(--line); border-radius: var(--radius-md); }
@@ -241,6 +253,6 @@
   .ai-node .ai-icon-button { width: var(--touch-target); height: var(--touch-target); }
 }
 
-:where(:root[data-motion="reduced"]) .ai-edge-group[data-state=flowing] > .ai-edge, :where(:root[data-motion="reduced"]) .ai-node-glyph[data-tone=running], :where(:root[data-motion="reduced"]) .ai-caret, :where(:root[data-motion="reduced"]) .ai-now-chip.is-running::before { animation: none; }
+:where(:root[data-motion="reduced"]) .ai-edge-group[data-state=flowing] > .ai-edge, :where(:root[data-motion="reduced"]) .ai-node-glyph[data-tone=running], :where(:root[data-motion="reduced"]) .ai-caret, :where(:root[data-motion="reduced"]) .ai-now-chip.is-running::before, :where(:root[data-motion="reduced"]) .ai-node > .ai-node-head, :where(:root[data-motion="reduced"]) .ai-node.is-collapsed { animation: none; }
 
 :where(:root[data-motion="reduced"]) .ai-node { transition: none; }

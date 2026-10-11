@@ -39,6 +39,7 @@ use zeroize::Zeroizing;
 
 mod audio_analysis;
 mod commands;
+mod content;
 mod graph_execution;
 mod graph_speech;
 #[cfg(feature = "workflow-capture")]

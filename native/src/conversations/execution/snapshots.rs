@@ -1,22 +1,6 @@
 use super::*;
 
 impl Store {
-    pub fn conversation_snapshot_since(
-        &self,
-        conversation: &str,
-        before: Option<i32>,
-        after_revision: i32,
-        force: bool,
-    ) -> Result<Option<ConversationSnapshot>> {
-        let revision: i32 =
-            self.connection
-                .query_row("SELECT revision FROM metadata", [], |r| r.get(0))?;
-        if !force && revision == after_revision {
-            return Ok(None);
-        }
-        self.conversation_snapshot(conversation, before).map(Some)
-    }
-
     /// Turns older than `before` (a turn ID), newest first. Independent of
     /// message paging, so history reaches every recorded turn.
     pub fn turn_history(
@@ -76,6 +60,15 @@ impl Store {
         &self,
         conversation: &str,
         before: Option<i32>,
+    ) -> Result<ConversationSnapshot> {
+        self.conversation_snapshot_receipts(conversation, before, true)
+    }
+
+    pub(crate) fn conversation_snapshot_receipts(
+        &self,
+        conversation: &str,
+        before: Option<i32>,
+        include_receipts: bool,
     ) -> Result<ConversationSnapshot> {
         let db = &self.connection;
         if !db.query_row(
@@ -165,8 +158,8 @@ impl Store {
                     "translation"
                 },
             )?;
-            self.graph_runtime.message_status(db, message)?;
         }
+        self.graph_runtime.message_statuses(db, &mut messages)?;
         let first = messages.first().map(|m| m.sequence).unwrap_or(0);
         let has_older = db.query_row(
             "SELECT EXISTS(SELECT 1 FROM messages m WHERE conversation_id=?1 AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=m.turn_id AND o.channel IN ('persona_reply','persona_opening')) AND sequence<?2)",
@@ -226,9 +219,10 @@ impl Store {
                 conversation,
                 &messages,
             )?,
-            transcription_attempts: crate::speech::recording::transcription::views(
+            transcription_attempts: crate::speech::recording::transcription::views_using(
                 db,
                 &crate::speech::recording::owner::RecordingOwner::Conversation(conversation.into()),
+                |id| if include_receipts { crate::ai::results::receipt_for_consumer(db,id) } else { Ok(None) },
             )?,
             coach_messages,
             conversation_id: conversation.into(),
@@ -281,7 +275,9 @@ impl Store {
             .map(|graph| super::graph_publication::surfaces(db, &id, graph))
             .transpose()?;
         let (replaces_turn_id, replaced_by) = db.query_row("SELECT replaces_turn_id,(SELECT id FROM turns child WHERE child.replaces_turn_id=turns.id) FROM turns WHERE id=?1", [&id], |r| Ok((r.get(0)?, r.get(1)?)))?;
+        let recording_ids = db.query_row("SELECT coalesce(json_extract(context,'$.input.recording_ids'),'null') FROM turns WHERE id=?1", [&id], |r|r.get::<_,String>(0))?;
         Ok(TurnView {
+            recording_ids: serde_json::from_str(&recording_ids)?,
             native_surfaces,
             award_sources: Some(db.prepare("SELECT award_source FROM conversation_graph_effects WHERE turn_id=?1 ORDER BY rowid")?.query_map([&id], |row| row.get(0))?.collect::<rusqlite::Result<Vec<String>>>()?),
             native_execution_available: {

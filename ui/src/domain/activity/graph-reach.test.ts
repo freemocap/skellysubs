@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { pipelineArtifact } from '../../../tests/fixtures/graph-artifacts'
 import { projectGraph } from './graph-projection'
-import { downstreamResults, groupDownstreamResults } from './graph-reach'
+import { downstreamResults } from './graph-reach'
 
 const view = projectGraph({ artifact_id: 'a', artifact: pipelineArtifact() })
 
@@ -21,9 +21,7 @@ describe('downstreamResults', () => {
     expect(downstreamResults(controlOnly, 'read')).toEqual(['packed', 'written'])
   })
 
-  it('unions a composition group and rejects unknown operations', () => {
-    expect(groupDownstreamResults(view, 'pack')).toEqual(['packed'])
+  it('rejects unknown operations', () => {
     expect(() => downstreamResults(view, 'ghost')).toThrow()
-    expect(() => groupDownstreamResults(view, 'ghost')).toThrow()
   })
 })

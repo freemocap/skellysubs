@@ -8,8 +8,10 @@ use crate::model::{AppError, ErrorCode, Result};
 use rusqlite::{Connection, OptionalExtension, params};
 use serde::Serialize;
 use ts_rs::TS;
+pub mod cache;
+mod content;
 
-#[derive(Serialize, TS)]
+#[derive(Serialize, serde::Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct NativeAttemptInspection {
     pub engine: String,
@@ -23,6 +25,10 @@ pub struct NativeAttemptInspection {
     #[ts(type = "unknown")]
     pub evidence: Option<serde_json::Value>,
     pub retained_text: Option<String>,
+    #[ts(type = "unknown")]
+    pub inputs: serde_json::Value,
+    #[ts(type = "unknown")]
+    pub outcome: Option<serde_json::Value>,
 }
 
 fn invalid(message: &str) -> AppError {
@@ -89,6 +95,27 @@ fn export() -> ExportLimits {
     }
 }
 
+pub struct PreparedHistory {
+    pub owner: String,
+    pub source: graph_store::DetachedHistory,
+}
+
+pub fn prepare(db: &Connection, engine: &str, run: &str) -> Result<PreparedHistory> {
+    let tx = db.unchecked_transaction()?;
+    let partition = partition(&tx, engine, run)?;
+    let source =
+        graph_store::DetachedHistory::capture(&tx, &partition, 32 * 1024 * 1024, limits().history)
+            .map_err(graph_error)?;
+    if source.stamp().engine != engine {
+        return Err(invalid("Graph engine identity differs."));
+    }
+    Ok(PreparedHistory {
+        owner: partition.owner.key().into(),
+        source,
+    })
+}
+
+#[cfg(test)]
 pub fn attempt(
     db: &Connection,
     engine: &str,
@@ -97,43 +124,113 @@ pub fn attempt(
     node: &str,
     attempt: &str,
 ) -> Result<NativeAttemptInspection> {
-    let tx = db.unchecked_transaction()?;
-    let partition = partition(&tx, engine, run)?;
-    let owner = partition.owner.key().to_owned();
-    let mut reader = graph_store::BorrowedReadStore::new(&tx, partition).map_err(graph_error)?;
-    let checkpoint = checkpoint(&reader)?;
-    if checkpoint.stamp().engine != engine {
-        return Err(invalid("Graph engine identity differs."));
+    prepare(db, engine, run)?.attempt(engine, run, revision, node, attempt)
+}
+
+impl PreparedHistory {
+    pub fn workspace_receipt(
+        mut self,
+        engine: &str,
+        run: &str,
+        execution: Option<ExecutionId>,
+    ) -> Result<Option<serde_json::Value>> {
+        let checkpoint = self
+            .source
+            .checkpoint(CheckpointLimits {
+                bytes: 32 * 1024 * 1024,
+                events: 4096,
+            })
+            .map_err(graph_error)?;
+        let history = checkpoint
+            .historical_inspection(checkpoint.stamp().revision, limits(), &mut self.source)
+            .map_err(graph_error)?;
+        if let Some(execution) = execution {
+            let mut receipt = super::workspace_graph::history::execution_receipt_from_history(
+                &history, engine, execution,
+            )?;
+            receipt["nativeRun"] = serde_json::json!(run);
+            Ok(Some(receipt))
+        } else {
+            super::workspace_graph::history::receipt_from_history(&history, engine, run)
+        }
     }
-    let history = checkpoint
-        .historical_inspection(number(revision)?, limits(), &mut reader)
-        .map_err(graph_error)?;
-    let snapshot = history.snapshot(run, export()).map_err(graph_error)?;
-    let selected = snapshot
-        .attempts
-        .get(node)
-        .and_then(|items| items.iter().find(|item| item.id == attempt))
-        .ok_or_else(|| invalid("Attempt does not belong to the selected node and revision."))?;
-    let execution: ExecutionId =
-        serde_json::from_value(serde_json::json!(number(&selected.execution)?))?;
-    let evidence = history.execution_evidence(execution).map_err(graph_error)?;
-    let retained_text = evidence
-        .as_ref()
-        .and_then(|value| value.provisional.as_ref())
-        .map(|value| value.text.clone());
-    let evidence = evidence.map(|value| serde_json::json!({"observations":value.observations,"complete":value.complete,"capture_failed":value.evidence_failure.is_some()}));
-    Ok(NativeAttemptInspection {
-        engine: engine.into(),
-        run: run.into(),
-        artifact: snapshot.artifact_id,
-        revision: revision.into(),
-        node: node.into(),
-        attempt: attempt.into(),
-        execution: selected.execution.clone(),
-        owner,
-        evidence,
-        retained_text,
-    })
+    pub fn current_snapshots(
+        mut self,
+        runs: &[String],
+    ) -> Result<std::collections::BTreeMap<String, InspectionSnapshot>> {
+        let checkpoint = self
+            .source
+            .checkpoint(CheckpointLimits {
+                bytes: 32 * 1024 * 1024,
+                events: 4096,
+            })
+            .map_err(graph_error)?;
+        let history = checkpoint
+            .historical_inspection(checkpoint.stamp().revision, limits(), &mut self.source)
+            .map_err(graph_error)?;
+        runs.iter()
+            .map(|run| {
+                Ok((
+                    run.clone(),
+                    history.snapshot(run, export()).map_err(graph_error)?,
+                ))
+            })
+            .collect()
+    }
+    pub fn cache_identity(&self) -> Result<String> {
+        self.source.cache_identity().map_err(graph_error)
+    }
+    pub fn attempt(
+        mut self,
+        engine: &str,
+        run: &str,
+        revision: &str,
+        node: &str,
+        attempt: &str,
+    ) -> Result<NativeAttemptInspection> {
+        let owner = self.owner;
+        let checkpoint = self
+            .source
+            .checkpoint(CheckpointLimits {
+                bytes: 32 * 1024 * 1024,
+                events: 4096,
+            })
+            .map_err(graph_error)?;
+        let history = checkpoint
+            .historical_inspection(number(revision)?, limits(), &mut self.source)
+            .map_err(graph_error)?;
+        let snapshot = history.snapshot(run, export()).map_err(graph_error)?;
+        let selected = snapshot
+            .attempts
+            .get(node)
+            .and_then(|items| items.iter().find(|item| item.id == attempt))
+            .ok_or_else(|| invalid("Attempt does not belong to the selected node and revision."))?;
+        let execution: ExecutionId =
+            serde_json::from_value(serde_json::json!(number(&selected.execution)?))?;
+        let evidence = history.execution_evidence(execution).map_err(graph_error)?;
+        let (work, outcome) = history.execution_content(execution).map_err(graph_error)?;
+        let inputs = content::inputs(work.inputs);
+        let outcome = outcome.map(serde_json::to_value).transpose()?;
+        let retained_text = evidence
+            .as_ref()
+            .and_then(|value| value.provisional.as_ref())
+            .map(|value| value.text.clone());
+        let evidence = evidence.map(|value| serde_json::json!({"observations":value.observations,"complete":value.complete,"capture_failed":value.evidence_failure.is_some() || value.provisional.as_ref().is_some_and(|p|p.failure.is_some()),"provisional_capture":value.provisional.as_ref().map(|p|serde_json::json!({"session":p.session,"sequence":p.sequence,"failure":p.failure}))}));
+        Ok(NativeAttemptInspection {
+            engine: engine.into(),
+            run: run.into(),
+            artifact: snapshot.artifact_id,
+            revision: revision.into(),
+            node: node.into(),
+            attempt: attempt.into(),
+            execution: selected.execution.clone(),
+            owner,
+            evidence,
+            retained_text,
+            inputs,
+            outcome,
+        })
+    }
 }
 
 #[derive(Debug, Clone, Serialize, serde::Deserialize, TS)]
@@ -184,29 +281,38 @@ pub fn workspace_runs(db: &Connection, before: Option<&str>) -> Result<NativeRun
     })
 }
 
+#[cfg(test)]
 pub fn history(
     db: &Connection,
     engine: &str,
     run: &str,
     before: Option<&str>,
 ) -> Result<RunHistory> {
-    let tx = db.unchecked_transaction()?;
-    let partition = partition(&tx, engine, run)?;
-    let mut reader = graph_store::BorrowedReadStore::new(&tx, partition).map_err(graph_error)?;
-    let checkpoint = checkpoint(&reader)?;
-    if checkpoint.stamp().engine != engine {
-        return Err(invalid("Graph engine identity differs."));
+    prepare(db, engine, run)?.history(run, before, 32)
+}
+impl PreparedHistory {
+    pub fn history(mut self, run: &str, before: Option<&str>, count: u32) -> Result<RunHistory> {
+        if !(1..=64).contains(&count) {
+            return Err(invalid("Graph history page size must be between 1 and 64."));
+        }
+        let checkpoint = self
+            .source
+            .checkpoint(CheckpointLimits {
+                bytes: 32 * 1024 * 1024,
+                events: 4096,
+            })
+            .map_err(graph_error)?;
+        checkpoint
+            .run_history(
+                run,
+                before.map(number).transpose()?,
+                count as usize,
+                limits(),
+                export(),
+                &mut self.source,
+            )
+            .map_err(graph_error)
     }
-    checkpoint
-        .run_history(
-            run,
-            before.map(number).transpose()?,
-            32,
-            limits(),
-            export(),
-            &mut reader,
-        )
-        .map_err(graph_error)
 }
 
 pub fn current(

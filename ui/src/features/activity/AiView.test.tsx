@@ -7,10 +7,11 @@ import { AiView } from './AiView'
 const api = vi.hoisted(() => ({
   readWorkspace: vi.fn(), watchConversation: vi.fn(), listTurnHistory: vi.fn(), getAiViewSelection: vi.fn(), setAiViewSelection: vi.fn(),
   readGraphHistory: vi.fn(), listNativeWorkspaceRuns: vi.fn(), readNativeWorkspaceGraph: vi.fn(), readNativeRunHistory: vi.fn(),
-  currentWindowLabel: vi.fn(), emitGraphHover: vi.fn(), onGraphHoverReply: vi.fn(), workspace: vi.fn(), workspaceRun: vi.fn(),
+  original: vi.fn(), currentWindowLabel: vi.fn(), emitGraphHover: vi.fn(), onGraphHoverReply: vi.fn(), workspace: vi.fn(), workspaceRun: vi.fn(),
 }))
 vi.mock('../../platform/ipc/workspace', () => ({ ...api, selectedConversation: (workspace: { selected: string | null }) => workspace.selected ? { id: workspace.selected } : null, nativeError: String }))
 vi.mock('../../platform/ipc/window', () => api)
+vi.mock('../../components/feedback/OriginalContent', () => ({ OriginalContent: (props: unknown) => { api.original(props); return <div data-testid="original-content" /> } }))
 vi.mock('./workspace/RunWorkspace', () => ({ RunWorkspace: (props: { graph: { run: string }; popover: string | null; onPopover: (node: string) => void; orientation: string; onHoverResults: (results: string[] | null) => void }) => {
   api.workspace(props)
   return <div data-testid="run" data-orientation={props.orientation}>{props.graph.run}<span>{props.popover}</span>
@@ -20,10 +21,10 @@ vi.mock('./workspace/RunWorkspace', () => ({ RunWorkspace: (props: { graph: { ru
 vi.mock('./WorkspaceRunView', () => ({ WorkspaceRunView: (props: { entry: { run: string } }) => { api.workspaceRun(props); return <div data-testid="workspace-run">{props.entry.run}</div> } }))
 
 function turn(id: string) {
-  return { id, channel: 'coach', state: 'pending', paused: false, route: 'hosted', hold: null, nativeGraph: { engine: 'engine', run: id, artifact_id: 'a', revision: '1', nodes: { reply: 'Running', helper: 'Unrequested' }, attempts: {} } }
+  return { id, channel: 'coach', state: 'pending', paused: false, route: 'hosted', hold: null, nativeGraph: { engine: 'engine', run: id, artifact_id: 'a', revision: '1', artifact: { definition: { inputs: {}, results: {} } }, nodes: { reply: 'Running', helper: 'Unrequested' }, attempts: {} } }
 }
 function snapshot(conversationId: string, revision: number, turns = [turn('run')]) {
-  return { conversationId, revision, turns, connection: { paused: false }, transcriptionAttempts: [] }
+  return { conversationId, revision, turns, messages: [], connection: { paused: false }, transcriptionAttempts: [] }
 }
 function deferred<T>() {
   let resolve!: (value: T) => void
@@ -176,4 +177,14 @@ it('pins a replayed revision to its turn and clears replay when following live',
   openPicker()
   fireEvent.click(screen.getByRole('button', { name: 'Follow live' }))
   await waitFor(() => expect(api.setAiViewSelection).toHaveBeenLastCalledWith({ conversationId: 'chat', turnId: null, operationKind: null }))
+})
+
+it('opens the exact recording source when selecting a transcription', async () => {
+  api.watchConversation.mockReset().mockResolvedValueOnce({ ...snapshot('chat', 1), transcriptionAttempts: [{ id: 'recording-source', model: 'recognizer', state: 'succeeded', diagnostics: null }] }).mockImplementation(() => new Promise(() => {}))
+  render(<AiView mode="docked" actions={null} />)
+  await screen.findByTestId('run')
+  openPicker()
+  fireEvent.click(screen.getByRole('button', { name: 'recognizer · succeeded' }))
+  expect(await screen.findByTestId('original-content')).toBeInTheDocument()
+  expect(api.original).toHaveBeenLastCalledWith(expect.objectContaining({ source: { recording: 'recording-source' } }))
 })

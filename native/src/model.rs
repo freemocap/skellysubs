@@ -715,6 +715,8 @@ pub fn bindings() -> String {
         AiElsewhereSelection::decl(&config),
         AiRevisionSelection::decl(&config),
         crate::ai::inspection::NativeAttemptInspection::decl(&config),
+        crate::ai::content::ContentRecord::decl(&config),
+        crate::ai::content::ContentPayload::decl(&config),
         crate::ai::inspection::NativeRunEntry::decl(&config),
         crate::ai::inspection::NativeRunPage::decl(&config),
         AiWindowState::decl(&config),
@@ -1027,6 +1029,9 @@ pub struct SpeechRequestView {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct TurnView {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub recording_ids: Option<Vec<String>>,
     /// Structural product-field associations, not value/attempt provenance.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[ts(optional)]

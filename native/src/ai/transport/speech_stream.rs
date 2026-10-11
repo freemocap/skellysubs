@@ -211,8 +211,10 @@ pub(super) async fn receive(
         error.diagnostics.as_mut().unwrap()["audio_samples"] = json!(decoder.pcm.len() / 2);
         error
     })? {
+        crate::ai::content::capture::chunk(&chunk)?;
         decoder.feed(&chunk, outcome, emit)?;
     }
+    crate::ai::content::capture::complete()?;
     decoder.finish(outcome, emit)
 }
 

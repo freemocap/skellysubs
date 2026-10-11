@@ -117,6 +117,9 @@ async fn speech_inner(
                 return Err(error());
             }
             call.wait(&mut previous, time).await?;
+            if super::originals::restore(&payload)? {
+                continue;
+            }
             match serde_json::from_value(payload).map_err(|_| error())? {
                 SpeechFrame::Chunk {
                     pcm,
@@ -139,23 +142,24 @@ async fn speech_inner(
         call.finish()?;
         return Ok(result);
     }
-    let outcome = service_audio::synthesize_stream_live(
-        client,
-        target,
-        key,
-        input,
-        install,
-        &|bytes, alignment, receipt| {
-            let frame = SpeechFrame::Chunk {
-                pcm: STANDARD.encode(bytes),
-                alignment: alignment.cloned(),
-                receipt: SavedSpeech::capture(receipt),
-            };
-            call.push(without_secret(serde_json::to_value(frame)?, key))?;
-            emit(bytes, alignment, receipt)
-        },
-    )
-    .await;
+    let outcome = call
+        .originals(service_audio::synthesize_stream_live(
+            client,
+            target,
+            key,
+            input,
+            install,
+            &|bytes, alignment, receipt| {
+                let frame = SpeechFrame::Chunk {
+                    pcm: STANDARD.encode(bytes),
+                    alignment: alignment.cloned(),
+                    receipt: SavedSpeech::capture(receipt),
+                };
+                call.push(without_secret(serde_json::to_value(frame)?, key))?;
+                emit(bytes, alignment, receipt)
+            },
+        ))
+        .await;
     call.push(without_secret(
         serde_json::to_value(SpeechFrame::End {
             outcome: SavedSpeech::capture(&outcome),
@@ -184,26 +188,39 @@ pub(in crate::ai::transport) async fn transcription(
         return transcription_provider::transcribe_live(client, target, key, input, install).await;
     };
     if let Some(frames) = call.recorded() {
-        if call.cancelled().is_some() {
-            if !frames.is_empty() {
+        let mut previous = 0;
+        let mut terminal = None;
+        for (time, payload) in frames {
+            if terminal.is_some() {
                 return Err(error());
             }
-            return call.require_cancellation(&mut 0).await;
+            call.wait(&mut previous, time).await?;
+            if super::originals::restore(&payload)? {
+                continue;
+            }
+            terminal = Some(
+                serde_json::from_value::<Result<SavedTranscription>>(payload)
+                    .map_err(|_| error())?,
+            );
         }
-        if frames.len() != 1 {
-            return Err(error());
+        if call.cancelled().is_some() {
+            if terminal.is_some() {
+                return Err(error());
+            }
+            return call.require_cancellation(&mut previous).await;
         }
-        let mut previous = 0;
-        call.wait(&mut previous, frames[0].0).await?;
-        let saved: Result<SavedTranscription> =
-            serde_json::from_value(frames[0].1.clone()).map_err(|_| error())?;
+        let saved = terminal.ok_or_else(error)?;
         call.finish()?;
         return saved.map(|v| TranscriptionOutcome {
             result: v.result,
             diagnostics: v.diagnostics,
         });
     }
-    let result = transcription_provider::transcribe_live(client, target, key, input, install).await;
+    let result = call
+        .originals(transcription_provider::transcribe_live(
+            client, target, key, input, install,
+        ))
+        .await;
     let payload = match &result {
         Ok(value) => json!({"Ok":{"result":value.result,"diagnostics":value.diagnostics}}),
         Err(error) => json!({"Err":error}),

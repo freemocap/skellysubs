@@ -31,6 +31,9 @@
    running operation's progress track. */
 @keyframes ai-flow { to { stroke-dashoffset: -22; } }
 @keyframes ai-indeterminate { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+/* A step's header while it works, and a step settling the moment it is done. */
+@keyframes ai-working { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.18); } }
+@keyframes ai-settle { from { box-shadow: 0 0 0 var(--space-3) var(--success-tint); } to { box-shadow: var(--shadow-bubble); } }
 
 @keyframes hydrate-arrive { from { opacity: 0; } to { opacity: 1; } }
 

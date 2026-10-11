@@ -11,5 +11,5 @@ export function PracticeAiStatus({ transcribing, fetchingAudio }: { transcribing
   const open = useAiActivityOpen()
   const { busy, line } = aiStatus({ transcribing, scheduling: false, turns: [], audio: fetchingAudio ? 'card' : null,
     connection: access.status, models: access.models })
-  return <AiStatusPill access={access} open={open} onOpen={() => openAiActivity(access.status)} busy={busy} line={line} />
+  return <AiStatusPill access={access} open={open} onOpen={() => openAiActivity(access.status)} busy={busy} line={line} beside={null} />
 }
