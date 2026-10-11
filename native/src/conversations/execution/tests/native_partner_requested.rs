@@ -108,5 +108,8 @@ async fn native_requested_reply_helpers_publish_without_activating_assessment() 
             .unwrap(),
         0
     );
-    assert_eq!(graph_runtime::outstanding(&store.connection).unwrap(), 0);
+    assert_eq!(
+        graph_runtime::outstanding(&store.connection, &store.graph_runtime).unwrap(),
+        0
+    );
 }

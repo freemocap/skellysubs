@@ -20,3 +20,4 @@ mod native_partner_commands;
 mod native_revision_commands;
 
 mod native_product_state;
+mod scheduling_performance;

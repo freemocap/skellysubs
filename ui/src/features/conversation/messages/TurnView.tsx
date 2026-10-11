@@ -1,3 +1,4 @@
+import { turnGraphTarget } from '../../../domain/activity/graph-target'
 import { useMessageToolDefinitions } from '../../../components/reading/useMessageToolDefinitions'
 import { bubbleSelection } from '../../../components/reading/bubble-selection'
 import { SelectionRing } from '../../../components/reading/SelectionRing'
@@ -175,6 +176,7 @@ function TurnContents({
   useEffect(() => { setUserWordsOverride(null) }, [autoTranslate, alwaysRomanize, alwaysPronunciation])
   const { snapshot } = useContext(SkillEvidenceContext)
   const practice = useContext(PracticeContext)
+  const graphTarget = (field: string) => turnGraphTarget(practice?.chatId, turn.execution, field)
   const [userTranslationOverride, setShowUserTranslation] = useState<boolean | null>(null)
   const showUserTranslation = userTranslationOverride ?? autoTranslate
   const source = turn.user ?? ''
@@ -230,7 +232,7 @@ function TurnContents({
         <div className="learner-turn">
           {editing && <span className="learner-turn-editing"><ToolbarIcon name="edit" size={12} />{tr("Fixing this message")}</span>}
           {pendingEdit ? <PendingLearner message={pendingEdit} rtl={rtl} /> : <>
-          <MessageFeedback requests={turn.userMessageId && !turn.replacedBy && !['cancelled', 'invalidated'].includes(turn.execution?.state ?? '') ? <MessageAssessmentRequests messageId={turn.userMessageId} execution={turn.execution} assessmentState={turn.assessmentState} assessmentError={turn.assessmentError} feedbackState={turn.feedbackState} feedbackError={turn.coachError} assessed={Boolean(turn.conversationFeedback)} coached={Boolean(turn.coach)} /> : undefined} onAddContext={onAddContext} feedbackContext={turn.feedbackContext} conversationFeedback={turn.conversationFeedback} onRetry={onRetryHelp} analysis={<AnalysisSentence label={tr("Your message")} text={turn.user} translation={userTranslation} gloss={turn.userSavedGloss} tokens={assistant?.user_tokens} />} skills={<MessageSkillAnalysis messageId={turn.id} source={turn.user} />} id={turn.id} text={turn.user} feedback={turn.coach} decision={turn.coachDecision} onControl={onCoachControl ? control => onCoachControl(turn, control) : undefined} error={turn.coachError} reviewing={coachingPending} onEdit={!editDisabled && onEditUser ? () => onEditUser(turn) : undefined} onAsk={onAskCoach}
+          <MessageFeedback graphTargets={{ feedback: graphTarget('coach_feedback'), assessment: graphTarget('skill_assessment') }} requests={turn.userMessageId && !turn.replacedBy && !['cancelled', 'invalidated'].includes(turn.execution?.state ?? '') ? <MessageAssessmentRequests messageId={turn.userMessageId} execution={turn.execution} assessmentState={turn.assessmentState} assessmentError={turn.assessmentError} feedbackState={turn.feedbackState} feedbackError={turn.coachError} assessed={Boolean(turn.conversationFeedback)} coached={Boolean(turn.coach)} /> : undefined} onAddContext={onAddContext} feedbackContext={turn.feedbackContext} conversationFeedback={turn.conversationFeedback} onRetry={onRetryHelp} analysis={<AnalysisSentence label={tr("Your message")} text={turn.user} translation={userTranslation} gloss={turn.userSavedGloss} tokens={assistant?.user_tokens} />} skills={<MessageSkillAnalysis graphTarget={graphTarget('attribution')} messageId={turn.id} source={turn.user} />} id={turn.id} text={turn.user} feedback={turn.coach} decision={turn.coachDecision} onControl={onCoachControl ? control => onCoachControl(turn, control) : undefined} error={turn.coachError} reviewing={coachingPending} onEdit={!editDisabled && onEditUser ? () => onEditUser(turn) : undefined} onAsk={onAskCoach}
             reward={<>{(turn.fixes ?? 0) > 0 && <FixCount count={turn.fixes!} />}<MessageXpButton messageId={turn.id} source={turn.user} /></>}
             bubble={coachTool => (
               <div
@@ -240,10 +242,10 @@ function TurnContents({
               >
                 <span data-phrase-source className={coachingPending ? 'message-coaching-pending' : undefined}>
                 {userSegments.length > 0
-                  ? <SavedGlossText revealAids={userWordsOverride === true} showAids={userWordsOpen} showSound={userSoundOverride ?? undefined} key={turn.userSavedGloss?.attemptId ?? 'tokens'} text={turn.user!} segments={userSegments} decorateSegment={decorateMarks} />
+                  ? <SavedGlossText graphTarget={graphTarget('learner.gloss')} revealAids={userWordsOverride === true} showAids={userWordsOpen} showSound={userSoundOverride ?? undefined} key={turn.userSavedGloss?.attemptId ?? 'tokens'} text={turn.user!} segments={userSegments} decorateSegment={decorateMarks} />
                   : plainMarked}
                 </span>
-                {showUserTranslation && userTranslation && <div className="trans" dir="auto">{userTranslation}</div>}
+                {showUserTranslation && userTranslation && <div className="trans" dir="auto" {...graphTarget('learner.translation')}>{userTranslation}</div>}
                 <TranslationStatus state={turn.userTranslationState} shown={showUserTranslation && !userTranslation} />
                 {userReading.status}
                 <GlossAssistance assistant={{ savedGloss: turn.userSavedGloss, glossState: turn.userGlossState, glossError: turn.userGlossError, glossOperationId: turn.userGlossOperationId }} onRetryGloss={onRetryGloss} />
@@ -272,7 +274,7 @@ function TurnContents({
           <span className="partner-reaction-slot">
             {turn.user && <PersonaReaction userGloss={turn.userSavedGloss} replyGloss={assistant.savedGloss} reaction={turn.reaction} error={turn.reactionError} message={turn.user} reply={assistant.reply} onEdit={!editDisabled && onEditUser ? () => onEditUser(turn) : undefined} />}
           </span>
-          <TargetMessage provenance={null}
+          <TargetMessage provenance={null} graphTargets={{ text: graphTarget('text'), translation: graphTarget('reply.translation'), gloss: graphTarget('reply.gloss'), audio: turn.execution?.speech?.state === 'succeeded' ? graphTarget('audio') : undefined }}
             additionalActions={eligible && assistant.messageId && onStartPhrase && <StartPhraseButton messageId={assistant.messageId} text={assistant.reply} onStart={onStartPhrase} />}
             layout="bubble"
             text={assistant.reply}

@@ -337,6 +337,32 @@ fn limit_message(bytes: &[u8], retry_after: Option<u32>) -> AppError {
     ))
 }
 pub async fn account(token: &str, install: &str) -> Result<HostedAccount> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        let value: serde_json::Value =
+            crate::ai::transport::workflow::unary::protocol(
+                serde_json::json!({"operation":"hosted-account","install":install}),
+                token,
+                async {
+                    account_live(token, install).await.map(|account| serde_json::json!({
+                "email":account.email,"name":account.name,"used_usd":account.used_usd,
+                "limit_usd":account.limit_usd,"remaining_usd":account.remaining_usd,
+                "tokens_today":account.tokens_today,"requests_today":account.requests_today,
+                "estimated_turns_remaining":account.estimated_requests_remaining,
+                "estimated_tokens_remaining":account.estimated_tokens_remaining,
+                "custom_limit":account.custom_limit,"resets":account.resets
+            }))
+                },
+            )
+            .await?;
+        serde_json::from_value(value).map_err(Into::into)
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    account_live(token, install).await
+}
+async fn account_live(token: &str, install: &str) -> Result<HostedAccount> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let response = identity(
         crate::ai::transport::provider::client()?
             .get(format!("{ORIGIN}/v1/me"))
@@ -427,6 +453,8 @@ fn callback_code(target: &str, challenge: &str) -> Result<String> {
 }
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub async fn sign_in(app: &tauri::AppHandle) -> Result<Zeroizing<String>> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
         .await
@@ -547,6 +575,8 @@ pub async fn sign_in(app: &tauri::AppHandle) -> Result<Zeroizing<String>> {
 }
 
 async fn exchange(code: &str, verifier: &str) -> Result<Zeroizing<String>> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let response = crate::ai::transport::provider::client()?
         .post(format!("{ORIGIN}/auth/exchange"))
         .timeout(Duration::from_secs(30))
@@ -756,6 +786,8 @@ mod tests {
 }
 
 pub async fn diagnostics(token: &str) -> Result<String> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let response = crate::ai::transport::provider::client()?
         .get(format!("{ORIGIN}/v1/diagnostics"))
         .bearer_auth(token)

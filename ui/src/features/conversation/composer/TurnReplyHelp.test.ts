@@ -11,25 +11,26 @@ beforeEach(() => {
   backend.watchConversation.mockResolvedValue(snapshot())
   backend.executeAction.mockResolvedValue({entityId:'op'})
 })
-it('reconciles the source before explicitly enqueueing absent grammar', async () => {
-  await requestReplyHelp('c','m','grammar')
-  expect(backend.watchConversation).toHaveBeenCalledWith('c')
+it('requests grammar without waiting for a conversation projection', async () => {
+  backend.watchConversation.mockReturnValue(new Promise(() => {}))
+  const pending = requestReplyHelp('m','grammar')
+  await vi.waitFor(() => expect(backend.executeAction).toHaveBeenCalledOnce())
+  await pending
+  expect(backend.watchConversation).not.toHaveBeenCalled()
   expect(backend.executeAction).toHaveBeenCalledExactlyOnceWith({sessionId:'session'},{kind:'requestExplanations',messageId:'m'})
 })
 it('requests an absent brief without treating its first request as a retry', async () => {
-  await requestReplyHelp('c', 'm', 'brief')
+  await requestReplyHelp('m', 'brief')
   expect(backend.executeAction).toHaveBeenCalledExactlyOnceWith({ sessionId: 'session' }, { kind: 'requestMessageHelp', messageId: 'm', help: 'reply_brief', retry: false })
 })
-it.each(['ready','running','held','succeeded','failed','unknown'])('opening a %s operation never resubmits it', async state => {
-  backend.watchConversation.mockResolvedValue(snapshot(state))
-  await requestReplyHelp('c','m','grammar')
-  expect(backend.executeAction).not.toHaveBeenCalled()
-})
-it('explicit retry uses the scoped action and reconciles an already running retry', async () => {
-  backend.watchConversation.mockResolvedValue(snapshot('failed'))
-  await requestReplyHelp('c','m','grammar',true)
+it('sends explicit retries to native admission without reconstructing help state', async () => {
+  await requestReplyHelp('m','grammar',true)
   expect(backend.executeAction).toHaveBeenCalledExactlyOnceWith({sessionId:'session'},{kind:'retryReplyHelp',messageId:'m',helpKind:'grammar'})
-  backend.watchConversation.mockResolvedValue(snapshot('running'))
-  await requestReplyHelp('c','m','grammar',true)
+  expect(backend.watchConversation).not.toHaveBeenCalled()
+})
+it('propagates native source rejection without substituting another request', async () => {
+  const failure = new Error('Source unavailable')
+  backend.executeAction.mockRejectedValueOnce(failure)
+  await expect(requestReplyHelp('m', 'replies')).rejects.toBe(failure)
   expect(backend.executeAction).toHaveBeenCalledOnce()
 })

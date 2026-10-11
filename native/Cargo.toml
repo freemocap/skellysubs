@@ -5,6 +5,9 @@ license = "AGPL-3.0-or-later"
 edition = "2024"
 default-run = "skellyspeak"
 
+[features]
+workflow-capture = []
+
 [lib]
 name = "skellyspeak_core"
 crate-type = ["staticlib", "cdylib", "rlib"]

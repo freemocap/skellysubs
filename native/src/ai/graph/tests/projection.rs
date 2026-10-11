@@ -349,8 +349,27 @@ fn durable_snapshot_is_revision_bound_and_refuses_uncertain_hosts() {
     let snapshot = host.inspection_snapshot("run", limits()).unwrap();
     assert_eq!(snapshot.engine, host.stamp().engine);
     assert_eq!(snapshot.revision, host.stamp().revision.to_string());
+    let control = host.run_control("run").unwrap();
+    assert_eq!(control.active, snapshot.active);
+    assert_eq!(control.paused, snapshot.paused);
+    assert!(host.run_control("missing").is_err());
+    for paused in [true, false] {
+        host.apply(
+            Event::Pause {
+                run: "run".into(),
+                paused,
+            },
+            &mut store,
+        )
+        .unwrap();
+        assert_eq!(host.run_control("run").unwrap().paused, paused);
+    }
     store.fail_after_commit = true;
     assert!(host.apply(capacity(1), &mut store).is_err());
+    assert_eq!(
+        host.run_control("run").err().unwrap().code,
+        "reload_required"
+    );
     assert_eq!(
         host.inspection_snapshot("run", limits())
             .err()

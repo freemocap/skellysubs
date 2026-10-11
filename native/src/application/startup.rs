@@ -2,6 +2,15 @@ use super::*;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(not(feature = "workflow-capture"))]
+    assert!(
+        std::env::var_os("SKELLYSPEAK_WORKFLOW_DIR").is_none(),
+        "Workflow recording requires a capture-enabled executable; no workspace was opened"
+    );
+    let context = tauri::generate_context!();
+    #[cfg(feature = "workflow-capture")]
+    let context = super::workflow::configure(context)
+        .expect("Workflow configuration failed; the ordinary workspace was not opened");
     let builder = tauri::Builder::default().plugin(tauri_plugin_opener::init());
     #[cfg(target_os = "android")]
     let builder = builder.plugin(diagnostics::sharing::plugin());
@@ -11,9 +20,16 @@ pub fn run() {
     let builder = builder.plugin(tauri_plugin_deep_link::init());
     #[cfg(target_os = "ios")]
     let builder = builder.plugin(crate::ai::hosted::ios_callback_plugin());
+    #[cfg(all(desktop, not(feature = "workflow-capture")))]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+    #[cfg(all(desktop, feature = "workflow-capture"))]
+    let builder = if crate::ai::transport::workflow::is_replay() {
+        builder
+    } else {
+        builder.plugin(tauri_plugin_updater::Builder::new().build())
+    };
     #[cfg(desktop)]
     let builder = builder
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .on_menu_event(|app, event| {
             let action = if event.id() == "reading-size-increase" {
@@ -33,6 +49,14 @@ pub fn run() {
         });
     builder
         .setup(|app| {
+            #[cfg(all(desktop, feature = "workflow-capture"))]
+            if crate::ai::transport::workflow::is_replay() {
+                // Automation targets the renderer directly. OS cursor movement
+                // must not introduce hover/scroll input into the recorded stream.
+                for window in app.webview_windows().values() {
+                    window.set_ignore_cursor_events(true)?;
+                }
+            }
             #[cfg(desktop)]
             {
                 let app_menu = SubmenuBuilder::new(app, "SkellySpeak")
@@ -81,6 +105,8 @@ pub fn run() {
                 )?;
             }
             let directory = app.path().app_data_dir()?;
+            #[cfg(feature = "workflow-capture")]
+            super::workflow::prepare_workspace(&directory)?;
             store::prepare_private_directory(&directory)?;
             // A previous reset may have left the log directory to clear. That has to
             // happen before the log sink below opens a file inside it.
@@ -109,6 +135,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            super::workflow::workflow_control,
             commands::drill::start_drill_session,
             commands::drill::end_drill_session,
             commands::drill::enter_drill_visit,
@@ -211,6 +238,7 @@ pub fn run() {
             rewards::skill_level_events::initialize_skill_level_events,
             rewards::skill_level_events::claim_skill_level_events,
             crate::learning::effort::get_effort_progress,
+            crate::learning::streaks::commands::refresh_streaks,
             crate::learning::effort::bot::record_bot_inspection,
             crate::learning::effort::report::get_effort_report,
             crate::learning::effort::claim_effort_awards,
@@ -239,6 +267,6 @@ pub fn run() {
             commands::workspace::set_ai_view_selection,
             commands::workspace::get_ai_view_selection,
         ])
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("SkellySpeak could not start; no reset or fallback was performed");
 }

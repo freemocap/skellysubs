@@ -3,12 +3,17 @@ use crate::drill::{DrillItemInput, DrillItemView};
 use base64::{Engine, engine::general_purpose::STANDARD};
 
 #[tauri::command]
-pub(in crate::application) fn get_practice_sets(
+pub(in crate::application) async fn get_practice_sets(
     state: tauri::State<'_, Arc<Application>>,
     language: String,
     variety: Option<String>,
 ) -> Result<Vec<crate::configuration::practice::PracticeSetSummary>> {
-    state.lock()?.practice_sets(&language, variety.as_deref())
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        state.lock()?.practice_sets(&language, variety.as_deref())
+    })
+    .await
+    .map_err(|cause| crate::diagnostics::failures::join(&cause, "get_practice_sets", internal()))?
 }
 
 #[tauri::command]
@@ -42,19 +47,29 @@ pub(in crate::application) fn create_drill_item(
 }
 
 #[tauri::command]
-pub(in crate::application) fn get_drill_items(
+pub(in crate::application) async fn get_drill_items(
     state: tauri::State<'_, Arc<Application>>,
     language: String,
 ) -> Result<Vec<DrillItemView>> {
-    state.lock()?.drill_items(&language)
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || state.lock()?.drill_items(&language))
+        .await
+        .map_err(|cause| {
+            crate::diagnostics::failures::join(&cause, "get_drill_items", internal())
+        })?
 }
 
 #[tauri::command]
-pub(in crate::application) fn get_last_drill_item(
+pub(in crate::application) async fn get_last_drill_item(
     state: tauri::State<'_, Arc<Application>>,
     language: String,
 ) -> Result<Option<String>> {
-    state.lock()?.last_drill_item(&language)
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || state.lock()?.last_drill_item(&language))
+        .await
+        .map_err(|cause| {
+            crate::diagnostics::failures::join(&cause, "get_last_drill_item", internal())
+        })?
 }
 
 #[tauri::command]
@@ -88,11 +103,19 @@ pub(in crate::application) fn clear_drill_attempts(
 
 /// One attempt's retained audio, for replay.
 #[tauri::command]
-pub(in crate::application) fn get_drill_attempt_audio(
+pub(in crate::application) async fn get_drill_attempt_audio(
     state: tauri::State<'_, Arc<Application>>,
     attempt_id: String,
 ) -> Result<String> {
-    Ok(STANDARD.encode(state.lock()?.drill_attempt_audio(&attempt_id)?))
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let wav = state.lock()?.drill_attempt_audio(&attempt_id)?;
+        Ok(STANDARD.encode(wav))
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(&cause, "get_drill_attempt_audio", internal())
+    })?
 }
 
 /// Analyse audio for this item: the reference reading, or a replayed attempt.

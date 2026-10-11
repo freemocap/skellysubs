@@ -1,4 +1,5 @@
 import { invoke } from './tauri'
+import { batchRead } from './batch-read'
 import type { PracticeOverview, ProfileChoices, SkillSnapshot } from '../../domain/learning/evidence/skills'
 
 /// The IPC half of skill evidence. Every function here crosses the Tauri
@@ -23,4 +24,4 @@ export function getSkillGuide(language: string, variety: string, skill: string, 
 }
 
 /** XP, conversations and lifetime effort per catalog language, without full snapshots. */
-export function getLanguageTotals(): Promise<import('../../generated/contracts').LanguageTotals[]> { return invoke('get_language_totals') }
+export const getLanguageTotals = batchRead(() => invoke<import('../../generated/contracts').LanguageTotals[]>('get_language_totals'))

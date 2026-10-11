@@ -18,6 +18,28 @@
 .progress-counter[data-gaining] .progress-counter-number { animation: progress-tick var(--dur-deliberate) var(--ease-out); }
 .progress-counter-error { color: var(--danger-ink); }
 
+/* Language XP spans the full left column; global XP and its streak stack right. */
+.progress-counters[data-streaks] { display: grid; grid-template-columns: auto auto; gap: var(--space-1) var(--space-3); }
+.progress-counters[data-streaks] .progress-counter-number { font-size: var(--type-body); font-weight: var(--weight-bold); }
+.progress-counters[data-streaks] .progress-counter-xp { grid-column: 1; grid-row: 1 / span 2; align-self: stretch; padding-inline-end: var(--space-3); border-inline-end: var(--border-width) solid var(--progress-line); }
+.progress-counters[data-streaks] .progress-counter-global { grid-column: 2; grid-row: 1; justify-content: center; padding-inline-start: 0; border: 0; }
+.progress-counters[data-streaks] .progress-counter-error { position: absolute; inset-inline-end: 0; }
+.progress-counters[data-streaks] > .streak-count { grid-column: 2; grid-row: 2; }
+.streak-count { display: inline-flex; position: relative; align-items: center; justify-content: center; gap: var(--space-1); color: var(--progress-ink); font: var(--weight-semibold) var(--type-meta)/var(--leading-tight) var(--font-mono); font-variant-numeric: tabular-nums; }
+.streak-flame { display: inline-block; }
+.streak-number { display: inline-block; height: 1.15em; overflow: hidden; min-width: 1ch; }
+.streak-roll { display: flex; flex-direction: column; animation: streak-roll var(--dur-deliberate) var(--ease-out) both; }
+.streak-roll > span { height: 1.15em; }
+.streak-count[data-celebrating] .streak-flame { animation: streak-pulse var(--dur-loop-fast) var(--ease-out) both; }
+.streak-confetti { position: absolute; inset-inline-start: 50%; top: 50%; pointer-events: none; z-index: var(--z-reward); }
+.streak-confetti i { position: absolute; width: var(--space-2); height: var(--space-3); border-radius: var(--radius-sm); background: var(--progress-mark); animation: action-reward-scatter var(--dur-loop-fast) var(--ease-out) both; }
+.streak-confetti i:nth-child(2n) { background: var(--interaction-ink); }
+.streak-confetti i:nth-child(3n) { background: var(--success-ink); }
+.progress-card-streak { display: flex; gap: var(--space-3); align-items: center; padding-inline: var(--space-2); }
+@keyframes streak-roll { 0%, 15% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+@keyframes streak-pulse { 0%, 100% { transform: scale(1); } 35% { transform: scale(1.65) rotate(-12deg); } 65% { transform: scale(1.15) rotate(8deg); } }
+@media (prefers-reduced-motion: reduce) { .streak-confetti { display: none; } .streak-count[data-celebrating] .streak-flame { animation: none; } .streak-roll { animation: none; transform: translateY(-50%); } }
+
 /* Each effort unit keeps the colour of the place it comes from: the partner, the
    coach's clean badge, the coach's edit, the Practice tab. */
 [data-unit="partnerUnderstood"] { color: var(--partner-ink); }

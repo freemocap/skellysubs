@@ -5,8 +5,10 @@ import { useEffect, useState } from 'react'
 import App from './App'
 import { useSessionStore } from '../state/session/session'
 import { useNavigationStore } from '../state/navigation/navigation'
+import { GuideActions, type RunGuideAction } from '../components/learning/GuideActions'
 
 const startSkill = vi.hoisted(() => vi.fn(async (_language: string, _variety: string, _skill: string) => {}))
+const askGuide = vi.hoisted(() => vi.fn<RunGuideAction>(async () => {}))
 
 vi.mock('../components/layout/useIsMobile', () => ({ useIsMobile: () => true }))
 vi.mock('../state/learning/useSkillEvidence', async importOriginal => ({ ...await importOriginal<typeof import('../state/learning/useSkillEvidence')>(), useSkillEvidence: () => ({ snapshot: null, error: null }) }))
@@ -27,14 +29,16 @@ const { native, state } = vi.hoisted(() => {
   return { native, state }
 })
 vi.mock('../platform/ipc/tauri', () => ({ isTauri: true, getSettings: async () => ({ native_language: 'english', native_variety: 'english-united-states', interface_locale: 'english', target_language: 'spanish', provider_mode: 'custom' }), invoke: native, languageFor: () => null, languages: () => [] }))
+vi.mock('./shell/GraphHoverOverlay', () => ({ GraphHoverOverlay: () => null }))
 vi.mock('./shell/UpdateBanner', () => ({ UpdateBanner: () => null }))
 vi.mock('../features/settings/SettingsModal', () => ({ SettingsModal: () => null }))
-vi.mock('../features/skills/SkillsPage', () => ({ default: ({ onPractice }: { onPractice: (language: string, variety: string, skill: string) => Promise<void> }) => <button onClick={() => void onPractice('spanish', 'spanish-spain', 'time_events')}>Practice this skill</button> }))
+vi.mock('../features/skills/SkillsPage', () => ({ default: ({ onPractice }: { onPractice: (language: string, variety: string, skill: string) => Promise<void> }) => <><button onClick={() => void onPractice('spanish', 'spanish-spain', 'time_events')}>Practice this skill</button><GuideActions guide={{ language: 'spanish', variety: 'spanish-spain', skillId: 'time_events', editionLanguage: 'english', fingerprint: 'source' }} subskill="sequence" /></> }))
 vi.mock('../features/drill/DrillPage', () => ({ default: () => <p>Drill surface</p> }))
 // The page is replaced, but it reads access the way the real one does — from the
 // session store — rather than through props the shell no longer threads down.
-vi.mock('../features/conversation/ConversationPage', () => ({ default: ({ mobileSurface, onSkillStartReady }: { mobileSurface: string; onSkillStartReady: (action: typeof startSkill | null) => void }) => {
+vi.mock('../features/conversation/ConversationPage', () => ({ default: ({ mobileSurface, onSkillStartReady, onGuideActionReady }: { mobileSurface: string; onSkillStartReady: (action: typeof startSkill | null) => void; onGuideActionReady: (action: RunGuideAction | null) => void }) => {
   useEffect(() => { onSkillStartReady(startSkill); return () => onSkillStartReady(null) }, [onSkillStartReady])
+  useEffect(() => { onGuideActionReady(askGuide); return () => onGuideActionReady(null) }, [onGuideActionReady])
   const [draft, setDraft] = useState('')
   const connection = useSessionStore((state) => state.connection)
   const startHostedSignIn = useSessionStore((state) => state.startHostedSignIn)
@@ -105,6 +109,15 @@ it('reaches the conversation from a skill action even when Practice was the prev
   await waitFor(() => expect(screen.getByLabelText('Draft').closest('.page-holder')).toHaveAttribute('aria-hidden', 'false'))
   expect(startSkill).toHaveBeenCalledWith('spanish', 'spanish-spain', 'time_events')
   expect(useNavigationStore.getState()).toMatchObject({ page: 'guided', practiceView: 'chat', mobileSurface: 'chat' })
+})
+
+it('hands a selected skill to coaching and opens the coach surface', async () => {
+  render(<App />)
+  fireEvent.click(within(screen.getByRole('navigation', { name: 'Main navigation' })).getByRole('button', { name: 'Progress' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Ask coach' }))
+  await waitFor(() => expect(screen.getByLabelText('Draft').closest('.page-holder')).toHaveAttribute('aria-hidden', 'false'))
+  expect(askGuide).toHaveBeenCalledWith({ kind: 'coach', text: 'Explain this selection.', guide: { language: 'spanish', variety: 'spanish-spain', skillId: 'time_events', editionLanguage: 'english', fingerprint: 'source' }, focus: { kind: 'subskill', subskillId: 'sequence' } })
+  expect(useNavigationStore.getState()).toMatchObject({ page: 'guided', mobileSurface: 'panel' })
 })
 
 it('connects the page stub to hosted sign-in through the session store', async () => {

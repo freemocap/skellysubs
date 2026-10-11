@@ -1,3 +1,4 @@
+import { turnGraphTarget } from '../../../domain/activity/graph-target'
 import { ResponseDetails } from '../../../components/feedback/ResponseDetails'
 import { ErrorNotice } from '../../../components/feedback/ErrorNotice'
 import { CoachChatLayout, type CoachChatLayoutHandle } from './CoachChatLayout'
@@ -13,7 +14,8 @@ import { useConversationSnapshot } from '../session/useConversationSnapshot'
 import { type AnalysedTurn } from '../reading/AnalysisContent'
 import { Markdown } from '../../../components/reading/Markdown'
 
-export function CoachAnalysisPanel({ chatId, targetLanguageName, conversationBusy, tab, onTab, draftQuestion, onDraftConsumed, autoSendDraft = false, coachingContent, onCollapse }: {
+export function CoachAnalysisPanel({ chatId, targetLanguageName, conversationBusy, tab, onTab, draftQuestion, onDraftConsumed, autoSendDraft = false, revealRequest = 0, coachingContent, onCollapse }: {
+  revealRequest?: number
   autoSendDraft?: boolean
   onCollapse?: () => void
   coachingContent?: ReactNode
@@ -31,6 +33,9 @@ export function CoachAnalysisPanel({ chatId, targetLanguageName, conversationBus
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const threadRef = useRef<HTMLDivElement>(null)
   const chatLayoutRef = useRef<CoachChatLayoutHandle>(null)
+  useEffect(() => {
+    if (revealRequest > 0) chatLayoutRef.current?.expand()
+  }, [revealRequest])
   useEffect(() => {
     const current = ++generation.current
     setInput(''); setError(null); setSubmitting(false); sending.current = false
@@ -83,7 +88,7 @@ export function CoachAnalysisPanel({ chatId, targetLanguageName, conversationBus
     onExpand={() => { if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight }}
     thread={<div className="coach-thread" ref={threadRef} aria-label={tr("Coach conversation")} aria-live="polite">
       {thread.length > 0 && <h3 className="coach-group-label">{tr("You asked")}</h3>}
-      {thread.map(message => <div key={message.id} className={`coach-msg ${message.role === 'user' ? 'user' : 'coach'}`}><Markdown text={message.text} onTerm={term => draft(`[[${term}]]`)} />{message.guideContext != null && <details><summary>{tr('Skill guide')}</summary><ResponseDetails value={message.guideContext} /></details>}</div>)}
+      {thread.map(message => <div key={message.id} {...(message.role === 'assistant' ? turnGraphTarget(currentSnapshot?.conversationId, currentSnapshot?.turns.find(turn => turn.id === message.turnId), 'text') : {})} className={`coach-msg ${message.role === 'user' ? 'user' : 'coach'}`}><Markdown text={message.text} onTerm={term => draft(`[[${term}]]`)} />{message.guideContext != null && <details><summary>{tr('Skill guide')}</summary><ResponseDetails value={message.guideContext} /></details>}</div>)}
       {lastCoachTurn?.nativePreview?.live && <div className="coach-msg coach"><Markdown text={lastCoachTurn.nativePreview.capture.text} /></div>}
       {busy && <ActivityIndicator compact label={tr("Coach replying…")} />}
     </div>}

@@ -56,13 +56,14 @@ export function useConversationActivity(): ConversationActivity {
           throw failure
         }
         if (stopped) return
+        if (next.conversationId !== conversationId) throw new Error('AI activity returned a different conversation.')
+        if (next.revision !== revision) setSnapshot(next)
+        revision = next.revision
         // Native selection changes increment the same global revision that
-        // wakes this wait. Re-read the directory before accepting its old scope.
+        // wakes this wait. Reconcile selection without withholding available data.
         workspace = await readWorkspace()
         if (stopped) return
         if (selectedConversation(workspace)?.id !== conversationId) continue
-        if (next.conversationId !== conversationId) throw new Error('AI activity returned a different conversation.')
-        setSnapshot(next); revision = next.revision
       }
     })().catch(failure => { if (!stopped) { setSnapshot(null); setError(nativeError(failure)) } })
     return () => { stopped = true }

@@ -41,6 +41,8 @@ mod audio_analysis;
 mod commands;
 mod graph_execution;
 mod graph_speech;
+#[cfg(feature = "workflow-capture")]
+mod local_timing;
 mod native_reading;
 mod native_speech;
 mod native_transcription;
@@ -50,6 +52,7 @@ mod speech_results;
 mod startup;
 mod state;
 mod transcription_results;
+mod workflow;
 mod workspace_text;
 
 use scheduler::scheduler;

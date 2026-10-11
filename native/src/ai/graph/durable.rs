@@ -1,6 +1,12 @@
 use super::{model::fault, read_budget::BudgetedStore, *};
 use std::sync::Arc;
 
+/// Authoritative resident run controls, without inspecting attempts or outputs.
+pub struct RunControl {
+    pub active: bool,
+    pub paused: bool,
+}
+
 /// Captured authority to compare with the owner's CURRENT state in its transaction.
 pub struct Authority<'a> {
     pub run: &'a str,
@@ -281,6 +287,15 @@ impl DurableEngine {
     ) -> Result<InspectionSnapshot> {
         self.check_live()?;
         self.engine.project(self.stamp(), run, limits)
+    }
+    pub fn run_control(&self, run: &str) -> Result<RunControl> {
+        self.check_live()?;
+        self.engine.state.require_resident()?;
+        let run = self.engine.run(run)?;
+        Ok(RunControl {
+            active: run.active,
+            paused: run.paused,
+        })
     }
     pub fn inspect(&self, run: &str) -> Result<Inspection<'_>> {
         self.check_live()?;

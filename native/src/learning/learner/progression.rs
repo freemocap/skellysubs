@@ -18,21 +18,36 @@ pub fn snapshot(store: &Store, target: &str) -> Result<Value> {
         .connection
         .query_row("SELECT preferences FROM learner", [], |r| r.get(0))?;
     let preferences: Preferences = serde_json::from_str(&raw)?;
+    // Guide selection is shared across varieties; only rendering depends on variety.
+    let editions = store
+        .config
+        .skills_for_language(target)?
+        .into_iter()
+        .map(|skill| {
+            store.config.guide_source(target, &skill.id)?;
+            Ok((
+                skill.id.clone(),
+                store
+                    .config
+                    .guide_edition(target, &preferences.explanation_language, &skill.id)?,
+            ))
+        })
+        .collect::<Result<Vec<_>>>()?;
     let mut guides = vec![];
     for variety in store.config.language(target)?.varieties {
-        let mut skills = serde_json::Map::new();
-        for skill in store.config.skills_for_language(target)? {
-            store.config.guide_source(target, &skill.id)?;
-            skills.insert(
-                skill.id.clone(),
-                json!(
-                    store
-                        .config
-                        .guide_edition(target, &preferences.explanation_language, &skill.id)?
-                        .map(|edition| edition.markdown(&variety.id))
-                ),
-            );
-        }
+        let skills: serde_json::Map<String, Value> = editions
+            .iter()
+            .map(|(id, edition)| {
+                (
+                    id.clone(),
+                    json!(
+                        edition
+                            .as_ref()
+                            .map(|edition| edition.markdown(&variety.id))
+                    ),
+                )
+            })
+            .collect();
         guides.push(json!({"id":variety.id,"name":variety.name,"skills":skills}));
     }
     result["guides"] = json!(guides);
@@ -56,7 +71,7 @@ fn project(
     runtime: Option<&crate::conversations::execution::graph_runtime::Runtime>,
 ) -> Result<Value> {
     let construct_hash = crate::learning::coaching::construct_hash(registry);
-    let catalog_version = crate::learning::coaching::version_for(registry);
+    let catalog_version = crate::learning::coaching::version_from_hash(&construct_hash);
     let learner: String = db.query_row("SELECT id FROM learner", [], |r| r.get(0))?;
     let choice: Option<(i32, Option<String>, String)> = db
         .query_row(
@@ -194,14 +209,23 @@ fn project(
     Ok(result)
 }
 #[tauri::command]
-pub(crate) fn get_skill_evidence(
+pub(crate) async fn get_skill_evidence(
     state: tauri::State<'_, Arc<crate::application::Application>>,
     target: String,
 ) -> Result<Value> {
-    {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
         let store = state.lock()?;
         snapshot(&store, &target)
-    }
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(
+            &cause,
+            "skill_evidence_read",
+            AppError::new(ErrorCode::Internal, "Could not read skill evidence."),
+        )
+    })?
 }
 /// One row per catalog language: its XP, saved conversations and lifetime effort
 /// units, for comparing languages without loading every evidence snapshot.
@@ -221,48 +245,25 @@ pub struct LanguageTotals {
     pub bot: u32,
 }
 #[tauri::command]
-pub(crate) fn get_language_totals(
+pub(crate) async fn get_language_totals(
     state: tauri::State<'_, Arc<crate::application::Application>>,
 ) -> Result<Vec<LanguageTotals>> {
-    let store = state.lock()?;
-    language_totals(&store)
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let store = state.lock()?;
+        language_totals(&store)
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(
+            &cause,
+            "language_totals_read",
+            AppError::new(ErrorCode::Internal, "Could not read language totals."),
+        )
+    })?
 }
 fn language_totals(store: &Store) -> Result<Vec<LanguageTotals>> {
-    let mut rows = vec![];
-    for language in store.snapshot()?.languages {
-        let evidence = snapshot_db(
-            &store.connection,
-            &store.config,
-            &store.session_id,
-            &language.id,
-        )?;
-        let count = |value: &Value, field: &str| {
-            value
-                .as_u64()
-                .and_then(|n| u32::try_from(n).ok())
-                .ok_or_else(|| {
-                    AppError::new(
-                        ErrorCode::Validation,
-                        format!("Language totals have no valid {field}."),
-                    )
-                })
-        };
-        let effort = crate::learning::effort::read(&store.connection, &language.id)?;
-        rows.push(LanguageTotals {
-            xp: count(&evidence["profile"]["xp"], "XP")?,
-            conversations: count(&evidence["conversation_count"], "conversation count")?,
-            target: language.id,
-            name: language.name,
-            native_name: language.native_name,
-            language_tag: language.language_tag,
-            partner_understood: effort.partner_understood,
-            revisions_sent: effort.revisions_sent,
-            practice_attempts: effort.practice_attempts,
-            explorations: effort.explorations,
-            bot: effort.bot,
-        });
-    }
-    Ok(rows)
+    super::language_totals::read(store)
 }
 #[tauri::command]
 pub(crate) fn get_practice_overview(

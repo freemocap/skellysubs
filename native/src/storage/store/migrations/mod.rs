@@ -29,6 +29,7 @@ mod v68_workspace_graphs;
 mod v69_graph_helper_requests;
 mod v70_graph_assessment_owners;
 mod v71_cache;
+mod v72_streaks;
 
 const MIN_VERSION: i32 = 45;
 const BASELINE: &str = include_str!("v45.sql");
@@ -170,6 +171,11 @@ const STEPS: &[Step] = &[
         from: 70,
         apply: v71_cache::apply,
         validate: v71_cache::validate,
+    },
+    Step {
+        from: 71,
+        apply: v72_streaks::apply,
+        validate: v72_streaks::validate,
     },
 ];
 

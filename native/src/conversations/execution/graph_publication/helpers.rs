@@ -38,6 +38,21 @@ fn projection(operation: &Contract) -> Option<(Projection, &'static str)> {
     }
 }
 
+/// Product fields served by the same adapters used for publication. This is a
+/// structural association, not a claim about the producing attempt of a value.
+pub(super) fn surface(operation: &Contract, port: &str) -> Option<&'static str> {
+    let (projection, output) = projection(operation)?;
+    if output != port {
+        return None;
+    }
+    Some(match projection {
+        Projection::Translation => "translation",
+        Projection::Gloss => "gloss",
+        Projection::Attribution => "attribution",
+        Projection::Support(kind) => kind,
+    })
+}
+
 /// `work` is the original producer read through DurableEngine's integrity-checked
 /// record API. The callback checks current access and all captured secondary
 /// sources. Unsupported operations return false so their owning adapter can act.

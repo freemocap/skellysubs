@@ -13,7 +13,7 @@ const turn = (state: string | null = null) => ({ id: 1, user: null, turnId: 'tur
 const view = (value: AnalysedTurn) => <StrictMode><AnalysisContent conversationId="chat" turn={value} nativeLanguageName="English" showRomanization={false} rtl={false} /></StrictMode>
 it('opening analysis requests grammar once, including strict-effect replay and rerenders', async () => {
   const { rerender } = render(view(turn()))
-  await waitFor(() => expect(help.requestReplyHelp).toHaveBeenCalledExactlyOnceWith('chat', 'reply', 'grammar'))
+  await waitFor(() => expect(help.requestReplyHelp).toHaveBeenCalledExactlyOnceWith('reply', 'grammar'))
   rerender(view(turn()))
   expect(help.requestReplyHelp).toHaveBeenCalledTimes(1)
   expect(screen.queryByRole('button', { name: 'Explain grammar' })).toBeNull()
@@ -25,5 +25,16 @@ it('reuses saved grammar and does not automatically retry a failed request', asy
   rerender(view(turn('failed')))
   expect(help.requestReplyHelp).not.toHaveBeenCalled()
   fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
-  await waitFor(() => expect(help.requestReplyHelp).toHaveBeenCalledExactlyOnceWith('chat', 'reply', 'grammar', true))
+  await waitFor(() => expect(help.requestReplyHelp).toHaveBeenCalledExactlyOnceWith('reply', 'grammar', true))
+})
+
+
+it('renders saved grammar immediately when message analysis opens without any request', () => {
+  const saved = turn('succeeded')
+  const card = { title: 'Saved construction', quote: '', body: 'Already available explanation.', example: '', contrast: '', cefr: null }
+  saved.assistant!.mechanics = [card]
+  render(view(saved))
+  expect(screen.getByText('Already available explanation.')).toBeVisible()
+  expect(screen.queryByText('Working out the grammar…')).toBeNull()
+  expect(help.requestReplyHelp).not.toHaveBeenCalled()
 })

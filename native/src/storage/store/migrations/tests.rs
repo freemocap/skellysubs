@@ -30,6 +30,8 @@ mod speech_default;
 mod speech_fidelity;
 #[path = "speech_reliability_tests.rs"]
 mod speech_reliability;
+#[path = "streak_tests.rs"]
+mod streaks;
 #[path = "turn_owner_tests.rs"]
 mod turn_owner;
 
@@ -643,7 +645,7 @@ fn cache_ownership_upgrade_is_atomic_and_preserves_graph_payloads() {
     ];
     let original: Vec<_> = tables.iter().map(|table| rows(&db, table)).collect();
     assert!(
-        run_chain(&mut db, 70, 71, STEPS, |_| Err(AppError::new(
+        run_chain(&mut db, 70, 71, &STEPS[..26], |_| Err(AppError::new(
             ErrorCode::Storage,
             "injected"
         )))
@@ -651,7 +653,7 @@ fn cache_ownership_upgrade_is_atomic_and_preserves_graph_payloads() {
     );
     assert_eq!(version(&db), 70);
     assert_eq!(rows(&db, "inference_results").len(), 1);
-    run_chain(&mut db, 70, 71, STEPS, v71_cache::validate).unwrap();
+    run_chain(&mut db, 70, 71, &STEPS[..26], v71_cache::validate).unwrap();
     for (table, expected) in tables.iter().zip(original) {
         assert_eq!(rows(&db, table), expected, "{table}");
     }

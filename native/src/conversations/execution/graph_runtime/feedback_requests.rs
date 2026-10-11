@@ -63,7 +63,7 @@ impl Runtime {
         if captured.source != request.source {
             return Err(unavailable());
         }
-        super::super::admit_network_work(db, 1)?;
+        super::super::admit_network_work(db, self, 1)?;
         request.fresh = Some(super::helper_requests::Fresh {
             run: uuid::Uuid::new_v4().to_string(),
             turn: turn.into(),

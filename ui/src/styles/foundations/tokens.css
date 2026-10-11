@@ -159,6 +159,24 @@
   --d-situating: #1e9c8e;
   --di-situating: #0e5c53;
   --dm-situating: color-mix(in srgb, var(--d-situating) 65%, var(--sheet));
+  /* AI workspace type identities: data hues for port and connection types,
+     chosen by a hash of the type contract. Never status. */
+  --graph-type-0: var(--d-social);
+  --graph-type-1: var(--d-questions);
+  --graph-type-2: var(--d-opinions);
+  --graph-type-3: var(--partner-mark);
+  --graph-type-4: var(--d-descriptions);
+  --graph-type-5: var(--d-situating);
+  --graph-type-6: var(--progress-mark);
+  --graph-type-7: var(--d-statements);
+  --graph-type-ink-0: var(--di-social);
+  --graph-type-ink-1: var(--di-questions);
+  --graph-type-ink-2: var(--di-opinions);
+  --graph-type-ink-3: var(--partner-ink);
+  --graph-type-ink-4: var(--di-descriptions);
+  --graph-type-ink-5: var(--di-situating);
+  --graph-type-ink-6: var(--progress-ink);
+  --graph-type-ink-7: var(--di-statements);
   /* Text on a domain ink (di-*): the XP badge. */
   --ink-on-domain: #ffffff;
 
@@ -285,6 +303,21 @@
   --control-height: 40px;
   --control-height-lg: 40px;
   --touch-target: 44px;
+  /* AI workspace geometry. The layout reads these resolved values, so drawn
+     rows and computed connection anchors share one source. */
+  --graph-card-width: 236px;
+  --graph-bubble-width: 236px;
+  --graph-bubble-height: 30px;
+  --graph-header: 30px;
+  --graph-row: 22px;
+  --graph-divider: 6px;
+  --graph-slot: 84px;
+  --graph-footer: 30px;
+  --graph-column-gap: 72px;
+  --graph-row-gap: 18px;
+  --graph-group-header: 28px;
+  --graph-group-pad: 12px;
+  --graph-pin: 10px;
   --border-width: 1px;
   --border-width-strong: 2px;
   --border-width-thick: 3px;
@@ -470,7 +503,7 @@
 
 /* Controls never go below the platform touch minimum. */
 @media (pointer: coarse) {
-  :root { --control-height: var(--touch-target); --control-height-sm: var(--touch-target); }
+  :root { --control-height: var(--touch-target); --control-height-sm: var(--touch-target); --graph-footer: var(--touch-target); }
 }
 
 /* Phones: a 20px reading size times a script scale (1.5 for Arabic) filled the

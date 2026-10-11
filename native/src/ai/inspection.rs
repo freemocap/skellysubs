@@ -136,8 +136,8 @@ pub fn attempt(
     })
 }
 
-#[derive(Serialize, TS)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Serialize, serde::Deserialize, TS)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NativeRunEntry {
     pub engine: String,
     pub run: String,

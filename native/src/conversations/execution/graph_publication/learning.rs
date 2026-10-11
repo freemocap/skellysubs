@@ -13,6 +13,23 @@ use crate::{
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
 
+fn projection(
+    operation: &crate::ai::graph::Contract,
+) -> Option<(&'static str, &'static str, &'static str)> {
+    if *operation == assessment_graph::operation_contract() {
+        Some(("skill_assessment", "assessment", "assessment"))
+    } else if *operation == feedback_graph::operation_contract() {
+        Some(("coach_feedback", "feedback", "value"))
+    } else {
+        None
+    }
+}
+
+pub(super) fn surface(operation: &crate::ai::graph::Contract, port: &str) -> Option<&'static str> {
+    let (kind, output, _) = projection(operation)?;
+    (port == output).then_some(kind)
+}
+
 pub fn publish_assessment(
     db: &Connection,
     request: &CommitRequest<'_>,
@@ -22,11 +39,7 @@ pub fn publish_assessment(
     authorize: impl FnOnce(&Connection, &Authority<'_>) -> Result<()>,
 ) -> Result<bool> {
     transaction(db)?;
-    let (kind, port, field) = if work.operation == assessment_graph::operation_contract() {
-        ("skill_assessment", "assessment", "assessment")
-    } else if work.operation == feedback_graph::operation_contract() {
-        ("coach_feedback", "feedback", "value")
-    } else {
+    let Some((kind, port, field)) = projection(&work.operation) else {
         return Ok(false);
     };
     let CommitIntent::Adopt {

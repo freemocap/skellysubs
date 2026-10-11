@@ -20,13 +20,17 @@ export function NativeAttemptDetails({ graph, node }: { graph: InspectionSnapsho
   const attempt = selected === null ? attempts.at(-1)?.id : selected
   const key = JSON.stringify([graph.engine, graph.run, graph.artifact_id, graph.revision, node, attempt])
   const [result, setResult] = useState<{ key: string; value?: NativeAttemptInspection; error?: string } | null>(null)
+  const loadedKey = useRef<string | null>(null)
   useEffect(() => {
     if (!open || !attempt) return
+    if (loadedKey.current === key) return
+    loadedKey.current = null
     let active = true
     void readNativeGraphAttempt(graph.engine, graph.run, graph.revision, node, attempt).then(value => {
       if (!active) return
       if (value.engine !== graph.engine || value.run !== graph.run || value.artifact !== graph.artifact_id || value.revision !== graph.revision || value.node !== node || value.attempt !== attempt)
         throw new Error('Graph attempt evidence does not match the selection.')
+      loadedKey.current = key
       setResult({ key, value })
     }).catch(error => { if (active) setResult({ key, error: nativeError(error) }) })
     return () => { active = false }

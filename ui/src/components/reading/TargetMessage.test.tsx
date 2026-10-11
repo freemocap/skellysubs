@@ -419,3 +419,10 @@ it('puts an owner-supplied practice action in place of the shared Add to Practic
   expect(screen.getByRole('button',{name:'Keep'})).toBeVisible()
   expect(screen.queryByRole('button',{name:'Add to Practice'})).toBeNull()
 })
+
+
+it('tags the rendered text and translation independently for graph surface hints', () => {
+  const view = render(<ReadingPreferencesContext value={{ autoTranslate: true, alwaysRomanize: false, alwaysPronunciation: false }}><TargetMessage {...passage({ text: 'Hola', translation: 'Hello', graphTargets: { text: { 'data-graph-results': 'answer' }, translation: { 'data-graph-results': 'translated' } } })} /></ReadingPreferencesContext>)
+  expect(view.container.querySelector('[data-graph-results="answer"]')).toHaveTextContent('Hola')
+  expect(view.container.querySelector('[data-graph-results="translated"]')).toHaveTextContent('Hello')
+})

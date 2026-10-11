@@ -12,6 +12,7 @@ async function withPlayback<T>(signal: AbortSignal, work: (lifetime: AbortSignal
   const cancel = () => interrupted.abort(signal.reason)
   signal.addEventListener('abort', cancel, { once: true })
   try { return await work(interrupted.signal, permit) } finally {
+    interrupted.abort()
     signal.removeEventListener('abort', cancel)
     stopListening()
   }
@@ -44,9 +45,12 @@ export function speakSelection(input: ReadingInput, signal: AbortSignal, onPlayb
     const result = await readSelection(input, lifetime)
     lifetime.throwIfAborted()
     if (!result.audioBase64) throw new Error('The speech service returned no audio.')
-    await observer?.onAudio?.(result)
+    // Inspection supplies display data; ready audio does not depend on it.
+    await Promise.all([
+      play(result.audioBase64, lifetime, permit, onPlayback, rate, volume, { ...observer, sourceText: input.text }, result.audioAlignment),
+      Promise.resolve().then(() => observer?.onAudio?.(result)),
+    ])
     lifetime.throwIfAborted()
-    await play(result.audioBase64, lifetime, permit, onPlayback, rate, volume, { ...observer, sourceText: input.text }, result.audioAlignment)
     return result
   })
 }

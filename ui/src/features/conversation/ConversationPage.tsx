@@ -146,6 +146,7 @@ export default function ConversationPage({
   useEffect(() => () => stopRewardSounds(), [])
   const [panelTab, setPanelTab] = useState<'coaching' | 'progress'>('coaching')
   const [coachDraft, setCoachDraft] = useState('')
+  const [coachRevealRequest, setCoachRevealRequest] = useState(0)
   const mode = useNavigationStore(state => state.mode)
   const [reviewing, setReviewing] = useState<Set<number>>(new Set())
   const consumeCoachDraft = useCallback(() => setCoachDraft(''), [])
@@ -176,6 +177,7 @@ export default function ConversationPage({
     setPinnedId(null)
     setSelectedMessage(null)
     setCoachDraft('')
+    setCoachRevealRequest(0)
     setReviewing(new Set())
     setError(null)
     setSending(false)
@@ -327,7 +329,10 @@ export default function ConversationPage({
   useEffect(() => {
     onGuideActionReady?.(async action => {
       await runGuideAction(action)
-      if (action.kind === 'coach') guideCoachOpen.current()
+      if (action.kind === 'coach') {
+        setCoachRevealRequest(request => request + 1)
+        guideCoachOpen.current()
+      }
     })
     return () => onGuideActionReady?.(null)
   }, [onGuideActionReady, runGuideAction])
@@ -792,6 +797,7 @@ export default function ConversationPage({
           onTab={setPanelTab}
           autoSendDraft
           draftQuestion={coachDraft}
+          revealRequest={coachRevealRequest}
           onDraftConsumed={consumeCoachDraft}
           pinnedTurn={pinnedTurn}
           nativeLanguageName={nativeLanguageName}

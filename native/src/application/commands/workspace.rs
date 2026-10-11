@@ -47,7 +47,10 @@ pub(in crate::application) fn execute_command(
     state: tauri::State<'_, Arc<Application>>,
     command: Command,
 ) -> Result<Receipt> {
-    state.lock()?.execute(command)
+    let result = state.lock()?.execute(command);
+    state.scheduler_wake.notify_waiters();
+    state.conversation_changed.notify_waiters();
+    result
 }
 
 #[tauri::command]
@@ -60,59 +63,68 @@ pub(in crate::application) fn get_message_history(
 }
 
 #[tauri::command]
-pub(in crate::application) fn read_speech_audio(
+pub(in crate::application) async fn read_speech_audio(
     state: tauri::State<'_, Arc<Application>>,
     session_id: String,
     operation_id: String,
     sample_offset: Option<u32>,
     execution_id: Option<String>,
 ) -> Result<model::SpeechAudioState> {
-    let store = state.lock()?;
-    if session_id != store.session_id {
-        return Err(AppError::new(
-            ErrorCode::SessionExpired,
-            "The application session changed. Refresh before continuing.",
-        ));
-    }
-    let audio = store.speech_audio(&operation_id)?;
-    let source_execution = store.speech_stream_execution(&operation_id)?;
-    if !matches!(audio, model::SpeechAudioState::Unavailable { .. })
-        && execution_id
-            .as_ref()
-            .is_some_and(|previous| source_execution.as_ref() != Some(previous))
-    {
-        return Err(AppError::new(
-            ErrorCode::Conflict,
-            "Speech execution changed during playback.",
-        ));
-    }
-    if let model::SpeechAudioState::Pending { message_id, .. } = &audio
-        && let Some(id) = source_execution
-    {
-        let streams = state
-            .speech_streams
-            .lock()
-            .map_err(|_| crate::diagnostics::failures::poisoned(internal()))?;
-        let offset = sample_offset.unwrap_or(0);
-        if let Some(pcm) = streams.read(&id, offset as usize)? {
-            use base64::Engine;
-            return Ok(model::SpeechAudioState::Streaming {
-                operation_id,
-                message_id: message_id.clone(),
-                execution_id: id.clone(),
-                sample_offset: offset,
-                alignment: streams.alignment(&id),
-                audio_base64: base64::engine::general_purpose::STANDARD.encode(pcm),
-            });
-        }
-        if execution_id.is_some() {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let store = state.lock()?;
+        if session_id != store.session_id {
             return Err(AppError::new(
-                ErrorCode::Conflict,
-                "Speech stream delivery expired.",
+                ErrorCode::SessionExpired,
+                "The application session changed. Refresh before continuing.",
             ));
         }
-    }
-    Ok(audio)
+        let audio = store.speech_audio(&operation_id)?;
+        let source_execution = store.speech_stream_execution(&operation_id)?;
+        if !matches!(audio, model::SpeechAudioState::Unavailable { .. })
+            && execution_id
+                .as_ref()
+                .is_some_and(|previous| source_execution.as_ref() != Some(previous))
+        {
+            return Err(AppError::new(
+                ErrorCode::Conflict,
+                "Speech execution changed during playback.",
+            ));
+        }
+        if let model::SpeechAudioState::Pending { message_id, .. } = &audio
+            && let Some(id) = source_execution
+        {
+            let streams = state
+                .speech_streams
+                .lock()
+                .map_err(|_| crate::diagnostics::failures::poisoned(internal()))?;
+            let offset = sample_offset.unwrap_or(0);
+            if let Some(pcm) = streams.read(&id, offset as usize)? {
+                use base64::Engine;
+                let pcm = pcm.to_vec();
+                let alignment = streams.alignment(&id);
+                drop(streams);
+                drop(store);
+                return Ok(model::SpeechAudioState::Streaming {
+                    operation_id,
+                    message_id: message_id.clone(),
+                    execution_id: id.clone(),
+                    sample_offset: offset,
+                    alignment,
+                    audio_base64: base64::engine::general_purpose::STANDARD.encode(pcm),
+                });
+            }
+            if execution_id.is_some() {
+                return Err(AppError::new(
+                    ErrorCode::Conflict,
+                    "Speech stream delivery expired.",
+                ));
+            }
+        }
+        Ok(audio)
+    })
+    .await
+    .map_err(|cause| crate::diagnostics::failures::join(&cause, "speech_audio_read", internal()))?
 }
 
 /// Inspect the exact audio already delivered to playback; never consume delivery twice.
@@ -317,15 +329,76 @@ pub(in crate::application) async fn watch_conversation(
 ) -> Result<ConversationSnapshot> {
     let deadline = tokio::time::Instant::now() + Duration::from_secs(20);
     loop {
-        if let Some(snapshot) = state.lock()?.conversation_snapshot_since(
-            &conversation_id,
+        let changed = state.conversation_changed.notified();
+        tokio::pin!(changed);
+        changed.as_mut().enable();
+        if let Some(snapshot) = read_conversation_since(
+            state.inner().clone(),
+            conversation_id.clone(),
             before,
             after_revision,
             tokio::time::Instant::now() >= deadline,
-        )? {
+        )
+        .await?
+        {
             return Ok(snapshot);
         }
-        tokio::time::sleep(Duration::from_millis(150)).await;
+        tokio::select! {
+            _ = changed => {},
+            _ = tokio::time::sleep(Duration::from_millis(150)) => {},
+        }
+    }
+}
+
+async fn read_conversation_since(
+    state: Arc<Application>,
+    conversation: String,
+    before: Option<i32>,
+    revision: i32,
+    force: bool,
+) -> Result<Option<ConversationSnapshot>> {
+    tauri::async_runtime::spawn_blocking(move || {
+        state
+            .lock()?
+            .conversation_snapshot_since(&conversation, before, revision, force)
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(&cause, "conversation_read_worker", internal())
+    })?
+}
+
+#[cfg(test)]
+mod contention_tests {
+    use super::*;
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn waiting_conversation_read_does_not_block_async_progress() {
+        let directory = tempfile::tempdir().unwrap();
+        let state = Application::recording_fixture(&directory.path().join("workspace.sqlite3"));
+        let owner = state.clone();
+        let (locked, ready) = std::sync::mpsc::channel();
+        let (release, released) = std::sync::mpsc::channel();
+        let holder = std::thread::spawn(move || {
+            let _guard = owner.lock().unwrap();
+            locked.send(()).unwrap();
+            released.recv_timeout(Duration::from_secs(2)).is_ok()
+        });
+        ready.recv().unwrap();
+        let read = tokio::spawn(read_conversation_since(
+            state,
+            "missing".into(),
+            None,
+            -1,
+            true,
+        ));
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        let _ = release.send(());
+        assert!(
+            holder.join().unwrap(),
+            "store wait blocked the async worker until the failsafe expired"
+        );
+        assert!(read.await.unwrap().is_err());
     }
 }
 

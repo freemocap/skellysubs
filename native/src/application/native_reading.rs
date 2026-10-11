@@ -25,7 +25,7 @@ impl Application {
             if let Err(failure) = &mut result {
                 let cancellation = (|| -> Result<()> {
                     let mut guard = state.lock()?;
-                    if guard.snapshot()?.learner.id == worker_request.install {
+                    if guard.learner_id()? == worker_request.install {
                         let store: &mut Store = &mut guard;
                         store
                             .workspace_graphs
@@ -197,7 +197,7 @@ async fn execute(
                     })
                     .await;
                 let mut guard = state.lock()?;
-                if guard.snapshot()?.learner.id != request.install {
+                if guard.learner_id()? != request.install {
                     return Err(AppError::new(
                         ErrorCode::SessionExpired,
                         "Workspace changed during reading.",

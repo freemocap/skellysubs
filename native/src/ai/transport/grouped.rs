@@ -331,9 +331,31 @@ pub async fn request_streaming(
     dispatches: &[crate::ai::transport::text_request::TextRequest],
     outputs: &[provider::RequestOutput<'_>],
     deltas: bool,
+    publish: impl FnMut(usize, Result<Completion>) -> Result<()>,
+    on_delta: impl FnMut(usize, &str),
+) -> Result<()> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        super::workflow::text::request(client, key, dispatches, outputs, deltas, publish, on_delta)
+            .await
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    {
+        request_streaming_live(client, key, dispatches, outputs, deltas, publish, on_delta).await
+    }
+}
+
+pub(super) async fn request_streaming_live(
+    client: &reqwest::Client,
+    key: &str,
+    dispatches: &[crate::ai::transport::text_request::TextRequest],
+    outputs: &[provider::RequestOutput<'_>],
+    deltas: bool,
     mut publish: impl FnMut(usize, Result<Completion>) -> Result<()>,
     mut on_delta: impl FnMut(usize, &str),
 ) -> Result<()> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     if dispatches.len() != outputs.len() {
         return Err(AppError::new(
             ErrorCode::Validation,
@@ -446,6 +468,21 @@ pub async fn supports_deltas(
     key: &str,
     dispatch: &crate::ai::transport::text_request::TextRequest,
 ) -> Result<bool> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        super::workflow::text::protocol(client, key, dispatch).await
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    {
+        supports_deltas_live(client, key, dispatch).await
+    }
+}
+
+pub(super) async fn supports_deltas_live(
+    client: &reqwest::Client,
+    key: &str,
+    dispatch: &crate::ai::transport::text_request::TextRequest,
+) -> Result<bool> {
     let Some(base) = dispatch.target.url.strip_suffix("/operations") else {
         return Ok(false);
     };
@@ -460,6 +497,8 @@ pub async fn supports_deltas(
     } else {
         request
     };
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let response = tokio::time::timeout(std::time::Duration::from_secs(5), request.send())
         .await
         .map_err(|_| protocol_timeout())?

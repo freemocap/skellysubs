@@ -1,6 +1,10 @@
 use super::*;
 
 pub(crate) struct Application {
+    #[cfg(feature = "workflow-capture")]
+    pub(super) local_timings: super::local_timing::Measurements,
+    pub(super) scheduler_wake: tokio::sync::Notify,
+    pub(super) conversation_changed: tokio::sync::Notify,
     /// Protected reports whose storage acknowledgement failed. Never diagnostics
     /// and never automatically resubmitted; reset explicitly clears this buffer.
     pub(super) graph_reports: Mutex<Vec<crate::ai::graph::InvocationReport>>,
@@ -35,16 +39,38 @@ pub(crate) struct Application {
     /// The AI View's place, kept while it moves between the panel and its window.
     pub(super) ai_view_selection: Mutex<Option<crate::model::AiViewSelection>>,
 }
-pub(crate) struct StoreGuard<'a>(MutexGuard<'a, Option<Store>>);
+pub(crate) struct StoreGuard<'a> {
+    store: Option<MutexGuard<'a, Option<Store>>>,
+    #[cfg(feature = "workflow-capture")]
+    timing: Option<super::local_timing::Pending<'a>>,
+}
 impl Deref for StoreGuard<'_> {
     type Target = Store;
     fn deref(&self) -> &Self::Target {
-        self.0.as_ref().expect("application store is unavailable")
+        self.store
+            .as_ref()
+            .expect("store guard released")
+            .as_ref()
+            .expect("application store is unavailable")
     }
 }
 impl DerefMut for StoreGuard<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.0.as_mut().expect("application store is unavailable")
+        self.store
+            .as_mut()
+            .expect("store guard released")
+            .as_mut()
+            .expect("application store is unavailable")
+    }
+}
+#[cfg(feature = "workflow-capture")]
+impl Drop for StoreGuard<'_> {
+    fn drop(&mut self) {
+        let released = std::time::Instant::now();
+        drop(self.store.take());
+        if let Some(timing) = self.timing.take() {
+            timing.released(released);
+        }
     }
 }
 impl Application {
@@ -69,6 +95,10 @@ impl Application {
             Err(error) => (None, Some(error)),
         };
         Arc::new(Self {
+            #[cfg(feature = "workflow-capture")]
+            local_timings: Default::default(),
+            scheduler_wake: Default::default(),
+            conversation_changed: Default::default(),
             graph_reports: Mutex::new(Vec::new()),
             speech_streams: Default::default(),
             speech_pending: Default::default(),
@@ -117,7 +147,10 @@ impl Application {
             credential_cleanup: Self::snapshot_error(&self.credential_cleanup),
         }
     }
+    #[track_caller]
     pub(crate) fn lock(&self) -> Result<StoreGuard<'_>> {
+        #[cfg(feature = "workflow-capture")]
+        let started = std::time::Instant::now();
         if let Some(error) = self
             .fatal
             .lock()
@@ -130,6 +163,10 @@ impl Application {
             .store
             .lock()
             .map_err(|_| crate::diagnostics::failures::poisoned(internal()))?;
+        #[cfg(feature = "workflow-capture")]
+        let timing = self
+            .local_timings
+            .acquired(std::panic::Location::caller(), started);
         if store.is_none() {
             if let Some(error) = self
                 .refusal
@@ -141,7 +178,11 @@ impl Application {
             }
             return Err(internal());
         }
-        Ok(StoreGuard(store))
+        Ok(StoreGuard {
+            store: Some(store),
+            #[cfg(feature = "workflow-capture")]
+            timing,
+        })
     }
     pub(crate) fn credential_operation(&self) -> Result<MutexGuard<'_, ()>> {
         self.credential_operations

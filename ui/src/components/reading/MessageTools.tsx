@@ -27,6 +27,7 @@ export interface MessageTool {
 
 /** The message's audio: play or stop reading it aloud. */
 export interface MessagePlay {
+  graphTarget?: Record<string, string>
   playing: boolean
   preparing?: boolean
   disabled?: boolean
@@ -77,7 +78,7 @@ export function MessageTools({ play, inspect, tools, actions, more, pending, men
   return <div className={`message-actions message-tools${waiting ? ' reply-activity' : ''}`} data-pending={waiting ? '' : undefined} dir={uiDirection} ref={root} onDoubleClick={stop}
     onKeyDown={event => { if (event.key === 'Escape' && open) { event.stopPropagation(); setOpen(false) } }}>
     <span className="message-tools-primary" aria-hidden={waiting || undefined} inert={waiting}>
-    {play && <button type="button" className="message-tools-icon message-tools-play" disabled={play.disabled}
+    {play && <button {...play.graphTarget} type="button" className="message-tools-icon message-tools-play" disabled={play.disabled}
       aria-label={tr(play.preparing ? "Cancel speech preparation" : play.playing ? "Stop playback" : "Play")} title={tr(play.preparing ? "Cancel speech preparation" : play.playing ? "Stop playback" : "Play")}
       onClick={event => { stop(event); play.onToggle() }}>{play.preparing ? <><span className="activity-spinner" aria-hidden="true" /><span className="hydrating-announce" role="status">{tr("Preparing audio…")}</span></> : <ToolbarIcon name={play.playing ? 'stop' : 'play'} />}</button>}
     {inspect && <button type="button" className="message-tools-icon" aria-label={tr("Inspect recording")} title={tr("Inspect recording")} aria-pressed={inspect.open} disabled={inspect.disabled}

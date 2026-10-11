@@ -1,4 +1,5 @@
 use super::*;
+mod performance;
 fn fixture() -> (tempfile::TempDir, Store) {
     let dir = tempfile::tempdir().unwrap();
     let store = Store::open(&dir.path().join("reading.sqlite3")).unwrap();
@@ -266,4 +267,26 @@ fn explicit_completion_aid_uses_template_syntax_and_requires_a_slot() {
             .contains(sentence_blanks::INSTRUCTION)
     );
     assert!(dispatch.messages[1].content.contains("Quiero___hoy."));
+}
+
+#[test]
+fn independent_reading_consumers_do_not_exhaust_local_request_slots() {
+    let (_dir, store) = fixture();
+    let registry = Registry::default();
+    let mut requests = vec![];
+    for _ in 0..16 {
+        let id = registry.begin(&store, input()).unwrap();
+        let request = registry.claim(&id).unwrap();
+        request.validate_source(&store).unwrap();
+        requests.push(request);
+    }
+    registry.cancel(&store, &requests[0].id).unwrap();
+    assert!(requests[0].validate_source(&store).is_err());
+    for request in &requests[1..] {
+        request.validate_source(&store).unwrap();
+    }
+    for request in requests {
+        registry.remove(&request.id).unwrap();
+    }
+    assert!(registry.0.lock().unwrap().is_empty());
 }

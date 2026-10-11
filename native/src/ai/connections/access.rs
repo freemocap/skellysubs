@@ -339,6 +339,24 @@ pub async fn check_access(
     state: tauri::State<'_, Arc<Application>>,
     expected_revision: i32,
 ) -> Result<AccessCheck> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        return crate::ai::transport::workflow::unary::protocol(
+            serde_json::json!({"operation":"custom-access-check","revision":expected_revision}),
+            "",
+            check_access_live(state, expected_revision),
+        )
+        .await;
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    check_access_live(state, expected_revision).await
+}
+async fn check_access_live(
+    state: tauri::State<'_, Arc<Application>>,
+    expected_revision: i32,
+) -> Result<AccessCheck> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let (url, credential) = {
         let store = state.lock()?;
         let access = settings(&store.connection)?;

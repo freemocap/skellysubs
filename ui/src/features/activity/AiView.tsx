@@ -1,47 +1,48 @@
-import { WorkspaceGraphActivity } from './WorkspaceGraphActivity'
-import { useExecutionPreferences } from '../../state/settings/useExecutionPreferences'
-import { ErrorNotice } from '../../components/feedback/ErrorNotice'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { AiExecutionSettings } from '../../components/controls/AiExecutionSettings'
-import { useNavigationStore } from '../../state/navigation/navigation'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { TurnView } from '../../generated/contracts'
-import { turnActivity } from '../../domain/conversation/activity-summary'
-import { ActivitySummary } from '../../components/feedback/ActivitySummary'
+import { ErrorNotice } from '../../components/feedback/ErrorNotice'
 import { ResponseDetails } from '../../components/feedback/ResponseDetails'
 import { useI18n } from '../../components/localization/i18n'
-import { getAiViewSelection, setAiViewSelection } from '../../platform/ipc/window'
+import type { GraphSurfaceKey } from '../../domain/activity/graph-surface'
+import { getAiViewSelection, readGraphHistory, setAiViewSelection } from '../../platform/ipc/window'
 import { nativeError } from '../../platform/ipc/workspace'
+import { useNavigationStore } from '../../state/navigation/navigation'
+import { useExecutionPreferences } from '../../state/settings/useExecutionPreferences'
+import type { AiRevisionSelection } from '../../generated/contracts'
+import { NativeRunControls } from './NativeRunControls'
+import { RunPicker, type ElsewhereSelection } from './RunPicker'
 import { useConversationActivity } from './useConversationActivity'
-import { NativeRunView } from './NativeRunView'
+import { useGraphHoverPublisher } from './useGraphHoverPublisher'
+import { WorkspaceRunView } from './WorkspaceRunView'
+import { RunWorkspace } from './workspace/RunWorkspace'
 
-/// The phone's views lead with the live graph, stacked down the screen so it
-/// stays readable, with the tapped operation inspected beneath it. `screen`
-/// fills the phone; `tray` sits above the recording panel under a single
-/// header line, leaving exchanges to the full screen.
+/// `screen` fills the phone; `tray` sits above the recording panel. Both stack
+/// the graph down the screen.
 export type AiViewMode = 'docked' | 'expanded' | 'window' | 'screen' | 'tray'
 
 interface Selection {
   conversationId: string | null
   /// Null follows the newest turn.
   turnId: string | null
-  kind: string | null
+  /// The operation whose details are open.
+  node: string | null
+  revision?: AiRevisionSelection
 }
 
-function turnLabel(turn: TurnView): string {
-  return `${turn.channel ?? 'Graph'} · ${turn.nativeGraph?.run ?? turn.id}`
-}
-
-/// A live view of the selected conversation's recorded AI operations.
+/// The AI workspace: one stable view of the selected run's executable graph.
 export function AiView({ mode, actions }: { mode: AiViewMode; actions: ReactNode }) {
+  const tr = useI18n()
   const inspection = useNavigationStore(state => state.aiInspection)
   const executionPreferences = useExecutionPreferences()
-  const tr = useI18n()
   const activity = useConversationActivity()
   const { snapshot, turns } = activity
-  const [selection, setSelection] = useState<Selection>({ conversationId: null, turnId: null, kind: null })
+  const [selection, setSelection] = useState<Selection>({ conversationId: null, turnId: null, node: null })
+  const [elsewhere, setElsewhere] = useState<ElsewhereSelection | null>(null)
   const [selectionError, setSelectionError] = useState<string | null>(null)
   const [selectionLoaded, setSelectionLoaded] = useState(false)
   const conversationId = snapshot?.conversationId ?? null
+  const phone = mode === 'screen' || mode === 'tray'
+  const hover = useGraphHoverPublisher(mode === 'window')
 
   // Restore the selected run when moving between windows.
   useEffect(() => {
@@ -50,7 +51,8 @@ export function AiView({ mode, actions }: { mode: AiViewMode; actions: ReactNode
       if (cancelled) return
       saved = useNavigationStore.getState().aiInspection ?? saved
       if (saved) {
-        setSelection({ conversationId: saved.conversationId, turnId: saved.turnId, kind: saved.operationKind })
+        setSelection({ conversationId: saved.conversationId, turnId: saved.turnId, node: saved.operationKind, revision: saved.revision })
+        setElsewhere(saved.elsewhere ?? null)
       }
       setSelectionLoaded(true)
     }).catch(error => { if (!cancelled) setSelectionError(nativeError(error)) })
@@ -58,69 +60,72 @@ export function AiView({ mode, actions }: { mode: AiViewMode; actions: ReactNode
   }, [])
   useEffect(() => {
     if (!inspection || !selectionLoaded) return
-    setSelection({ conversationId: inspection.conversationId, turnId: inspection.turnId, kind: inspection.operationKind })
+    setSelection({ conversationId: inspection.conversationId, turnId: inspection.turnId, node: inspection.operationKind })
+    setElsewhere(null)
     useNavigationStore.setState({ aiInspection: null })
   }, [inspection, selectionLoaded])
   useEffect(() => {
-    if (selectionLoaded && conversationId && selection.conversationId !== conversationId) {
-      setSelection({ conversationId, turnId: null, kind: null })
-    }
+    if (selectionLoaded && conversationId && selection.conversationId !== conversationId) setSelection({ conversationId, turnId: null, node: null })
   }, [selectionLoaded, conversationId, selection.conversationId])
   useEffect(() => {
     if (!selectionLoaded || (conversationId && selection.conversationId !== conversationId)) return
     let current = true
-    void setAiViewSelection({ conversationId: selection.conversationId, turnId: selection.turnId, operationKind: selection.kind,
-    }).catch(error => { if (current) setSelectionError(nativeError(error)) })
+    void setAiViewSelection({ conversationId: selection.conversationId, turnId: selection.turnId, operationKind: selection.node, ...(elsewhere ? { elsewhere } : {}), ...(selection.revision ? { revision: selection.revision } : {}) })
+      .catch(error => { if (current) setSelectionError(nativeError(error)) })
     return () => { current = false }
-  }, [selectionLoaded, conversationId, selection])
+  }, [selectionLoaded, conversationId, selection, elsewhere])
 
   const selectionReady = selectionLoaded && selection.conversationId === conversationId && conversationId !== null
   const pinned = selection.turnId ? turns.find(turn => turn.id === selection.turnId) : undefined
-  // A saved selection can live beyond the snapshot's newest 50 turns. Page
-  // until it is found; never silently display a different exchange meanwhile.
+  // A saved selection can live beyond the snapshot's newest turns. Page until it
+  // is found; never silently display a different exchange meanwhile.
   const restoring = selectionReady && selection.turnId !== null && !pinned
   useEffect(() => {
     if (restoring && activity.hasOlder && !activity.loadingOlder && !activity.error) activity.loadOlder()
   }, [restoring, activity.hasOlder, activity.loadingOlder, activity.error, activity.loadOlder])
   const turn = !selectionReady ? undefined : selection.turnId ? pinned : turns[0]
   const following = selectionReady && selection.turnId === null
-  const summary = useMemo(() => turn ? turnActivity(turn, turn.nativePreview?.capture.text ?? null) : null, [turn])
-  const pick = (turnId: string) => setSelection(current => ({ ...current, turnId }))
-  const phone = mode === 'screen' || mode === 'tray'
 
-  const renderHeader = () => (
-    <header className="ai-view-head">
-      <h2 className="ai-view-title">{tr('AI activity')}</h2>
-      {summary && <ActivitySummary activity={summary} showLast={false} />}
-      <AiExecutionSettings {...executionPreferences} />
-      <div className="ai-view-spacer" />
-      {mode !== 'tray' && <div className="ai-exchanges" role="group" aria-label={tr('Exchanges')}>
-        <button type="button" className="ai-chip" aria-pressed={following} onClick={() => setSelection(current => ({ ...current, turnId: null }))} title={tr('Follow the newest exchange')}>{tr('Follow live')}</button>
-        {turns.map(item => {
-          const nativeStates = item.nativeGraph ? Object.values(item.nativeGraph.nodes) : null
-          const failed = nativeStates?.some(state => state === 'Failed' || state === 'Unknown')
-          const busy = nativeStates?.includes('Running')
-          return <button key={item.id} type="button" className="ai-chip" title={turnLabel(item)} aria-pressed={!following && item.id === turn?.id} onClick={() => pick(item.id)}>
-            {(failed || busy) && <span className="ai-node-dot" data-phase={busy ? 'running' : 'failed'} aria-hidden="true" />}
-            {turnLabel(item)}
-          </button>
-        })}
-        {activity.hasOlder && <button type="button" className="ai-chip" disabled={activity.loadingOlder} onClick={activity.loadOlder}>{activity.loadingOlder ? tr('Loading…') : tr('Older')}</button>}
-      </div>}
-      <div className="ai-view-actions">{actions}</div>
-    </header>
-  )
+  const turnKey: GraphSurfaceKey | null = turn && conversationId ? { scope: 'conversation', conversationId, turnId: turn.id } : null
+  const workspaceKey: GraphSurfaceKey | null = elsewhere?.kind === 'workspace' ? { scope: 'workspace', engine: elsewhere.entry.engine, run: elsewhere.entry.run } : null
+  const surface = elsewhere ? workspaceKey : turnKey
+  const publish = hover.publish
+  const onHoverResults = useCallback((results: string[] | null) => {
+    publish(results && results.length && surface ? { key: surface, results } : null)
+  }, [publish, surface])
+  useEffect(() => () => publish(null), [publish, surface?.scope, turn?.id, elsewhere])
+  const loadHistory = useCallback((before: string | null) => {
+    if (!conversationId || !turn?.nativeGraph) throw new Error('No conversation run is selected.')
+    return readGraphHistory(conversationId, turn.nativeGraph.run, before)
+  }, [conversationId, turn?.nativeGraph?.run])
+  const onPopover = (node: string | null) => setSelection(current => ({ ...current, node }))
+  const orientation = phone ? 'down' : 'across'
+  const transcription = elsewhere?.kind === 'transcription' ? snapshot?.transcriptionAttempts.find(attempt => attempt.id === elsewhere.id) ?? null : null
 
   return <section className="ai-view" data-mode={mode} aria-label={tr('AI activity')}>
-    {renderHeader()}
+    <header className="ai-view-head">
+      <h2 className="ai-view-title">{tr('AI activity')}</h2>
+      {mode !== 'tray' && <RunPicker turns={turns} selectedTurn={turn?.id ?? null} following={following} elsewhere={elsewhere}
+        hasOlder={activity.hasOlder} loadingOlder={activity.loadingOlder} transcriptions={snapshot?.transcriptionAttempts ?? []}
+        onFollow={() => { setElsewhere(null); setSelection(current => ({ ...current, turnId: null, node: null, revision: undefined })) }}
+        onTurn={turnId => { setElsewhere(null); setSelection(current => ({ ...current, turnId, node: null, revision: undefined })) }}
+        onElsewhere={next => { setElsewhere(next); setSelection(current => ({ ...current, node: null, revision: undefined })) }} onOlder={activity.loadOlder} />}
+      {!phone && <AiExecutionSettings {...executionPreferences} />}
+      {hover.visible && hover.visible.visible === 0 && <span className="ai-hover-note">{tr('Not on screen')}</span>}
+      <div className="ai-view-spacer" />
+      <div className="ai-view-actions">{actions}</div>
+    </header>
     {(activity.error || selectionError) && <ErrorNotice as="p" className="ai-error" error={selectionError || activity.error}>{selectionError || activity.error}</ErrorNotice>}
-    {turn?.nativeGraph && conversationId
-      ? <NativeRunView key={turn.id} conversationId={conversationId} turn={turn} selected={selection.kind} onSelect={kind => setSelection(current => ({ ...current, kind }))} down={phone} globallyPaused={snapshot?.connection.paused ?? false} />
-      : <p className="ai-muted">{conversationId && !activity.error && !selectionError && (!selectionReady || (restoring && activity.hasOlder)) ? tr('Loading…') : tr('No recorded AI operations.')}</p>}
-    {!phone && <details className="ai-other">
-      <summary>{tr('Other AI activity')}</summary>
-      {snapshot?.transcriptionAttempts.map(attempt => <details key={attempt.id}><summary>{attempt.model} · {attempt.state}</summary>{attempt.error && <p>{attempt.error}</p>}<ResponseDetails value={attempt.diagnostics} /></details>)}
-      <WorkspaceGraphActivity />
-    </details>}
+    {elsewhere?.kind === 'workspace' ? <WorkspaceRunView key={JSON.stringify([elsewhere.entry.engine, elsewhere.entry.run])} entry={elsewhere.entry} visible orientation={orientation} compact={phone}
+        initialRevision={selection.revision} onRevision={revision => setSelection(current => ({ ...current, revision, turnId: elsewhere ? current.turnId : turn?.id ?? current.turnId }))} popover={selection.node} onPopover={onPopover} onHoverResults={onHoverResults} />
+      : elsewhere?.kind === 'transcription' ? <div className="ai-transcription">
+          {transcription ? <><p>{transcription.model} · {transcription.state}</p>{transcription.error && <ErrorNotice as="p" error={transcription.error}>{transcription.error}</ErrorNotice>}<ResponseDetails value={transcription.diagnostics} /></>
+            : <p className="ai-muted">{tr('No recorded AI operations.')}</p>}
+        </div>
+      : turn?.nativeGraph && conversationId
+        ? <RunWorkspace key={turn.id} graph={turn.nativeGraph} preview={turn.nativePreview ?? null} loadHistory={loadHistory}
+            controls={<NativeRunControls turn={turn} globallyPaused={snapshot?.connection.paused ?? false} />}
+            orientation={orientation} compact={phone} initialRevision={selection.revision} onRevision={revision => setSelection(current => ({ ...current, revision, turnId: elsewhere ? current.turnId : turn?.id ?? current.turnId }))} popover={selection.node} onPopover={onPopover} onHoverResults={onHoverResults} />
+        : <p className="ai-muted">{conversationId && !activity.error && !selectionError && (!selectionReady || (restoring && activity.hasOlder)) ? tr('Loading…') : tr('No recorded AI operations.')}</p>}
   </section>
 }

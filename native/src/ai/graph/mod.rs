@@ -45,7 +45,8 @@ pub use archive::HistoryLimits;
 pub use checkpoint::{Checkpoint, CheckpointLimits, Stamp};
 pub use compile::Executable;
 pub use durable::{
-    Authority, CommitFailure, CommitIntent, CommitRequest, CommitStore, DurableEngine, HistoryStore,
+    Authority, CommitFailure, CommitIntent, CommitRequest, CommitStore, DurableEngine,
+    HistoryStore, RunControl,
 };
 pub use execution_evidence::{EvidenceSnapshot, ExecutionEvidence};
 pub use fault_codes::CoreFaultCode;

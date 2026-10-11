@@ -21,3 +21,6 @@ mod synthesis_timing;
 mod transcription_timing;
 
 pub(crate) mod graph_audio_target;
+
+#[cfg(feature = "workflow-capture")]
+pub(crate) mod workflow;

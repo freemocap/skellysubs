@@ -185,7 +185,7 @@ impl Request {
             context,
             target,
             model,
-            install: store.snapshot()?.learner.id,
+            install: store.learner_id()?,
             attempt,
             operation,
             config_hash: store.config.hash().into(),
@@ -206,11 +206,10 @@ impl Request {
         if self.cancelled.load(Ordering::SeqCst) {
             return Err(self.stopped("cancelled"));
         }
-        if self.install != store.snapshot()?.learner.id {
-            return Err(self.stopped("workspace_changed"));
-        }
         if self.input.aid != ReadingAid::Speech {
             self.validate_access(store)?;
+        } else if self.install != store.learner_id()? {
+            return Err(self.stopped("workspace_changed"));
         }
         Ok(())
     }
@@ -222,7 +221,7 @@ impl Request {
         Ok(())
     }
     pub(crate) fn validate_access(&self, store: &Store) -> Result<()> {
-        if self.install != store.snapshot()?.learner.id {
+        if self.install != store.learner_id()? {
             return Err(self.stopped("workspace_changed"));
         }
         if self.config_hash != store.config.hash() {
@@ -301,12 +300,8 @@ impl Registry {
             receipts::cancel(store, &id)?;
             entries.remove(&id);
         }
-        if entries.len() >= 8 {
-            return Err(AppError::new(
-                ErrorCode::AdmissionHeld,
-                "Finish or close pending reading requests first.",
-            ));
-        }
+        // This registry owns local consumers, not provider admission. Independent
+        // open helpers must not prevent another local request from being created.
         let mut request = Request::capture(store, input)?;
         request.fresh = fresh;
         let request = Arc::new(request);

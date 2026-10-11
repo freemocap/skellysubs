@@ -4,6 +4,8 @@ import { clearInspectionResources } from '../src/platform/audio/inspection-resou
 // `tsc` sees them too. Harmless for the pure-function tests, which run in the
 // node environment and simply never call them.
 import '@testing-library/jest-dom/vitest'
+import { readFileSync } from 'node:fs'
+import { URL as FileUrl } from 'node:url'
 import { afterEach, beforeEach, vi } from 'vitest'
 
 // Zustand stores are module-level singletons. The shared mock resets every
@@ -36,6 +38,12 @@ if (typeof document !== 'undefined') {
 
   // jsdom has no layout observer; component tests can supply measured boxes.
   globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} }
+
+  // jsdom loads no stylesheet. The AI workspace measures its geometry from root
+  // tokens, so apply the stylesheet's own pixel-valued geometry tokens.
+  const tokens = readFileSync(new FileUrl('../src/styles/foundations/tokens.css', import.meta.url), 'utf8')
+  const root = tokens.slice(tokens.indexOf(':root {'), tokens.indexOf('}', tokens.indexOf(':root {')))
+  for (const [, name, value] of root.matchAll(/(--graph-[\w-]+|--border-width):\s*([\d.]+px);/g)) document.documentElement.style.setProperty(name, value)
 
   // Nothing under test scrolls, but the chat stream asks the DOM to.
   Element.prototype.scrollIntoView ??= vi.fn()

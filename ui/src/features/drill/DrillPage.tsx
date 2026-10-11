@@ -307,7 +307,6 @@ export function DrillPage({ active }: { active: boolean }) {
             controller.signal.throwIfAborted()
             if (current()) {
               setReference({ itemId: item.id, audioBase64: spoken.audioBase64, inspection, alignment: spoken.audioAlignment })
-              setReferenceTime(0)
             }
           },
         })
@@ -339,10 +338,10 @@ export function DrillPage({ active }: { active: boolean }) {
   const inspectionCache = useRef(new Map<string, AudioInspection>())
   useEffect(() => { inspectionCache.current.clear() }, [selected?.id])
   useEffect(() => {
-    if (attemptAudio.audio) inspectionCache.current.set(attemptAudio.audio.attemptId, attemptAudio.audio.inspection)
+    if (attemptAudio.audio?.inspection) inspectionCache.current.set(attemptAudio.audio.attemptId, attemptAudio.audio.inspection)
   }, [attemptAudio.audio])
   const scrubVolume = (settings?.master_volume ?? 100) * (settings?.voice_volume ?? 100) / 10000
-  const attemptPlayback = useRecordingPlayback({ audio: shownAttemptAudio?.base64 ?? null, duration: shownAttemptAudio?.inspection.duration ?? 0,
+  const attemptPlayback = useRecordingPlayback({ audio: shownAttemptAudio?.base64 ?? null, duration: shownAttemptAudio?.inspection?.duration ?? 0,
     enabled: active && !holdingAudio, rate: settings?.tts_rate ?? 1, volume: scrubVolume, onError: setFailure })
   const referenceScrub = useAudibleScrub(reference?.itemId === selected?.id ? reference?.audioBase64 ?? null : null,
     active && !holdingAudio, speaking, scrubVolume, setReferenceFailure,
@@ -466,7 +465,7 @@ export function DrillPage({ active }: { active: boolean }) {
           onPlayReference={toggleReference} playingReference={speaking}
           referenceNote={holdingAudio ? tr("Playback waits until the attempt is stored.") : tr("Replays reuse the saved reference; no new request is made.")}
           reference={shown?.inspection ?? null} referenceTime={referenceTime} onSeekReference={seekReference} referenceScrub={referenceScrub} attemptScrub={attemptPlayback.scrub}
-          attempt={shownAttemptAudio?.inspection ?? null} preview={preview} attemptTime={attemptPlayback.time}
+          attempt={shownAttemptAudio?.inspection ?? null} attemptAudioReady={!!shownAttemptAudio} preview={preview} attemptTime={attemptPlayback.time}
           attemptLabel={preview ? tr("Attempt {value0}", { value0: preview.number }) : attempt ? tr("Attempt {value0}", { value0: String(attempt.sequence) }) : null}
           attemptFailure={clip.failure ?? attemptAudio.failure} onRetryAttempt={() => { if (clip.failure) clip.retry(); else attemptAudio.retry() }} attemptUnavailable={preview ? null : attemptUnavailable}
           onSeekAttempt={attemptPlayback.seek}

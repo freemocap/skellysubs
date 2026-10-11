@@ -186,6 +186,10 @@ pub extern "system" fn Java_com_freemocap_skellyspeak_MainActivity_initializeCre
     }
 }
 pub fn save(id: &str, secret: &str) -> Result<()> {
+    #[cfg(feature = "workflow-capture")]
+    if crate::ai::transport::workflow::is_replay() {
+        return Err(unavailable());
+    }
     #[cfg(target_os = "macos")]
     {
         super::credential_cache::CACHE.mutate(id, || {
@@ -223,6 +227,10 @@ fn save_uncached(id: &str, secret: &str) -> Result<()> {
     }
 }
 pub fn read(id: &str) -> Result<Zeroizing<String>> {
+    #[cfg(feature = "workflow-capture")]
+    if crate::ai::transport::workflow::is_replay() {
+        return Ok(Zeroizing::new(String::new()));
+    }
     #[cfg(target_os = "macos")]
     {
         super::credential_cache::CACHE.read(id, || {
@@ -263,6 +271,10 @@ fn read_uncached(id: &str) -> Result<Zeroizing<String>> {
     }
 }
 pub fn remove(id: &str) -> Result<()> {
+    #[cfg(feature = "workflow-capture")]
+    if crate::ai::transport::workflow::is_replay() {
+        return Err(unavailable());
+    }
     #[cfg(target_os = "macos")]
     {
         super::credential_cache::CACHE.mutate(id, || {

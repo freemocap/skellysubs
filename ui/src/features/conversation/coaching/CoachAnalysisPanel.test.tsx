@@ -10,8 +10,8 @@ vi.mock('../../../platform/ipc/workspace', () => ({ readWorkspace: backend.read,
 vi.mock('../../../domain/input/back', () => ({ openOverlay: () => () => {} }))
 vi.mock('../progress/ConversationMap', () => ({ ConversationMap: () => null }))
 const snapshot = { conversationId: 'chat-1', sessionId: 'session', revision: 7, coachMessages: [], turns: [], messages: [], revisionSuffixCounts: [], hasOlder: false } as unknown as ConversationSnapshot
-function panel(chatId = 'chat-1', draftQuestion = '', autoSendDraft = false, conversationBusy = false) {
-  return <CoachAnalysisPanel targetLanguageName="Spanish" autoSendDraft={autoSendDraft} chatId={chatId} conversationBusy={conversationBusy} tab="coaching" onTab={vi.fn()} draftQuestion={draftQuestion} onDraftConsumed={vi.fn()} pinnedTurn={null} nativeLanguageName="English" showRomanization={false} rtl={false} />
+function panel(chatId = 'chat-1', draftQuestion = '', autoSendDraft = false, conversationBusy = false, revealRequest = 0) {
+  return <CoachAnalysisPanel targetLanguageName="Spanish" autoSendDraft={autoSendDraft} revealRequest={revealRequest} chatId={chatId} conversationBusy={conversationBusy} tab="coaching" onTab={vi.fn()} draftQuestion={draftQuestion} onDraftConsumed={vi.fn()} pinnedTurn={null} nativeLanguageName="English" showRomanization={false} rtl={false} />
 }
 beforeEach(() => {
   vi.resetAllMocks()
@@ -22,6 +22,21 @@ beforeEach(() => {
   backend.execute.mockResolvedValue({ revision: 20 })
 })
 describe('native private coaching', () => {
+  it('reveals an externally submitted guide question without resubmitting and respects subsequent minimization', async () => {
+    backend.watch.mockReset().mockResolvedValueOnce({ ...snapshot, coachMessages: [{ id: 'guide', role: 'user', text: 'Explain this skill', guideContext: { markdown: 'Selected skill context' } }] }).mockImplementation(() => new Promise(() => {}))
+    const view = render(panel())
+    await screen.findByText('Explain this skill')
+    expect(screen.getByLabelText('Coach conversation')).not.toBeVisible()
+    view.rerender(panel('chat-1', '', false, false, 1))
+    expect(screen.getByLabelText('Coach conversation')).toBeVisible()
+    expect(screen.getByText('Skill guide')).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Minimize coach chat' }))
+    view.rerender(panel('chat-1', '', false, true, 1))
+    expect(screen.getByLabelText('Coach conversation')).not.toBeVisible()
+    view.rerender(panel('chat-1', '', false, false, 2))
+    expect(screen.getByLabelText('Coach conversation')).toBeVisible()
+    expect(backend.execute).not.toHaveBeenCalled()
+  })
   it('uses declared coach ownership and native previews without legacy operations', async () => {
     backend.watch.mockReset().mockResolvedValueOnce({ ...snapshot, turns: [{ id: 'native', channel: 'coach', state: 'pending', operations: [], attempts: [],
       nativePreview: { live: true, capture: { text: 'Streaming native reply' } } }] }).mockImplementation(() => new Promise(() => {}))

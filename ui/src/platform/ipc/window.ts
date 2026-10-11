@@ -2,6 +2,7 @@ import { isTauri } from './tauri'
 import { invoke } from './native'
 import type { AiViewSelection, AiWindowState } from '../../generated/contracts'
 import type { RunHistory } from '../../generated/graph-contracts'
+import { parseGraphHoverMessage, parseGraphHoverReply, type GraphHoverMessage, type GraphHoverReply } from '../../domain/activity/graph-surface'
 
 /// The label of the webview this bundle runs in, or null outside Tauri.
 ///
@@ -90,4 +91,27 @@ export function readNativeRunHistory(engine: string, run: string, before: string
 
 export function readNativeWorkspaceGraph(engine: string, run: string, after: string | null): Promise<import('../../generated/graph-contracts').InspectionSnapshot | null> {
   return invoke('read_native_workspace_graph', { engine, run, after })
+}
+
+/** Downstream-surface hints travel from the popped-out AI view to the main
+ * window, which owns the app surfaces; it answers how many are visible. */
+export async function emitGraphHover(message: GraphHoverMessage): Promise<void> {
+  if (!isTauri) throw new Error('Graph hover messages need the desktop app.')
+  const { emitTo } = await import('@tauri-apps/api/event')
+  await emitTo('main', 'ai-graph-hover', message)
+}
+export async function onGraphHover(handler: (message: GraphHoverMessage) => void): Promise<() => void> {
+  if (!isTauri) return () => {}
+  const { listen } = await import('@tauri-apps/api/event')
+  return listen<unknown>('ai-graph-hover', event => handler(parseGraphHoverMessage(event.payload)))
+}
+export async function emitGraphHoverReply(window: string, reply: GraphHoverReply): Promise<void> {
+  if (!isTauri) throw new Error('Graph hover replies need the desktop app.')
+  const { emitTo } = await import('@tauri-apps/api/event')
+  await emitTo(window, 'ai-graph-hover-reply', reply)
+}
+export async function onGraphHoverReply(handler: (reply: GraphHoverReply) => void): Promise<() => void> {
+  if (!isTauri) return () => {}
+  const { listen } = await import('@tauri-apps/api/event')
+  return listen<unknown>('ai-graph-hover-reply', event => handler(parseGraphHoverReply(event.payload)))
 }

@@ -4,11 +4,16 @@ use crate::learning::coaching::conversation_support as support;
 
 /// Local preview only: a cache miss must never create or dispatch reading work.
 #[tauri::command]
-pub(in crate::application) fn get_cached_reading_audio(
+pub(in crate::application) async fn get_cached_reading_audio(
     state: tauri::State<'_, Arc<Application>>,
     input: reading::ReadingInput,
 ) -> Result<Option<crate::speech::alignment::SpeechAudio>> {
-    cached_reading_audio(&*state.lock()?, input)
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || cached_reading_audio(&*state.lock()?, input))
+        .await
+        .map_err(|cause| {
+            crate::diagnostics::failures::join(&cause, "cached_reading_audio", internal())
+        })?
 }
 
 fn cached_reading_audio(

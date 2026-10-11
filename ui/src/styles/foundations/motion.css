@@ -27,6 +27,11 @@
 
 @keyframes stream-caret { 50% { opacity: 0; } }
 
+/* AI workspace: a connection carrying a value into a running operation, and a
+   running operation's progress track. */
+@keyframes ai-flow { to { stroke-dashoffset: -22; } }
+@keyframes ai-indeterminate { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+
 @keyframes hydrate-arrive { from { opacity: 0; } to { opacity: 1; } }
 
 /* A card or message bubble growing into its place: Practice's opened take, and a

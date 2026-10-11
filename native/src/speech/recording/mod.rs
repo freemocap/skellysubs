@@ -16,3 +16,6 @@ pub(crate) mod voice;
 mod wav;
 
 mod preflight;
+
+#[cfg(all(desktop, feature = "workflow-capture"))]
+mod workflow;

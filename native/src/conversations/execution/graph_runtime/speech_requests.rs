@@ -113,7 +113,7 @@ impl Runtime {
                 "AI execution is paused. Speech was not queued.",
             ));
         }
-        super::super::admit_network_work(db, 1)?;
+        super::super::admit_network_work(db, self, 1)?;
         let captured: serde_json::Value = serde_json::from_str(&raw)?;
         let language = serde_json::from_value(captured["languageContext"].clone())?;
         let target = crate::ai::connections::speech_routing::resolve(

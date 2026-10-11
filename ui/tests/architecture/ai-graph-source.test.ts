@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { expect, it } from 'vitest'
 
 /// Presentation reads the compiler-exported artifact; application code must not
-/// maintain another topology. Renderer identity parity is tested with NativeGraph.
+/// maintain another topology. The workspace projection is tested in domain/activity/graph-projection.test.ts.
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 const definition = JSON.parse(readFileSync(join(root, 'ui/src/generated/coach-graph.json'), 'utf8'))
 const kinds = Object.keys(definition.artifact.definition.nodes)

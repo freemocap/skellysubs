@@ -20,7 +20,7 @@ implementation work and verification limits. Formal semantics belong to the
 | 8. Functional acceptance | Accepted by the user with performance issues noted. |
 | 9. Unified activity | Connected artifact graph, run timeline, controls and attempt inspection. Usability/performance needs further work. |
 | 10. Source cleanup | Complete; final automated gates passed. |
-| 11. Efficiency | Pending: measure repeated work, contention, rendering and result hydration. |
+| 11. Efficiency | In progress: capture timings recorded; reading authority narrowed with focused before/after measurements. Remaining contention, scheduling and rendering findings are tracked in the audit. |
 | 12. Final verification and acceptance | Pending complete regression gates and user app check. |
 
 Changes remain uncommitted. Builds and controlled-provider tests establish their
@@ -196,26 +196,112 @@ or used as evidence of browser rendering performance. Changes remain uncommitted
 
 - [x] **11.1** Audit reads, writes, locks, polling, scheduling and rendering; produce a ranked inventory.
 - [x] **11.2** Agree on interaction budgets and a finite set of representative workflows.
-- [ ] **11.3** Prove desktop automation can attach to and drive the actual application.
-- [ ] **11.4** Add correlated timing measurements across the UI/native boundary.
-- [ ] **11.5** Implement explicit session capture, including workspace state, interactions, provider output and audio.
-- [ ] **11.6** Verify capture completeness and measure recording overhead.
-- [ ] **11.7** Have you record the representative workflows.
-- [ ] **11.8** Implement isolated replay of those recordings and verify the expected outputs.
-- [ ] **11.9** Establish latency, repeated-work and concurrency baselines.
-- [ ] **11.10** Fix the ranked problems one at a time, replaying after each change.
-- [ ] **11.11** Run regression checks and prepare your responsiveness acceptance check.
+- [x] **11.3** Complete reproducible capture infrastructure before learner recording:
+  - [x] Inspect the existing capture tools and application integration points.
+  - [x] Add isolated development sessions and recording controls.
+  - [x] Capture starting state, interactions, provider responses and media.
+  - [x] Implement isolated replay with explicit mismatch failures.
+  - [x] Add correlated latency measurements and comparison reports.
+  - [x] Verify a complete capture/replay cycle and recording overhead.
+  - [x] Give the user the verified launch command and recording instructions.
+- [ ] **11.4** Record representative learner workflows and verify each through offline replay.
+- [ ] **11.5** Establish latency, repeated-work and concurrency baselines; fill missing causal measurement endpoints before claiming the corresponding budget.
+- [x] **11.6** Fix ranked problems one at a time using focused before/after measurements and affected regressions; use complete workflow replay when available.
+- [x] **11.7** Run regression checks and prepare responsiveness acceptance.
 
 The [source audit](ai-graph-efficiency-audit.md) records confirmed mechanisms,
 provisional priorities and measurements needed before claiming improvements.
 The user approved next-frame loaded-content response, 50 ms p95 small local reads
 and 50 ms p95 provider completion-to-display, with provider wait measured separately.
-The audit lists the agreed workflow set. No measured performance pass is claimed.
+The audit lists the agreed workflow set. No measured product performance pass is claimed.
 
-A secondary agent implemented bounded recording/replay tooling, reviewed by the
-primary agent. The [recording note](workflow-recording-replay.md) distinguishes
-tested primitives from application integration. Synthetic tooling tests do not
-complete desktop attachment or real-session capture. Startup currently selects
-the standard application directory; stage 11.3 needs an explicit isolated desktop
-workspace/profile launch before exercising the application. Stage 12 remains
-final verification and user acceptance after this efficiency work.
+2026-10-10: the user approved proceeding with focused fixes using existing capture
+observations while complete learner-session replay remains unresolved. The first
+audit finding now uses a narrow learner-identity read instead of full workspace
+projections. A 25-contact debug fixture measured validation p50 13.987 → 0.771 ms
+and p95 16.004 → 1.300 ms (200 samples per run). These are local validation timings,
+not measured whole-app responsiveness gains. See the audit for the regression
+test, measurement command and remaining limitations.
+
+The [recording note](workflow-recording-replay.md) records current implementation,
+commands, controlled desktop evidence and verification limits. A secondary agent
+implemented native capture/replay and tooling primitives; the primary agent
+integrated the isolated desktop recorder and verified a complete coach workflow.
+The controlled provider was shut down before successful offline replay. A changed
+input was rejected. Native tests passed (947 passed, 2 ignored); final source gates passed. Physical microphone/speaker and representative learner workflow
+acceptance remain distinct from this controlled evidence. Stage 12 remains final
+verification and user acceptance after the efficiency work.
+
+2026-10-10 focused efficiency batch complete: all twelve linear audit items have
+implementation/review evidence in the source audit. Final gates passed: 938 native
+library tests (5 ignored), 1,956 UI tests, 13 capture-enabled native tests, 32 workflow
+tooling tests, Clippy, binary/contract checks, UI build, fast gate and documentation
+links. A fresh isolated desktop capture/replay smoke also passed. The audit records
+the exact prepared build and four-step responsiveness check. Whole learner-session
+replay and measured product-budget acceptance remain open under 11.4/11.5; they
+were explicitly excluded as prerequisites for these focused corrections. Stage 12
+user acceptance has not been declared complete.
+
+
+2026-10-10 recorder concurrency follow-up (stage 11 measurement infrastructure):
+
+- [x] Trace the failure using the partial recording and native capture code.
+- [x] Reproduce the failure in a focused regression test.
+- [x] Fix the cause and retain specific failure diagnostics.
+- [x] Run regression checks and verify the prepared recorder.
+- [x] Report what is verified and prepare the next learner recording.
+
+Identical overlapping calls now have independent recording identities, response
+frames and cancellation ownership. Native tests (954 passed / 5 ignored), Clippy,
+binary checks/build, tooling (35 tests), fast gate, and three isolated desktop
+capture/replay checks passed. The recording note holds exact evidence and prepared
+executable identity. The prior learner capture lacks its first native failure
+reason; the concurrency defect is reproduced and fixed, but attribution of that
+specific session remains unproven. The next learner recording checks this repair
+against the same workflow; full product responsiveness acceptance remains open.
+
+
+Stage 11 measured responsiveness batch: the efficiency audit records the full
+15-item checklist, focused workload identities and verification limits. Implemented
+changes cover blocking read dispatch, workspace read batching, compact language
+totals, repeated evidence computation, speech delivery, Drill audio hydration,
+reading admission and the Skills coach handoff. Grammar surfaces share their
+existing native request and saved result. No graph ontology or workspace format
+changes are part of this batch. Full-session replay reliability (item 3), final
+regression gates and running-app responsiveness acceptance remain distinct from
+these implemented components. See [the efficiency audit](ai-graph-efficiency-audit.md).
+
+
+Stage 11 measured responsiveness batch: the efficiency audit records the full
+15-item checklist, focused workload identities and verification limits. Implemented
+changes cover blocking read dispatch, workspace read batching, compact language
+totals, repeated evidence computation, speech delivery, Drill audio hydration,
+reading admission and the Skills coach handoff. Grammar surfaces share their
+existing native request and saved result. No graph ontology or workspace format
+changes are part of this batch. Full-session replay reliability (item 3), final
+regression gates and running-app responsiveness acceptance remain distinct from
+these implemented components. See [the efficiency audit](ai-graph-efficiency-audit.md).
+
+
+Responsiveness batch verification completed: 957 native tests (five ignored),
+2,020 UI tests, Clippy, binary/contract checks, UI build, 37 workflow tooling tests,
+fast gate and documentation links passed. Prepared combined build identity:
+`a2886805242c17bc68392363ca9714480c74fe14ef9d1dd48cfdec0d43b72530`.
+Two focused isolated runs verified all 21 language totals and measured concurrent
+read p95 at 16-35 ms. Full-session replay reliability and roughly half-second
+startup frame stalls remain unresolved; this is not whole-app responsiveness
+acceptance. Exact measurements and limits are in the efficiency audit.
+
+
+PR-readiness follow-up: targeted startup layout fixes passed 65 affected UI tests
+and the UI build; warm-reload frame p95 is 16.8 ms. Cold isolated WebView frame
+gaps remain an explicit limitation. Native conversation identity capture now
+preserves the seed used by persona sampling. A real three-conversation command
+smoke and fresh controlled-provider browser capture/offline replay pass. Native
+regressions: 959 passed, five ignored; Clippy, production binaries and 38 workflow
+tooling tests/types pass. The full recovered recording passes its provider mismatch
+but stops at a positional microphone selector around 120 seconds; a fresh capture
+is required. The concurrent Activity UI work currently blocks the fast gate with
+missing translation keys and remains untouched by this batch. The full eight-item
+PR-readiness checklist and limits are maintained in ai-graph-efficiency-audit.md;
+replay receipts are in workflow-recording-replay.md. Item 2 remains open.

@@ -26,9 +26,34 @@ fn native_help_command_demands_exact_source_atomically_and_replays_without_legac
         before.nodes["learner_translation"],
         Disposition::Unrequested
     );
+    let snapshot = store.conversation_snapshot(&conversation, None).unwrap();
+    let surfaces = snapshot
+        .turns
+        .iter()
+        .find(|view| view.id == turn)
+        .unwrap()
+        .native_surfaces
+        .as_ref()
+        .unwrap();
+    assert_eq!(surfaces["text"], ["text"]);
+    assert_eq!(surfaces["learner.translation"], ["learner_translation"]);
+    assert_eq!(surfaces["reply.translation"], ["reply_translation"]);
+    assert_eq!(surfaces["reply_brief"], ["brief"]);
+    assert_eq!(surfaces["reply_assistance"], ["assistance"]);
+    assert_eq!(surfaces["reply_explanations"], ["explanations"]);
+    assert_eq!(surfaces["coach_feedback"], ["feedback"]);
+    assert_eq!(surfaces["skill_assessment"], ["assessment"]);
+    // Merely exposing associations must leave on-demand work dormant.
+    assert_eq!(
+        snapshot.turns[0].native_graph.as_ref().unwrap().nodes,
+        before.nodes
+    );
     // Reply, assessment, attribution, feedback and brief reserve work. Dormant
     // reading, grammar, suggestions and read-aloud branches do not.
-    assert_eq!(graph_runtime::outstanding(&store.connection).unwrap(), 5);
+    assert_eq!(
+        graph_runtime::outstanding(&store.connection, &store.graph_runtime).unwrap(),
+        5
+    );
     let command = Command {
         session_id: store.session_id.clone(),
         action_id: id(),
@@ -72,7 +97,10 @@ fn native_help_command_demands_exact_source_atomically_and_replays_without_legac
     // Demand is retained while the declared context prerequisite is unfinished.
     assert_eq!(after.nodes["learner_translation"], Disposition::Waiting);
     assert_eq!(after.nodes["learner_gloss"], Disposition::Unrequested);
-    assert_eq!(graph_runtime::outstanding(&store.connection).unwrap(), 6);
+    assert_eq!(
+        graph_runtime::outstanding(&store.connection, &store.graph_runtime).unwrap(),
+        6
+    );
     apply(
         &mut store,
         Action::ControlTurn {
@@ -80,7 +108,10 @@ fn native_help_command_demands_exact_source_atomically_and_replays_without_legac
             control: TurnControl::Pause,
         },
     );
-    assert_eq!(graph_runtime::outstanding(&store.connection).unwrap(), 6);
+    assert_eq!(
+        graph_runtime::outstanding(&store.connection, &store.graph_runtime).unwrap(),
+        6
+    );
     assert_eq!(after.artifact_id, before.artifact_id);
     assert_eq!(store.execute(command).unwrap().entity_id, receipt.entity_id);
     assert_eq!(

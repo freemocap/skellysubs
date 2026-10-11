@@ -129,3 +129,15 @@ it('opens narrow comparison controls in a native modal above the scrub surfaces'
   media.mockRestore()
   modal.mockRestore()
 })
+
+
+it('plays available audio before inspection and keeps that control usable if inspection fails', () => {
+  const play = vi.fn()
+  const { rerender } = render(view({ attemptAudioReady: true, attemptLabel: 'Attempt 1', onPlayAttempt: play }))
+  fireEvent.click(screen.getByRole('button', { name: 'Play yours' }))
+  expect(play).toHaveBeenCalledTimes(1)
+  rerender(view({ attemptAudioReady: true, attemptLabel: 'Attempt 1', attemptFailure: new Error('Inspection failed'), onPlayAttempt: play }))
+  expect(screen.getByRole('button', { name: 'Play yours' })).toBeEnabled()
+  rerender(view({ attemptAudioReady: true, holding: true }))
+  expect(screen.getByRole('button', { name: 'Play yours' })).toBeDisabled()
+})

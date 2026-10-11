@@ -80,7 +80,7 @@ impl Runtime {
             if current.as_ref().is_some_and(|latest| latest != &run) {
                 return Err(rejected());
             }
-            super::super::admit_network_work(db, 1)?;
+            super::super::admit_network_work(db, self, 1)?;
             Some(super::helper_requests::Fresh {
                 run: uuid::Uuid::new_v4().to_string(),
                 turn,
@@ -265,7 +265,7 @@ impl Runtime {
             _ => unreachable!(),
         };
         let providers = budget::requested(&view, target)?;
-        super::super::admit_network_work(&tx, providers)?;
+        super::super::admit_network_work(&tx, self, providers)?;
         let attempts: usize = view
             .attempts
             .iter()

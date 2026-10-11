@@ -33,6 +33,23 @@ pub(in crate::ai) async fn transcribe(
     input: TranscriptionRequest,
     install: &str,
 ) -> Result<TranscriptionOutcome> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        super::workflow::audio::transcription(client, target, key, input, install).await
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    {
+        transcribe_live(client, target, key, input, install).await
+    }
+}
+
+pub(super) async fn transcribe_live(
+    client: &reqwest::Client,
+    target: &ResolvedTarget,
+    key: &str,
+    input: TranscriptionRequest,
+    install: &str,
+) -> Result<TranscriptionOutcome> {
     let mut outcome = execute(client, target, key, input, install).await;
     let diagnostics = match &mut outcome {
         Ok(value) => &mut value.diagnostics,
@@ -53,6 +70,8 @@ async fn execute(
     input: TranscriptionRequest,
     install: &str,
 ) -> Result<TranscriptionOutcome> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let private_context = input.context.clone().unwrap_or_default();
     let wav = &input.wav;
     if wav.is_empty() || wav.len() > 25 * 1024 * 1024 {

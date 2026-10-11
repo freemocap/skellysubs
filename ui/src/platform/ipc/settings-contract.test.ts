@@ -21,6 +21,15 @@ function directory(): Snapshot {
     })),
   }
 }
+it('shares a settings projection requested by multiple surfaces in the same burst', async () => {
+  await Promise.all([getSettings(), getSettings(), getSettings()])
+  for (const command of ['get_snapshot', 'get_connection', 'get_access_settings', 'get_reward_settings', 'get_playback_rate', 'get_microphone']) {
+    expect(backend.invoke.mock.calls.filter(([name]) => name === command)).toHaveLength(1)
+  }
+  await getSettings()
+  expect(backend.invoke.mock.calls.filter(([name]) => name === 'get_snapshot')).toHaveLength(2)
+})
+
 let workspace: Snapshot
 let connection: ConnectionConfig
 let access: AccessSettings

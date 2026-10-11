@@ -8,3 +8,4 @@ pub mod turn_assessment;
 pub mod recommendations;
 
 pub mod effort;
+pub(crate) mod streaks;

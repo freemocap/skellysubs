@@ -80,7 +80,7 @@ it('each view opens on its own demo page when picked from the tabs', () => {
   expect(screen.getByRole('heading', { name: 'Skill level' })).toBeInTheDocument()
   fireEvent.click(screen.getByRole('tab', { name: 'AI panel' }))
   expect(screen.getByRole('heading', { name: 'Activity' })).toBeInTheDocument()
-  expect(screen.getByText('conversations/execution/prose/1')).toBeInTheDocument()
+  expect(screen.getByLabelText('Reply. Generate prose → generated text')).toBeInTheDocument()
 })
 
 it('the last stop of a view offers the next view and finishing', async () => {

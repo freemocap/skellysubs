@@ -225,7 +225,9 @@ impl Runtime {
         session: &str,
     ) -> Result<Option<Claim>> {
         let global_pause = crate::ai::connections::configuration::config(db)?.paused;
-        let rows=db.prepare("SELECT o.run_id,t.conversation_id,t.state,CASE WHEN o.channel IN ('speech','helper') THEN 0 ELSE t.paused END,t.refusal_hold IS NOT NULL FROM turns t JOIN graph_conversation_runs o ON o.turn_id=t.id ORDER BY t.rowid")?
+        // Terminal coach runs have no automatic work. Keep cancelled/invalidated
+        // runs eligible for core cancellation and retain every independent helper.
+        let rows=db.prepare("SELECT o.run_id,t.conversation_id,t.state,CASE WHEN o.channel IN ('speech','helper') THEN 0 ELSE t.paused END,t.refusal_hold IS NOT NULL FROM turns t JOIN graph_conversation_runs o ON o.turn_id=t.id WHERE o.channel<>'coach' OR t.state IN ('pending','assisting','cancelled','invalidated') OR EXISTS(SELECT 1 FROM graph_speech_requests WHERE run_id=o.run_id UNION ALL SELECT 1 FROM graph_helper_requests WHERE run_id=o.run_id) ORDER BY t.rowid")?
             .query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?,r.get::<_,String>(2)?,r.get::<_,bool>(3)?,r.get::<_,bool>(4)?)))?.collect::<rusqlite::Result<Vec<_>>>()?;
         let mut pending: std::collections::VecDeque<_> = rows.into();
         while let Some((run, conversation, state, paused, held)) = pending.pop_front() {
@@ -233,17 +235,9 @@ impl Runtime {
             let Some(engine) = self.engines.get(&engine_id) else {
                 continue;
             };
-            let snapshot = engine
-                .inspection_snapshot(
-                    &run,
-                    ExportLimits {
-                        bytes: 4 * 1024 * 1024,
-                        attempts: 4096,
-                    },
-                )
-                .map_err(error)?;
+            let control = engine.run_control(&run).map_err(error)?;
             if matches!(state.as_str(), "cancelled" | "invalidated") {
-                if snapshot.active {
+                if control.active {
                     self.transition(
                         db,
                         &engine_id,
@@ -255,7 +249,7 @@ impl Runtime {
                 }
                 continue;
             }
-            if !snapshot.active {
+            if !control.active {
                 continue;
             }
             let partner = status::partner(db, engine, &run)?;
@@ -268,7 +262,7 @@ impl Runtime {
                 continue;
             }
             let pause = paused || held || global_pause;
-            if snapshot.paused != pause {
+            if control.paused != pause {
                 self.transition(
                     db,
                     &engine_id,

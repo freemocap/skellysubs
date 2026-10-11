@@ -5,8 +5,10 @@ import { useOverlayLayer } from '../../components/dialogs/useOverlayLayer'
 import { useHoverCard } from '../../components/learning/useHoverCard'
 import { useLanguageTotals } from '../../state/learning/useLanguageTotals'
 import { useVisibleEffort } from '../../state/learning/EffortProgressContext'
+import { useVisibleStreaks } from '../../state/learning/StreakProgressContext'
+import { StreakCount } from '../../components/learning/StreakCount'
 import { playRewardSound } from '../../platform/audio/reward-sounds'
-import { useEffect, useRef, type ReactNode, type RefObject } from 'react'
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react'
 import { LearningPicker } from '../../features/settings/language/LanguagePickers'
 import { useI18n } from '../../components/localization/i18n'
 import { ToolbarIcon } from '../../components/controls/ToolbarIcon'
@@ -21,8 +23,8 @@ import { skillColors } from '../../domain/learning/catalog/skill-domains'
 import { ThemeControls } from './ThemeControls'
 import { cutOff, useFitStage } from '../../components/layout/useFitStage'
 
-/// The bar's layouts, fullest first. The progress pill folds to the skill
-/// level (its radar and level) before the language's own name is cut off.
+/// The bar's layouts, fullest first. Compact mode preserves the skill level,
+/// language/globe markers and the app streak before the language name is cut off.
 const LAYOUTS = ['full', 'compact-progress'] as const
 
 /// A layout fits when the target language's own name shows whole and nothing runs past the bar.
@@ -42,13 +44,15 @@ function languageCutOff(bar: HTMLElement) {
  * AI activity under More everywhere). The theme and palette sit here when the
  * bar has room, and always in Settings. The bar is one row at every width: when
  * the language's own name would be cut off, the progress pill folds to the
- * skill level, because the language matters more than the XP numbers.
+ * skill level and streaks, with XP totals still available in the card.
  * The injected picker supports the local layout fixture; production selection
  * uses the shared settings writer. */
 export function TopBar({ languagePicker = <LearningPicker /> }: { languagePicker?: ReactNode }) {
   const tr = useI18n()
   const evidence = useSkillEvidence()
   const effort = useVisibleEffort()
+  const streaks = useVisibleStreaks()
+  const streakDescription = useId()
   const counter = useRef<HTMLButtonElement>(null)
   const progressAnchor = useRef<HTMLDivElement>(null)
   const bar = useRef<HTMLDivElement>(null)
@@ -87,11 +91,13 @@ export function TopBar({ languagePicker = <LearningPicker /> }: { languagePicker
           <SkillRadarGlyph levels={levels} /><strong>{tr('Lv {value0}', { value0: levels.level })}</strong>
         </button>}
         {/* Hover (mouse) or a first tap shows the card; pressing while it shows opens the XP tab. */}
-        <button ref={counter} type="button" className="profile-trigger progress-trigger" aria-label={tr("Language XP")} aria-haspopup="dialog" aria-expanded={progressCard.open} onClick={progressCard.press} {...progressCard.anchor}>
-          <ProgressCounters xp={profile?.xp ?? null} xpLabel="Language XP" code={activeRow ? languageCode(activeRow) : undefined} global={totals.globalXp} effort={effort.value} effects={effort.effects} error={effort.error ?? totals.error} />
+        <button ref={counter} type="button" className="profile-trigger progress-trigger" aria-label={tr("Language XP")} aria-describedby={streakDescription} aria-haspopup="dialog" aria-expanded={progressCard.open} onClick={progressCard.press} {...progressCard.anchor}>
+          <ProgressCounters xp={profile?.xp ?? null} xpLabel="Language XP" code={activeRow ? languageCode(activeRow) : undefined} global={totals.globalXp} effort={effort.value} effects={effort.effects} streaks={streaks.value} error={streaks.error ?? effort.error ?? totals.error} />
         </button>
+        <span id={streakDescription} hidden>{tr('App streak: {value0}', { value0: streaks.value?.app.count ?? 1 })}</span>
         {progressCard.open && <CardLayer anchor={progressAnchor} onClose={progressCard.close}>
           <div {...progressCard.anchor}><ProgressCard title={tr("All languages")} icon="globe" xp={totals.globalXp} effort={totals.globalEffort} units={['explorations', 'bot']} error={totals.error} expandLabel="Open the Progress page" onExpand={() => { progressCard.close(); openProgress('xp') }}>
+            <div className="progress-card-streak"><ToolbarIcon name="globe" size={14} /><StreakCount value={streaks.value?.app} effects={false} /></div>
             {levels && <div className="progress-card-levels">
               <SkillRadarGlyph levels={levels} />
               <div>

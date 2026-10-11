@@ -33,6 +33,19 @@ it('rejects mismatched evidence instead of displaying another execution', async 
   expect(screen.queryByText('retained 2')).toBeNull()
   expect(api.recordBotInspection).not.toHaveBeenCalled()
 })
+
+it('reopens already loaded evidence at the same exact cut without another native read', async () => {
+  api.readNativeGraphAttempt.mockResolvedValue(detail('2'))
+  const view = render(<NativeAttemptDetails graph={graph} node="helper" />)
+  open(view.container)
+  await screen.findByText('retained 2')
+  const details = view.container.querySelector('details')!
+  details.open = false
+  fireEvent(details, new Event('toggle'))
+  open(view.container)
+  expect(await screen.findByText('retained 2')).toBeVisible()
+  expect(api.readNativeGraphAttempt).toHaveBeenCalledOnce()
+})
 it('discards a delayed response after the historical cut changes', async () => {
   let finish!: (value: ReturnType<typeof detail>) => void
   api.readNativeGraphAttempt.mockImplementationOnce(() => new Promise(resolve => { finish = resolve })).mockResolvedValueOnce({ ...detail('2', '9'), retainedText: 'new cut' })
@@ -44,6 +57,18 @@ it('discards a delayed response after the historical cut changes', async () => {
   await act(async () => finish(detail('2')))
   expect(screen.queryByText('retained 2')).toBeNull()
   expect(screen.getByText('new cut')).toBeVisible()
+})
+
+it('can return to an attempt after another attempt read failed', async () => {
+  api.readNativeGraphAttempt.mockResolvedValueOnce(detail('2')).mockRejectedValueOnce(new Error('unavailable')).mockResolvedValueOnce(detail('2'))
+  const view = render(<NativeAttemptDetails graph={graph} node="helper" />)
+  open(view.container)
+  await screen.findByText('retained 2')
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } })
+  await screen.findByText('unavailable')
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: '2' } })
+  await screen.findByText('retained 2')
+  expect(api.readNativeGraphAttempt).toHaveBeenCalledTimes(3)
 })
 
 it('renders evidence while inspection credit is pending and does not repeat it for another cut', async () => {

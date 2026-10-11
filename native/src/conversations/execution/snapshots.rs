@@ -90,14 +90,19 @@ impl Store {
         }
         let mut messages=db.prepare("SELECT id,sequence,role,text,created_at,turn_id,(SELECT replaces_turn_id FROM turns WHERE id=m.turn_id),(SELECT id FROM turns WHERE replaces_turn_id=m.turn_id) FROM messages m WHERE conversation_id=?1 AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=m.turn_id AND o.channel IN ('persona_reply','persona_opening')) AND sequence<?2 ORDER BY sequence DESC LIMIT 100")?.query_map(params![conversation,before.unwrap_or(i32::MAX)],|r|Ok(ChatMessage{assessment_state:None,assessment_error:None,guide_context:None,feedback_context:None,reply_brief:None,brief_state:None,brief_error:None,reading_scope:None,conversation_feedback:None,reply_assistance:None,reply_explanations:None,explanations_state:None,explanations_error:None,reaction:None,reaction_error:None,coach_decision:None,turn_id:r.get(5)?,replaces_turn_id:r.get(6)?,replaced_by:r.get(7)?,feedback_state:None,feedback_error:None,feedback:None,suggested_replies:None,suggestions_state:None,suggestions_error:None,gloss_error:None,word_gloss:None,gloss_state:None,gloss_operation_id:None,translation_state:None,translation:None,id:r.get(0)?,sequence:r.get(1)?,role:r.get(2)?,text:r.get(3)?,created_at:r.get(4)?}))?.collect::<rusqlite::Result<Vec<_>>>()?;
         messages.reverse();
+        let mut contexts = std::collections::HashMap::<String, serde_json::Value>::new();
         for message in &mut messages {
-            let saved: Option<String> = db.query_row("SELECT json_extract(t.context,?2) FROM turns t JOIN messages m ON m.turn_id=t.id WHERE m.id=?1", params![message.id, if message.role=="user" { "$.coachFeedback" } else { "$.coachReplies" }], |r|r.get(0))?;
-            let captured: String = db.query_row(
-                "SELECT context FROM turns WHERE id=?1",
-                [&message.turn_id],
-                |r| r.get(0),
-            )?;
-            let captured: serde_json::Value = serde_json::from_str(&captured)?;
+            let captured = match contexts.entry(message.turn_id.clone()) {
+                std::collections::hash_map::Entry::Occupied(entry) => entry.into_mut(),
+                std::collections::hash_map::Entry::Vacant(entry) => {
+                    let raw: String = db.query_row(
+                        "SELECT context FROM turns WHERE id=?1",
+                        [&message.turn_id],
+                        |r| r.get(0),
+                    )?;
+                    entry.insert(serde_json::from_str(&raw)?)
+                }
+            };
             let language: crate::configuration::LanguageContext =
                 serde_json::from_value(captured["languageContext"].clone())?;
             message.reading_scope = Some(crate::language::reading::ReadingScope {
@@ -124,65 +129,41 @@ impl Store {
                     .map(serde_json::from_value)
                     .transpose()?;
             } else {
-                let reaction: Option<String> = db.query_row(
-                    "SELECT json_extract(context,'$.partnerReaction') FROM turns WHERE id=?1",
-                    [&message.turn_id],
-                    |r| r.get(0),
-                )?;
-                message.reaction = reaction.map(|s| serde_json::from_str(&s)).transpose()?;
-                message.reaction_error = db.query_row(
-                    "SELECT json_extract(context,'$.skill_assessmentError') FROM turns WHERE id=?1",
-                    [&message.turn_id],
-                    |r| r.get(0),
-                )?;
-                let context: String = db.query_row(
-                    "SELECT context FROM turns WHERE id=?1",
-                    [&message.turn_id],
-                    |r| r.get(0),
-                )?;
-                let context: serde_json::Value = serde_json::from_str(&context)?;
-                message.reply_brief = context
+                message.reaction = context_field(captured, "partnerReaction")?;
+                message.reaction_error = context_field(captured, "skill_assessmentError")?;
+                message.reply_brief = captured
                     .get("reply_brief")
                     .cloned()
                     .map(serde_json::from_value)
                     .transpose()?;
-                message.reply_assistance = context
+                message.reply_assistance = captured
                     .get("reply_assistance")
                     .cloned()
                     .map(serde_json::from_value)
                     .transpose()?;
-                message.reply_explanations = context
+                message.reply_explanations = captured
                     .get("reply_explanations")
                     .cloned()
                     .map(serde_json::from_value)
                     .transpose()?;
-                message.suggested_replies = saved.map(|s| serde_json::from_str(&s)).transpose()?;
+                message.suggested_replies = context_field(captured, "coachReplies")?;
             }
 
-            let saved: Option<String> = db.query_row(
-                "SELECT json_extract(context,?2) FROM turns WHERE id=?1",
-                params![
-                    message.turn_id,
-                    if message.role == "user" {
-                        "$.userWordGloss"
-                    } else {
-                        "$.wordGloss"
-                    }
-                ],
-                |r| r.get(0),
+            message.word_gloss = context_field(
+                captured,
+                if message.role == "user" {
+                    "userWordGloss"
+                } else {
+                    "wordGloss"
+                },
             )?;
-            message.word_gloss = saved.map(|json| serde_json::from_str(&json)).transpose()?;
-            message.translation = db.query_row(
-                "SELECT json_extract(context,?2) FROM turns WHERE id=?1",
-                params![
-                    message.turn_id,
-                    if message.role == "user" {
-                        "$.userTranslation"
-                    } else {
-                        "$.translation"
-                    }
-                ],
-                |r| r.get(0),
+            message.translation = context_field(
+                captured,
+                if message.role == "user" {
+                    "userTranslation"
+                } else {
+                    "translation"
+                },
             )?;
             self.graph_runtime.message_status(db, message)?;
         }
@@ -261,6 +242,20 @@ impl Store {
     }
 }
 
+/// Match JSON extraction's missing/null behavior while retaining typed validation.
+fn context_field<T: serde::de::DeserializeOwned>(
+    context: &serde_json::Value,
+    key: &str,
+) -> Result<Option<T>> {
+    context
+        .get(key)
+        .filter(|value| !value.is_null())
+        .cloned()
+        .map(serde_json::from_value)
+        .transpose()
+        .map_err(Into::into)
+}
+
 /// A turn's graph inspection and source-bound product requests.
 /// The conversation snapshot and turn history share this builder, so the AI
 /// View never sees two descriptions of the same turn.
@@ -276,8 +271,18 @@ impl Store {
         hold: Option<String>,
     ) -> Result<TurnView> {
         let speech = self.graph_runtime.speech_request_view(db, &id)?;
+        let owner: Option<String> = db.query_row("SELECT t.conversation_id FROM turns t JOIN turn_execution_owners o ON o.turn_id=t.id WHERE t.id=?1 AND o.executor='graph'",[&id],|r|r.get(0)).optional()?;
+        let native_graph = owner
+            .map(|conversation| self.graph_runtime.inspection(db, &conversation, &id))
+            .transpose()?
+            .flatten();
+        let native_surfaces = native_graph
+            .as_ref()
+            .map(|graph| super::graph_publication::surfaces(db, &id, graph))
+            .transpose()?;
         let (replaces_turn_id, replaced_by) = db.query_row("SELECT replaces_turn_id,(SELECT id FROM turns child WHERE child.replaces_turn_id=turns.id) FROM turns WHERE id=?1", [&id], |r| Ok((r.get(0)?, r.get(1)?)))?;
         Ok(TurnView {
+            native_surfaces,
             award_sources: Some(db.prepare("SELECT award_source FROM conversation_graph_effects WHERE turn_id=?1 ORDER BY rowid")?.query_map([&id], |row| row.get(0))?.collect::<rusqlite::Result<Vec<String>>>()?),
             native_execution_available: {
                 let owner: Option<String> = db.query_row("SELECT t.conversation_id FROM turns t JOIN turn_execution_owners o ON o.turn_id=t.id WHERE t.id=?1 AND o.executor='graph'",[&id],|r|r.get(0)).optional()?;
@@ -306,13 +311,7 @@ impl Store {
                     .transpose()?
                     .flatten()
             },
-            native_graph: {
-                let owner: Option<String> = db.query_row("SELECT t.conversation_id FROM turns t JOIN turn_execution_owners o ON o.turn_id=t.id WHERE t.id=?1 AND o.executor='graph'",[&id],|r|r.get(0)).optional()?;
-                owner
-                    .map(|conversation| self.graph_runtime.inspection(db, &conversation, &id))
-                    .transpose()?
-                    .flatten()
-            },
+            native_graph,
             replaces_turn_id,
             replaced_by,
             route: ConnectionRoute::parse(&route)?,

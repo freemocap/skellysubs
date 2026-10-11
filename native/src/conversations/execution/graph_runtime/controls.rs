@@ -10,7 +10,7 @@ impl Runtime {
         )?;
         let engine_id = self.owner_engine(&tx, &conversation, run)?;
         let partition = self.partition(&engine_id)?;
-        let engine = self.engines.get_mut(&engine_id).ok_or_else(|| {
+        let engine = self.engines.get(&engine_id).ok_or_else(|| {
             AppError::new(ErrorCode::Conflict, "Graph implementation unavailable.")
         })?;
         let event = match control {
@@ -101,7 +101,7 @@ impl Runtime {
                             "No failed reply dependency is available to retry.",
                         )
                     })?;
-                super::super::admit_network_work(&tx, budget::requested(&view, &node)?)?;
+                super::super::admit_network_work(&tx, self, budget::requested(&view, &node)?)?;
                 tx.execute(
                     "UPDATE turns SET state='pending',paused=0 WHERE id=?1",
                     [run],
@@ -130,7 +130,11 @@ impl Runtime {
         };
         let callback = |_: &Connection, _: &CommitRequest<'_>| Ok(());
         let mut adapter = TransactionStore::new(tx, partition, limits().checkpoint.bytes, callback);
-        engine.apply(event, &mut adapter).map_err(error)?;
+        self.engines
+            .get_mut(&engine_id)
+            .unwrap()
+            .apply(event, &mut adapter)
+            .map_err(error)?;
         Ok(())
     }
 }

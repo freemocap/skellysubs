@@ -217,11 +217,12 @@ pub fn construct_hash(registry: &crate::configuration::Registry) -> String {
     registry.learning_content_hash()
 }
 pub fn version_for(registry: &crate::configuration::Registry) -> u32 {
-    construct_hash(registry)
-        .bytes()
-        .fold(2166136261u32, |h, b| {
-            (h ^ u32::from(b)).wrapping_mul(16777619)
-        })
+    version_from_hash(&construct_hash(registry))
+}
+pub(crate) fn version_from_hash(hash: &str) -> u32 {
+    hash.bytes().fold(2166136261u32, |h, b| {
+        (h ^ u32::from(b)).wrapping_mul(16777619)
+    })
 }
 pub fn catalog_version() -> u32 {
     version_for(&crate::configuration::Registry::bundled().expect("Bundled registry is validated"))

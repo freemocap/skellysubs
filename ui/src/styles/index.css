@@ -44,6 +44,7 @@
 @import './components/waveform.css';
 @import './components/voice.css';
 @import './shell/notices.css';
+@import './shell/graph-hover.css';
 
 /* Feature surfaces, in the order the learner meets them. */
 @import './features/conversation/workspace.css';
@@ -59,6 +60,8 @@
 @import './features/skills/evidence.css';
 @import './features/conversation/analysis.css';
 @import './features/activity/ai-view.css';
+@import './features/activity/workspace.css';
+@import './features/activity/timeline.css';
 @import './features/settings/forms.css';
 @import './features/settings/settings.css';
 @import './features/settings/access.css';

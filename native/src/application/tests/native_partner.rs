@@ -121,6 +121,9 @@ async fn native_partner_application_host_publishes_reply_and_requested_translati
     for translation in [false, true] {
         let deadline = tokio::time::Instant::now() + std::time::Duration::from_secs(30);
         loop {
+            let completed = app.scheduler_wake.notified();
+            tokio::pin!(completed);
+            completed.as_mut().enable();
             schedule(&app, &client).await.unwrap();
             let ready = {
                 let store = app.lock().unwrap();
@@ -150,7 +153,9 @@ async fn native_partner_application_host_publishes_reply_and_requested_translati
                     serde_json::to_string(&inspection).unwrap()
                 );
             }
-            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+            tokio::time::timeout_at(deadline, completed)
+                .await
+                .expect("graph completion did not wake the application host");
         }
         if !translation {
             let mut store = app.lock().unwrap();

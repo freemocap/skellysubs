@@ -108,16 +108,7 @@ impl Runtime {
             attempt_id: attempt_id.clone(),
             diagnostics,
         };
-        if !engine
-            .inspection_snapshot(
-                &run,
-                ExportLimits {
-                    bytes: 4 * 1024 * 1024,
-                    attempts: 4096,
-                },
-            )
-            .map_err(error)?
-            .active
+        if !engine.run_control(&run).map_err(error)?.active
             || ancestors(&view, &node)?
                 .iter()
                 .any(|n| view.nodes[n] == Disposition::Cancelled)
@@ -145,19 +136,26 @@ impl Runtime {
             } else {
                 view.nodes[&node].clone()
             };
-            let mut responses = Vec::new();
-            for dependency in dependencies {
-                if let Some(attempt) = view.attempts.get(&dependency).and_then(|a| a.last())
-                    && let Some(evidence) = engine
-                        .read_execution_evidence(attempt.execution, &mut reader)
-                        .map_err(error)?
-                {
-                    responses.push(serde_json::json!({"node":dependency,"execution":attempt.execution,"observations":evidence.observations,"capture_failed":evidence.evidence_failure.is_some(),"complete":evidence.complete}));
+            let diagnostics = if matches!(
+                status,
+                Disposition::Failed | Disposition::Blocked | Disposition::Unknown
+            ) {
+                let mut responses = Vec::new();
+                for dependency in dependencies {
+                    if let Some(attempt) = view.attempts.get(&dependency).and_then(|a| a.last())
+                        && let Some(evidence) = engine
+                            .read_execution_evidence(attempt.execution, &mut reader)
+                            .map_err(error)?
+                    {
+                        responses.push(serde_json::json!({"node":dependency,"execution":attempt.execution,"observations":evidence.observations,"capture_failed":evidence.evidence_failure.is_some(),"complete":evidence.complete}));
+                    }
                 }
-            }
-            let diagnostics = Some(
-                serde_json::json!({"graph":engine.inspection_snapshot(&run, ExportLimits{bytes:4*1024*1024,attempts:4096}).map_err(error)?,"responses":responses}),
-            );
+                Some(
+                    serde_json::json!({"graph":engine.inspection_snapshot(&run, ExportLimits{bytes:4*1024*1024,attempts:4096}).map_err(error)?,"responses":responses}),
+                )
+            } else {
+                None
+            };
             return Ok(match status {
                 Disposition::Failed | Disposition::Blocked => unavailable(
                     SpeechUnavailableReason::Failed,

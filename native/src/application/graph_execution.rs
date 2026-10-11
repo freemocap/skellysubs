@@ -85,6 +85,8 @@ async fn provide_text(
                         let store: &mut Store = &mut guard;
                         store.graph_runtime.observe(&mut store.connection, snapshot.clone())?;
                         retained = Some(snapshot);
+                        drop(guard);
+                        state.conversation_changed.notify_waiters();
                     }
                 }
             }
@@ -233,6 +235,8 @@ fn schedule_one(state: &Arc<Application>, client: &reqwest::Client) -> Result<bo
                 .finish(&mut store.connection, &conversation, &run, report.clone())
         });
         drop(permit);
+        state.scheduler_wake.notify_waiters();
+        state.conversation_changed.notify_waiters();
         if let Err(error) = result {
             state
                 .graph_reports

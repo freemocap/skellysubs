@@ -2,8 +2,8 @@ import { DEFAULT_EXECUTION, DEFAULT_APPEARANCE } from '../../generated/contracts
 // @vitest-environment jsdom
 import { StrictMode } from 'react'
 import userEvent from '@testing-library/user-event'
-import { act, fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, cleanup, fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Command, ConversationSnapshot, Receipt, Snapshot, TranscriptionInspectionResult } from '../../generated/contracts'
 import type { Settings } from '../../types'
 import { createSpectrumFeed, type SpectrumFeed } from '../../domain/audio/spectrum-feed'
@@ -104,6 +104,14 @@ function snapshot(id = 'a', revision = 1, text?: string): ConversationSnapshot {
 let workspace: Snapshot
 let watches: Array<{ conversationId: string; afterRevision: number } & ReturnType<typeof deferred<ConversationSnapshot>>>
 let submit: (command: Command) => Promise<Receipt>
+afterEach(async () => {
+  cleanup()
+  // Native long polls eventually settle. Release their test doubles too, so
+  // shared in-flight reads cannot leak a never-settling request into another test.
+  await act(async () => {
+    for (const watch of watches) watch.resolve(snapshot(watch.conversationId))
+  })
+})
 const resetView = vi.fn()
 const setHistoryOpen = vi.fn()
 function useSubject(settings = SETTINGS) { return useConversation({ settings, resetView, setHistoryOpen }) }

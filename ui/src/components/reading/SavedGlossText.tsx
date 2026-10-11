@@ -19,7 +19,7 @@ function PinnedGlossLayer({ host, onClose }: { host: RefObject<HTMLSpanElement |
 }
 
 /** Saved UTF-16 anchors select exact source occurrences; reading never requests analysis. */
-export function SavedGlossText({ text, segments, afterSegment, decorateSegment, interactive = true, showAids = true, revealAids = false, showSound }: { showSound?: boolean; revealAids?: boolean; showAids?: boolean; interactive?: boolean; text: string; segments: GlossSegment[]; afterSegment?: (start: number, end: number) => ReactNode; decorateSegment?: (node: ReactNode, start: number, end: number) => ReactNode }) {
+export function SavedGlossText({ text, segments, afterSegment, decorateSegment, interactive = true, showAids = true, revealAids = false, showSound, graphTarget }: { graphTarget?: Record<string, string>; showSound?: boolean; revealAids?: boolean; showAids?: boolean; interactive?: boolean; text: string; segments: GlossSegment[]; afterSegment?: (start: number, end: number) => ReactNode; decorateSegment?: (node: ReactNode, start: number, end: number) => ReactNode }) {
   const tr = useI18n()
   const uiDirection = useUiDirection()
   const { autoTranslate, alwaysRomanize, alwaysPronunciation, supportsRomanization } = useReadingPreferences()
@@ -80,7 +80,7 @@ export function SavedGlossText({ text, segments, afterSegment, decorateSegment, 
     const phrase = (field: 'gloss' | 'romanization' | 'pronunciation') => annotations.map(part => field === 'pronunciation' && part.romanization ? undefined : part[field]).filter(Boolean).join(field === 'gloss' ? ' ' : '')
     const joined = (field: 'gloss' | 'romanization' | 'pronunciation', className: string) => {
       const value = phrase(field)
-      return value ? <span className={className} dir="auto" data-gloss-start={segment.start} data-gloss-end={segment.end}>{value}</span> : null
+      return value ? <span className={className} dir="auto" data-gloss-start={segment.start} data-gloss-end={segment.end} {...graphTarget}>{value}</span> : null
     }
     if (segment.start > cursor) pieces.push(<Fragment key={`gap-${cursor}`}><UnannotatedText inline source={{ text, start: cursor }} text={text.slice(cursor, segment.start)} interactive={interactive} /></Fragment>)
     const source = text.slice(segment.start, segment.end)
@@ -101,7 +101,7 @@ export function SavedGlossText({ text, segments, afterSegment, decorateSegment, 
             {source}
           </span>
           {(open || hovering) && renderHelp(<span id={helperId} ref={helper} className={`saved-word-help${segment.parts.length > 1 ? ' gloss-fragments' : ''}`} dir={uiDirection} popover={layer.popover ? "manual" : undefined} data-word-help-layer={!layer.popover ? "portal" : undefined}
-            role="group" aria-label={tr("Word help")}
+            role="group" aria-label={tr("Word help")} {...graphTarget}
             onPointerEnter={keepHover} onPointerLeave={leaveHover}
             onClick={event => event.stopPropagation()}>
             {open && <PinnedGlossLayer host={helper} onClose={() => { setRevealed(new Set()); setHovered(null); hoveredWord.current?.focus() }} />}

@@ -74,8 +74,28 @@ pub(in crate::ai) async fn synthesize_stream(
     install: &str,
     emit: &crate::ai::audio::SpeechSink<'_>,
 ) -> SpeechOutcome {
+    #[cfg(feature = "workflow-capture")]
+    {
+        super::workflow::audio::speech(client, target, key, input, install, emit).await
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    {
+        synthesize_stream_live(client, target, key, input, install, emit).await
+    }
+}
+
+pub(super) async fn synthesize_stream_live(
+    client: &reqwest::Client,
+    target: &ResolvedTarget,
+    key: &str,
+    input: &SpeechInput,
+    install: &str,
+    emit: &crate::ai::audio::SpeechSink<'_>,
+) -> SpeechOutcome {
     let mut outcome = SpeechOutcome::empty();
     outcome.audio = async {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
         validate(input)?;
         // Display labels are not provider delivery instructions. The former
         // accent prefix caused v4 Turbo to repeat speech, including in complete

@@ -1,29 +1,23 @@
-/* AI View — a view of the scheduler's recorded operations. Dense by design:
-   the graph and the inspector share the space, and motion is reserved for
-   running work only. */
+/* AI View shell — header, run picker, dock, expanded panel, pop-out window and
+   phone tray. The workspace canvas and the timeline own their own sheets. */
 
 .ai-view {
   flex: 1; min-height: 0; min-width: 0;
   display: flex; flex-direction: column;
   font-size: var(--type-ui); color: var(--ink);
-  background: color-mix(in srgb, var(--interaction-fill) 9%, var(--chrome));
+  background: var(--bg);
 }
 
 .ai-view-head {
   flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4);
   padding: var(--space-2) var(--space-3) var(--space-2) var(--space-6);
   border-bottom: var(--border-width) solid var(--line);
-  background: color-mix(in srgb, var(--interaction-fill) 13%, var(--chrome));
+  background: var(--chrome);
 }
 
 .ai-view-title { margin: 0; font-size: var(--type-ui); font-weight: var(--weight-semibold); }
 
 .ai-view-spacer { flex: 1; }
-
-.ai-exchanges {
-  display: flex; gap: var(--space-2); min-width: 0; max-width: 55%;
-  overflow-x: auto; scrollbar-width: thin; padding-block: var(--space-1);
-}
 
 .ai-view-actions { display: flex; align-items: center; gap: var(--space-1); }
 
@@ -37,6 +31,8 @@
 .ai-chip:hover:not(:disabled) { border-color: var(--ink-3); color: var(--ink); }
 
 .ai-chip[aria-pressed=true] { background: var(--interaction-fill); border-color: var(--interaction-fill); color: var(--ink-on-fill); }
+
+.ai-chip:disabled { cursor: default; opacity: .55; }
 
 .ai-icon-button {
   flex: none; display: inline-flex; align-items: center; justify-content: center;
@@ -54,19 +50,49 @@
   background: var(--interaction-fill); color: var(--ink-on-fill); font-size: var(--type-ui); cursor: pointer;
 }
 
-.ai-view-body {
-  flex: 1; min-height: 0;
-  display: grid; grid-template-columns: minmax(0, 1fr);
-}
+.ai-error { margin: 0; padding: var(--space-3) var(--space-6); color: var(--danger-ink); overflow-wrap: anywhere; }
 
-/* Inspector width belongs to this view; the outer dock controls height separately. */
-.ai-view-split { grid-template-columns: minmax(200px, 1fr) var(--space-3) minmax(240px, var(--ai-inspector-width)); }
-.ai-inspector-slot { min-width: 0; min-height: 0; display: flex; }
-.ai-inspector-slot > .ai-inspector { flex: 1; min-width: 0; }
-.ai-inspector-resize { cursor: col-resize; touch-action: none; background: var(--chrome); border-inline: var(--border-width) solid var(--line-soft); }
-.ai-inspector-resize:hover, .ai-inspector-resize:focus-visible { background: var(--interaction-fill); }
+.ai-muted { margin: 0; color: var(--ink-3); }
+
+.ai-view > .ai-muted { padding: var(--space-6); }
+
+.ai-hover-note { font-size: var(--type-meta); color: var(--ink-3); }
+
+.ai-transcription { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6); overflow: auto; }
+
+/* Run picker: one list of every run the view can show. */
+.ai-run-picker { position: relative; min-width: 0; }
+.ai-run-picker > summary { list-style: none; max-width: 32ch; }
+.ai-run-picker > summary::-webkit-details-marker { display: none; }
+.ai-run-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ai-run-menu {
+  position: absolute; inset-block-start: calc(100% + var(--space-2)); inset-inline-start: 0; z-index: var(--z-dropdown);
+  display: flex; flex-direction: column; gap: var(--space-1);
+  width: min(26rem, 85vw); max-height: 60vh; overflow: auto; padding: var(--space-3);
+  border: var(--border-width) solid var(--line); border-radius: var(--radius-md);
+  background: var(--sheet); box-shadow: var(--shadow-menu);
+}
+.ai-run-group { margin: var(--space-3) var(--space-3) var(--space-1); font-size: var(--type-meta); font-weight: var(--weight-semibold); color: var(--ink-3); }
+.ai-run-option {
+  display: flex; flex-direction: column; align-items: stretch; gap: var(--space-2);
+  min-height: var(--control-height-sm); padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid transparent; border-radius: var(--radius-sm);
+  background: transparent; color: var(--ink); font: inherit; text-align: start; cursor: pointer;
+}
+.ai-run-option:hover:not(:disabled) { background: var(--chrome); }
+.ai-run-option[aria-pressed=true] { border-color: var(--interaction-line); background: var(--interaction-tint); }
+.ai-run-option-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-run-bar { display: flex; gap: var(--space-1); height: 4px; border-radius: var(--radius-pill); overflow: hidden; }
+.ai-run-bar > span { min-width: 4px; background: var(--line); }
+.ai-run-bar > [data-tone=done] { background: var(--success-line); }
+.ai-run-bar > [data-tone=running] { background: var(--interaction-mark); }
+.ai-run-bar > [data-tone=ask] { background: var(--interaction-line); }
+.ai-run-bar > [data-tone=problem] { background: var(--danger-line); }
+.ai-run-bar > [data-tone=held] { background: var(--warning-line); }
+
+/* Readable inspection content (attempt evidence). */
 .ai-content-mode { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.ai-view pre, .ai-detail pre { min-width: 0; max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; }
+.ai-view pre, .ai-popover pre { min-width: 0; max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; }
 .ai-content-readable { min-width: 0; white-space: normal; font-family: var(--font-sans); font-size: var(--type-ui); line-height: var(--leading-relaxed); overflow-wrap: anywhere; }
 .ai-content-readable > section + section { margin-top: var(--space-4); }
 .ai-content-readable ol, .ai-content-readable ul { padding-inline-start: var(--space-6); }
@@ -74,196 +100,6 @@
 .ai-readable-fields { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-2) 0; }
 .ai-readable-fields dt { font-weight: var(--weight-semibold); }
 .ai-readable-fields dd { margin: 0; padding-inline-start: var(--space-4); min-width: 0; }
-.ai-message > .ai-content-readable { padding: var(--space-3) var(--space-4); }
-.ai-response .ai-content-source { margin: 0; }
-
-.ai-view-main {
-  min-height: 0; min-width: 0; overflow: auto;
-  display: flex; flex-direction: column; gap: var(--space-4);
-  padding: var(--space-4) var(--space-6);
-}
-
-.ai-graph {
-  flex: 1 0 200px; min-height: 200px;
-  border: var(--border-width) solid var(--line-soft); border-radius: var(--radius-md); background: var(--sheet);
-}
-
-.ai-view[data-mode=docked] .ai-graph { flex-basis: 100%; }
-
-.ai-view[data-mode=window] .ai-graph, .ai-view[data-mode=expanded] .ai-graph { flex-basis: 340px; }
-
-/* React Flow chrome: handles anchor edges but are not controls here. */
-.ai-graph .react-flow__handle { opacity: 0; pointer-events: none; }
-
-.ai-graph .react-flow__node-operation { padding: 0; border: 0; background: transparent; }
-
-.ai-graph .react-flow__edge.ai-edge .react-flow__edge-path { stroke: var(--line); stroke-width: 1.25; transition: stroke var(--dur-slow) var(--ease-out); }
-
-.ai-graph .react-flow__edge.ai-edge-running .react-flow__edge-path { stroke: var(--interaction-ink); }
-
-.ai-graph .react-flow__edge.ai-edge-succeeded .react-flow__edge-path { stroke: var(--success-line); }
-
-.ai-graph .react-flow__edge.ai-edge-failed .react-flow__edge-path { stroke: var(--danger-line); }
-
-.ai-node {
-  position: relative; width: 100%; height: 100%;
-  display: flex; align-items: center; gap: var(--space-3); padding-inline: var(--space-4);
-  border: var(--border-width) solid var(--line); border-radius: var(--radius-sm);
-  background: var(--sheet); color: var(--ink);
-  font-family: var(--font-mono); font-size: var(--type-meta); text-align: start; cursor: pointer;
-  transition: border-color var(--dur-slow) var(--ease-out), background-color var(--dur-slow) var(--ease-out);
-}
-
-.ai-node:hover { border-color: var(--ink-3); }
-
-.ai-node[aria-pressed=true] { box-shadow: 0 0 0 var(--border-width-strong) var(--interaction-ink); }
-
-.ai-node[data-phase=waiting] { border-style: dashed; background: var(--bg); color: var(--ink-3); }
-
-.ai-node[data-phase=held] { border-color: var(--warning-line); background: var(--warning-tint); }
-
-.ai-node[data-phase=succeeded] { border-color: var(--success-line); }
-
-.ai-node[data-phase=failed] { border-color: var(--danger-line); background: var(--danger-tint); }
-
-.ai-node[data-phase=unknown] { border-color: var(--warning-line); }
-
-.ai-node[data-phase=ended] { color: var(--ink-3); background: var(--bg); }
-
-.ai-node[data-phase=ended] .ai-node-kind { text-decoration: line-through; }
-
-.ai-node-kind { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.ai-node-meta { flex: none; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-
-.ai-node-dot {
-  flex: none; display: inline-block; width: 8px; height: 8px;
-  border-radius: var(--radius-circle); background: var(--line);
-}
-
-[data-phase=running] > .ai-node-dot, .ai-node-dot[data-phase=running] { background: var(--interaction-ink); animation: inside-pulse var(--dur-loop-fast) ease-in-out infinite; }
-
-[data-phase=succeeded] > .ai-node-dot { background: var(--success-ink); }
-
-[data-phase=failed] > .ai-node-dot, .ai-node-dot[data-phase=failed] { background: var(--danger-ink); }
-
-[data-phase=held] > .ai-node-dot, [data-phase=unknown] > .ai-node-dot { background: var(--warning-line); }
-
-/* The one moving edge a running operation gets. */
-.ai-node[data-phase=running] { border-color: transparent; }
-
-.ai-node[data-phase=running]::after {
-  content: ''; position: absolute; inset: calc(-1 * var(--border-width)); border-radius: inherit;
-  padding: var(--border-width); pointer-events: none;
-  background: linear-gradient(90deg, var(--line) 0%, var(--interaction-ink) 25%, var(--line) 50%, var(--interaction-ink) 75%, var(--line) 100%) 0 0 / 300% 100%;
-  mask: linear-gradient(black 0 0) content-box exclude, linear-gradient(black 0 0);
-  animation: hydrate-sweep var(--dur-loop-slow) linear infinite;
-}
-
-.ai-inspector {
-  min-height: 0; overflow: auto;
-  display: flex; flex-direction: column;
-  border-inline-start: var(--border-width) solid var(--line-soft); background: var(--sheet);
-}
-
-.ai-inspector-head {
-  position: sticky; top: 0; z-index: var(--z-raised);
-  display: flex; align-items: center; gap: var(--space-3);
-  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6);
-  border-bottom: var(--border-width) solid var(--line-soft); background: var(--sheet);
-}
-
-.ai-inspector-head h3 { flex: 1; margin: 0; font-family: var(--font-mono); font-size: var(--type-ui); font-weight: var(--weight-semibold); }
-
-.ai-inspector-body { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-4) var(--space-6) var(--space-6); }
-
-.ai-facts { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-1) var(--space-5); font-size: var(--type-meta); }
-
-.ai-facts dt { color: var(--ink-3); }
-
-.ai-facts dd { margin: 0; font-family: var(--font-mono); overflow-wrap: anywhere; }
-
-.ai-section-title {
-  margin: 0; font-size: var(--type-meta); font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-tag); text-transform: uppercase; color: var(--ink-3);
-}
-
-.ai-history { margin: 0; padding: 0; list-style: none; }
-
-.ai-history-row {
-  width: 100%; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr) max-content; gap: var(--space-3);
-  align-items: center; padding: var(--space-2) var(--space-3);
-  border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--ink);
-  font-size: var(--type-meta); text-align: start; cursor: pointer;
-}
-
-.ai-history-row:hover { background: var(--sheet); }
-
-.ai-history-row[aria-current=true] { background: var(--chip); }
-
-.ai-history-state { display: inline-flex; align-items: center; gap: var(--space-2); }
-
-.ai-history-tokens, .ai-history-duration { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
-
-.ai-response {
-  margin: 0; min-width: 0; padding: var(--space-3) var(--space-4);
-  border: var(--border-width) solid var(--line-soft); border-radius: var(--radius-sm); background: var(--bg);
-  font-family: var(--font-mono); font-size: var(--type-meta); white-space: pre-wrap; overflow-wrap: anywhere;
-}
-
-.ai-error { margin: 0; color: var(--danger-ink); overflow-wrap: anywhere; }
-
-.ai-muted { margin: 0; color: var(--ink-3); }
-
-.ai-response-block { display: flex; flex-direction: column; gap: var(--space-2); }
-
-.ai-timeline { margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }
-
-.ai-timeline ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); }
-
-.ai-timeline li { display: grid; grid-template-columns: minmax(120px, 190px) minmax(0, 1fr); gap: var(--space-4); align-items: center; }
-
-.ai-timeline-kind { font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.ai-timeline-track { position: relative; height: 14px; border-radius: var(--radius-xs); background: var(--sheet); }
-
-.ai-timeline-bar { position: absolute; top: 3px; bottom: 3px; border-radius: var(--radius-xs); background: var(--success-line); }
-
-.ai-timeline-bar[data-phase=running] { background: var(--interaction-ink); animation: inside-pulse var(--dur-loop) ease-in-out infinite; }
-
-.ai-timeline-bar[data-phase=failed] { background: var(--danger-line); }
-
-.ai-timeline-bar[data-phase=unknown], .ai-timeline-bar[data-phase=held] { background: var(--warning-line); }
-
-.ai-timeline-axis {
-  margin-inline-start: calc(190px + var(--space-4));
-  display: flex; justify-content: space-between;
-  font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-3);
-}
-
-.ai-other { font-size: var(--type-meta); }
-
-.ai-other > summary { cursor: pointer; color: var(--ink-3); }
-
-.ai-detail { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr) minmax(240px, 340px); gap: var(--space-6); min-height: 0; }
-
-.ai-detail-head { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
-
-.ai-detail-head h2 { margin: 0; font-family: var(--font-mono); font-size: var(--type-title); }
-
-.ai-attempts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-
-.ai-detail-bodies, .ai-detail-history, .ai-detail-facts { min-width: 0; display: flex; flex-direction: column; gap: var(--space-4); }
-
-.ai-message { border: var(--border-width) solid var(--line-soft); border-radius: var(--radius-sm); background: var(--sheet); }
-
-.ai-message-role { padding: var(--space-2) var(--space-4); border-bottom: var(--border-width) solid var(--line-soft); font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-3); }
-
-.ai-message pre { margin: 0; padding: var(--space-3) var(--space-4); font-family: var(--font-mono); font-size: var(--type-meta); white-space: pre-wrap; overflow-wrap: anywhere; }
-
-.ai-sparkline { width: 100%; height: 40px; }
-
-.ai-sparkline polyline { fill: none; stroke: var(--interaction-ink); stroke-width: 2; vector-effect: non-scaling-stroke; }
 
 /* Expanded: the docked panel lifts into a window-filling pop-over. */
 .logs-panel.ai-panel-expanded {
@@ -273,98 +109,14 @@
   animation: dialog-arrive var(--dur-slow) var(--ease-out);
 }
 
-@media (pointer: coarse) and (min-width: 860px) {
-  .ai-view-split { grid-template-columns: minmax(200px, 1fr) 44px minmax(240px, var(--ai-inspector-width)); }
-}
-
-@media (max-width: 860px) {
-  .ai-view-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(220px, 1fr) auto; }
-  .ai-inspector-resize { display: none; }
-  .ai-inspector-slot { min-height: 220px; max-height: 65dvh; }
-  .ai-inspector { border-inline-start: 0; border-top: var(--border-width) solid var(--line-soft); }
-  .ai-exchanges { max-width: 100%; order: 5; flex-basis: 100%; }
-  .ai-detail { grid-template-columns: minmax(0, 1fr); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ai-graph .react-flow__edge.animated .react-flow__edge-path { animation: none; }
-  .ai-node[data-phase=running]::after, [data-phase=running] > .ai-node-dot, .ai-node-dot[data-phase=running], .ai-timeline-bar[data-phase=running] { animation: none; }
-  .ai-node[data-phase=running] { border-color: var(--interaction-ink); }
-  .ai-node[data-phase=running]::after { display: none; }
-  .logs-panel:has(> .ai-view[data-mode=docked]), .logs-panel.ai-panel-expanded, .ai-tray { animation: none; }
-}
-
-/* Static definitions use the same graph geometry with no execution state. */
-.ai-definition-toolbar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4);
-  min-width: 0;
-}
-.ai-definition-toolbar label { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
-.ai-definition-toolbar .field {
-  flex: none; min-width: 0; width: auto; max-width: 30ch;
-  min-height: var(--control-height-sm); padding: var(--space-1) var(--space-3);
-  font-size: var(--type-meta);
-}
-.ai-definition-source { font-family: var(--font-mono); font-size: var(--type-meta); overflow-wrap: anywhere; }
-
-
-/* The activity dock sits above the workspace; its tinted frame separates the
-   graph canvas and inspector sheets from the conversation surfaces. */
+/* The activity dock sits above the workspace and pushes the app up. */
 .logs-panel:has(> .ai-view[data-mode=docked]) {
   position: relative; z-index: var(--z-raised);
   border-top: var(--border-width) solid var(--line);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: 0 -6px 20px color-mix(in srgb, var(--ink) 16%, transparent);
-  /* Opening slides the dock up from the bottom rather than dropping it in. */
   animation: surface-in-from-bottom var(--dur-slow) var(--ease-out);
 }
-@media (pointer: coarse) {
-  .ai-definition-toolbar .field { min-height: 44px; }
-}
-
-/* Phones: both views lead with the live graph, stacked down the screen as a
-   tree; the tapped operation's details follow beneath, secondary. Controls sit
-   in the view's own header, so no column is given up to a floating close
-   button. The tray rises above the recording panel, into the slot its page
-   gives it, like reply help: one header line, then the graph. The full screen
-   adds the summary and the exchanges under its title line. */
-.ai-tray-slot { display: contents; }
-.ai-tray {
-  flex: none; box-sizing: border-box; display: flex; flex-direction: column;
-  width: 100%; height: var(--ai-tray-height); min-height: 0; overflow: hidden;
-  border: var(--border-width) solid var(--line); border-radius: var(--radius-lg);
-  background: var(--chrome); box-shadow: var(--shadow-sm);
-  animation: panel-rise var(--dur-slow) var(--ease-out);
-}
-.ai-tray-resize { flex: none; margin-block: 0; background: color-mix(in srgb, var(--interaction-fill) 13%, var(--chrome)); }
-.ai-tray-resize::after { background: transparent; }
-.ai-tray-resize::before { top: calc(50% - 2px); inset-inline-start: calc(50% - 24px); width: 48px; height: 4px; }
-.detail-dialog.ai-screen { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
-.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-view-actions { margin-inline-start: auto; }
-.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-view-spacer { display: none; }
-.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-view-body { display: block; overflow-y: auto; overscroll-behavior: contain; }
-.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-view-main { height: 100%; overflow: hidden; padding: var(--space-3); }
-.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-graph { flex: 1 1 auto; min-height: 0; }
-.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-inspector-resize { display: none; }
-.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-inspector-slot { min-height: 0; max-height: none; }
-.ai-view[data-mode=screen] .ai-view-head { padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6); border-bottom-color: var(--line-soft); }
-.ai-view[data-mode=screen] .ai-view-title { order: -2; font-size: var(--type-body); }
-.ai-view[data-mode=screen] .ai-view-actions { order: -1; }
-.ai-view[data-mode=screen] .ai-view-head > .activity-summary { flex-basis: 100%; }
-.ai-view[data-mode=screen] .ai-exchanges { max-width: 100%; flex-basis: 100%; }
-.ai-view[data-mode=screen] .ai-icon-button { width: var(--control-height); height: var(--control-height); }
-/* The tray's one line: the title, what is running, cut short, and its controls. */
-.ai-view[data-mode=tray] .ai-view-head { flex-wrap: nowrap; gap: var(--space-3); padding: 0 var(--space-2) var(--space-1) var(--space-4); border-bottom-color: var(--line-soft); }
-.ai-view[data-mode=tray] .ai-view-title { flex: none; font-size: var(--type-meta); }
-.ai-view[data-mode=tray] .ai-view-head > .activity-summary { flex: 1 1 0; font-size: var(--type-meta); }
-
-/* The stacked graph's edges leave a node from its lower start corner and run
-   down the start side into each dependent, like a tree's branches. */
-.ai-graph[data-orientation=down] .react-flow__handle-bottom { left: var(--space-7); }
-
-/* Historical native states retain their colors without implying current execution. */
-.ai-node[data-animate=false]::after,
-.ai-node[data-animate=false] > .ai-node-dot { animation: none; }
 
 /* Activity settings are secondary controls; opening them does not shrink the graph. */
 .ai-view-head .ai-execution-settings { position: relative; padding: 0; }
@@ -375,13 +127,30 @@
   padding: var(--space-5); border: var(--border-width) solid var(--line);
   border-radius: var(--radius-md); background: var(--sheet); box-shadow: var(--shadow-floating);
 }
-.ai-exchanges .ai-chip { max-width: 24ch; overflow: hidden; text-overflow: ellipsis; }
 
-/* Vendor defaults are white even under the app's dark theme. Use app surfaces
-   and ink for canvas chrome and the selected node's binding labels. */
-.ai-graph .react-flow__controls-button { background: var(--sheet); color: var(--ink); border-color: var(--line); }
-.ai-graph .react-flow__controls-button:hover { background: var(--chrome); color: var(--ink); }
-.ai-graph .react-flow__attribution { background: var(--sheet); }
-.ai-graph .react-flow__edge-text { fill: var(--ink); font-size: var(--type-meta); }
-.ai-graph .react-flow__edge-textbg { fill: var(--sheet); }
-.ai-graph .react-flow__attribution a { color: var(--ink-2); }
+/* Phones: the tray rises above the recording panel, in the slot its page gives
+   it, under one header line; the full screen is a dialog. */
+.ai-tray-slot { display: contents; }
+.ai-tray {
+  flex: none; box-sizing: border-box; display: flex; flex-direction: column;
+  width: 100%; height: var(--ai-tray-height); min-height: 0; overflow: hidden;
+  border: var(--border-width) solid var(--line); border-radius: var(--radius-lg);
+  background: var(--chrome); box-shadow: var(--shadow-sm);
+  animation: panel-rise var(--dur-slow) var(--ease-out);
+}
+.ai-tray-resize { flex: none; margin-block: 0; background: var(--chrome); }
+.ai-tray-resize::after { background: transparent; }
+.ai-tray-resize::before { top: calc(50% - 2px); inset-inline-start: calc(50% - 24px); width: 48px; height: 4px; }
+.detail-dialog.ai-screen { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-view-actions { margin-inline-start: auto; }
+.ai-view:is([data-mode=screen], [data-mode=tray]) .ai-view-spacer { display: none; }
+.ai-view[data-mode=screen] .ai-view-head { padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6); border-bottom-color: var(--line-soft); }
+.ai-view[data-mode=screen] .ai-view-title { order: -2; font-size: var(--type-body); }
+.ai-view[data-mode=screen] .ai-view-actions { order: -1; }
+.ai-view[data-mode=screen] .ai-icon-button { width: var(--control-height); height: var(--control-height); }
+.ai-view[data-mode=tray] .ai-view-head { flex-wrap: nowrap; gap: var(--space-3); padding: 0 var(--space-2) var(--space-1) var(--space-4); border-bottom-color: var(--line-soft); }
+.ai-view[data-mode=tray] .ai-view-title { flex: none; font-size: var(--type-meta); }
+
+@media (prefers-reduced-motion: reduce) {
+  .logs-panel:has(> .ai-view[data-mode=docked]), .logs-panel.ai-panel-expanded, .ai-tray { animation: none; }
+}

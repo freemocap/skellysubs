@@ -39,6 +39,7 @@ export interface TargetMessageAnalysis {
 }
 
 export interface TargetMessageProps {
+  graphTargets?: { text?: Record<string, string>; translation?: Record<string, string>; gloss?: Record<string, string>; audio?: Record<string, string> }
   additionalActions?: ReactNode
   menuActions?: ReactNode
   /** Durable message owners supply requests instead of generic text lookups. */
@@ -102,7 +103,7 @@ export interface TargetMessageProps {
 export function TargetMessage({
   text, segments, segmentsKey, translation, romanization, pronunciation, layout, translateLabel,
   segmentsPending, lookupWords, status, translationState, annotation, speech, analysis, focused, rtl, addToDrill = true, practiceAction, provenance, readAloud = true, side = 'bot',
-  inspect = null, inspector, onSelect, sourcePresentation, bulkReading, onRequestWords, onRequestTranslation, additionalActions, menuActions,
+  inspect = null, inspector, onSelect, sourcePresentation, bulkReading, onRequestWords, onRequestTranslation, additionalActions, menuActions, graphTargets,
 }: TargetMessageProps) {
   const tr = useI18n()
   const messageTools = useMessageToolDefinitions()
@@ -232,11 +233,11 @@ export function TargetMessage({
   }, [bulkReading?.phonetics, sourceKey])
 
   const body = <>
-    <span data-phrase-source>{sourcePresentation ?? (known.length > 0
-      ? <SavedGlossText key={segmentsKey} text={text} segments={known} showAids={wordsOpen} revealAids={wordsOverride === true} showSound={soundOverride ?? undefined} />
+    <span data-phrase-source {...graphTargets?.text}>{sourcePresentation ?? (known.length > 0
+      ? <SavedGlossText graphTarget={graphTargets?.gloss} key={segmentsKey} text={text} segments={known} showAids={wordsOpen} revealAids={wordsOverride === true} showSound={soundOverride ?? undefined} />
       : <TargetText text={text} />)}</span>
     {annotation}
-    {translationShown && <div className="trans" dir="auto">{shownTranslation}</div>}
+    {translationShown && <div className="trans" dir="auto" {...graphTargets?.translation}>{shownTranslation}</div>}
     {translationState !== undefined && <TranslationStatus state={translationState} shown={translationOpen && shownTranslation === null} />}
     {soundOpen && sound && !(wordsOpen && known.some(part => part.romanization || part.pronunciation)) && <div className="wroman" dir="auto">{sound}</div>}
     {status}
@@ -255,7 +256,7 @@ export function TargetMessage({
     ...(messageAnalysis ? [messageTools.analysis({ pending: messageAnalysis.pending, onSelect: messageAnalysis.onOpen })] : []),
   ]
   const actions = <MessageTools menuActions={menuActions} tools={tools} inspect={inspect} more={more}
-    play={playback && { playing: playback.speaking, preparing: 'preparing' in playback && playback.preparing, disabled: playback.disabled, onToggle: playback.onToggle }}
+    play={playback && { graphTarget: graphTargets?.audio, playing: playback.speaking, preparing: 'preparing' in playback && playback.preparing, disabled: playback.disabled, onToggle: playback.onToggle }}
     actions={<>{provenance && <ProvenanceTip provenance={provenance} />}{practiceAction ?? (addToDrill && <AddToDrillButton text={text} />)}{additionalActions}</>} />
   const failure = <>
     {words.error != null && <ErrorDetails onRetry={toggleWords} label={tr('Word meanings')} errorKey={errorMessage(words.error)} explanation={errorMessage(words.error)}><ResponseDetails value={errorDetails(words.error)} /></ErrorDetails>}

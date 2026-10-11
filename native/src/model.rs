@@ -628,6 +628,8 @@ pub fn bindings() -> String {
         crate::learning::effort::EffortDimension::decl(&config),
         crate::learning::effort::EffortAward::decl(&config),
         crate::learning::effort::EffortProgress::decl(&config),
+        crate::learning::streaks::commands::StreakCounter::decl(&config),
+        crate::learning::streaks::commands::StreakSnapshot::decl(&config),
         crate::learning::learner::progression::LanguageTotals::decl(&config),
         crate::learning::effort::report::EffortActivity::decl(&config),
         crate::learning::effort::report::EffortHistoryEntry::decl(&config),
@@ -709,6 +711,8 @@ pub fn bindings() -> String {
         TurnHistoryPage::decl(&config),
         RecordedMessage::decl(&config),
         AiViewSelection::decl(&config),
+        AiElsewhereSelection::decl(&config),
+        AiRevisionSelection::decl(&config),
         crate::ai::inspection::NativeAttemptInspection::decl(&config),
         crate::ai::inspection::NativeRunEntry::decl(&config),
         crate::ai::inspection::NativeRunPage::decl(&config),
@@ -1022,6 +1026,10 @@ pub struct SpeechRequestView {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct TurnView {
+    /// Structural product-field associations, not value/attempt provenance.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub native_surfaces: Option<std::collections::BTreeMap<String, Vec<String>>>,
     #[ts(optional)]
     pub award_sources: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1057,14 +1065,38 @@ pub struct AiWindowState {
 }
 /// What the AI View is looking at, handed between the docked panel and the
 /// popped-out window so neither loses the learner's place. `turn_id` is None
-/// while the view follows the newest turn. The operation is named by kind so
-/// the selection carries over to whichever turn is shown.
+/// while the view follows the newest turn. `operation_kind` retains its wire
+/// name but carries the executable graph's operation identity.
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AiViewSelection {
     pub conversation_id: Option<String>,
     pub turn_id: Option<String>,
     pub operation_kind: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub elsewhere: Option<AiElsewhereSelection>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub revision: Option<AiRevisionSelection>,
+}
+/// Presentation selection only; retained in application memory across windows.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+pub enum AiElsewhereSelection {
+    Workspace {
+        entry: crate::ai::inspection::NativeRunEntry,
+    },
+    Transcription {
+        id: String,
+    },
+}
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+pub enum AiRevisionSelection {
+    Live,
+    Structure,
+    Revision { revision: String },
 }
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]

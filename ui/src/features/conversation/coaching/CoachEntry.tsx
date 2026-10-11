@@ -8,7 +8,8 @@ import { coachFlags } from '../../../domain/conversation/coach-marks'
 import { correctionChanges } from '../../../domain/conversation/correction-diff'
 
 /** Learner-facing explanations only. Native diagnostics never substitute for help. */
-export function CoachEntry({ decision, feedback, source, error, revealSelected = false }: {
+export function CoachEntry({ graphTarget, decision, feedback, source, error, revealSelected = false }: {
+  graphTarget?: Record<string, string>
   /** Opening the feedback dialog reveals its already-saved selection immediately. */
   revealSelected?: boolean
   decision?: CoachDecision; feedback?: CoachObservationView; source: string | null; error?: string
@@ -18,7 +19,7 @@ export function CoachEntry({ decision, feedback, source, error, revealSelected =
   const flags = coachFlags(feedback, decision)
   const corrections = [...(shown ? [shown] : []), ...(decision?.exposedMove === 'explicit' && !decision.keptGoing ? feedback?.corrections ?? [] : [])].filter((item, index, all) => all.findIndex(other => other.quote === item.quote && other.text === item.text) === index)
   const explanations = !decision?.keptGoing ? (feedback?.items ?? []).filter(item => item.rationale.trim() && item.outcome !== 'not_observed').filter((item, index, all) => all.findIndex(other => other.quote === item.quote && other.rationale === item.rationale) === index) : []
-  return <div className="coach-entry">
+  return <div className="coach-entry" {...graphTarget}>
     {source && <div className="coach-entry-said"><TargetPassage side="me" text={source} /></div>}
     {error && <ErrorNotice as="p" error={error} className="turn-errors">{error}</ErrorNotice>}
     {corrections.map((shown, index) => <section key={index} className="coach-card coach-card-help" aria-label={tr("Coaching suggestion")}>

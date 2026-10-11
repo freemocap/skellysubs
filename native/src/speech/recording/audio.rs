@@ -34,7 +34,7 @@ const WAVE_MAX: usize = 8_192;
 const MAX_SECONDS: u32 = 120;
 
 #[derive(Default)]
-struct Buffers {
+pub(super) struct Buffers {
     /// Every captured sample, mono, for the WAV.
     pcm: Vec<f32>,
     /// How much of `pcm` the live spectrogram has already read.
@@ -59,6 +59,8 @@ pub struct Capture {
     sample_rate: u32,
     thread: Option<std::thread::JoinHandle<()>>,
     device_label: String,
+    #[cfg(feature = "workflow-capture")]
+    workflow: Option<super::workflow::Session>,
 }
 
 fn open(name: Option<&str>) -> Result<cpal::Device, String> {
@@ -81,7 +83,7 @@ fn open(name: Option<&str>) -> Result<cpal::Device, String> {
 }
 
 /// Mix a frame down to mono and record it.
-fn push(buffers: &Arc<Mutex<Buffers>>, mono: &[f32], limit: usize) {
+pub(super) fn push(buffers: &Arc<Mutex<Buffers>>, mono: &[f32], limit: usize) {
     let mut b = buffers.lock().expect("audio buffers");
     if b.overflowed {
         return;
@@ -141,6 +143,7 @@ fn stream_for<T>(
     config: &cpal::StreamConfig,
     buffers: Arc<Mutex<Buffers>>,
     limit: usize,
+    #[cfg(feature = "workflow-capture")] sink: Option<super::workflow::Sink>,
 ) -> Result<cpal::Stream, cpal::BuildStreamError>
 where
     T: cpal::SizedSample + 'static,
@@ -158,6 +161,12 @@ where
                 })
                 .collect();
             push(&buffers, &mono, limit);
+            #[cfg(feature = "workflow-capture")]
+            if let Some(sink) = &sink
+                && let Err(error) = sink.push(&mono)
+            {
+                buffers.lock().expect("audio buffers").error = Some(error);
+            }
         },
         move |e| {
             errors.lock().expect("audio buffers").error =
@@ -173,6 +182,20 @@ where
 /// opened fails here — at the moment the user pressed the button — rather than
 /// producing an empty recording later.
 pub fn start(device_name: Option<&str>) -> Result<Capture, String> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        super::workflow::start(device_name)
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    {
+        start_live(device_name)
+    }
+}
+
+pub(super) fn start_live(
+    device_name: Option<&str>,
+    #[cfg(feature = "workflow-capture")] sink: Option<super::workflow::Sink>,
+) -> Result<Capture, String> {
     let buffers = Arc::new(Mutex::new(Buffers::default()));
     let (stop_tx, stop_rx) = mpsc::channel::<()>();
     let (ready_tx, ready_rx) = mpsc::channel::<Result<(u32, String), String>>();
@@ -193,15 +216,30 @@ pub fn start(device_name: Option<&str>) -> Result<Capture, String> {
             let config: cpal::StreamConfig = supported.into();
             let limit = (sample_rate * MAX_SECONDS) as usize;
             let stream = match format {
-                cpal::SampleFormat::F32 => {
-                    stream_for::<f32>(&device, &config, thread_buffers, limit)
-                }
-                cpal::SampleFormat::I16 => {
-                    stream_for::<i16>(&device, &config, thread_buffers, limit)
-                }
-                cpal::SampleFormat::U16 => {
-                    stream_for::<u16>(&device, &config, thread_buffers, limit)
-                }
+                cpal::SampleFormat::F32 => stream_for::<f32>(
+                    &device,
+                    &config,
+                    thread_buffers,
+                    limit,
+                    #[cfg(feature = "workflow-capture")]
+                    sink,
+                ),
+                cpal::SampleFormat::I16 => stream_for::<i16>(
+                    &device,
+                    &config,
+                    thread_buffers,
+                    limit,
+                    #[cfg(feature = "workflow-capture")]
+                    sink,
+                ),
+                cpal::SampleFormat::U16 => stream_for::<u16>(
+                    &device,
+                    &config,
+                    thread_buffers,
+                    limit,
+                    #[cfg(feature = "workflow-capture")]
+                    sink,
+                ),
                 other => {
                     return Err(format!(
                         "The microphone \"{label}\" records in a format this app cannot \
@@ -241,6 +279,8 @@ pub fn start(device_name: Option<&str>) -> Result<Capture, String> {
                 sample_rate,
                 thread: Some(thread),
                 device_label,
+                #[cfg(feature = "workflow-capture")]
+                workflow: None,
             })
         }
         Ok(Err(e)) => Err(e),
@@ -249,6 +289,14 @@ pub fn start(device_name: Option<&str>) -> Result<Capture, String> {
 }
 
 impl Capture {
+    #[cfg(feature = "workflow-capture")]
+    pub(super) fn attach_workflow(&mut self, session: super::workflow::Session) {
+        self.workflow = Some(session);
+    }
+    #[cfg(feature = "workflow-capture")]
+    pub(super) fn sample_rate(&self) -> u32 {
+        self.sample_rate
+    }
     pub(super) fn device_label(&self) -> &str {
         &self.device_label
     }
@@ -322,6 +370,14 @@ impl Capture {
     /// Stop recording and return the WAV.
     pub fn finish(mut self) -> Result<Vec<u8>, String> {
         self.halt();
+        let result = self.finished_wav();
+        #[cfg(feature = "workflow-capture")]
+        if let Some(session) = self.workflow.take() {
+            session.finish("finish", result.as_ref().err().cloned())?;
+        }
+        result
+    }
+    fn finished_wav(&self) -> Result<Vec<u8>, String> {
         let b = self.buffers.lock().expect("audio buffers");
         if let Some(error) = &b.error {
             return Err(error.clone());
@@ -352,6 +408,10 @@ impl Capture {
 impl Drop for Capture {
     fn drop(&mut self) {
         self.halt();
+        #[cfg(feature = "workflow-capture")]
+        if let Some(session) = self.workflow.take() {
+            let _ = session.finish("cancel", None);
+        }
     }
 }
 
@@ -367,7 +427,32 @@ pub(super) fn fixture(samples: Vec<f32>, sample_rate: u32) -> Capture {
         sample_rate,
         thread: None,
         device_label: "fixture".into(),
+        #[cfg(feature = "workflow-capture")]
+        workflow: None,
     }
+}
+
+#[cfg(feature = "workflow-capture")]
+pub(super) fn replay_capture(
+    rate: u32,
+    drive: impl FnOnce(Arc<Mutex<Buffers>>, mpsc::Receiver<()>) + Send + 'static,
+) -> Capture {
+    let buffers = Arc::new(Mutex::new(Buffers::default()));
+    let (stop, receive) = mpsc::channel();
+    let target = buffers.clone();
+    let thread = std::thread::spawn(move || drive(target, receive));
+    Capture {
+        stop,
+        buffers,
+        sample_rate: rate,
+        thread: Some(thread),
+        device_label: "Recorded microphone".into(),
+        workflow: None,
+    }
+}
+#[cfg(feature = "workflow-capture")]
+pub(super) fn replay_error(buffers: &Arc<Mutex<Buffers>>, error: String) {
+    buffers.lock().unwrap_or_else(|e| e.into_inner()).error = Some(error);
 }
 
 #[cfg(test)]

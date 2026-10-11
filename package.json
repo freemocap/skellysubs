@@ -3,6 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "workflow:prepare": "npm run build && cargo build --manifest-path native/Cargo.toml --features workflow-capture --bin skellyspeak && node tools/workflow-replay/prepare.ts",
+    "workflow:record": "node tools/workflow-replay/record.ts",
+    "workflow:replay": "node tools/workflow-replay/replay.ts",
+    "workflow:check": "tsc -p tools/workflow-replay/tsconfig.json && node --test tools/workflow-replay/*.test.ts",
+    "workflow:tally": "node tools/workflow-replay/measurement-tally.ts",
+    "complexity:report": "node tools/complexity-report.ts",
+    "complexity:check": "tsc --noEmit --strict --skipLibCheck --target es2022 --module nodenext --allowImportingTsExtensions tools/complexity-report.ts tools/complexity-report.test.ts && node --test tools/complexity-report.test.ts",
     "dev": "npm run dev --workspace @skellyspeak/ui --",
     "build": "npm run build --workspace @skellyspeak/ui --",
     "preview": "npm run preview --workspace @skellyspeak/ui --",

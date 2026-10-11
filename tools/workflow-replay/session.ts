@@ -4,10 +4,10 @@ import { join } from 'node:path'
 import { ProviderTape } from './provider-tape.ts'
 
 // This tooling protocol records observations; graph semantics remain in native code.
-export type AssetKind = 'workspace' | 'audio-input' | 'audio-output' | 'screenshot'
+export type AssetKind = 'workspace' | 'audio-input' | 'audio-output' | 'screenshot' | 'provider-tape'
 export type Asset = { digest: string; bytes: number; roles: AssetKind[] }
 export type Event =
-  | { kind: 'action'; target: string; action: 'click' | 'input' | 'composition' | 'key' | 'pointer' | 'scroll' | 'focus'; value: string }
+  | { kind: 'action'; target: string; action: 'click' | 'input' | 'composition' | 'key' | 'pointer' | 'wheel' | 'scroll' | 'focus'; value: string }
   | { kind: 'display'; target: string; text: string }
   | { kind: 'audio'; action: 'captured' | 'requested' | 'started' | 'ended' | 'cancelled'; role: 'audio-input' | 'audio-output'; asset: string }
   | { kind: 'timing'; trace: string; span: string; phase: 'start' | 'end'; clock: 'ui' | 'native' | 'runner'; micros: number }
@@ -17,6 +17,7 @@ export type Bundle = {
   format: 1
   build: string
   workspace: string
+  providerTape?: string
   status: 'complete' | 'incomplete'
   reason?: string
   assets: Asset[]
@@ -81,6 +82,12 @@ export class SessionCapture {
     this.bundle.workspace = this.addAsset('workspace', bytes)
   }
 
+  setProviderTape(bytes: Uint8Array): void {
+    this.requireOpen()
+    if (this.bundle.providerTape) throw new Error('Provider tape already supplied.')
+    this.bundle.providerTape = this.addAsset('provider-tape', bytes)
+  }
+
   append(event: Event, elapsedMicros: number): void {
     this.requireOpen()
     if (!nonnegative(elapsedMicros) || elapsedMicros < this.lastTime) throw new Error('Runner time must be monotonic.')
@@ -115,12 +122,13 @@ export class SessionCapture {
 
   /** Explicit export only. A new directory is required; an interrupted write has
    * no complete manifest. Native integration must stream larger recordings. */
-  async export(directory: string): Promise<void> {
+  async export(directory: string, incompleteReason?: string): Promise<void> {
     if (!this.stopped) throw new Error('Stop capture before export.')
     await mkdir(directory, { recursive: false, mode: 0o700 })
     await mkdir(join(directory, 'assets'), { mode: 0o700 })
     for (const [key, bytes] of this.blobs) await writeFile(join(directory, 'assets', key), bytes, { flag: 'wx', mode: 0o600 })
-    await writeFile(join(directory, 'session.json'), JSON.stringify(this.bundle), { flag: 'wx', mode: 0o600 })
+    const manifest = incompleteReason ? { ...this.bundle, status: 'incomplete', reason: incompleteReason } : this.bundle
+    await writeFile(join(directory, 'session.json'), JSON.stringify(manifest), { flag: 'wx', mode: 0o600 })
   }
 }
 
@@ -131,12 +139,13 @@ export function validateBundle(bundle: Bundle, assets: ReadonlyMap<string, Uint8
   const indexed = new Map<string, Asset>()
   for (const asset of bundle.assets) {
     if (!hashPattern.test(asset.digest) || indexed.has(asset.digest)) throw new Error('Invalid or duplicate asset identity.')
-    if (!asset.roles.length || new Set(asset.roles).size !== asset.roles.length || asset.roles.some(role => !['workspace', 'audio-input', 'audio-output', 'screenshot'].includes(role))) throw new Error('Invalid asset roles.')
+    if (!asset.roles.length || new Set(asset.roles).size !== asset.roles.length || asset.roles.some(role => !['workspace', 'audio-input', 'audio-output', 'screenshot', 'provider-tape'].includes(role))) throw new Error('Invalid asset roles.')
     const bytes = assets.get(asset.digest)
     if (!bytes || bytes.byteLength !== asset.bytes || digest(bytes) !== asset.digest) throw new Error('Missing or damaged asset.')
     indexed.set(asset.digest, asset)
   }
   if (!indexed.get(bundle.workspace)?.roles.includes('workspace')) throw new Error('Consistent starting workspace is required.')
+  if (bundle.providerTape && !indexed.get(bundle.providerTape)?.roles.includes('provider-tape')) throw new Error('Missing provider tape asset role.')
   let time = 0
   for (const [sequence, event] of bundle.events.entries()) {
     if (event.sequence !== sequence || !nonnegative(event.elapsedMicros) || event.elapsedMicros < time) throw new Error('Invalid event ordering.')

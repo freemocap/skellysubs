@@ -70,7 +70,7 @@ impl Runtime {
                 )
             }
         };
-        super::super::admit_network_work(&tx, budget::initial(graph.artifact(), &policy)?)?;
+        super::super::admit_network_work(&tx, self, budget::initial(graph.artifact(), &policy)?)?;
         let begin = Event::Begin {
             run: turn.into(),
             artifact: graph.identity().into(),

@@ -7,10 +7,15 @@ use crate::{
     speech::{graph_audio, synthesis_graph},
 };
 
+pub(super) fn surface(operation: &crate::ai::graph::Contract, port: &str) -> Option<&'static str> {
+    ((operation == &synthesis_graph::operation_contract()
+        || operation == &synthesis_graph::playback::select_operation())
+        && port == "audio")
+        .then_some("audio")
+}
+
 pub fn adopt_audio(db: &Connection, request: &CommitRequest<'_>, work: &Work) -> Result<bool> {
-    if work.operation != synthesis_graph::operation_contract()
-        && work.operation != synthesis_graph::playback::select_operation()
-    {
+    if surface(&work.operation, "audio").is_none() {
         return Ok(false);
     }
     let CommitIntent::Adopt {
