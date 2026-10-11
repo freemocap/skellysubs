@@ -17,12 +17,17 @@ impl Engine {
         node: &str,
     ) -> Result<Option<AttemptId>> {
         let owner = records.run(run)?;
-        if self.states_using(records, &owner)?.get(node) != Some(&Disposition::Adopted) {
+        if owner.retry_requested.contains(node) {
             return Ok(None);
         }
         let Some(id) = owner.current.get(node) else {
             return Ok(None);
         };
+        // A current attempt's disposition is independent of parent states.
+        // Use the same resolver as inspection without inspecting unrelated nodes.
+        if self.state_using(records, &owner, node, &BTreeMap::new())? != Disposition::Adopted {
+            return Ok(None);
+        }
         let row = records.attempt(*id)?;
         if row.run != run || row.node != node || row.attempt.id != *id {
             return Err(fault(CoreFaultCode::RecordMismatch, "attempt"));
@@ -62,7 +67,16 @@ impl Engine {
                     .ok_or_else(|| fault(CoreFaultCode::UnknownInput, port))
             })
             .collect::<Result<Vec<_>>>()?;
-        let states = self.states_using(records, &owner)?;
+        // The source resolver consults dispositions only for output producers
+        // without a current attempt. Inputs/constants and recorded producers
+        // can be resolved directly from their protected dependency records.
+        let states = if sources.iter().any(|source| {
+            matches!(source, Source::Output { node, .. } if !owner.current.contains_key(node))
+        }) {
+            self.states_using(records, &owner)?
+        } else {
+            BTreeMap::new()
+        };
         sources
             .into_iter()
             .map(|source| {

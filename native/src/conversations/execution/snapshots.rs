@@ -266,11 +266,19 @@ impl Store {
     ) -> Result<TurnView> {
         let speech = self.graph_runtime.speech_request_view(db, &id)?;
         let owner: Option<String> = db.query_row("SELECT t.conversation_id FROM turns t JOIN turn_execution_owners o ON o.turn_id=t.id WHERE t.id=?1 AND o.executor='graph'",[&id],|r|r.get(0)).optional()?;
-        let native_graph = owner
-            .as_deref()
-            .map(|conversation| self.graph_runtime.inspection(db, conversation, &id))
-            .transpose()?
-            .flatten();
+        let (native_graph, native_execution_available, native_response, native_preview) =
+            match owner.as_deref() {
+                Some(conversation) => {
+                    let view = self.graph_runtime.turn_inspection(db, conversation, &id)?;
+                    (
+                        Some(view.graph),
+                        Some(view.execution_available),
+                        view.response,
+                        view.preview,
+                    )
+                }
+                None => (None, None, None, None),
+            };
         let native_surfaces = native_graph
             .as_ref()
             .map(|graph| super::graph_publication::surfaces(db, &id, graph))
@@ -281,17 +289,8 @@ impl Store {
             recording_ids: serde_json::from_str(&recording_ids)?,
             native_surfaces,
             award_sources: Some(db.prepare("SELECT award_source FROM conversation_graph_effects WHERE turn_id=?1 ORDER BY rowid")?.query_map([&id], |row| row.get(0))?.collect::<rusqlite::Result<Vec<String>>>()?),
-            native_execution_available: {
-                owner.as_deref()
-                    .map(|conversation| self.graph_runtime.owns(db, conversation, &id))
-                    .transpose()?
-            },
-            native_response: {
-                owner.as_deref()
-                    .map(|conversation| self.graph_runtime.response(db, conversation, &id))
-                    .transpose()?
-                    .flatten()
-            },
+            native_execution_available,
+            native_response,
             channel: db
                 .query_row(
                     "SELECT channel FROM turn_execution_owners WHERE turn_id=?1",
@@ -299,12 +298,7 @@ impl Store {
                     |r| r.get(0),
                 )
                 .optional()?,
-            native_preview: {
-                owner.as_deref()
-                    .map(|conversation| self.graph_runtime.preview(db, conversation, &id))
-                    .transpose()?
-                    .flatten()
-            },
+            native_preview,
             native_graph,
             replaces_turn_id,
             replaced_by,

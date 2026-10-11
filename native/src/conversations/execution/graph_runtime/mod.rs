@@ -38,6 +38,13 @@ mod usage;
 pub use execution::Claim;
 pub use usage::Usage;
 
+pub struct TurnInspection {
+    pub graph: InspectionSnapshot,
+    pub execution_available: bool,
+    pub response: Option<serde_json::Value>,
+    pub preview: Option<AttemptPreview>,
+}
+
 pub struct Runtime {
     retained_views: BTreeMap<String, BTreeMap<String, InspectionSnapshot>>,
     pub partner: partner_host::PartnerHost,
@@ -139,64 +146,70 @@ impl Runtime {
         run: &str,
     ) -> Result<Option<InspectionSnapshot>> {
         let engine = self.owner_engine(db, conversation, run)?;
-        if let Some(view) = self.retained_view(&engine, run) {
-            return Ok(Some(view));
-        }
-        if !self.owns(db, conversation, run)? {
-            return self
-                .retained(db, conversation, run)?
-                .snapshot(
-                    run,
-                    ExportLimits {
-                        bytes: 4 * 1024 * 1024,
-                        attempts: 4096,
-                    },
-                )
-                .map(Some)
-                .map_err(error);
-        }
-        let engine_id = self.owner_engine(db, conversation, run)?;
-        self.engines
-            .get(&engine_id)
-            .map(|engine| {
-                engine
-                    .inspection_snapshot(
-                        run,
-                        ExportLimits {
-                            bytes: 4 * 1024 * 1024,
-                            attempts: 4096,
-                        },
-                    )
-                    .map_err(error)
-            })
-            .transpose()
+        self.inspection_for_engine(db, conversation, run, &engine)
+            .map(Some)
     }
 
-    pub fn owns(&self, db: &Connection, conversation: &str, run: &str) -> Result<bool> {
-        let id = self.owner_engine(db, conversation, run)?;
-        Ok(self.engines.contains_key(&id))
-    }
-
-    pub fn preview(
+    fn inspection_for_engine(
         &self,
         db: &Connection,
         conversation: &str,
         run: &str,
-    ) -> Result<Option<AttemptPreview>> {
-        if !self.owns(db, conversation, run)? {
-            return Ok(None);
+        engine: &str,
+    ) -> Result<InspectionSnapshot> {
+        if let Some(view) = self.retained_view(engine, run) {
+            return Ok(view);
         }
-        let engine_id = self.owner_engine(db, conversation, run)?;
-        let Some(engine) = self.engines.get(&engine_id) else {
-            return Ok(None);
+        let export = ExportLimits {
+            bytes: 4 * 1024 * 1024,
+            attempts: 4096,
         };
+        match self.engines.get(engine) {
+            Some(engine) => engine.inspection_snapshot(run, export).map_err(error),
+            None => self
+                .retained(db, conversation, run)?
+                .snapshot(run, export)
+                .map_err(error),
+        }
+    }
+
+    /// One owner lookup for the related fields of an immutable product read.
+    /// Response and preview still verify their committed dependency records.
+    pub fn turn_inspection(
+        &self,
+        db: &Connection,
+        conversation: &str,
+        run: &str,
+    ) -> Result<TurnInspection> {
+        let engine_id = self.owner_engine(db, conversation, run)?;
+        let graph = self.inspection_for_engine(db, conversation, run, &engine_id)?;
+        let Some(engine) = self.engines.get(&engine_id) else {
+            return Ok(TurnInspection {
+                graph,
+                execution_available: false,
+                response: None,
+                preview: None,
+            });
+        };
+        let view = engine.inspect(run).map_err(error)?;
         let mut reader = graph_store::ReadStore::from_transaction(
             db.unchecked_transaction()?,
             self.partition(&engine_id)?,
         );
-        engine
+        let response = match view.attempts.get(coach_graph::REPLY).and_then(|a| a.last()) {
+            Some(attempt) => engine.read_execution_evidence(attempt.execution, &mut reader).map_err(error)?
+                .map(|evidence| serde_json::json!({"node":coach_graph::REPLY,"observations":evidence.observations,"capture_failed":evidence.evidence_failure.is_some(),"complete":evidence.complete})),
+            None => None,
+        };
+        let preview = engine
             .read_node_preview(run, coach_graph::REPLY, 4 * 1024 * 1024, &mut reader)
-            .map_err(error)
+            .map_err(error)?;
+        Ok(TurnInspection {
+            graph,
+            execution_available: true,
+            response,
+            preview,
+        })
     }
 
     pub fn prune(&mut self, db: &Connection) -> Result<()> {
@@ -207,29 +220,6 @@ impl Runtime {
         self.engines.retain(|key, _| existing.contains(key));
         self.partitions.retain(|key, _| existing.contains(key));
         Ok(())
-    }
-
-    pub fn response(
-        &self,
-        db: &Connection,
-        conversation: &str,
-        run: &str,
-    ) -> Result<Option<serde_json::Value>> {
-        if !self.owns(db, conversation, run)? {
-            return Ok(None);
-        }
-        let engine_id = self.owner_engine(db, conversation, run)?;
-        let engine = &self.engines[&engine_id];
-        let view = engine.inspect(run).map_err(error)?;
-        let Some(attempt) = view.attempts.get(coach_graph::REPLY).and_then(|a| a.last()) else {
-            return Ok(None);
-        };
-        let mut reader = graph_store::ReadStore::from_transaction(
-            db.unchecked_transaction()?,
-            self.partition(&engine_id)?,
-        );
-        Ok(engine.read_execution_evidence(attempt.execution,&mut reader).map_err(error)?.map(|evidence|
-            serde_json::json!({"node":coach_graph::REPLY,"observations":evidence.observations,"capture_failed":evidence.evidence_failure.is_some(),"complete":evidence.complete})))
     }
 }
 

@@ -258,6 +258,9 @@ async fn native_stream_prefix_survives_cancellation_without_publication_or_doubl
         "Private partial reply"
     );
     assert!(view.turns[0].native_preview.as_ref().unwrap().live);
+    let response = view.turns[0].native_response.as_ref().unwrap();
+    assert_eq!(response["complete"], false);
+    assert_eq!(response["observations"][0]["usage"]["input_tokens"], 21);
     assert_eq!(
         serde_json::to_value(&view.turns[0].native_graph.as_ref().unwrap().artifact).unwrap(),
         definition
@@ -283,6 +286,9 @@ async fn native_stream_prefix_survives_cancellation_without_publication_or_doubl
     let view = store.conversation_snapshot(&conversation, None).unwrap();
     assert_eq!(view.coach_messages.len(), 1);
     assert!(!view.turns[0].native_preview.as_ref().unwrap().live);
+    let response = view.turns[0].native_response.as_ref().unwrap();
+    assert_eq!(response["complete"], true);
+    assert_eq!(response["observations"][0]["usage"]["input_tokens"], 21);
     let usage = store.profile().unwrap().global;
     assert_eq!(
         (

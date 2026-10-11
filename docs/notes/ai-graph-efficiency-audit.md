@@ -1022,3 +1022,141 @@ fail captured-access validation, and propagate through the scheduler to
 `Application::stop`. This is not introduced or repaired by this performance
 batch. Reproduce and handle authority revocation as a local execution outcome
 before treating the branch as merge-ready.
+
+## Follow-up: local conversation read attribution (2026-10-11)
+
+Status: measured investigation and implemented native read-path changes. The
+preceding batch is now committed as `009246a2`; this follow-up is uncommitted.
+No schema, graph ontology, persisted content, release version or UI contract
+changes are part of this follow-up.
+
+### What the work actually costs
+
+The consistent replay workspace is approximately 14.9 MB. Its sampled active
+conversation has 19 messages and 10 turns. Data volume does not explain a need
+to repeatedly reconstruct this display from storage. Memory residency is a
+reasonable direction, but moving SQLite itself into memory would not remove
+record hashing, decoding, graph calculations, projection construction or IPC
+serialization. Physical disk reads were not measured; SQL calls must not be
+reported as disk I/O counts.
+
+Temporary probes on the baseline counted 482 protected-record reads, 128 graph
+state calculations, 40 inspections, 18 assessment reads and 20 bounded encodes
+per forced conversation snapshot. Debug record access spent approximately
+50–58 ms in aggregate, including 15–20 ms in SQL and 34–38 ms in hashing. These
+are nested timings, not independent additive categories. Probes were removed
+after attribution; instrumented builds are not the final benchmark candidates.
+
+The runtime already retains graph engines and inspection data in memory.
+`StoredAccess::with_resident` deliberately still reads and verifies persisted
+bytes before returning a resident decoded record. This preserves detection of
+same-stamp corruption, but means residency alone does not eliminate repeated
+storage work. Protected reads are a stronger contract than a cheap display
+projection. Changing that contract silently is not an acceptable optimization.
+
+The ordinary watcher already skips reconstruction while the workspace revision
+is unchanged. These measurements deliberately force full reads, representing
+the cost of loading/rebuilding a snapshot, not the idle polling cost. The native
+gate currently compares the workspace revision, not a conversation-local one.
+
+The optimized intermediate candidate's phase medians were 8.47 ms for messages,
+8.56 ms for statuses, 36.81 ms for turns, 0.18 ms for coaching and 1.36 ms for
+workspace fields. Turn assembly was the largest remaining measured component.
+The returned field values contain 462,393 UTF-8 JSON bytes, including 354,481 in
+turns, 52,969 in messages and 53,090 in transcription attempts. These counts
+exclude outer property names/punctuation and are not a wire-traffic measurement.
+
+### Implemented changes
+
+- Resolve adoption through the requested node's state rather than calculating
+  every node's state. Unknown nodes, retry requests, cancellation and required
+  protected-read failures retain their behavior.
+- Resolve node inputs without constructing all states when their bindings can
+  be answered directly. Producers without a current attempt still use the
+  existing full-state fallback for disposition semantics.
+- Assemble graph inspection, execution availability, response evidence and
+  preview together for each turn. Active-engine ownership lookups drop from
+  eight to one; response and preview share one read transaction. Cached retained
+  views also need one lookup; an uncached historical fallback still performs
+  another lookup inside `retained()`. Existing graph projection, integrity checks,
+  response metadata and preview limits remain authoritative.
+
+The first two new read-count tests failed against the original implementation
+because it read an unrelated attempt. Five new graph tests cover exact read
+dependencies, required failures, disposition fallback, retry, cancellation and
+eviction. The existing streamed-response test additionally verifies usage and
+completion metadata before and after cancellation. Independent specification
+and standards reviews found no actionable issues in these changes.
+
+### Measurement boundaries and intermediate result
+
+The historical approximately 400 ms observation was from a debug build. A fresh
+debug sample in this session was approximately 182 ms, demonstrating substantial
+environment variability. Neither is a valid baseline for claiming an optimized
+code-change speedup.
+
+Two matched optimized runs per version, ten forced reads per run, compared
+`009246a2` with the targeted core-read changes before the combined turn projection:
+
+| Optimized forced conversation read | Baseline | Core-read changes |
+| --- | ---: | ---: |
+| Median | 75.55 ms | 68.60 ms |
+| p95 | 82.60 ms | 72.30 ms |
+| Main application lock median | 65.84 ms | 59.57 ms |
+
+The output digests match across these runs. Aggregate evidence is retained in
+`.local/review-release-comparison.json`. These are native request/response
+measurements through the real desktop IPC boundary, not click-to-paint timings.
+The improvement is useful but does not establish near-instant interaction.
+
+### Memory reuse direction, not yet implemented
+
+Retain a validated committed working set and revision-bound display projections;
+update or invalidate them at their owning mutation boundary, and reuse them for
+unchanged reads. Keep durable history in SQLite, with detailed historical
+diagnostics loaded when requested. This is a proposal, not a new verified cache
+contract. Workspace replacement, restart, eviction, mutation failure and external
+corruption need explicit treatment. In particular, display reuse must not quietly
+weaken protected storage reads or return a resident value after a failed required
+read. Full-history retention and cheap ordinary display reads are compatible;
+repeated reconstruction is not a prerequisite for durability.
+
+### Final candidate verification
+
+After compiler and test processes finished, two alternating optimized baseline
+and final-candidate runs produced 20 forced reads per version. The baseline
+median was 89.15 ms (p95 173.40 ms), versus 72.05 ms (p95 84.70 ms) for the final
+candidate. Main-lock medians were 77.38 and 60.55 ms; queued workspace-read
+medians were 88.60 and 52.35 ms. All output digests matched.
+
+The first baseline run was markedly slower than the second, whose samples were
+mostly 68–92 ms. Therefore the aggregate difference does not establish a precise
+19% speedup, nor does it isolate the incremental benefit of combining turn fields.
+The deterministic removal of repeated work and the earlier matched core-read
+comparison are stronger evidence than this noisy final aggregate. Approximately
+72 ms remains the observed candidate median, not a solved latency target.
+Receipts and build hashes are in `.local/review-final-comparison.json`.
+
+Final-state verification:
+
+- `npm run check:fast`: passed.
+- Native library suite with `workflow-capture`, eight test threads: 997 passed,
+  zero failed, five intentionally ignored (1,002 total), 434.99 seconds.
+- Native Clippy with `workflow-capture`, library and tests, warnings denied:
+  passed. Native binary checks and generated-contract checks: passed.
+- Optimized workflow binary built successfully. Debug workflow binary built
+  separately without replacing the user's running executable.
+- Recorded seven-action debug workflow: passed, including rendered and playback
+  checkpoints. Receipt: `.local/workflow/5b949f9b-f0ba-4164-b368-ef7ae59b1af0`.
+- Optimized exact-screen replay: not passing. Both the unchanged baseline and
+  intermediate candidate reach action seven but include an updater-plugin error
+  banner because replay disables that plugin. Baseline receipt:
+  `.local/workflow/37e65a18-a460-43c5-99e2-1db504ea44e3`; intermediate receipt:
+  `.local/workflow/1c1974b5-1d02-470f-a4f5-3ba3e4c88444`. This is a pre-existing
+  harness/build-mode limitation, not a passing optimized end-to-end check.
+- Documentation links and `git diff --check`: passed. Temporary profiling probes
+  removed. No UI source changed; no application UI build was required by this
+  native-only batch.
+
+The prepared local workflow executable is the final optimized candidate. The
+normal running application remains untouched. Changes remain uncommitted.
