@@ -453,6 +453,14 @@ prerequisite error; explicit cross-target runs and other Tauri commands skip set
 
 ## Verification
 
+Windows MSVC builds embed the Common Controls v6 dependency through `build.rs`
+for all linked targets, including the library test executable. Tauri's ordinary
+binary-only resource manifest does not cover library tests that exercise window
+startup. Keep icons/version resources with Tauri, but do not restore a second
+manifest there: duplicate manifest resources fail linking. CI's native inventory
+step starts the compiled executable and detects loader failures before distributing
+it to the test domains.
+
 From the repository root:
 
 ```sh

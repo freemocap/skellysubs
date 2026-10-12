@@ -1,5 +1,9 @@
 # v4.0.1 release: speech fixture timeout
 
+The loader limitation below was subsequently reproduced in v4.0.3 CI and traced
+to a missing Windows manifest. See the
+[follow-up investigation](release-v4.0.3-windows-loader-2026-10-12.md).
+
 ## Observed failure
 
 The [v4.0.1 release run](https://github.com/freemocap/skellyspeak/actions/runs/38246914057)

@@ -60,7 +60,9 @@ fn check_first_startup(refused: bool) {
                     cmd: "get_startup_state".into(),
                     callback: tauri::ipc::CallbackFn(0),
                     error: tauri::ipc::CallbackFn(1),
-                    url: "tauri://localhost".parse().unwrap(),
+                    // Use the configured webview origin: Tauri's local URL
+                    // differs across platforms and development/release builds.
+                    url: window.url().unwrap(),
                     body: tauri::ipc::InvokeBody::Json(serde_json::json!({})),
                     headers: Default::default(),
                     invoke_key: tauri::test::INVOKE_KEY.into(),
