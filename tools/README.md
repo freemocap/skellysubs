@@ -30,6 +30,35 @@ archived `workflow/` inputs and require a separate review before reuse. Do not r
 them against `old/` in place. Screening helpers are isolated from their file and
 credential reads.
 
+`npm run e2e:android:startup -- --runs 10` checks repeated cold launches of an
+installed Android APK, including non-debuggable release builds. It sends the
+launcher intent, rejects visible error/reload screens, and requires two consecutive
+healthy screen observations. `--mode resume` tests returning from Home; the default
+`cold` mode force-stops
+the selected app but never clears its data, reloads its WebView, backgrounds it
+to recover, or makes provider calls. The default expected surface is the English
+welcome screen; pass `--expect 'Settings'` (or another exact visible app label)
+for a configured workspace. Use `--package` and `--activity` for an isolated test
+installation and `ANDROID_SERIAL` when multiple devices are connected. Run once
+immediately after a fresh test-package install, then repeat against its retained
+workspace. The runner removes its temporary UI dump and reports timings without
+printing user content. While connected to power, it temporarily keeps the screen
+awake and restores that setting on completion or failure. A locked phone is an
+interruption, not an app result. Use `--timeout-ms 30000` when hierarchy capture is
+slow; timings include that observer overhead. `npm run e2e:check` checks its types
+and hierarchy assertions.
+
+The iOS XCTest suite under `tools/e2e/ios-startup/` asserts five cold launches and
+three Home/activate transitions against an installed, fresh-onboarding simulator
+build. It rejects error/reload screens and checks the first render stays visible.
+It never clears app data or clicks Retry/Reload. Build with
+`npm run tauri -- ios build --target aarch64-sim --no-sign --ci`, install the resulting
+`native/gen/apple/build/arm64-sim/SkellySpeak.app` with `xcrun simctl install`, copy
+the test directory to a temporary directory, and run `xcodegen generate` there.
+Run `xcodebuild test -project StartupChecks.xcodeproj -scheme StartupChecks
+-destination 'platform=iOS Simulator,id=<SIMULATOR_ID>' -parallel-testing-enabled NO
+CODE_SIGNING_ALLOWED=NO`. Simulator results do not establish physical-device behavior.
+
 The active [conversation prompt experiments](benchmarks/conversation-prompts/README.md)
 use synthetic current-source fixtures, offline plans, bounded paid OpenRouter runs
 and saved comparisons. They do not depend on archived workflows or alter app prompts.

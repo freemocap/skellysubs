@@ -3612,6 +3612,16 @@
   claim = {State sets, initial states and transition relations provide a precise model of computation. Used to frame the proposed execution specification and its verification obligations, not to claim the application has been formally verified.}
 }
 
+@misc{taoAndroidWakeDrain2026,
+  title = {Drain EventLoopProxy user events on every poll iteration},
+  author = {{Tauri contributors}},
+  year = {2026},
+  url = {https://github.com/tauri-apps/tao/commit/beb88249},
+  urldate = {2026-10-12},
+  review = {reviewed},
+  claim = {Android looper results can consume a wake while reporting another event. Draining Tao's user-event channel after every poll prevents stranded IPC responses. The small upstream change is backported to the current compatible Tao version; device cold-start verification remains separate evidence.}
+}
+
 @misc{readingExpansionQuebecLunch20261007,
   title = {Dîner},
   author = {{Office québécois de la langue française}},
@@ -3619,4 +3629,47 @@
   urldate = {2026-10-07},
   review = {reviewed},
   claim = {Dîner denotes the midday meal in Quebec usage. Supports the Canadian French meal sense in the preload; does not certify all translation directions.}
+}
+
+
+@misc{tauriSetupOrdering2026,
+  title = {Tauri 2.11.5 application setup},
+  author = {{Tauri contributors}},
+  url = {https://github.com/tauri-apps/tauri/blob/tauri-v2.11.5/crates/tauri/src/app.rs},
+  urldate = {2026-10-12},
+  review = {reviewed},
+  claim = {The runtime creates configured automatic windows before invoking the application setup hook. SkellySpeak defers its main window until application state is managed so initial frontend commands cannot race state registration. Reviewed against the installed release source and exercised through the real setup path in the mock runtime.}
+}
+
+@misc{appleSceneLifecycle2026,
+  title = {Transitioning to the UIKit scene-based life cycle},
+  author = {{Apple}},
+  year = {2026},
+  url = {https://developer.apple.com/documentation/uikit/transitioning-to-the-uikit-scene-based-life-cycle},
+  urldate = {2026-10-12},
+  review = {reviewed},
+  note = {Read 2026-10-12 while reproducing the iOS 27 startup trap in the simulator.},
+  claim = {Apps built with the iOS 27 SDK must adopt the scene lifecycle to launch.}
+}
+
+@misc{taoSingleSceneStartup2026,
+  title = {Always implement the scene configuration callback},
+  author = {{Tauri contributors}},
+  year = {2026},
+  url = {https://github.com/tauri-apps/tao/commit/a3ff3f035f3f5886a45af0533532e568ca57e91b},
+  urldate = {2026-10-12},
+  review = {reviewed},
+  note = {Read source diff 2026-10-12; adapted its explicit-manifest lifecycle policy to Tao 0.35.3 while retaining single-window behavior.},
+  claim = {Scene lifecycle adoption is independent of permission to display multiple scenes; scene windows must be attached to their scene.}
+}
+
+@misc{taoSceneConfigurationLifetime2026,
+  title = {Use autorelease_ptr to fix UISceneConfiguration crash},
+  author = {{Tauri contributors}},
+  year = {2026},
+  url = {https://github.com/tauri-apps/tao/pull/1245},
+  urldate = {2026-10-12},
+  review = {reviewed},
+  note = {Read 2026-10-12 and compared with the retained-pointer return in vendored Tao 0.35.3.},
+  claim = {The scene configuration callback must not return a pointer whose retained owner is dropped at callback exit.}
 }

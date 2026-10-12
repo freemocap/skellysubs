@@ -1,5 +1,34 @@
 use super::*;
 
+#[cfg(all(test, desktop))]
+#[path = "tests/startup.rs"]
+mod tests;
+
+fn open_main_window<R: tauri::Runtime>(app: &tauri::App<R>) -> tauri::Result<()> {
+    // The frontend immediately invokes get_startup_state. Tauri's automatic
+    // windows load before our setup hook, racing workspace initialization. [@tauriSetupOrdering2026]
+    // Keep the configured window deferred and register state before loading it.
+    if app.try_state::<Arc<Application>>().is_none() {
+        return Err(std::io::Error::other("Application state must precede the main window").into());
+    }
+    let config = app
+        .config()
+        .app
+        .windows
+        .iter()
+        .find(|window| window.label == "main")
+        .ok_or_else(|| std::io::Error::other("Main window configuration is missing"))?;
+    let window = tauri::WebviewWindowBuilder::from_config(app, config)?.build()?;
+    #[cfg(all(desktop, feature = "workflow-capture"))]
+    if crate::ai::transport::workflow::is_replay() {
+        // Preserve replay's cursor isolation after the deferred window exists.
+        window.set_ignore_cursor_events(true)?;
+    }
+    #[cfg(not(all(desktop, feature = "workflow-capture")))]
+    let _ = window;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[cfg(not(feature = "workflow-capture"))]
@@ -49,14 +78,6 @@ pub fn run() {
         });
     builder
         .setup(|app| {
-            #[cfg(all(desktop, feature = "workflow-capture"))]
-            if crate::ai::transport::workflow::is_replay() {
-                // Automation targets the renderer directly. OS cursor movement
-                // must not introduce hover/scroll input into the recorded stream.
-                for window in app.webview_windows().values() {
-                    window.set_ignore_cursor_events(true)?;
-                }
-            }
             #[cfg(desktop)]
             {
                 let app_menu = SubmenuBuilder::new(app, "SkellySpeak")
@@ -132,6 +153,7 @@ pub fn run() {
             }
             app.manage(state.clone());
             tauri::async_runtime::spawn(scheduler(state.clone(), app.handle().clone()));
+            open_main_window(app)?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

@@ -424,6 +424,19 @@ application relaunch through `build.additionalWatchFolders` in `tauri.conf.json`
 Content is embedded at compile time; refreshing the webview alone does not reload
 YAML. Restart an already running dev command once after changing watcher settings.
 
+## Mobile startup
+
+`vendor/tao` preserves the compatible Tao 0.35.3 runtime with the upstream Android
+event-loop wake fix and targeted iOS scene-lifecycle fixes backported.
+`Info.ios.plist` declares a single scene for iOS 27 startup; state is registered
+before creating the main WebView on every platform. The Cargo patch applies to local and release
+builds. See its [provenance and removal condition](vendor/tao/SKELLYSPEAK-PATCH.md)
+and the [device investigation](../docs/notes/android-startup-white-screen-2026-10-12.md).
+
+Xcode 27 builds require `rustup component add llvm-tools` for Swift C entry-point
+exports. The private diagnostic plugin keeps its Swift target name aligned with
+its product/package name for that export handling.
+
 ## Linux build dependencies
 
 The Linux credential-store dependency enables `keyring`'s `vendored` feature.

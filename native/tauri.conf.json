@@ -19,6 +19,7 @@
     "windows": [
       {
         "label": "main",
+        "create": false,
         "title": "SkellySpeak",
         "width": 1180,
         "height": 820,

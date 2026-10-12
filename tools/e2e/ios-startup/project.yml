@@ -1,0 +1,17 @@
+name: StartupChecks
+options:
+  bundleIdPrefix: com.freemocap.startupchecks
+  deploymentTarget:
+    iOS: '15.0'
+targets:
+  StartupChecks:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [StartupChecks.swift]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+        SWIFT_VERSION: '5.0'
+    scheme:
+      testTargets: [StartupChecks]

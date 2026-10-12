@@ -74,3 +74,8 @@ tauri-plugin-diagnostic-sharing = { path = "src/diagnostics/ios" }
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 tauri-plugin-deep-link = "2"
+
+# Tauri 2.11 uses Tao 0.35, before mobile startup fixes in newer Tao releases.
+# Preserve its API while backporting Android queue draining and iOS scene fixes.
+[patch.crates-io]
+tao = { path = "vendor/tao" }
