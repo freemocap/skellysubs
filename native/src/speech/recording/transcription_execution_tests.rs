@@ -10,6 +10,10 @@ use std::{
     time::Duration,
 };
 
+// Per-phase hang guard for real HTTP, audio analysis and durable graph work on
+// contended CI runners. These behavior tests do not impose a latency target.
+const FIXTURE_TIMEOUT: Duration = Duration::from_secs(30);
+
 fn server(
     body: serde_json::Value,
 ) -> (
@@ -45,14 +49,14 @@ fn server_on(
         // Polling transcription still precedes audio inspection and durable
         // admission. This is a hang guard, not a five-second performance test;
         // allow those operations to finish on contended CI workers.
-        let deadline = std::time::Instant::now() + Duration::from_secs(30);
+        let deadline = std::time::Instant::now() + FIXTURE_TIMEOUT;
         let (mut socket, _) = loop {
             match listener.accept() {
                 Ok(connection) => break connection,
                 Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
                     assert!(
                         std::time::Instant::now() < deadline,
-                        "No transcription request arrived within 30 seconds"
+                        "No transcription request arrived within {FIXTURE_TIMEOUT:?}"
                     );
                     std::thread::sleep(Duration::from_millis(10));
                 }
@@ -60,9 +64,8 @@ fn server_on(
             }
         };
         socket.set_nonblocking(false).unwrap();
-        socket
-            .set_read_timeout(Some(Duration::from_secs(5)))
-            .unwrap();
+        socket.set_read_timeout(Some(FIXTURE_TIMEOUT)).unwrap();
+        socket.set_write_timeout(Some(FIXTURE_TIMEOUT)).unwrap();
         let mut request = Vec::new();
         loop {
             let mut buffer = [0; 4096];
@@ -84,7 +87,8 @@ fn server_on(
             }
         }
         sent.send(()).unwrap();
-        gate.recv_timeout(Duration::from_secs(5)).unwrap();
+        gate.recv_timeout(FIXTURE_TIMEOUT)
+            .expect("Test did not release the transcription response");
         let body = body.to_string();
         write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",body.len(),body).unwrap();
         request
@@ -472,47 +476,7 @@ async fn leaving_one_or_all_consumers_does_not_abandon_submitted_recognition() {
         assert!(a.is_err());
         assert_eq!(b.is_ok(), keep_second);
         worker.join().unwrap();
-        tokio::time::timeout(Duration::from_secs(3), async {
-            loop {
-                let receipt = results::receipt_for_consumer(&app.lock().unwrap().connection, "a")
-                    .unwrap()
-                    .unwrap();
-                if receipt["state"] == "succeeded" {
-                    let store = app.lock().unwrap();
-                    let history = crate::ai::workspace_graph::inspection(
-                        &store.connection,
-                        receipt["nativeEngine"].as_str().unwrap(),
-                    )
-                    .unwrap();
-                    let view = history
-                        .snapshot(
-                            receipt["nativeRun"].as_str().unwrap(),
-                            crate::ai::graph::ExportLimits {
-                                bytes: 4 * 1024 * 1024,
-                                attempts: 4096,
-                            },
-                        )
-                        .unwrap();
-                    assert!(
-                        !view
-                            .nodes
-                            .values()
-                            .any(|state| *state == crate::ai::graph::Disposition::Cancelled),
-                        "Closing consumers must not cancel already submitted recognition"
-                    );
-                    if view
-                        .nodes
-                        .values()
-                        .all(|state| *state == crate::ai::graph::Disposition::Adopted)
-                    {
-                        break;
-                    }
-                }
-                tokio::time::sleep(Duration::from_millis(5)).await;
-            }
-        })
-        .await
-        .unwrap();
+        wait_for_settlement(&app, "a", true).await;
         let saved = app
             .shared_transcription(recording.target, input, recording.install, "later", || {
                 Ok(())
@@ -537,6 +501,88 @@ async fn leaving_one_or_all_consumers_does_not_abandon_submitted_recognition() {
         assert_eq!(decoded.timing.unwrap().words[0].word, "Hola");
         assert_eq!(app.lock().unwrap().profile().unwrap().global.attempts, 1);
     }
+}
+
+async fn wait_for_settlement(app: &Application, consumer: &str, require_adoption: bool) {
+    let mut last_state = String::new();
+    tokio::time::timeout(FIXTURE_TIMEOUT, async {
+        loop {
+            let receipt = results::receipt_for_consumer(&app.lock().unwrap().connection, consumer)
+                .unwrap()
+                .unwrap();
+            last_state = format!("receipt state: {}", receipt["state"]);
+            if receipt["state"] == "succeeded" {
+                if !require_adoption {
+                    break;
+                }
+                let store = app.lock().unwrap();
+                let history = crate::ai::workspace_graph::inspection(
+                    &store.connection,
+                    receipt["nativeEngine"].as_str().unwrap(),
+                )
+                .unwrap();
+                let view = history
+                    .snapshot(
+                        receipt["nativeRun"].as_str().unwrap(),
+                        crate::ai::graph::ExportLimits {
+                            bytes: 4 * 1024 * 1024,
+                            attempts: 4096,
+                        },
+                    )
+                    .unwrap();
+                let states: Vec<_> = view.nodes.values().collect();
+                last_state.push_str(&format!(", node states: {states:?}"));
+                assert!(
+                    !states.contains(&&crate::ai::graph::Disposition::Cancelled),
+                    "Closing consumers must not cancel already submitted recognition"
+                );
+                if states
+                    .iter()
+                    .all(|state| **state == crate::ai::graph::Disposition::Adopted)
+                {
+                    break;
+                }
+            }
+            tokio::time::sleep(Duration::from_millis(5)).await;
+        }
+    })
+    .await
+    .unwrap_or_else(|_| panic!("Recognition did not settle for {consumer}: {last_state}"));
+}
+
+#[tokio::test]
+async fn abandoned_recognition_can_settle_after_a_slow_provider_response() {
+    let (url, ready, release, worker) = server(reply());
+    let (_dir, app, recording, input) = setup(&url);
+    app.lock()
+        .unwrap()
+        .begin_transcription("slow", &recording.owner, &recording.target)
+        .unwrap();
+    let alive = AtomicBool::new(true);
+    let cancel = async {
+        ready.await.unwrap();
+        alive.store(false, Ordering::SeqCst);
+    };
+    let (result, _) = tokio::join!(
+        app.shared_transcription(recording.target, input, recording.install, "slow", || {
+            if alive.load(Ordering::SeqCst) {
+                Ok(())
+            } else {
+                Err(AppError::new(ErrorCode::Conflict, "Recording closed."))
+            }
+        }),
+        cancel
+    );
+    assert!(result.is_err());
+    // Start the actual settlement wait before delivering the provider response.
+    // This is a behavioral wait, not a three-second performance requirement.
+    let respond = async {
+        tokio::time::sleep(Duration::from_millis(3100)).await;
+        release.send(()).unwrap();
+    };
+    tokio::join!(wait_for_settlement(&app, "slow", true), respond);
+    worker.join().unwrap();
+    assert_eq!(app.lock().unwrap().profile().unwrap().global.attempts, 1);
 }
 
 #[tokio::test]
@@ -625,20 +671,7 @@ async fn removing_the_recording_owner_prevents_publication_but_retains_paid_exec
     let (result, _) = tokio::join!(transcribe(app.clone(), recording.clone(), input.wav), close);
     assert!(result.is_err());
     worker.join().unwrap();
-    tokio::time::timeout(Duration::from_secs(3), async {
-        loop {
-            let receipt =
-                results::receipt_for_consumer(&app.lock().unwrap().connection, &recording.id)
-                    .unwrap()
-                    .unwrap();
-            if receipt["state"] == "succeeded" {
-                break;
-            }
-            tokio::time::sleep(Duration::from_millis(5)).await;
-        }
-    })
-    .await
-    .unwrap();
+    wait_for_settlement(&app, &recording.id, false).await;
     let store = app.lock().unwrap();
     let receipts = super::super::transcription::views(&store.connection, &recording.owner).unwrap();
     assert_eq!(receipts[0].state, "unknown");
