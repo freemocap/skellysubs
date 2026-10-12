@@ -49,10 +49,10 @@ export default function DownloadPage() {
     setSystem(detected);
     setDetection(detected.os === 'unknown' ? 'Choose your operating system below.' : `Your browser reports ${OS_LABELS[detected.os]}. You can change the selection below.`);
     const hints = (navigator as HintNavigator).userAgentData;
-    if (hints && ['windows', 'macos', 'linux'].includes(detected.os)) {
+    if (hints && ['windows', 'macos', 'linux', 'android'].includes(detected.os)) {
       void hints.getHighEntropyValues(['architecture', 'bitness']).then(values => {
         if (active && !manuallySelected.current) {
-          const arch = hintedArchitecture(values);
+          const arch = hintedArchitecture(values, detected.os);
           setSystem({ ...detected, arch });
           setDetection(arch === 'unknown' ? 'Your browser does not report your processor. A suggested installer is shown; other processors are available below.' : `Detected ${OS_LABELS[detected.os]} · ${architectureLabel(arch, detected.os)}.`);
         }
@@ -87,7 +87,11 @@ export default function DownloadPage() {
     { value: 'macos:x64', label: 'Mac (Intel)' },
     { value: 'linux:x64', label: 'Linux x64' },
     { value: 'linux:arm64', label: 'Linux ARM64' },
-    { value: 'android:unknown', label: 'Android' },
+    { value: 'android:unknown', label: 'Android (Universal / unknown processor)' },
+    { value: 'android:arm64', label: 'Android ARM64 (arm64-v8a)' },
+    { value: 'android:armv7', label: 'Android ARM 32-bit (armeabi-v7a)' },
+    { value: 'android:x64', label: 'Android Intel / AMD 64-bit (x86_64)' },
+    { value: 'android:x86', label: 'Android Intel / AMD 32-bit (x86)' },
     { value: 'ios:unknown', label: 'iPhone / iPad' },
   ];
   const selected = `${system.os}:${system.arch}`;
@@ -133,6 +137,7 @@ export default function DownloadPage() {
             {state.status === 'loading' && <p className="dl-no-detect">Loading the latest published release…</p>}
             {state.status === 'error' && <div className="dl-no-detect" role="alert"><p>Couldn’t load downloads: {state.message}</p><button type="button" onClick={() => setAttempt(value => value + 1)}>Try again</button> · <a href={RELEASES_URL}>Open GitHub releases</a></div>}
             {state.status === 'ready' && system.os !== 'ios' && <>
+                  {system.os === 'android' && <p className="dl-no-detect">Architecture-specific APKs are smaller. {system.arch === 'unknown' ? 'Your browser has not identified your processor. Choose Universal if unsure, or select a known architecture above.' : `Selected ${architectureLabel(system.arch, 'android')}. Universal also supports this processor.`}</p>}
                   {needsProcessor && recommended && <p className="dl-no-detect">Suggested: {architectureLabel(recommended.arch, system.os)}. Your browser does not expose the processor; choose another installer below if needed.</p>}
                   {recommended && <div className="dl-downloads"><DownloadCard installer={recommended} primary /></div>}
                   {!recommended && <p className="dl-no-detect">{system.os === 'unknown' ? 'Could not detect your OS. All available downloads are shown below with their system and processor labels.' : `No matching installer for ${OS_LABELS[system.os]} in this release.`}</p>}
@@ -152,6 +157,7 @@ export default function DownloadPage() {
               <div className="dl-help-section"><div className="dl-help-section-title"><strong className="dl-install-term">macOS</strong> Intel or Apple Silicon?</div><p>Apple menu → <strong>About This Mac</strong>. An Apple M-series chip means Apple Silicon; an Intel processor means Intel.</p></div>
               <div className="dl-help-section"><div className="dl-help-section-title"><strong className="dl-install-term">Windows</strong></div><p>Settings → System → About → System type. Choose x64 for Intel/AMD, or ARM64 for an ARM-based processor.</p></div>
               <div className="dl-help-section"><div className="dl-help-section-title"><strong className="dl-install-term">Linux</strong> x64 or ARM64?</div><p>Run <code>uname -m</code>: <code>x86_64</code> means x64; <code>aarch64</code> means ARM64. DEB is for Debian/Ubuntu; RPM is for Fedora-compatible systems.</p></div>
+              <div className="dl-help-section"><div className="dl-help-section-title"><strong className="dl-install-term">Android</strong></div><p>Use the architecture reported by your browser or choose Universal if unsure. With Android developer tools, <code>adb shell getprop ro.product.cpu.abilist</code> lists supported ABIs; match one to the labels above. All APK variants use the same app identity and signing key, so a compatible variant can update an existing installation.</p></div>
               <p role="status">{detection}</p>
             </div>
           </details>

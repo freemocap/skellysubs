@@ -23,6 +23,11 @@ describe('device detection', () => {
     expect(hintedArchitecture({ architecture: 'x86', bitness: '32' })).toBe('unknown');
     expect(hintedArchitecture({ architecture: '', bitness: '' })).toBe('unknown');
   });
+  it('uses explicit 32-bit Android hints without guessing from device models', () => {
+    expect(hintedArchitecture({ architecture: 'arm', bitness: '32' }, 'android')).toBe('armv7');
+    expect(hintedArchitecture({ architecture: 'x86', bitness: '32' }, 'android')).toBe('x86');
+    expect(hintedArchitecture({ architecture: 'arm', bitness: '' }, 'android')).toBe('unknown');
+  });
 });
 
 // Filenames follow the desktop and Android workflow outputs.
@@ -32,6 +37,8 @@ const names = [
   'SkellySpeak_0.9.1_amd64.AppImage', 'SkellySpeak_0.9.1_amd64.deb',
   'SkellySpeak_0.9.1_arm64.deb', 'SkellySpeak-0.9.1-1.x86_64.rpm',
   'SkellySpeak_0.9.1_universal.apk', 'SkellySpeak_0.9.1.ipa', 'SkellySpeak_0.9.1.aab',
+  'SkellySpeak_0.9.1_arm64-v8a.apk', 'SkellySpeak_0.9.1_armeabi-v7a.apk',
+  'SkellySpeak_0.9.1_x86.apk', 'SkellySpeak_0.9.1_x86_64.apk',
   'latest.json', 'SkellySpeak_aarch64.app.tar.gz', 'SkellySpeak_0.9.1_amd64.AppImage.sig',
 ];
 const release: Release = {
@@ -41,7 +48,7 @@ const release: Release = {
 
 describe('published installer selection', () => {
   it('excludes updater and store artifacts', () => {
-    expect(installers(release)).toHaveLength(9);
+    expect(installers(release)).toHaveLength(13);
     expect(installers(release).map(item => item.format)).not.toContain('IPA');
   });
 
@@ -57,6 +64,19 @@ describe('published installer selection', () => {
 
   it('does not invent a link for a missing artifact', () => {
     expect(recommend(installers({ ...release, assets: [] }), { os: 'android', arch: 'unknown' })).toBeNull();
+  });
+  it.each(['arm64', 'armv7', 'x86', 'x64'] as const)('prefers the exact Android ABI over universal: %s', arch => {
+    const available = installers(release);
+    expect(recommend(available, { os: 'android', arch })?.arch).toBe(arch);
+    expect(recommend(available.filter(item => item.arch !== arch), { os: 'android', arch })?.arch).toBe('universal');
+    expect(recommend(available.filter(item => item.arch !== arch && item.arch !== 'universal'), { os: 'android', arch })).toBeNull();
+  });
+  it('uses only universal for unidentified Android devices, including older releases', () => {
+    const available = installers(release);
+    const system = { os: 'android', arch: 'unknown' } as const;
+    expect(recommend(available, system)?.arch).toBe('universal');
+    expect(recommend(available.filter(item => item.arch !== 'universal'), system)).toBeNull();
+    expect(recommend(available.filter(item => item.arch === 'universal'), { os: 'android', arch: 'arm64' })?.arch).toBe('universal');
   });
 
   it('validates release data and rejects drafts, prereleases and foreign links', () => {

@@ -310,7 +310,7 @@ jobs:
     # Runs alongside the desktop matrix, not after it: the release already
     # exists, so there is nothing to wait for.
     needs: [version, release-draft]
-    name: Android (APK)
+    name: Android (universal and per-ABI APKs)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -402,12 +402,38 @@ jobs:
 
       # Release, not debug: the debug build is unoptimised and unstripped, and
       # ships every ABI's symbols. APK for sideloading, AAB for Play.
-      - name: Build APK and AAB
-        run: npm run tauri -- android build --config native/tauri.release.conf.json --apk --aab
+      - name: Build universal APK, AAB and architecture APKs
+        run: |
+          npm run tauri -- android build --config native/tauri.release.conf.json --apk --aab --ci
+          npm run tauri -- android build --config native/tauri.release.conf.json --apk --split-per-abi --ci
         env:
           NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+          # Static symbol/name tables cost ~47 MB in the v4 universal APK.
+          # Keep this scoped to Android release builds; runtime metadata is unchanged.
+          CARGO_PROFILE_RELEASE_STRIP: symbols
 
-      - name: Verify the APK is signed with the upload key
+      - name: Collect and inspect Android artifacts
+        run: |
+          set -euo pipefail
+          out=native/gen/android/app/build/outputs
+          v=${{ needs.version.outputs.version }}
+          mkdir -p dist-android
+          python -m unittest discover -s tools -p 'test_android_apk.py'
+          for pair in universal:universal arm64:arm64-v8a arm:armeabi-v7a x86:x86 x86_64:x86_64; do
+            flavor=${pair%%:*}
+            abi=${pair#*:}
+            apk="$out/apk/$flavor/release/app-$flavor-release.apk"
+            [ -f "$apk" ] || { echo "::error::release APK not found at $apk"; exit 1; }
+            dest="dist-android/SkellySpeak_${v}_${abi}.apk"
+            cp "$apk" "$dest"
+            python tools/android_apk.py "$dest" "$abi" --require-stripped >> "$GITHUB_STEP_SUMMARY"
+          done
+          aab="$out/bundle/universalRelease/app-universal-release.aab"
+          [ -f "$aab" ] || { echo "::error::release AAB not found at $aab"; exit 1; }
+          cp "$aab" "dist-android/SkellySpeak_${v}.aab"
+          ls -lh dist-android
+
+      - name: Verify every APK is signed with the upload key
         env:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -415,50 +441,39 @@ jobs:
           set -euo pipefail
           keytool -exportcert -keystore native/gen/android/upload-keystore.jks -storepass:env KEYSTORE_PASSWORD -alias "$KEY_ALIAS" -file /tmp/upload-cert.der
           expected=$(sha256sum /tmp/upload-cert.der | cut -d' ' -f1)
-          out=native/gen/android/app/build/outputs
-          apk="$out/apk/universal/release/app-universal-release.apk"
-          [ -f "$apk" ] || { echo "::error::release APK not found at $apk"; exit 1; }
           apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort | tail -1)
           [ -n "$apksigner" ] || { echo "::error::apksigner not found"; exit 1; }
-          # An unsigned release APK installs nowhere and can never be upgraded
-          # over, so a missing signature must fail the build, not ship.
-          "$apksigner" verify --print-certs "$apk" | tee /tmp/apk-cert.txt
-          # apksigner reports numbered, SDK-range, or V2 signer labels.
-          actual=$(sed -nE 's/^(Signer (#[0-9]+|\(minSdkVersion=.*\))|V2 Signer:) certificate SHA-256 digest: (.*)$/\3/p' /tmp/apk-cert.txt)
-          [ -n "$actual" ] || { echo "::error::No APK signer SHA-256 fingerprints found in apksigner output"; exit 1; }
-          while IFS= read -r fingerprint; do
-            [[ "$fingerprint" =~ ^[0-9a-f]{64}$ ]] || { echo "::error::Invalid APK signer SHA-256 fingerprint: $fingerprint"; exit 1; }
-            [ "$fingerprint" = "$expected" ] || { echo "::error::APK signer differs from the upload key: expected $expected, got $fingerprint"; exit 1; }
-          done <<< "$actual"
+          for apk in dist-android/*.apk; do
+            # An unsigned release APK installs nowhere and can never be upgraded
+            # over, so a missing signature must fail the build, not ship.
+            "$apksigner" verify --print-certs "$apk" | tee /tmp/apk-cert.txt
+            # apksigner reports numbered, SDK-range, or V2 signer labels.
+            actual=$(sed -nE 's/^(Signer (#[0-9]+|\(minSdkVersion=.*\))|V2 Signer:) certificate SHA-256 digest: (.*)$/\3/p' /tmp/apk-cert.txt)
+            [ -n "$actual" ] || { echo "::error::No APK signer SHA-256 fingerprints found in apksigner output"; exit 1; }
+            while IFS= read -r fingerprint; do
+              [[ "$fingerprint" =~ ^[0-9a-f]{64}$ ]] || { echo "::error::Invalid APK signer SHA-256 fingerprint: $fingerprint"; exit 1; }
+              [ "$fingerprint" = "$expected" ] || { echo "::error::APK signer differs from the upload key: expected $expected, got $fingerprint"; exit 1; }
+            done <<< "$actual"
+          done
 
       # Android refuses to install a lower versionCode over a higher one, and
       # Play rejects a repeated one, so a wrong version must fail here.
-      - name: Verify the APK carries the release version
+      - name: Verify every APK carries the release identity and version
         run: |
           set -euo pipefail
           v=${{ needs.version.outputs.version }}
           IFS=. read -r major minor patch <<< "$v"
           code=$((major * 1000000 + minor * 1000 + patch))
-          apk=native/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
           aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort | tail -1)
           [ -n "$aapt2" ] || { echo "::error::aapt2 not found"; exit 1; }
-          badge=$("$aapt2" dump badging "$apk" | head -1)
-          echo "$badge"
-          [[ "$badge" == *"versionCode='$code'"* ]] || { echo "::error::APK versionCode is not $code"; exit 1; }
-          [[ "$badge" == *"versionName='$v'"* ]] || { echo "::error::APK versionName is not $v"; exit 1; }
-
-      - name: Collect the release artifacts
-        run: |
-          out=native/gen/android/app/build/outputs
-          v=${{ needs.version.outputs.version }}
-          mkdir -p dist-android
-          apk="$out/apk/universal/release/app-universal-release.apk"
-          aab="$out/bundle/universalRelease/app-universal-release.aab"
-          [ -f "$apk" ] || { echo "::error::release APK not found at $apk"; exit 1; }
-          [ -f "$aab" ] || { echo "::error::release AAB not found at $aab"; exit 1; }
-          cp "$apk" "dist-android/SkellySpeak_${v}_universal.apk"
-          cp "$aab" "dist-android/SkellySpeak_${v}.aab"
-          ls -lh dist-android
+          for apk in dist-android/*.apk; do
+            badge=$("$aapt2" dump badging "$apk")
+            badge=${badge%%$'\n'*}
+            echo "$badge"
+            [[ "$badge" == *"name='com.freemocap.skellyspeak'"* ]] || { echo "::error::Wrong APK application ID"; exit 1; }
+            [[ "$badge" == *"versionCode='$code'"* ]] || { echo "::error::APK versionCode is not $code"; exit 1; }
+            [[ "$badge" == *"versionName='$v'"* ]] || { echo "::error::APK versionName is not $v"; exit 1; }
+          done
 
       - name: Attach the Android artifacts to the release
         env:

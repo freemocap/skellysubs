@@ -44,6 +44,8 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
+      - name: Test APK inspection
+        run: python -m unittest discover -s tools -p 'test_android_apk.py'
       - name: Validate Android XML resources
         run: |
           python3 - <<'EOF'

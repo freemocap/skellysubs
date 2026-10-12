@@ -2,7 +2,7 @@ export const RELEASES_URL = 'https://github.com/freemocap/skellyspeak/releases';
 export const RELEASE_API = 'https://api.github.com/repos/freemocap/skellyspeak/releases/latest';
 
 export type OperatingSystem = 'windows' | 'macos' | 'linux' | 'android' | 'ios' | 'unknown';
-export type Architecture = 'x64' | 'arm64' | 'unknown';
+export type Architecture = 'x64' | 'arm64' | 'armv7' | 'x86' | 'unknown';
 export interface System { os: OperatingSystem; arch: Architecture }
 export interface BrowserIdentity { userAgent: string; platform: string; maxTouchPoints: number }
 export interface ClientHints { architecture: string; bitness: string }
@@ -28,7 +28,11 @@ export function detectSystem(browser: BrowserIdentity): System {
   return { os: 'unknown', arch: 'unknown' };
 }
 
-export function hintedArchitecture(hints: ClientHints): Architecture {
+export function hintedArchitecture(hints: ClientHints, os: OperatingSystem = 'unknown'): Architecture {
+  if (os === 'android' && hints.bitness === '32') {
+    if (hints.architecture === 'arm') return 'armv7';
+    if (hints.architecture === 'x86') return 'x86';
+  }
   if (hints.bitness !== '64') return 'unknown';
   if (hints.architecture === 'arm') return 'arm64';
   if (hints.architecture === 'x86') return 'x64';
@@ -40,7 +44,7 @@ export interface Release { tag_name: string; html_url: string; assets: ReleaseAs
 export interface Installer {
   asset: ReleaseAsset;
   os: 'windows' | 'macos' | 'linux' | 'android';
-  arch: 'x64' | 'arm64' | 'universal';
+  arch: Exclude<Architecture, 'unknown'> | 'universal';
   format: 'EXE' | 'MSI' | 'DMG' | 'AppImage' | 'DEB' | 'RPM' | 'APK';
 }
 
@@ -77,6 +81,10 @@ export function installers(release: Release): Installer[] {
     const name = asset.name.toLowerCase();
     if (!name.startsWith('skellyspeak')) return [];
     if (name.endsWith('_universal.apk')) return [{ asset, os: 'android', arch: 'universal', format: 'APK' }];
+    const androidArchitectures = { 'arm64-v8a': 'arm64', 'armeabi-v7a': 'armv7', x86: 'x86', x86_64: 'x64' } as const;
+    for (const [abi, arch] of Object.entries(androidArchitectures)) {
+      if (name.endsWith(`_${abi}.apk`)) return [{ asset, os: 'android', arch, format: 'APK' }];
+    }
     const arch = /(?:_|\.)(?:aarch64|arm64)(?:_|\.|-)/.test(name) ? 'arm64'
       : /(?:_|\.)(?:x64|amd64|x86_64)(?:_|\.|-)/.test(name) ? 'x64' : null;
     if (!arch) return [];
@@ -95,6 +103,11 @@ export function matchingInstallers(available: Installer[], system: System): Inst
 }
 
 export function recommend(available: Installer[], system: System): Installer | null {
+  if (system.os === 'android') {
+    const android = available.filter(item => item.os === 'android');
+    return android.find(item => item.arch === system.arch)
+      ?? android.find(item => item.arch === 'universal') ?? null;
+  }
   const formats: Installer['format'][] = ['EXE', 'DMG', 'AppImage', 'DEB', 'RPM', 'MSI', 'APK'];
   const preferred = system.arch === 'unknown' ? { ...system, arch: system.os === 'macos' ? 'arm64' as const : 'x64' as const } : system;
   return matchingInstallers(available, preferred)
@@ -104,6 +117,7 @@ export function recommend(available: Installer[], system: System): Installer | n
 
 export function architectureLabel(arch: Installer['arch'], os: OperatingSystem): string {
   if (arch === 'universal') return 'Universal';
+  if (os === 'android') return { arm64: 'ARM64 (arm64-v8a)', armv7: 'ARM 32-bit (armeabi-v7a)', x86: 'Intel / AMD 32-bit (x86)', x64: 'Intel / AMD 64-bit (x86_64)' }[arch];
   if (os === 'macos') return arch === 'arm64' ? 'Apple Silicon' : 'Intel';
   return arch === 'arm64' ? 'ARM64' : 'Intel / AMD 64-bit';
 }
