@@ -1,3 +1,4 @@
+import { reducedMotion } from '../../platform/appearance/motion'
 import { useEffect, useRef } from 'react'
 
 /** Move a copy of the clipped plot; the destination remains painted throughout. */
@@ -5,7 +6,7 @@ export function useClipArrival(recordingId?: string) {
   const target = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const destination = target.current
-    if (!recordingId || !destination || !destination.animate || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    if (!recordingId || !destination || !destination.animate || reducedMotion()) return
     const source = [...document.querySelectorAll<HTMLElement>('[data-clip-id]')].find(element => element.dataset.clipId === recordingId)
     if (!source) return
     const from = source.getBoundingClientRect(), to = destination.getBoundingClientRect()

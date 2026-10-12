@@ -2,8 +2,8 @@ import { DEFAULT_EXECUTION, DEFAULT_APPEARANCE } from '../../generated/contracts
 // @vitest-environment jsdom
 import { StrictMode } from 'react'
 import userEvent from '@testing-library/user-event'
-import { act, fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, cleanup, fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Command, ConversationSnapshot, Receipt, Snapshot, TranscriptionInspectionResult } from '../../generated/contracts'
 import type { Settings } from '../../types'
 import { createSpectrumFeed, type SpectrumFeed } from '../../domain/audio/spectrum-feed'
@@ -95,7 +95,7 @@ function directory(): Snapshot {
 }
 function snapshot(id = 'a', revision = 1, text?: string): ConversationSnapshot {
   return {
-    opening: null, topicChoices: [], starterGreeting: { text: 'hola', romanized: null }, revisionSuffixCounts: [], conversationId: id, sessionId: 'native-session', revision, hasOlder: false,
+    opening: null, topicChoices: [], starterGreeting: { text: 'hola', romanized: null }, revisionSuffixCounts: [], conversationId: id, contentRevision: String(revision), sessionId: 'native-session', revision, hasOlder: false,
     messages: text === undefined ? [] : [{ coachDecision: null, wordGloss: null, glossState: null, glossError: null, glossOperationId: null, turnId: `${id}-turn`, replacesTurnId: null, replacedBy: null, id: `${id}-source`, sequence: 1, role: 'user', text, createdAt: '2026-09-10', translation: null, translationState: null }],
     turns: [], coachMessages: [], transcriptionAttempts: [],
     connection: { route: 'hosted', signedIn: true, email: '', revision: 1, configured: true, assessmentAdapter: 'jev_choice' as const, standardModel: 'google/gemini-2.5-flash', fastModel: '', audio: { transcription: { model: 'whisper-large-v3' }, speech: { model: 'openai/gpt-audio-mini' } }, paused: false },
@@ -104,6 +104,14 @@ function snapshot(id = 'a', revision = 1, text?: string): ConversationSnapshot {
 let workspace: Snapshot
 let watches: Array<{ conversationId: string; afterRevision: number } & ReturnType<typeof deferred<ConversationSnapshot>>>
 let submit: (command: Command) => Promise<Receipt>
+afterEach(async () => {
+  cleanup()
+  // Native long polls eventually settle. Release their test doubles too, so
+  // shared in-flight reads cannot leak a never-settling request into another test.
+  await act(async () => {
+    for (const watch of watches) watch.resolve(snapshot(watch.conversationId))
+  })
+})
 const resetView = vi.fn()
 const setHistoryOpen = vi.fn()
 function useSubject(settings = SETTINGS) { return useConversation({ settings, resetView, setHistoryOpen }) }
@@ -255,10 +263,10 @@ describe('native conversation ownership', () => {
     const { result } = renderHook(() => useSubject())
     await waitFor(() => expect(watches).toHaveLength(1))
     const assisting = snapshot()
-    assisting.turns = [{ id: 'turn', replacesTurnId: null, replacedBy: null, route: 'hosted', state: 'assisting', paused: false, hold: null, operations: [], attempts: [] }]
+    assisting.turns = [{ id: 'turn', replacesTurnId: null, replacedBy: null, route: 'hosted', state: 'assisting', paused: false, hold: null,   }]
     await act(async () => watches[0].resolve(assisting))
     expect(result.current.pendingReply).toBe(false)
-    await act(async () => watches[1].resolve({ ...assisting, revision: 2, turns: [{ ...assisting.turns[0], state: 'pending' }] }))
+    await act(async () => watches[1].resolve({ ...assisting, revision: 2, contentRevision: '2', turns: [{ ...assisting.turns[0], state: 'pending' }] }))
     expect(result.current.pendingReply).toBe(true)
     expect(commands()).toEqual([])
   })
@@ -630,9 +638,10 @@ describe('native composer admission', () => {
     // Native storage has it: the landed turn takes the same place, without growing again.
     const landed = exchangeSnapshot()
     landed.revision = 32
+    landed.contentRevision = '32'
     landed.messages.push({ ...landed.messages[0], id: 'sent', turnId: 'accepted', sequence: 3, text: 'Fui al mercado.' })
-    landed.turns = [{ id: 'accepted', replacesTurnId: null, replacedBy: null, route: 'hosted', state: 'pending', paused: false, hold: null, attempts: [],
-      operations: [{ id: 'accepted-reply', kind: 'persona_reply', state: 'running', sourceMessageId: null, contractVersion: 1, dependencies: [], role: 'standard' }] }]
+    landed.turns = [{ id: 'accepted', replacesTurnId: null, replacedBy: null, route: 'hosted', state: 'pending', paused: false, hold: null,
+       }]
     await act(async () => watches[1].resolve(landed))
     const sent = [...document.querySelectorAll<HTMLElement>('.stream .msg.me')].filter(bubble => bubble.textContent?.includes('Fui al mercado.'))
     expect(sent).toHaveLength(1)
@@ -778,7 +787,7 @@ it('edits through the real page handler, sends durable identity and renders reta
   ])
   expect(screen.getByText('Edit saved — updating conversation…')).toBeVisible()
   expect(commands().find(command => command.action.kind === 'reviseTurn')?.action).toEqual({ kind: 'reviseTurn', conversationId: 'a', turnId: 'a-turn', text: 'Yo fui ayer', expectedRevision: 31, input: { modality: 'text', suggestion: false, scaffold: false, revision: true } })
-  const revised: ConversationSnapshot = { ...initial, revision: 32, messages: [
+  const revised: ConversationSnapshot = { ...initial, revision: 32, contentRevision: '32', messages: [
     ...initial.messages.map(message => ({ ...message, replacedBy: 'repair' })),
     { ...initial.messages[0], turnId: 'repair', replacesTurnId: 'a-turn', id: 'repair-user', sequence: 3, text: 'Yo fui ayer' },
     { ...initial.messages[1], turnId: 'repair', replacesTurnId: 'a-turn', id: 'repair-reply', sequence: 4, text: '¿Qué hiciste allí?' },
@@ -793,7 +802,7 @@ it('edits through the real page handler, sends durable identity and renders reta
   expect(screen.queryByText('Yo fue ayer')).not.toBeInTheDocument()
   expect(screen.queryByText('¿Adónde fuiste?')).not.toBeInTheDocument()
   await waitFor(() => expect(watches).toHaveLength(3))
-  await act(async () => watches[2].resolve({ ...revised, revision: 33 }))
+  await act(async () => watches[2].resolve({ ...revised, revision: 33, contentRevision: '33' }))
   expect(document.querySelector('.stream .turn-stack')).toBe(presentationSlot)
   expect(screen.getAllByText('Yo fui ayer').some(element => element.closest('.msg.me'))).toBe(true)
   expect(screen.queryByText('Edit saved — updating conversation…')).not.toBeInTheDocument()
@@ -832,7 +841,7 @@ it('allows editing and replacing a pending partner reply', async () => {
   render(page())
   await waitFor(() => expect(watches).toHaveLength(1))
   const value = exchangeSnapshot()
-  value.turns = [{ id: 'pending', replacesTurnId: null, replacedBy: null, route: 'hosted', state: 'pending', paused: false, hold: null, operations: [], attempts: [] }]
+  value.turns = [{ id: 'pending', replacesTurnId: null, replacedBy: null, route: 'hosted', state: 'pending', paused: false, hold: null,   }]
   await act(async () => watches[0].resolve(value))
   openMenus()
   fireEvent.click(screen.getByRole('button', { name: 'Edit message' }))
@@ -921,6 +930,7 @@ it('persists Show answer through the real handler and renders only the returned 
   expect(screen.queryByText('Which form goes with yo?')).toBeNull()
   const exposed = structuredClone(value)
   exposed.revision++
+  exposed.contentRevision = String(exposed.revision)
   exposed.messages[0].coachDecision!.exposedMove = 'hint'
   await act(async () => watches[1].resolve(exposed))
   expect(within(screen.getByRole('region', { name: 'Conversation coaching' })).getByText('Which form goes with yo?')).toBeVisible()
@@ -931,6 +941,7 @@ it('persists Show answer through the real handler and renders only the returned 
   expect(screen.queryByText('Yo fui ayer.')).toBeNull()
   const next = structuredClone(exposed)
   next.revision++
+  next.contentRevision = String(next.revision)
   next.messages[0].coachDecision!.exposedMove = 'explicit'
   next.messages[0].coachDecision!.shown = { ...value.messages[0].coachDecision!.shown!, move: 'explicit', text: 'Yo fui ayer.' }
   await act(async () => watches[2].resolve(next))
@@ -955,24 +966,28 @@ it('hides starters after accepting an opening and surfaces failure without a lea
   await waitFor(() => expect(watches).toHaveLength(1))
   const value = snapshot('a', 41)
   value.opening = { kind: 'partner' }
-  value.turns = [{ id: 'opening', replacesTurnId: null, replacedBy: null, route: 'hosted', state: 'pending', paused: false, hold: null, attempts: [], operations: [{ id: 'opening-operation', kind: 'persona_opening', state: 'ready', sourceMessageId: null, contractVersion: 1, dependencies: [], role: 'standard' }] }]
+  value.turns = [{ id: 'opening', replacesTurnId: null, replacedBy: null, route: 'hosted', state: 'pending', paused: false, hold: null,   }]
   await act(async () => watches[0].resolve(value))
   expect(screen.queryByRole('button', { name: / starts$/ })).toBeNull()
-  expect(screen.getByLabelText('Conversation opening')).toHaveTextContent('Starting conversation')
+  expect(screen.getByLabelText('Conversation opening')).toHaveTextContent('Replying')
   const paused = structuredClone(value)
   paused.revision++
+  paused.contentRevision = String(paused.revision)
   paused.connection.paused = true
   await act(async () => watches[1].resolve(paused))
   expect(screen.getByLabelText('Conversation opening')).toHaveTextContent('Conversation opening is paused.')
-  expect(screen.getByLabelText('Conversation opening')).not.toHaveTextContent('Starting conversation')
+  expect(screen.getByLabelText('Conversation opening')).not.toHaveTextContent('Replying')
   const resumed = structuredClone(paused)
   resumed.revision++
+  resumed.contentRevision = String(resumed.revision)
   resumed.connection.paused = false
   await act(async () => watches[2].resolve(resumed))
-  expect(screen.getByLabelText('Conversation opening')).toHaveTextContent('Starting conversation')
+  expect(screen.getByLabelText('Conversation opening')).toHaveTextContent('Replying')
   const failed = structuredClone(resumed)
   failed.revision++
+  failed.contentRevision = String(failed.revision)
   failed.turns[0].state = 'failed'
+  failed.turns[0].channel = 'persona_opening'
   failed.turns[0].hold = { code: 'credential', message: 'Opening provider refused access.', refusal: null }
   await act(async () => watches[3].resolve(failed))
   expect(screen.getByRole('alert')).toHaveTextContent('Opening provider refused access.')
@@ -1087,7 +1102,7 @@ it('routes bubble selection to its message side and keeps it while a newer excha
   expect(within(panel).queryByRole('button', { name: 'Help with this reply' })).toBeNull()
   expect(panel.querySelector('.msg.bot')!.compareDocumentPosition(panel.querySelector('.reply-help')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   await waitFor(() => expect(watches).toHaveLength(2))
-  await act(async () => watches[1].resolve({ ...initial, revision: 32, messages: [...initial.messages,
+  await act(async () => watches[1].resolve({ ...initial, revision: 32, contentRevision: '32', messages: [...initial.messages,
     { ...initial.messages[0], id: 'next-user', turnId: 'next', sequence: 3, text: 'Another message' },
     { ...initial.messages[1], id: 'next-reply', turnId: 'next', sequence: 4, text: 'Another reply' },
   ] }))
@@ -1108,7 +1123,7 @@ it('automatically selects the latest learner message, then its reply, without re
   expect(within(document.querySelector('.stream') as HTMLElement).getByRole('group', { name: 'Partner replied' })).toHaveAttribute('aria-current', 'true')
   expect(commands()).toHaveLength(0)
   const next = exchangeSnapshot()
-  await act(async () => watches[2].resolve({ ...next, revision: 32, messages: [...next.messages,
+  await act(async () => watches[2].resolve({ ...next, revision: 32, contentRevision: '32', messages: [...next.messages,
     { ...next.messages[0], id: 'next-user', turnId: 'next', sequence: 3, text: 'Another message' },
   ] }))
   expect(within(document.querySelector('.stream') as HTMLElement).getAllByRole('group', { name: 'Your message' })[1]).toHaveAttribute('aria-current', 'true')

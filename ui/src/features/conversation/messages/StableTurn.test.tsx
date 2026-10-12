@@ -5,6 +5,14 @@ import { StableTurn } from './StableTurn'
 
 afterEach(() => vi.restoreAllMocks())
 
+it('does not measure finished message geometry when there is no temporary footprint to maintain', () => {
+  const measure = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+  const content = (text: string) => <StableTurn><div className="partner-turn"><div className="msg chat-message bot">{text}</div></div></StableTurn>
+  const view = render(content('Saved reply'))
+  view.rerender(content('Saved translation'))
+  expect(measure).not.toHaveBeenCalled()
+})
+
 it('keeps allocated height during hydration, then fits finished content and responds to resizing and interaction', () => {
   let height = 120, width = 300
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {

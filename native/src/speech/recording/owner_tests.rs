@@ -113,7 +113,7 @@ fn both_owners_record_through_the_same_receipts_and_stay_separate() {
 }
 
 #[test]
-fn drill_usage_counts_once_for_the_language_and_never_for_a_partner() {
+fn recording_receipts_have_independent_owners_and_do_not_invent_provider_usage() {
     let (_dir, mut store, conversation, item, target) = setup();
     let before = store.profile().unwrap();
     for owner in [&conversation, &item] {
@@ -125,33 +125,15 @@ fn drill_usage_counts_once_for_the_language_and_never_for_a_partner() {
             .unwrap();
     }
     let after = store.profile().unwrap();
-    let language = |profile: &ProfileSnapshot| {
-        profile
-            .languages
-            .iter()
-            .find(|l| l.id == "spanish")
-            .map(|l| (l.attempts, l.unknown_usage))
-            .unwrap()
-    };
-    // Both recordings count once globally and once for their language; a
-    // transcription's usage is never reported by the provider, so both stay
-    // unknown usage rather than being counted as zero tokens.
-    assert_eq!(after.global.attempts, before.global.attempts + 2);
-    assert_eq!(after.global.unknown_usage, before.global.unknown_usage + 2);
-    assert_eq!(language(&after).0, language(&before).0 + 2);
-    assert_eq!(language(&after).1, language(&before).1 + 2);
-    // The partner owns only its own conversation's recording.
-    let partner = |profile: &ProfileSnapshot| profile.personas[0].attempts;
-    assert_eq!(partner(&after), partner(&before) + 1);
-    // Removing the item removes its receipt and its usage, and leaves the
-    // conversation's untouched.
+    assert_eq!(after.global.attempts, before.global.attempts);
+    assert_eq!(after.global.unknown_usage, before.global.unknown_usage);
+    assert!(after.personas.iter().all(|p| p.attempts == 0));
     store
         .connection
         .execute("DELETE FROM drill_items WHERE id='item'", [])
         .unwrap();
     let pruned = store.profile().unwrap();
-    assert_eq!(pruned.global.attempts, before.global.attempts + 1);
-    assert_eq!(partner(&pruned), partner(&before) + 1);
+    assert_eq!(pruned.global.attempts, before.global.attempts);
     assert!(views(&store.connection, &item).unwrap().is_empty());
     assert_eq!(
         views(&store.connection, &conversation).unwrap()[0].state,

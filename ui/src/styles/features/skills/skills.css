@@ -89,10 +89,9 @@
   .progress-xp-columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .progress-tab-panel { animation: none; }
-  .progress-tabs button, .progress-xp-skill { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .progress-tab-panel { animation: none; }
+
+:where(:root[data-motion="reduced"]) .progress-tabs button, :where(:root[data-motion="reduced"]) .progress-xp-skill { transition: none; }
 
 /* One skill's page: back to the overview, then the skill (features/skills/evidence/SkillDetailContent.tsx). */
 .skill-detail-page { display: flex; flex-direction: column; gap: var(--space-8); }

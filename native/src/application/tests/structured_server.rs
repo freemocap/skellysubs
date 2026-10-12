@@ -43,6 +43,11 @@ fn serve_one(
         received.extend_from_slice(&buffer[..count]);
         if let Some(start) = received.windows(4).position(|w| w == b"\r\n\r\n") {
             let headers = String::from_utf8_lossy(&received[..start]).to_string();
+            if headers.starts_with("GET /v1/protocol ") {
+                let body = r#"{"operations_versions":[3]}"#;
+                write!(socket, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).unwrap();
+                return serve_one(listener, content);
+            }
             assert!(headers.starts_with("POST /v1/operations "));
             let length: usize = headers
                 .lines()

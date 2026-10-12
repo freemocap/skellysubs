@@ -5,6 +5,7 @@ import { invoke as nativeInvoke } from './native'
 import { validateAudioVolumes } from '../../domain/audio/audio-settings'
 import { logDebug, logError, logInfo, logWarn } from '../diagnostics/log'
 import type { Settings } from '../../types'
+import { batchRead } from './batch-read'
 
 export const isTauri =
   typeof window !== 'undefined' &&
@@ -91,7 +92,9 @@ export function languageFor(code: string, varietyId?: string): LanguageInfo | nu
 }
 
 /** View settings combine native conversation choices and learner display preferences. */
-export async function getSettings(): Promise<Settings> {
+export const getSettings = batchRead(readSettings)
+
+async function readSettings(): Promise<Settings> {
   const [snapshot, connection, access, rewards, playbackRate, microphone] = await Promise.all([
     readWorkspace(), invoke<ConnectionConfig>('get_connection'), invoke<AccessSettings>('get_access_settings'), invoke<RewardSettings>('get_reward_settings'), invoke<number>('get_playback_rate'),
     invoke<string | null>('get_microphone'),

@@ -1,4 +1,5 @@
 use super::*;
+use crate::ai::transport::provider::Completion;
 
 pub(super) fn apply(store: &mut Store, action: Action) -> Receipt {
     store
@@ -8,6 +9,37 @@ pub(super) fn apply(store: &mut Store, action: Action) -> Receipt {
             action,
         })
         .unwrap()
+}
+
+pub(super) fn coach_provider(store: &Store, replies: &[&str]) {
+    use std::sync::{Arc, Mutex};
+    let replies = Arc::new(Mutex::new(
+        replies
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<std::collections::VecDeque<_>>(),
+    ));
+    store
+        .graph_runtime
+        .bind_provider(Arc::new(move |context, _| {
+            let text = replies
+                .lock()
+                .unwrap()
+                .pop_front()
+                .expect("unexpected provider call");
+            Box::pin(async move {
+                context.observe(crate::ai::graph::ResponseEvidence {
+                    usage: Some(crate::ai::graph::UsageEvidence {
+                        input_tokens: Some(21),
+                        output_tokens: Some(8),
+                        total_tokens: None,
+                        provenance: "test_provider".into(),
+                    }),
+                    ..Default::default()
+                })?;
+                Ok(text)
+            })
+        }));
 }
 
 pub(super) fn setup() -> (tempfile::TempDir, Store, String) {
@@ -67,32 +99,6 @@ pub(super) fn send(store: &Store, conversation: &str) -> Command {
     }
 }
 
-pub(super) fn isolate_user_reading(store: &mut Store) {
-    store.connection.execute("DELETE FROM operations WHERE kind IN ('user_word_gloss','user_translation') AND state='waiting_dependencies'", []).unwrap();
-}
-
-pub(super) fn isolate_coaching(store: &mut Store) {
-    isolate_user_reading(store);
-    // Dedicated lifecycle suites isolate their subject; coaching graph overlap is
-    // exercised separately below with both automatic operations retained.
-    store.connection.execute("DELETE FROM operations WHERE kind IN ('coach_feedback','coach_suggestions','coach_reaction','skill_attribution','skill_assessment','skill_evidence','conversation_feedback','reply_brief','reply_assistance','reply_explanations') AND state='waiting_dependencies'", []).unwrap();
-}
-
-pub(super) fn isolate_translation(store: &mut Store) {
-    isolate_coaching(store);
-    // These tests focus on the established reply/translation lifecycle.
-    store.connection.execute("DELETE FROM operations WHERE kind='persona_word_gloss' AND state='waiting_dependencies'", []).unwrap();
-}
-
-pub(super) fn begin(store: &mut Store, conversation: &str) -> Dispatch {
-    let command = send(store, conversation);
-    store.execute(command).unwrap();
-    isolate_coaching(store);
-    isolate_translation(store);
-    assert!(store.dispatch().unwrap().is_none());
-    store.dispatch().unwrap().unwrap()
-}
-
 pub(super) fn reply(text: &str) -> Completion {
     Completion {
         diagnostics: None,
@@ -103,109 +109,6 @@ pub(super) fn reply(text: &str) -> Completion {
         input_tokens: Some(21),
         output_tokens: Some(8),
     }
-}
-
-pub(super) fn gloss_children(
-    store: &mut Store,
-    conversation: &str,
-    text: &str,
-) -> (Dispatch, Dispatch) {
-    let command = send(store, conversation);
-    store.execute(command).unwrap();
-    isolate_coaching(store);
-    assert!(store.dispatch().unwrap().is_none());
-    let parent = store.dispatch().unwrap().unwrap();
-    store.finish(&parent, Ok(reply(text))).unwrap();
-    let gloss = store.dispatch().unwrap().unwrap();
-    assert!(gloss.gloss_source.is_some());
-    assert_eq!(
-        gloss.gloss_schema.as_ref().unwrap()["properties"]["spans"]["items"]["oneOf"][0]["properties"]
-            ["romanization"]["type"],
-        "null"
-    );
-    // Audit the outbound provider body, not just validation/display behavior.
-    for route in [
-        ConnectionRoute::Hosted,
-        ConnectionRoute::Custom,
-        ConnectionRoute::Hosted,
-    ] {
-        let payload = crate::ai::transport::provider::payload_with_output(
-            &gloss.model,
-            &gloss.messages,
-            route,
-            crate::language::gloss::request_output(
-                gloss.gloss_source.as_ref(),
-                gloss.gloss_schema.as_ref().unwrap(),
-            ),
-        )
-        .unwrap();
-        assert_eq!(
-            payload["response_format"]["json_schema"]["schema"]["properties"]["spans"]["items"]["oneOf"]
-                [0]["properties"]["romanization"],
-            serde_json::json!({"type":"null"})
-        );
-        assert_eq!(
-            payload["max_tokens"],
-            crate::ai::transport::provider::GLOSS_OUTPUT_TOKENS
-        );
-        assert!(
-            payload["messages"][0]["content"]
-                .as_str()
-                .unwrap()
-                .contains("no transliteration work is needed")
-        );
-    }
-    let translation = store.dispatch().unwrap().unwrap();
-    assert!(translation.gloss_source.is_none());
-    (gloss, translation)
-}
-
-pub(super) fn speech_outcome(audio: Result<Vec<u8>>) -> crate::ai::audio::SpeechOutcome {
-    crate::ai::audio::SpeechOutcome {
-        alignment: None,
-        diagnostics: None,
-        audio,
-        actual_model: Some("speech-model".into()),
-        provider_id: Some("speech-request".into()),
-        input_tokens: Some(12),
-        output_tokens: Some(30),
-        cost_micros: Some(4),
-        finish_reason: Some("stop".into()),
-    }
-}
-
-pub(super) fn speech_children(store: &mut Store, conversation: &str) -> (Dispatch, Vec<Dispatch>) {
-    store.connection.execute("UPDATE conversation_settings SET settings=json_set(settings,'$.readAloud',json('true')) WHERE conversation_id=?1",[conversation]).unwrap();
-    let command = send(store, conversation);
-    store.execute(command).unwrap();
-    isolate_coaching(store);
-    assert!(store.dispatch().unwrap().is_none());
-    let parent = store.dispatch().unwrap().unwrap();
-    let reserved: i64 = store
-        .connection
-        .query_row(
-            "SELECT count(*) FROM operations WHERE kind NOT IN ('persona_context','coach_context')",
-            [],
-            |r| r.get(0),
-        )
-        .unwrap();
-    assert_eq!(reserved, 4);
-    store.finish(&parent, Ok(reply("Hola."))).unwrap();
-    let mut speech = None;
-    let mut others = Vec::new();
-    for _ in 0..3 {
-        let dispatch = store.dispatch().unwrap().unwrap();
-        if dispatch.speech_source.is_some() {
-            speech = Some(dispatch);
-        } else {
-            others.push(dispatch);
-        }
-    }
-    (speech.unwrap(), others)
-}
-
-pub(super) fn gloss_reply() -> Completion {
-    reply(r#"{"spans":[{"first":"g0000","last":"g0003","kind":"gloss","gloss":"hello"}]}"#)
 }
 
 pub(super) fn revision_command(
@@ -230,123 +133,6 @@ pub(super) fn revision_command(
     }
 }
 
-pub(super) fn finish_fixture_exchange(store: &mut Store, turn: &str, text: &str) {
-    store.connection.execute("INSERT INTO messages(id,conversation_id,turn_id,sequence,role,text) SELECT ?1,conversation_id,id,(SELECT coalesce(max(sequence),0)+1 FROM messages WHERE conversation_id=t.conversation_id),'assistant',?3 FROM turns t WHERE id=?2",params![id(),turn,text]).unwrap();
-    store
-        .connection
-        .execute(
-            "UPDATE operations SET state='succeeded' WHERE turn_id=?1",
-            [turn],
-        )
-        .unwrap();
-    store
-        .connection
-        .execute("UPDATE turns SET state='succeeded' WHERE id=?1", [turn])
-        .unwrap();
-}
-
-pub(super) fn fixture_evidence(store: &Store, turn: &str, _wording: &str) {
-    let tx = store.connection.unchecked_transaction().unwrap();
-    let operation: String = tx
-        .query_row(
-            "SELECT id FROM operations WHERE turn_id=?1 AND kind='skill_assessment'",
-            [turn],
-            |r| r.get(0),
-        )
-        .unwrap();
-    let attempt = format!("evidence-{turn}");
-    tx.execute("INSERT OR IGNORE INTO attempts(id,operation_id,state,requested_model) VALUES(?1,?2,'running','fixture')",params![attempt,operation]).unwrap();
-    tx.execute(
-        "UPDATE operations SET state='running' WHERE id=?1",
-        [&operation],
-    )
-    .unwrap();
-    tx.execute("UPDATE turns SET state='assisting' WHERE id=?1", [turn])
-        .unwrap();
-    let presence: std::collections::BTreeMap<_, _> = store
-        .config
-        .shared_skills()
-        .skills
-        .iter()
-        .map(|s| {
-            (
-                s.id.clone(),
-                if s.id == "information_exchange" {
-                    crate::learning::practice::Presence::Direct
-                } else {
-                    crate::learning::practice::Presence::Absent
-                },
-            )
-        })
-        .collect();
-    crate::learning::practice::publish(
-        &tx,
-        turn,
-        &attempt,
-        presence.clone(),
-        &presence.keys().cloned().collect(),
-    )
-    .unwrap();
-    let value = serde_json::json!({"adapter":"jev_choice","answers":{"information_exchange":{"choice":"direct","confidence":1.0,"probabilities":{"direct":1.0,"contextual":0.0,"absent":0.0,"unclear":0.0}}}});
-    tx.execute("UPDATE turns SET context=json_set(context,'$.skillAssessment',json(?2),'$.skillAssessmentAttempt',?3),state='succeeded' WHERE id=?1",params![turn,value.to_string(),attempt]).unwrap();
-    crate::learning::rewards::publish(&tx, turn, &attempt).unwrap();
-    tx.execute(
-        "UPDATE operations SET state='succeeded' WHERE id=?1",
-        [&operation],
-    )
-    .unwrap();
-    tx.execute(
-        "UPDATE attempts SET state='succeeded' WHERE id=?1",
-        [&attempt],
-    )
-    .unwrap();
-    tx.commit().unwrap();
-}
-
 pub(super) fn wave2_context(store: &Store, turn: &str) -> serde_json::Value {
     crate::conversations::assessments::context(&store.connection, turn).unwrap()
-}
-
-pub(super) fn wave2_error(quote: &str) -> serde_json::Value {
-    serde_json::json!({"construct":"information_exchange","quote":quote,"outcome":"partial","rationale":"Use está to ask how someone is.","error":{"op":"missing","category":"AUX","source":"unknown","blocks_meaning":true,"target_hypothesis":"¿Cómo está tu hermana?","hint":"","elicitation":"","metalinguistic":""}})
-}
-
-pub(super) fn wave2_observe(
-    store: &Store,
-    turn: &str,
-    kind: &str,
-    value: serde_json::Value,
-) -> serde_json::Value {
-    retained_observation(store, turn, kind);
-    let validated = crate::learning::coaching::coach_observation::validate(
-        &store.connection,
-        turn,
-        kind,
-        &reply(&value.to_string()),
-    )
-    .unwrap();
-    let attempt = id();
-    store
-        .connection
-        .execute(
-            "UPDATE operations SET state='succeeded' WHERE turn_id=?1 AND kind=?2",
-            params![turn, kind],
-        )
-        .unwrap();
-    store.connection.execute("INSERT INTO attempts(id,operation_id,state,requested_model) SELECT ?1,id,'succeeded','fixture' FROM operations WHERE turn_id=?2 AND kind=?3", params![attempt,turn,kind]).unwrap();
-    crate::conversations::assessments::publish(&store.connection, turn, kind, &attempt, &validated)
-        .unwrap();
-    validated
-}
-
-// Fixtures for retained evidence math explicitly create its former producer.
-// Current conversational judgments must never create these records.
-pub(super) fn retained_observation(store: &Store, turn: &str, kind: &str) {
-    store.connection.execute("INSERT INTO operations(id,turn_id,kind,state) SELECT ?1,?2,?3,'succeeded' WHERE NOT EXISTS(SELECT 1 FROM operations WHERE turn_id=?2 AND kind=?3)",params![id(),turn,kind]).unwrap();
-}
-
-pub(super) fn translation_reply(dispatch: &Dispatch, text: &str) -> Completion {
-    reply(
-        &serde_json::json!({"source":dispatch.messages[1].content,"translation":text}).to_string(),
-    )
 }

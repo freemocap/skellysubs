@@ -18,6 +18,29 @@
 .progress-counter[data-gaining] .progress-counter-number { animation: progress-tick var(--dur-deliberate) var(--ease-out); }
 .progress-counter-error { color: var(--danger-ink); }
 
+/* Language XP spans the full left column; global XP and its streak stack right. */
+.progress-counters[data-streaks] { display: grid; grid-template-columns: auto auto; gap: var(--space-1) var(--space-3); }
+.progress-counters[data-streaks] .progress-counter-number { font-size: var(--type-body); font-weight: var(--weight-bold); }
+.progress-counters[data-streaks] .progress-counter-xp { grid-column: 1; grid-row: 1 / span 2; align-self: stretch; padding-inline-end: var(--space-3); border-inline-end: var(--border-width) solid var(--progress-line); }
+.progress-counters[data-streaks] .progress-counter-global { grid-column: 2; grid-row: 1; justify-content: center; padding-inline-start: 0; border: 0; }
+.progress-counters[data-streaks] .progress-counter-error { position: absolute; inset-inline-end: 0; }
+.progress-counters[data-streaks] > .streak-count { grid-column: 2; grid-row: 2; }
+.streak-count { display: inline-flex; position: relative; align-items: center; justify-content: center; gap: var(--space-1); color: var(--progress-ink); font: var(--weight-semibold) var(--type-meta)/var(--leading-tight) var(--font-mono); font-variant-numeric: tabular-nums; }
+.streak-flame { display: inline-block; }
+.streak-number { display: inline-block; height: 1.15em; overflow: hidden; min-width: 1ch; }
+.streak-roll { display: flex; flex-direction: column; animation: streak-roll var(--dur-deliberate) var(--ease-out) both; }
+.streak-roll > span { height: 1.15em; }
+.streak-count[data-celebrating] .streak-flame { animation: streak-pulse var(--dur-loop-fast) var(--ease-out) both; }
+.streak-confetti { position: absolute; inset-inline-start: 50%; top: 50%; pointer-events: none; z-index: var(--z-reward); }
+.streak-confetti i { position: absolute; width: var(--space-2); height: var(--space-3); border-radius: var(--radius-sm); background: var(--progress-mark); animation: action-reward-scatter var(--dur-loop-fast) var(--ease-out) both; }
+.streak-confetti i:nth-child(2n) { background: var(--interaction-ink); }
+.streak-confetti i:nth-child(3n) { background: var(--success-ink); }
+@keyframes streak-roll { 0%, 15% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+@keyframes streak-pulse { 0%, 100% { transform: scale(1); } 35% { transform: scale(1.65) rotate(-12deg); } 65% { transform: scale(1.15) rotate(8deg); } }
+:where(:root[data-motion="reduced"]) .streak-confetti { display: none; }
+:where(:root[data-motion="reduced"]) .streak-count[data-celebrating] .streak-flame { animation: none; }
+:where(:root[data-motion="reduced"]) .streak-roll { animation: none; transform: translateY(-50%); }
+
 /* Each effort unit keeps the colour of the place it comes from: the partner, the
    coach's clean badge, the coach's edit, the Practice tab. */
 [data-unit="partnerUnderstood"] { color: var(--partner-ink); }
@@ -28,7 +51,7 @@
 @keyframes progress-gain { 0% { opacity: 0; transform: translateY(var(--space-2)); } 20%, 65% { opacity: 1; } 100% { opacity: 0; transform: translateY(calc(-1 * var(--space-3))); } }
 @keyframes progress-tick { 0%, 35% { text-shadow: 0 0 var(--space-3) var(--progress-mark); } 100% { text-shadow: none; } }
 @keyframes progress-spin { 0% { transform: scale(1) rotate(0); } 40% { transform: scale(1.35) rotate(72deg); } 100% { transform: scale(1) rotate(144deg); } }
-@media (prefers-reduced-motion: reduce) { .progress-counter-gain, .progress-counter[data-gaining] .progress-counter-number, .progress-counter[data-gaining] .progress-counter-mark { animation: none; } }
+:where(:root[data-motion="reduced"]) .progress-counter-gain, :where(:root[data-motion="reduced"]) .progress-counter[data-gaining] .progress-counter-number, :where(:root[data-motion="reduced"]) .progress-counter[data-gaining] .progress-counter-mark { animation: none; }
 
 /* The card a progress button shows first: compact, in the progress gold. */
 .progress-card { position: absolute; top: calc(100% + var(--space-2)); inset-inline-end: 0; z-index: var(--z-reward); box-sizing: border-box; width: max-content; min-width: 240px; max-width: min(380px, calc(100vw - var(--space-8))); display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: var(--border-width) solid var(--progress-line); border-radius: var(--radius-lg); background: var(--sheet); color: var(--ink); box-shadow: var(--shadow-floating); font: var(--type-ui)/var(--leading-snug) var(--font-sans); text-transform: none; letter-spacing: normal; animation: progress-card-open var(--dur-base) var(--ease-out); }
@@ -53,7 +76,7 @@
 [dir="rtl"] .progress-card-expand svg { transform: rotate(90deg); }
 .progress-card-expand:hover { text-decoration: underline; }
 @keyframes progress-card-open { from { opacity: 0; transform: translateY(calc(-1 * var(--space-2))); } }
-@media (prefers-reduced-motion: reduce) { .progress-card { animation: none; } }
+:where(:root[data-motion="reduced"]) .progress-card { animation: none; }
 @media (pointer: coarse) { .progress-card-expand { min-height: var(--touch-target); } }
 
 /* A take that earned a practice unit, in the Practice tab's colour. */
@@ -67,7 +90,7 @@
 
 /* Languages side by side: sortable columns, the active language highlighted. */
 .language-table { width: 100%; border-collapse: collapse; font-size: var(--type-meta); font-variant-numeric: tabular-nums; }
-.language-table :is(th, td) { padding: var(--space-2) var(--space-3); text-align: end; white-space: nowrap; }
+.language-table :is(th, td) { padding: var(--space-2) var(--space-3); text-align: center; white-space: nowrap; }
 .language-table tbody :is(th, td) { border-top: var(--border-width) solid var(--line-soft); }
 .language-table :is(thead th:first-child, tbody th, tfoot th) { text-align: start; }
 /* The Total row: each column added up over every language. */
@@ -75,11 +98,12 @@
 .language-table tfoot th { color: var(--ink-2); font-family: var(--font-sans); }
 /* The Effort column: the row's effort units added up, set off from the kinds it adds. */
 .language-table [data-column="effort"] { border-inline-start: var(--border-width) solid var(--line-soft); }
-.language-table thead button { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 0; padding: 0; border: 0; background: transparent; color: inherit; font: var(--weight-semibold) var(--type-meta) var(--font-sans); cursor: pointer; }
+.language-table thead button { position: relative; display: inline-flex; align-items: center; gap: var(--space-1); min-height: 0; padding: 0; border: 0; background: transparent; color: inherit; font: var(--weight-semibold) var(--type-meta) var(--font-sans); cursor: pointer; }
 .language-table thead th:not([data-unit]) button { color: var(--ink-2); }
 .language-table thead th[data-column="xp"] button { color: var(--progress-ink); }
 .language-table thead button:hover { text-decoration: underline; }
 .language-table-sort { display: inline-block; width: 1ch; font-size: var(--type-meta); text-align: center; visibility: hidden; }
+.language-table thead th:not(:first-child) .language-table-sort { position: absolute; inset-inline-start: calc(100% + var(--space-1)); }
 .language-table-sort[data-shown] { visibility: visible; }
 .language-table td { font-family: var(--font-mono); font-weight: var(--weight-semibold); }
 .language-table td[data-column="xp"] { color: var(--progress-ink); font-weight: var(--weight-bold); }
@@ -110,7 +134,7 @@
 .action-reward-center, .action-reward-particle { position: absolute; display: flex; pointer-events: none; filter: drop-shadow(0 0 var(--space-1) var(--sheet)); }
 .action-reward-center { animation: action-reward-pop calc(var(--dur-deliberate) * 2) var(--ease-out) both; }
 .action-reward-particle { animation: action-reward-scatter calc(var(--dur-deliberate) * 2) var(--ease-out) both; }
-@media (prefers-reduced-motion: reduce) { .action-reward-burst { display: none; } }
+:where(:root[data-motion="reduced"]) .action-reward-burst { display: none; }
 
 /* The skill level (top bar) or a conversation's skill points (chat header): a
    button before the XP button, its glyph and number, divided from the XP. */

@@ -1,175 +1,169 @@
 use super::*;
-use crate::ai::results;
+use crate::ai::{graph::*, transport::graph_identity, workspace_graph};
 use serde_json::json;
+use std::{collections::BTreeMap, sync::Arc};
 
-fn apply(store: &mut Store, action: Action) -> String {
-    store
-        .execute(Command {
-            session_id: store.session_id.clone(),
-            action_id: uuid::Uuid::new_v4().to_string(),
-            action,
-        })
-        .unwrap()
-        .entity_id
-}
-
-fn speech_consumer(store: &mut Store, consumer: &str) -> String {
-    let conversation = apply(
-        store,
-        Action::CreateContact {
-            language_id: "spanish".into(),
-            details: crate::partners::persona::starter("spanish").unwrap(),
+fn graph() -> Arc<Executable> {
+    let mut registry = Registry::default();
+    let value = Contract::new("usage.value", 1);
+    let operation = Contract::new("usage.provider", 1);
+    registry.define_type(value.clone(), Shape::Integer).unwrap();
+    let ports = BTreeMap::from([(
+        "value".into(),
+        Port {
+            contract: value,
+            optional: false,
         },
-    );
-    let revision = store
-        .snapshot()
-        .unwrap()
-        .conversations
-        .iter()
-        .find(|row| row.id == conversation)
-        .unwrap()
-        .revision;
-    apply(
-        store,
-        Action::SendMessage {
-            conversation_id: conversation.clone(),
-            text: "Hello".into(),
-            input: crate::learning::coaching::InputEvidence::default(),
-            expected_revision: revision,
-        },
-    );
-    let turn: String = store
-        .connection
-        .query_row(
-            "SELECT id FROM turns WHERE conversation_id=?1 ORDER BY rowid DESC LIMIT 1",
-            [&conversation],
-            |row| row.get(0),
+    )]);
+    registry
+        .register(
+            Operation {
+                contract: operation.clone(),
+                implementation: "usage/provider/1".into(),
+                inputs: ports.clone(),
+                outputs: ports.clone(),
+                resource: Resource::Provider,
+                reuse: Reuse::Exact,
+            },
+            Arc::new(|context, inputs| {
+                Box::pin(async move {
+                    context.observe(ResponseEvidence {
+                        request_id: Some("usage-request".into()),
+                        usage: Some(UsageEvidence {
+                            input_tokens: Some(7),
+                            output_tokens: Some(11),
+                            total_tokens: Some(18),
+                            provenance: "provider".into(),
+                        }),
+                        ..Default::default()
+                    })?;
+                    Ok(inputs)
+                })
+            }),
         )
         .unwrap();
-    let operation: String = store.connection.query_row(
-        "UPDATE operations SET state='succeeded' WHERE turn_id=?1 AND kind='persona_speech' RETURNING id",
-        [&turn], |row| row.get(0),
-    ).unwrap();
-    store.connection.execute(
-        "INSERT INTO attempts(id,operation_id,state,requested_model) VALUES(?1,?2,'succeeded','speech-fixture')",
-        params![consumer, operation],
-    ).unwrap();
-    store.connection.query_row(
-        "SELECT r.persona_id FROM conversations c JOIN contacts r ON r.id=c.contact_id WHERE c.id=?1",
-        [&conversation], |row| row.get(0),
-    ).unwrap()
+    Arc::new(
+        workspace_graph::single_operation(
+            registry,
+            Contract::new("usage.graph", 1),
+            operation,
+            ports.clone(),
+            ports,
+        )
+        .unwrap(),
+    )
 }
 
-#[test]
-fn shared_speech_counts_once_per_scope_and_survives_payload_eviction() {
+#[tokio::test]
+async fn shared_graph_usage_counts_once_per_scope_and_survives_restart() {
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("usage.sqlite3");
     let mut store = Store::open(&path).unwrap();
-    store
-        .set_hosted_connection(1, Some("fixture-credential"), "fixture@example.invalid")
-        .unwrap();
-    let first = speech_consumer(&mut store, "first");
-    let second = speech_consumer(&mut store, "second");
-    assert_ne!(first, second);
-    let db = &store.connection;
-    results::begin(db, "shared", "speech").unwrap();
-    results::dispatched(db, "shared").unwrap();
-    results::finish(
-        db,
-        "shared",
-        "key",
-        &json!({
-            "inputTokens":7,"outputTokens":11,"costMicros":null,"providerId":"retained-id"
-        }),
-        Some(
-            &serde_json::to_vec(&crate::speech::alignment::SpeechAudio::new(
-                b"fixture audio",
-                None,
-            ))
-            .unwrap(),
-        ),
-        None,
-    )
-    .unwrap();
-    for consumer in ["first", "second", "reading", "reading-again"] {
-        results::associate(db, consumer, "shared").unwrap();
+    let workspace = store.snapshot().unwrap().learner.id;
+    let graph = graph();
+    let mut runtime = workspace_graph::Runtime::default();
+    let mut submitted = 0;
+    for (run, language) in [("one", "spanish"), ("two", "spanish"), ("three", "french")] {
+        let catalog = runtime
+            .begin(
+                &mut store.connection,
+                &workspace,
+                graph.clone(),
+                run,
+                BTreeMap::from([("value".into(), json!(1))]),
+                "shared",
+                "reading",
+                &json!({"scope":{"language":language}}),
+                |_, _| Ok(()),
+            )
+            .unwrap();
+        loop {
+            let progress = runtime
+                .poll(
+                    &mut store.connection,
+                    &catalog,
+                    run,
+                    Capacity {
+                        local: 8,
+                        provider: 8,
+                    },
+                    |db, request| {
+                        if matches!(request.intent, CommitIntent::Dispatch { .. }) {
+                            graph_identity::bind_workspace(db, request).unwrap();
+                        }
+                        Ok(())
+                    },
+                )
+                .unwrap();
+            match progress {
+                workspace_graph::Progress::Invoke(invocation) => {
+                    submitted += 1;
+                    let report = invocation
+                        .execute(EvidenceLimits {
+                            observations: 8,
+                            bytes: 8192,
+                        })
+                        .await;
+                    runtime
+                        .event(
+                            &mut store.connection,
+                            &catalog,
+                            Event::SettleObserved(report),
+                            |_, _| Ok(()),
+                        )
+                        .unwrap();
+                }
+                workspace_graph::Progress::Complete(_) => break,
+                workspace_graph::Progress::Waiting => (),
+                _ => panic!("Unexpected graph disposition"),
+            }
+        }
     }
-    for id in ["reading", "reading-again"] {
-        db.execute(
-            "INSERT INTO reading_attempts(id,receipt) VALUES(?1,?2)",
-            params![
-                id,
-                json!({"id":id,"language":"spanish","state":"succeeded"}).to_string()
-            ],
+    assert_eq!(submitted, 1);
+    // Admission alone cannot add a provider call to the usage report.
+    runtime
+        .begin(
+            &mut store.connection,
+            &workspace,
+            graph,
+            "queued",
+            BTreeMap::from([("value".into(), json!(2))]),
+            "shared",
+            "reading",
+            &json!({"scope":{"language":"spanish"}}),
+            |_, _| Ok(()),
         )
         .unwrap();
-    }
-    // A profile-discovery failure is not a dispatched synthesis execution.
-    results::begin(db, "unsubmitted", "speech").unwrap();
-    results::finish(
-        db,
-        "unsubmitted",
-        "other-key",
-        &json!({}),
-        None,
-        Some(&AppError::new(
-            ErrorCode::Provider,
-            "Configuration unavailable.",
-        )),
-    )
-    .unwrap();
     for _ in 0..2 {
-        let profile = store.profile().unwrap();
+        let report = store.profile().unwrap();
         assert_eq!(
             (
-                profile.global.attempts,
-                profile.global.input_tokens,
-                profile.global.output_tokens,
-                profile.global.unknown_usage
+                report.global.attempts,
+                report.global.input_tokens,
+                report.global.output_tokens,
+                report.global.unknown_usage
             ),
             (1, 7, 11, 0)
         );
-        let spanish = profile
-            .languages
-            .iter()
-            .find(|row| row.id == "spanish")
-            .unwrap();
-        assert_eq!((spanish.attempts, spanish.input_tokens), (1, 7));
-        assert!(
-            profile
+        for language in ["spanish", "french"] {
+            let scope = report
                 .languages
                 .iter()
-                .filter(|row| row.id != "spanish")
-                .all(|row| row.attempts == 0)
-        );
-        for id in [&first, &second] {
-            let partner = profile.personas.iter().find(|row| &row.id == id).unwrap();
+                .find(|row| row.id == language)
+                .unwrap();
             assert_eq!(
-                (
-                    partner.attempts,
-                    partner.input_tokens,
-                    partner.output_tokens
-                ),
+                (scope.attempts, scope.input_tokens, scope.output_tokens),
                 (1, 7, 11)
             );
         }
-        assert_eq!(
-            profile.personas.iter().map(|row| row.attempts).sum::<i32>(),
-            2
-        );
-        results::set_capacity(db, 0).unwrap();
+        assert!(report.personas.iter().all(|row| row.attempts == 0));
+        crate::ai::results::set_capacity(&store.connection, 0).unwrap();
     }
     drop(store);
     let reopened = Store::open(&path).unwrap();
     assert_eq!(reopened.profile().unwrap().global.attempts, 1);
-    assert!(
-        results::for_consumer(&reopened.connection, "reading")
-            .unwrap()
-            .is_none()
-    );
-    let receipt = results::receipt_for_consumer(&reopened.connection, "reading")
+    let receipt = workspace_graph::receipt(&reopened.connection, "one")
         .unwrap()
         .unwrap();
-    assert_eq!(receipt["response"]["providerId"], "retained-id");
-    assert!(receipt["response"]["costMicros"].is_null());
+    assert_eq!(receipt["response"]["providerId"], "usage-request");
 }

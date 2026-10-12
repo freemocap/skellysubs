@@ -1,5 +1,38 @@
 use super::*;
 
+#[test]
+fn workspace_identity_reads_one_row_without_materializing_product_state() {
+    use std::sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    };
+    let directory = tempfile::tempdir().unwrap();
+    let store = Store::open(&directory.path().join("db")).unwrap();
+    let count = Arc::new(AtomicUsize::new(0));
+    let measured = count.clone();
+    store
+        .connection
+        .progress_handler(
+            1,
+            Some(move || {
+                measured.fetch_add(1, Ordering::Relaxed);
+                false
+            }),
+        )
+        .unwrap();
+    let expected = store.snapshot().unwrap().learner.id;
+    let projection_steps = count.swap(0, Ordering::Relaxed);
+    assert_eq!(store.learner_id().unwrap(), expected);
+    let identity_steps = count.load(Ordering::Relaxed);
+    store
+        .connection
+        .progress_handler(0, None::<fn() -> bool>)
+        .unwrap();
+    eprintln!("workspace_snapshot_vm_steps={projection_steps} identity_vm_steps={identity_steps}");
+    assert!(identity_steps < 50);
+    assert!(projection_steps > identity_steps);
+}
+
 #[cfg(unix)]
 #[test]
 fn application_data_and_database_are_owner_only() {

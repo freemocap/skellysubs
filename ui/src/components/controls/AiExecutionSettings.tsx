@@ -17,6 +17,7 @@ export function AiExecutionSettings({ settings, busy, error, change, reload }: {
   ]
   return <details className="ai-execution-settings" onToggle={event => { if (event.currentTarget.open) reload() }}>
     <summary>{tr('Automatic AI work')}</summary>
+    <div className="ai-execution-fields">
     <p className="hint">{tr('Coaching feedback')}: {tr('Automatic')}</p>
     <p className="hint">{tr('Changes apply to new messages. Saved and pending work stays unchanged.')}</p>
     {fields.map(([feature, label]) => <label className="form-row" key={feature}>
@@ -29,5 +30,6 @@ export function AiExecutionSettings({ settings, busy, error, change, reload }: {
       </select>
     </label>)}
     {error != null && <ErrorNotice error={error}>{nativeError(error)}</ErrorNotice>}
+    </div>
   </details>
 }

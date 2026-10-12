@@ -64,7 +64,7 @@ impl RecordingOwner {
                     .ok_or_else(|| fault("Conversation is unavailable."))?;
                 // The partner message the learner is answering.
                 let previous: Option<String> = store.connection.query_row(
-                    "SELECT m.text FROM messages m JOIN turns t ON t.id=m.turn_id WHERE m.conversation_id=?1 AND m.role='assistant' AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id) AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=t.id AND o.kind IN ('persona_reply','persona_opening') AND o.state='succeeded') ORDER BY m.sequence DESC LIMIT 1",
+                    "SELECT m.text FROM messages m JOIN turns t ON t.id=m.turn_id WHERE m.conversation_id=?1 AND m.role='assistant' AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id) AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=t.id AND o.channel IN ('persona_reply','persona_opening')) ORDER BY m.sequence DESC LIMIT 1",
                     [id], |row| row.get(0),
                 ).optional()?;
                 (

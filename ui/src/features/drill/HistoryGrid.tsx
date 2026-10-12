@@ -1,3 +1,4 @@
+import { reducedMotion } from '../../platform/appearance/motion'
 import { Component, createRef, type ReactNode } from 'react'
 
 type WordSnapshot = { rect: DOMRect; color: string }
@@ -13,7 +14,7 @@ export class HistoryGrid extends Component<Props, Record<string, never>, Snapsho
 
   getSnapshotBeforeUpdate(previous: Props): Snapshot {
     if (previous.motionKey === this.props.motionKey && previous.expandedId === this.props.expandedId) return null
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return null
+    if (reducedMotion()) return null
     const entries = [...(this.root.current?.querySelectorAll<HTMLElement>('[data-history-id]') ?? [])]
     const rows = new Map(entries.filter(element => element.dataset.historyId !== previous.expandedId)
       .map(element => [element.dataset.historyId!, element.getBoundingClientRect()]))

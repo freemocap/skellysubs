@@ -96,9 +96,7 @@
 .detail-dialog:is(.dialog-sheet, .dialog-full)[open] { animation-name: surface-in-from-bottom; }
 .detail-dialog.dialog-drawer[open] { animation-name: surface-in-from-start; }
 .detail-dialog.dialog-drawer[open]:dir(rtl) { animation-name: surface-in-from-end; }
-@media (prefers-reduced-motion: reduce) {
-  .detail-dialog[open], .detail-dialog[open]::backdrop { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .detail-dialog[open], :where(:root[data-motion="reduced"]) .detail-dialog[open]::backdrop { animation: none; }
 
 /* Shared dialogs can expand to the viewport rather than fixing reports to their initial width. */
 .modal, .detail-dialog { resize: both; min-width: min(280px, 100%); min-height: 100px; }

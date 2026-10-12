@@ -25,6 +25,8 @@ pub(crate) use workspace::{
 };
 
 pub struct Store {
+    pub(crate) workspace_graphs: crate::ai::workspace_graph::Runtime,
+    pub(crate) graph_runtime: crate::conversations::execution::graph_runtime::Runtime,
     pub(crate) config: crate::configuration::Registry,
     pub(crate) connection: Connection,
     pub(crate) session_id: String,
@@ -32,7 +34,6 @@ pub struct Store {
     /// Where credential identifiers are recorded outside the database, so a
     /// factory reset can remove secrets even when the workspace will not open.
     pub(crate) credential_index: std::path::PathBuf,
-    pub(crate) speech_delivery: crate::speech::delivery::DeliveryBuffer,
     pub(crate) audio_analysis: std::sync::Arc<crate::speech::analysis::signal_cache::AnalysisGate>,
     /// Where drill attempt audio is stored, beside the workspace database.
     pub(crate) drill_audio: std::path::PathBuf,

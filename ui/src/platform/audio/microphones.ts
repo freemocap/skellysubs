@@ -10,7 +10,7 @@ export async function listMicrophones(requestAccess: boolean): Promise<Microphon
   if (native.source === 'native') return native
   if (!navigator.mediaDevices?.enumerateDevices) throw new Error('This device does not list microphones.')
   let inputs = (await navigator.mediaDevices.enumerateDevices()).filter(device => device.kind === 'audioinput')
-  if (requestAccess && inputs.some(device => !device.label)) {
+  if (requestAccess && (!inputs.length || inputs.some(device => !device.label || !device.deviceId))) {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     stream.getTracks().forEach(track => track.stop())
     inputs = (await navigator.mediaDevices.enumerateDevices()).filter(device => device.kind === 'audioinput')

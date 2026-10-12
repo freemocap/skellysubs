@@ -30,19 +30,43 @@ it('revokes a pending token request when another utterance starts and never play
   expect(api.play).not.toHaveBeenCalled()
 })
 
-it('prepares the spectrum before playback and does not play if preparation is superseded', async () => {
+it('starts playback while inspection is pending and interruption stops it', async () => {
   api.read.mockResolvedValue({ audioBase64: 'AA==', receipt: {} })
+  const stop = vi.fn()
+  api.play.mockImplementation(() => ({ play: async () => {}, stop }))
   let inspected!: () => void
   const onAudio = vi.fn(() => new Promise<void>(resolve => { inspected = resolve }))
   const pending = speakSelection({ text: 'sí', language: 'spanish', variety: null, explanation: 'english', explanationVariety: null, aid: 'speech' }, new AbortController().signal, vi.fn(), 1, 1, { onAudio })
   await vi.waitFor(() => expect(onAudio).toHaveBeenCalledOnce())
-  expect(api.play).not.toHaveBeenCalled()
+  expect(api.play).toHaveBeenCalledOnce()
   interruptSpeech()
   inspected()
   await expect(pending).rejects.toThrow()
-  expect(api.play).not.toHaveBeenCalled()
+  expect(stop).toHaveBeenCalledOnce()
 })
 
+
+it('reports inspection failure and stops playback without leaving it detached', async () => {
+  api.read.mockResolvedValue({ audioBase64: 'AA==', receipt: {} })
+  const stop = vi.fn()
+  api.play.mockImplementation(() => ({ play: async () => {}, stop }))
+  const failure = new Error('Inspection failed')
+  await expect(speakSelection({ text: 'go', language: 'english', variety: null, explanation: 'english', explanationVariety: null, aid: 'speech' }, new AbortController().signal, vi.fn(), 1, 1, { onAudio: async () => { throw failure } })).rejects.toBe(failure)
+  expect(api.play).toHaveBeenCalledOnce()
+  expect(stop).toHaveBeenCalledOnce()
+})
+
+it('retains cancellation when playback finishes before inspection', async () => {
+  api.read.mockResolvedValue({ audioBase64: 'AA==', receipt: {} })
+  api.play.mockImplementation((_audio, finish) => ({ play: async () => finish(), stop: vi.fn() }))
+  let inspected!: () => void
+  const onAudio = vi.fn(() => new Promise<void>(resolve => { inspected = resolve }))
+  const pending = speakSelection({ text: 'go', language: 'english', variety: null, explanation: 'english', explanationVariety: null, aid: 'speech' }, new AbortController().signal, vi.fn(), 1, 1, { onAudio })
+  await vi.waitFor(() => expect(onAudio).toHaveBeenCalledOnce())
+  interruptSpeech()
+  inspected()
+  await expect(pending).rejects.toThrow()
+})
 
 it('forwards cancellation and its reason without AbortSignal.any', async () => {
   const any = Object.getOwnPropertyDescriptor(AbortSignal, 'any')

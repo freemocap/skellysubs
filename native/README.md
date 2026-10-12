@@ -22,7 +22,75 @@ problem. Declarative language-config overrides are a documented last resort,
 only after the shared approach has been shown insufficient. Preserve original
 text; normalization belongs only to the operation that requires it.
 
+## Native graph integration
+
+Native graph publication adapters now cover reading helpers and assessment/feedback
+with receipt-owned disclosure and transactional learning credit (workspace format
+63). Format 64 adds native audio receipts separately from evictable payloads under
+the existing shared cache budget. Format 65 records delivered-audio identity
+against native consumers without retaining another audio copy. Format 66 is a no-op compatibility marker; it changes no persisted data.
+Format 70 records each native assessment receipt's producer engine and run,
+preserving prior results and disclosures.
+Format 69 adds message-owned native helper requests for explicit fresh runs.
+Existing results and source identities remain intact.
+Format 68 adds workspace-owned native execution and bounded reading projections.
+Standalone text reading commands use those engines; transcription, standalone
+speech and proposal conversion remain in progress (migration step 5).
+Format 67 adds message-owned native playback requests, without duplicating audio
+or conversation turns. Explicit playback uses the shared speech graph.
+Ordinary partner Send and every opening entry point now admit native graphs through
+the application command transaction. The application host binds their text,
+structured-response, evidence and speech capabilities. Conversation controls and
+revisions also use native ownership. Other AI entry points and running-app
+acceptance remain on the
+[production checklist](../docs/notes/ai-graph-production-integration.md).
+
 ## Source folder map
+
+`application/conversation_reads/` owns the ordinary conversation display response
+and its workspace-lifetime memory cache. A cold read uses the existing validated
+projection; unchanged reads reuse its encoded JSON without SQL, graph inspection
+or repeated encoding. The cache is bounded to 32 MiB and keyed by conversation,
+page, session and the owning SQLite connection's in-memory change counter. Local
+writes invalidate it conservatively, including rolled-back writes. Navigation-only
+`OpenConversation` commands preserve current content and advance its observation
+revision under the same store guard as commit. If that command gains a new
+display-affecting side effect, remove or revise this optimization and its parity
+test. Other commands must not promote cached content.
+
+Conversation responses also carry an ephemeral decimal `contentRevision`, taken
+from that connection's mutation counter. Within a session, conversation and page,
+retaining this token means retaining the same display fields even when navigation
+advances the observation revision. The UI keeps message/history object identities
+and skips learner refreshes in that case. Different tokens trigger normal refresh;
+numeric token ordering breaks ties between same-revision history/live responses.
+Cold reads may assign a newer token conservatively. This is not a persisted
+version, execution identity or cross-session comparison key.
+
+Rendering outside the store lock may finish after another write; such a response
+is never installed as the current cache entry. The ordinary watcher observes the
+new revision on its next read. Reset clears retained responses; fatal workspace
+state prevents cache access. This relies on exclusive workspace ownership and
+does not detect unsupported writes from another connection or offline corruption
+on every warm display hit. Protected storage/execution reads, startup validation
+and persisted history are unchanged. This cache is a derived display projection,
+never authority for commands, graph execution or result adoption.
+
+`application/learning_reads.rs` applies the same workspace version and exact
+navigation exception to skill evidence, language totals and scoped effort
+progress. Its 16 MiB encoded-value cache shares the bounded cache implementation
+in `application/response_cache.rs` with graph inspection. Encoding and warm
+decoding happen outside the store guard. Credit publication, award claims and
+time-dependent reports remain uncached; their writes invalidate display entries.
+
+The scheduler retains its 100 ms wake interval, but an unchanged idle workspace
+requires no SQL or graph inspection. `application/scheduler.rs` remembers a scan
+only when it returned no claim and made no writes. Each tick still checks actual
+provider capacity; any capacity, session or database change requires a new scan.
+Navigation can preserve an exact idle observation because it changes no scheduling
+input. A scan that advances/adopts/cancels without launching work is not idle and
+must remain eligible for another scan. This is a memoized scheduler observation,
+not another readiness model or permission to bypass dispatch/adoption validation.
 
 | Folder | Responsibility |
 | --- | --- |
@@ -56,6 +124,136 @@ content-free script/Unicode comparison metadata. Its serialized diagnostic field
 remain stable when called by audio transport. Language-specific test examples,
 localized messages and font asset declarations are data, not exceptions for
 embedding language behavior in feature code.
+
+### Executable graph foundation
+
+`ai/graph/` owns the typed DAG compiler, bound operation registry, composition,
+execution state machine and inspection. It has no product, database or provider
+dependencies. All application AI workflows execute through graph hosts. Follow the
+[foundations](../docs/notes/ai-graph-foundations.md) and
+[semantic profile](../docs/notes/ai-graph-core-semantics.md) when extending it.
+The executable artifact owns topology; run state overlays that artifact.
+
+`graph::DurableEngine` implements the reducer's
+[owner-transaction contract](../docs/notes/ai-graph-durability.md).
+`ai/graph_store/` supplies SQLite storage. A partition belongs to a conversation
+or workspace and an exact executable catalog. Protected reads verify native
+bytes, stamps and integrity. The domain owner checks authority and stages
+publication in the adapter's single transaction.
+
+`turn_execution_owners` declares each turn's channel, engine, run and artifact.
+`conversations/execution/graph_publication/` publishes replies, assessment receipts,
+reading results and stable learning effects from adopted graph values. Exact source,
+attempt and producing execution identify publication. One-time credit and product
+state commit together. Revisions preserve predecessor wording and coach history,
+remove the dependent partner suffix and revoke replaced-source authority.
+
+`conversations/execution/graph_runtime/` owns admission, source status, controls,
+recovery and usage. `application/graph_execution.rs` binds credentials, provider
+admission, transport, bounded provisional text and checks after asynchronous work.
+`application/native_reading.rs`, `native_speech.rs`, `native_transcription.rs` and
+`commands/proposal_execution/native.rs` connect workspace-owned workflows.
+The [integration checklist](../docs/notes/ai-graph-production-integration.md) records
+implementation, verification and running-app acceptance separately.
+
+`execution/context.rs` validates captured prompt context while preserving exact
+text and source identity. `coach_graph.rs` binds its validated output to the typed
+prose operation; `partner_graph/` composes reply, opening and helper artifacts.
+Shared language, learning and speech operations own their typed contracts.
+
+`ai/transport/graph_identity.rs` stages immutable wire request IDs per producer
+inside Dispatch. Recovery retains those IDs; explicit retry creates a new producer.
+`graph_authority.rs` checks captured sources, ownership, holds, destination and
+credentials. Adoption checks authority independently of dispatch; pause alone does
+not revoke an available result. `ai/transport/graph_evidence.rs` retains classified,
+redacted metadata and partial outcomes. `graph_request.rs` connects an authorized
+producer to transport and native evidence/provisional capture. The application host
+persists reports and owns admission and asynchronous authority checks.
+
+`DurableLimits` requires an explicit maximum serialized settlement-event size.
+Admission reserves checkpoint space for running outcomes, consumer adoption and
+recovery. Oversized outcomes fail without truncation; callers must retain them.
+Reservations do not guarantee that a storage commit succeeds.
+The [inspection export](../docs/notes/ai-graph-inspection.md) preserves these same
+graph types while replacing sensitive constant values with explicit omissions.
+Generate its TypeScript contracts with the normal `npm run contracts` command;
+do not add a frontend graph catalog. Activity IPC exposes live snapshots, timeline pages and revision-bound attempt evidence.
+Saved checkpoints expose the same definition projection without executable
+handlers through `Checkpoint::inspection_definition`. This reads historical
+evidence; live recovery still requires compatible implementations. The
+[retention contract](../docs/notes/ai-graph-retention.md) describes formats 2/3/4 snapshots
+and atomic compaction. Compaction retains exact old checkpoint bytes, preserves
+absolute revisions and checks settlement reservations against the new footprint.
+Recovery audits the full bounded archive chain through native replay. Explicit
+record eviction and cold payload reads work through the native SQLite adapter;
+production workflow wiring, automatic eviction policy and selective history deletion
+are not implemented.
+The [historical reader](../docs/notes/ai-graph-history.md) reconstructs selected
+logical cuts without handlers, using the same validated structure and reducer.
+Attempt pages retain full topology and native node facts with explicit continuation
+cursors. It accepts a read-only `HistoryStore`; executable recovery still requires
+exact handlers. Opening a reader still audits and holds the retained native state.
+Declare `DurableLimits.state` and `HistoricalLimits.state` explicitly. Their
+[retained record ceilings](../docs/notes/ai-graph-state-bounds.md) reject new run,
+attempt or execution allocation atomically while leaving admitted settlement,
+adoption and recovery possible. Cancellation and compaction do not free record
+allowances; eviction does not free them either. These are logical count limits,
+not loaded-payload counts or RSS bounds.
+`state.rs` owns canonical run, attempt and execution records. Runs hold current
+attempt references; retry history lives in independent attempt rows. Format-4
+checkpoint bases retain primary-row commitments and allocation/control scalars.
+Formats 2/3 remain readable and audited by native replay. `records.rs` separates
+stable identities from optional loaded records with copy-on-write payload ownership.
+Transactions share unchanged loaded payloads and load cold rows before mutation.
+`attempts.rs` derives a per-run sorted ID
+index from primary rows, rebuilding it on decode without changing checkpoint encoding.
+Historical pages seek within that index and read only selected attempt rows; node
+facts follow current references. The index adds no scheduling or visualization rules.
+`executions.rs` indexes producer IDs by immutable reuse key; attempts also index
+their immutable execution association. The reducer uses these queries for reuse
+and current consumers while retaining eligibility and oldest-producer selection.
+Indexes rebuild from primary records and are not separately persisted. An unresolved
+execution-ID index narrows resource occupancy, dispatch, cancellation cleanup,
+producer recovery and settlement reservations to unfinished producers. Queries
+enumerate IDs without dereferencing payloads; required rows use typed access.
+The [native record transaction boundary](../docs/notes/ai-graph-record-storage.md)
+adds changed primary rows to the same owner commit as checkpoint/publication.
+Executable recovery audits bounded, stamp-bound record reads against native replay
+before writing recovery state. The workspace SQL adapter and isolated fixtures
+implement this contract. Durable adoption loads its three typed native records through
+`record_access.rs` and uses the same adoption decision as resident replay.
+Durable dispatch also loads the selected owner, producer, shared consumers and
+unresolved capacity records through that interface. `dispatch.rs` owns the shared
+dispatch decision; invocation uses the loaded work only after the owner commit.
+Advance now uses stored reads for dependencies, reuse and admission through the
+same native scheduler as replay. `dependencies.rs` separates read errors from
+graph availability, and `staged_access.rs` reads records created earlier within
+the same atomic event without requiring premature persistence.
+Other event decisions now use typed reads too. `consumer_reads.rs` resolves current
+membership from loaded records selected by immutable associations. Stored inspection
+and output methods use the same native projection/resolution as resident access.
+`record_evidence.rs` verifies stored rows against a revision-bound key/digest catalog
+rebuilt from validated replay and updated only after acknowledged commits. Reads no
+longer require resident payloads for integrity comparison. `evict_records` archives
+the event suffix before dropping all primary payloads; it preserves IDs, indexes,
+commitments and complete history. `resident_usage` reports loaded counts separately
+from `state_usage`. Use `read_inspection` and `read_outputs` after eviction; resident
+helpers return `record_not_resident` when required data is unloaded. Subsequent
+events load required rows and retain mutated rows until the next explicit eviction.
+Startup still replays full history. An aggregate working-set budget, disk-backed
+indexes and production integration remain open.
+Declare `DurableLimits.record_reads` explicitly. It caps the number of native row
+reads and their aggregate encoded bytes across each owner operation, including
+mutation and final reservations. The remaining byte allowance reaches the adapter
+before body allocation. Budget exhaustion rejects the complete operation; it does
+not hide nodes or commit partial fanout. `set_record_read_limits` changes only owner
+admission policy and allows an explicit retry. This bounds stored-read work, not
+decoded heap/RSS, resident payloads or checkpoint allocation. Startup recovery's
+row audit and Recover event share one outer allowance; full replay still precedes it.
+The [finite refinement check](../docs/notes/ai-graph-refinement.md) compares the
+native reducer with an independent model of two consumers sharing one producer.
+It exhausts that lifecycle's reachable states; broader scheduling, durable storage
+and production integration remain outside its verified scope.
 
 ### Reply-help execution
 
@@ -259,27 +457,11 @@ Transport tests use local loopback servers; allow localhost binding when running
 inside a sandbox. They do not need live AI providers. The UI registration check
 reads `src/application/startup.rs`, where the `generate_handler!` list lives.
 
-`ai/policy/retry.rs` owns bounded automatic retries for eligible provider
-requests, transcription, read-aloud, reading help and persona generation. All use
-one runner with typed outcomes and owner-specific authority/persistence callbacks:
-three retries, 1/2/4-second exponential delays plus up to 250ms jitter, and a
-30-second cumulative wait budget. Numeric and HTTP-date `Retry-After` values are
-minimum waits; values outside the budget stop automatic retry. Only explicit
-HTTP/embedded/empty-stream 429 refusals qualify, including a server 502 containing
-an explicit upstream 429. Quota exhaustion, ambiguous transport failures, partial
-output, credentials and validation failures are not replayed.
-
-The admission permit stays held. Cancellation, pause and destination authority
-are checked in flight, during waits and before each submission. Each scheduled
-retry's redacted refusal, timestamp and delay is persisted before sleeping and
-retained on success, failure or cancellation. Audio's typed outcomes preserve
-partial metadata even when a response is not retryable.
-
-Grouped operations are retried individually by `server/app/inference/retry.py`
-inside their existing claim; native code never replays a group or completed sibling.
-The Python executor implements the same limits because those requests execute in
-a separate runtime and each round needs its own server ledger reservation. Adapters
-remain single-submission transports. See the [audit](../docs/notes/ai-retry-audit-2026-09-21.md).
+Native provider submissions use graph-owned execution identity. Uncertain outcomes
+remain explicit and require requested retry. `ai/policy/retry.rs` retains retry
+metadata reported by the service. Server-side rate-limit retries are bounded by
+`server/app/inference/retry.py`; completed siblings and entire groups are not replayed.
+Response diagnostics retain attempt timing, refusal reasons and retry history.
 
 The root Tauri launcher selects this directory explicitly. Moving the native
 project root can invalidate cached build-script paths;
@@ -313,10 +495,9 @@ explanations and speech requests outside conversation turns.
 `application/commands/reading.rs` registers begin, run, cancel and receipt inspection.
 Requests reuse conversation aid contracts and validate captured connection/workspace
 authority. Accepted fresh text help earns exploration effort, never skill XP;
-saved results, speech playback and failed requests earn none. `application/reading_results.rs` owns
-shared generated-text execution; `ai/results/` retains evictable validated
-payloads and durable content-free execution receipts. `reading_attempts` records
-independent consumers and links to those executions. Closing a card cannot cancel
+saved results, speech playback and failed requests earn none. `application/native_reading.rs` owns graph execution; `reading_attempts` records
+source-owned product receipts. Graph records retain producing execution evidence;
+validated reading payloads use bounded caches. Closing a card cannot cancel
 another consumer or abandon accounting for submitted work.
 
 Text identity includes the exact prompt, output contract, model, configuration,
@@ -330,12 +511,16 @@ Speech and Drill reference playback use the shared local speech result lifecycle
 
 ### Shared transcription execution
 
-`application/transcription_results.rs` owns recognizer admission, credentials,
-transport, bounded retries and shared execution settlement. Exact audio bytes,
+`application/native_transcription.rs` owns recognizer graph admission and settlement.
+The shared host supplies credentials, transport and classified response evidence. Exact audio bytes,
 model, endpoint/account/workspace, captured language/variety/tag and prompt context
 identify a result. No text normalization, audio preprocessing or recognition
 settings change accompanies reuse. Validated text and timing are evictable local
-payloads; the shared repository does not copy original recordings into its cache.
+payloads. Format 74 also retains the accepted source WAV and original transport
+content in the private shared inference cache, independently of normalized results.
+Format 75 adds blob-reference indexes without changing retained records. Stream
+chunks still commit individually; metadata-only capture events skip cache pruning,
+and new blob bytes trigger eviction only when the shared capacity is exceeded.
 Hidden server processing changes are not discovered by local request identity.
 
 `speech/recording/voice.rs` retains per-recording inspection, Chat/Drill ownership,
@@ -354,6 +539,21 @@ Views attach the current shared receipt, including settlement after owner depart
 The existing capture/reservation pause and access checks remain in force; reuse
 does not authorize starting a new recording while execution is paused.
 
+### Private computation originals
+
+`ai/content.rs` stores original request/response bytes and accepted microphone WAVs
+under the learner's inference-cache capacity and LRU policy. Graph execution and
+recording identities remain durable when payloads are evicted; inspections disclose
+availability, byte count, digest, credential removal and complete/partial/interrupted
+state. Content reads validate immutable captured bytes after releasing the store lock.
+Transport capture is at the app-to-inference-service boundary. Transcription retains
+actual multipart field values and WAV bytes separately. It does not claim to contain
+an upstream provider exchange that the app never received. Actual credentials remain
+excluded, while prompts, transcripts and response content remain available privately.
+Diagnostic logs and exports retain their separate content-free policy. Older missing
+originals cannot be reconstructed by this migration. Conversation inputs retain all
+contributing recording IDs, including across restart and edited-message acceptance.
+
 ### Manual Drill storage
 
 `drill/` owns immutable phrases, attempts with grapheme/word comparisons, and
@@ -368,8 +568,7 @@ transcripts, comparisons and usage receipts remain. References use a separate
 and interrupted cleanup is retried on startup. In-progress replay owns loaded
 bytes rather than a file handle. SQLite incremental vacuum reclaims freed media
 pages after pruning, file publication and phrase deletion. Export includes the
-database and `drill-audio`; explicit Factory Reset removes both. Development data may be deleted when its feature format changes; do not build
-legacy format conversion to retain it.
+database and `drill-audio`; explicit Factory Reset removes both. Persisted format changes follow the complete workspace migration chain.
 
 ### Transcription boundary
 
@@ -395,11 +594,8 @@ model or route fallback after provider failure. New workspaces default to
 saved v3 speech selections to v4 once; later learner choices are preserved.
 Shared declared capabilities select alternatives before dispatch when needed.
 
-Only the current schema is supported. Desktop credentials use
-`com.freemocap.skellyspeak.credentials`. There is no fallback read or relocation
-from the retired provider namespace; existing sessions can be re-established.
-Deletion uses only the current namespace. Retired Keychain entries are left untouched
-so cleanup cannot provoke authorization for a removed access route.
+Workspace formats migrate through the supported consecutive chain. Desktop
+credential access and deletion use `com.freemocap.skellyspeak.credentials`.
 
 ### Persona generation
 
@@ -416,7 +612,7 @@ the language of generated prose.
 Drill and persona proposals use `application/commands/proposal_execution.rs` for
 structured completion, admission, cancellation checks and refusal handling.
 `ai/generation/` owns their proposal registry and `generation_attempts` consumer
-receipts; `ai/results/` retains independent execution receipts. Each feature owns
+receipts; workspace graph records retain producing execution receipts. Each feature owns
 its prompt and response projection. Every Generate action dispatches fresh work;
 there is no prompt deduplication or reusable proposal cache. Closing a submitted
 proposal cannot abandon its execution accounting or authorize late adoption.
@@ -433,7 +629,7 @@ revalidates their source before adoption. Schema 36 uses fresh development data.
 
 ### Workspace migrations
 
-Workspace format **54** upgrades supported files from baseline **45**. The format
+Workspace format **72** upgrades supported files from baseline **45**. Format 72 adds prospective daily streak storage without backfilling activity or altering XP. Runtime tracking is app-wide only; the original scope column remains for format compatibility. The format
 covers SQL and persisted JSON; application release numbers are independent.
 `storage/store/migrations/` owns consecutive steps and frozen historical contracts.
 `storage/schemas/` owns the current schema, including settings and result tables

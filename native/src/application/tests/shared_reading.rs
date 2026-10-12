@@ -41,6 +41,7 @@ async fn shared_translation_survives_restart_and_pause_without_another_paid_atte
     let first = first.unwrap();
     let second = second.unwrap();
     worker.join().unwrap();
+    crate::ai::inspection::verify_workspace_reads(&state.lock().unwrap());
     assert_eq!(first.translation, second.translation);
     assert_eq!(
         first.receipt["response"]["sourceExecutionId"],
@@ -48,6 +49,19 @@ async fn shared_translation_survives_restart_and_pause_without_another_paid_atte
     );
     assert_ne!(first.receipt["attemptId"], second.receipt["attemptId"]);
     assert_eq!(state.lock().unwrap().profile().unwrap().global.attempts, 1);
+    assert_eq!(
+        state
+            .lock()
+            .unwrap()
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
+    );
     let effort =
         crate::learning::effort::read(&state.lock().unwrap().connection, "spanish").unwrap();
     assert_eq!(effort.explorations, 1);
@@ -79,10 +93,11 @@ async fn shared_translation_survives_restart_and_pause_without_another_paid_atte
     assert_eq!(state.lock().unwrap().profile().unwrap().global.attempts, 1);
     let retry = begin(&state, reading::ReadingAid::Translation, true);
     assert!(run_owned_reading(&state, &retry).await.is_err());
-    let held = results::receipt_for_consumer(&state.lock().unwrap().connection, &retry)
+    let held = crate::ai::workspace_graph::receipt(&state.lock().unwrap().connection, &retry)
         .unwrap()
         .unwrap();
-    assert_eq!(held["state"], "failed");
+    // A rejected request releases its native consumer; it is not left queued.
+    assert_eq!(held["state"], "cancelled");
     assert_eq!(held["dispatched"], false);
     assert_eq!(
         crate::learning::effort::read(&state.lock().unwrap().connection, "spanish")
@@ -197,7 +212,7 @@ async fn retry_fills_missing_glosses_preserves_accepted_spans_and_reuse_is_local
     );
     assert_eq!(state.lock().unwrap().profile().unwrap().global.attempts, 2);
     assert!(
-        results::receipt_for_consumer(&state.lock().unwrap().connection, &a)
+        crate::ai::workspace_graph::receipt(&state.lock().unwrap().connection, &a)
             .unwrap()
             .is_some()
     );
@@ -212,9 +227,9 @@ fn exact_contract_identity_is_independent_of_consumer_but_sensitive_to_inputs() 
     let key = |input| {
         reading::Request::capture(&store, input)
             .unwrap()
-            .prepare_text()
-            .unwrap()
-            .key
+            .native_context()
+            .unwrap()["sourceKey"]
+            .clone()
     };
     let original = input(reading::ReadingAid::Translation);
     assert_eq!(key(original.clone()), key(original.clone()));
@@ -262,7 +277,7 @@ async fn an_explicit_retry_does_not_join_work_already_in_flight() {
                         .unwrap()
                         .connection
                         .query_row(
-                            "SELECT count(*) FROM inference_executions WHERE dispatched=1",
+                            "SELECT count(*) FROM workspace_graph_transport_identities",
                             [],
                             |r| r.get(0),
                         )
@@ -311,9 +326,10 @@ async fn submitted_work_settles_after_its_last_card_closes() {
     release.send(()).unwrap();
     tokio::time::timeout(Duration::from_secs(3), async {
         loop {
-            let receipt = results::receipt_for_consumer(&state.lock().unwrap().connection, &a)
-                .unwrap()
-                .unwrap();
+            let receipt =
+                crate::ai::workspace_graph::receipt(&state.lock().unwrap().connection, &a)
+                    .unwrap()
+                    .unwrap();
             if receipt["state"] == "succeeded" {
                 break;
             }
@@ -337,7 +353,7 @@ async fn cache_publication_failure_retains_provider_usage_and_response_details()
     let state = Application::start(&dir.path().join("shared.sqlite3"), None);
     let (base, worker) = translation_server(json!("Hello house"));
     configure(&state, &base);
-    state.lock().unwrap().connection.execute_batch("CREATE TRIGGER reject_reading_cache BEFORE INSERT ON inference_results BEGIN SELECT RAISE(ABORT,'cache publication refused'); END;").unwrap();
+    state.lock().unwrap().connection.execute_batch("CREATE TRIGGER reject_reading_cache BEFORE INSERT ON workspace_reading_cache BEGIN SELECT RAISE(ABORT,'cache publication refused'); END;").unwrap();
     let id = begin(&state, reading::ReadingAid::Translation, false);
     let Err(error) = run_owned_reading(&state, &id).await else {
         panic!("publication must fail explicitly")
@@ -348,10 +364,15 @@ async fn cache_publication_failure_retains_provider_usage_and_response_details()
         "structured-receipt"
     );
     let store = state.lock().unwrap();
-    let receipt = results::receipt_for_consumer(&store.connection, &id)
+    let receipt = crate::ai::workspace_graph::receipt(&store.connection, &id)
         .unwrap()
         .unwrap();
-    assert_eq!(receipt["state"], "failed");
+    assert_eq!(receipt["state"], "succeeded");
+    let activity = reading::activity(&store).unwrap();
+    assert_eq!(
+        activity.iter().find(|row| row["id"] == id).unwrap()["state"],
+        "failed"
+    );
     assert_eq!(receipt["response"]["providerId"], "structured-receipt");
     assert_eq!(receipt["response"]["inputTokens"], 21);
     assert_eq!(store.profile().unwrap().global.attempts, 1);

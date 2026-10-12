@@ -222,7 +222,7 @@ it('exposes theme and palette and autosaves them', async () => {
   expect(screen.queryByLabelText('Surface depth')).toBeNull()
   fireEvent.click(screen.getByRole('radio', { name: 'Warm' }))
   await waitFor(() => expect(backend.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({
-    appearance: { palette: 'warm' },
+    appearance: { palette: 'warm', motion: 'system' as const },
   }), expect.any(Object)))
 })
 
@@ -259,4 +259,21 @@ it('saves the XP effects switch without changing the sound preference or voice v
   expect(toggle).toBeChecked()
   fireEvent.click(toggle)
   await waitFor(() => expect(backend.saveSettings).toHaveBeenCalledWith(expect.objectContaining({ xp_effects: false, reward_sounds: 'follow_tts', voice_volume: 100 }), expect.any(Object)))
+})
+
+
+it('autosaves motion choices and resets to follow system', async () => {
+  render(<SettingsModal onClose={vi.fn()} />)
+  fireEvent.change(await screen.findByLabelText('Search settings'), { target: { value: 'motion' } })
+  expect(screen.getByRole('radio', { name: 'Follow system' })).toHaveAttribute('aria-checked', 'true')
+  for (const [label, motion] of [['Full animation', 'full'], ['Reduced motion', 'reduced'], ['Follow system', 'system']]) {
+    fireEvent.click(screen.getByRole('radio', { name: label }))
+    await waitFor(() => expect(backend.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({
+      appearance: expect.objectContaining({ motion }),
+    }), expect.any(Object)))
+  }
+  fireEvent.click(screen.getByRole('radio', { name: 'Full animation' }))
+  await waitFor(() => expect(backend.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({ appearance: expect.objectContaining({ motion: 'full' }) }), expect.any(Object)))
+  fireEvent.click(screen.getByRole('button', { name: 'Reset appearance' }))
+  await waitFor(() => expect(backend.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({ appearance: { palette: 'cool', motion: 'system' } }), expect.any(Object)))
 })

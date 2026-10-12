@@ -3,7 +3,7 @@ import { drillAttemptAudio, inspectDrillAudio } from '../../platform/ipc/drill'
 import type { AudioInspection, DrillAttemptView } from '../../generated/contracts'
 
 /** A retained attempt recording and native's analysis of it. */
-export interface AttemptAudio { attemptId: string; base64: string; inspection: AudioInspection }
+export interface AttemptAudio { attemptId: string; base64: string; inspection: AudioInspection | null }
 
 /** Read one attempt's retained audio and analyse it against its item. A pruned
  * or never-kept recording loads nothing; a failed read is kept for the caller
@@ -21,6 +21,7 @@ export function useAttemptAudio(itemId: string | null, attempt: DrillAttemptView
     void drillAttemptAudio(attemptId)
       .then(async base64 => {
         if (!current) return
+        setAudio({ attemptId, base64, inspection: null })
         const inspection = await inspectDrillAudio(itemId, base64, { attemptId })
         if (current) setAudio({ attemptId, base64, inspection })
       })

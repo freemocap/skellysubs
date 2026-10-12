@@ -4,7 +4,7 @@ mod response;
 
 pub use payload::{
     GLOSS_OUTPUT_TOKENS, MAX_OUTPUT_TOKENS, RequestOutput, dispatch_payload, payload,
-    payload_with_output, structured_output,
+    payload_with_output, structured_output, validate_temperature,
 };
 pub use request::{client, complete, complete_with_output};
 pub use response::{decode, strip_prose_emojis, validate_prose};

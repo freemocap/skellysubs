@@ -95,7 +95,7 @@ pub(crate) fn read(db: &Connection, target: &str) -> Result<EffortProgress> {
     read_scoped(db, target, None)
 }
 /// Counts and recent awards for a language, optionally narrowed to one conversation.
-fn read_scoped(
+pub(crate) fn read_scoped(
     db: &Connection,
     target: &str,
     conversation: Option<&str>,
@@ -165,9 +165,7 @@ pub(crate) fn get_effort_progress(
     target: String,
     conversation: Option<String>,
 ) -> Result<EffortProgress> {
-    let store = state.lock()?;
-    store.config.language(&target)?;
-    read_scoped(&store.connection, &target, conversation.as_deref())
+    state.read_effort_progress(&target, conversation.as_deref())
 }
 /// Presentation is separate from credit; claiming never changes a total.
 #[tauri::command]

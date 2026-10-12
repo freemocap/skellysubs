@@ -4,7 +4,6 @@ import { ConversationErrorScope } from './reading/ConversationErrorScope'
 import { ConversationReadingProvider } from './reading/ConversationReadingProvider'
 import { interruptSpeech } from '../../platform/audio/speech'
 import { ConversationDirectionSettings } from './session/ConversationDirectionSettings'
-import { useAttemptStreamSync } from '../../state/session/attempt-streams'
 import type { CoachControl, ConversationStartConfig } from '../../generated/contracts'
 import { AskCoachContext } from '../../components/learning/AskCoachButton'
 import { useI18n } from '../../components/localization/i18n'
@@ -147,6 +146,7 @@ export default function ConversationPage({
   useEffect(() => () => stopRewardSounds(), [])
   const [panelTab, setPanelTab] = useState<'coaching' | 'progress'>('coaching')
   const [coachDraft, setCoachDraft] = useState('')
+  const [coachRevealRequest, setCoachRevealRequest] = useState(0)
   const mode = useNavigationStore(state => state.mode)
   const [reviewing, setReviewing] = useState<Set<number>>(new Set())
   const consumeCoachDraft = useCallback(() => setCoachDraft(''), [])
@@ -177,6 +177,7 @@ export default function ConversationPage({
     setPinnedId(null)
     setSelectedMessage(null)
     setCoachDraft('')
+    setCoachRevealRequest(0)
     setReviewing(new Set())
     setError(null)
     setSending(false)
@@ -221,7 +222,6 @@ export default function ConversationPage({
   const selectedChatRef = useRef(currentChatId)
   selectedChatRef.current = currentChatId
   const details = useConversationDetails(currentChatId, snapshotRevision)
-  useAttemptStreamSync(currentChatId)
   const [creatingConversation, setCreatingConversation] = useState(false)
   const creatingContactConversation = useRef(false)
   const [contactError, setContactError] = useState<string | null>(null)
@@ -329,7 +329,10 @@ export default function ConversationPage({
   useEffect(() => {
     onGuideActionReady?.(async action => {
       await runGuideAction(action)
-      if (action.kind === 'coach') guideCoachOpen.current()
+      if (action.kind === 'coach') {
+        setCoachRevealRequest(request => request + 1)
+        guideCoachOpen.current()
+      }
     })
     return () => onGuideActionReady?.(null)
   }, [onGuideActionReady, runGuideAction])
@@ -531,7 +534,7 @@ export default function ConversationPage({
     setEditRevision(snapshot?.revision ?? null)
     setInput(selected.user ?? '')
     setError(null)
-    inputEvidence.current = unreportedInput()
+    inputEvidence.current = { ...unreportedInput(), recording_ids: snapshot?.turns.find(turn => turn.id === selected.turnId)?.recordingIds }
     // On phones, leave the microphone visible until the learner taps to type.
     if (!isMobile) composer.current?.querySelector('textarea')?.focus()
   }
@@ -567,7 +570,11 @@ export default function ConversationPage({
       if (text) {
         draftRecording.current = result.inspection.recordingId
         inputEvidence.current.modality = 'speech_transcript'
-        if (settingsRef.current?.auto_send && (!sending || editingTurnId !== null)) {
+        const autoSend = settingsRef.current?.auto_send && (!sending || editingTurnId !== null)
+        inputEvidence.current.recording_ids = autoSend
+          ? [result.inspection.recordingId]
+          : [...new Set([...(inputEvidence.current.recording_ids ?? []), result.inspection.recordingId])]
+        if (autoSend) {
           logInfo('[mic] auto-send enabled — sending transcription')
           void sendRef.current(text)
         } else {
@@ -593,7 +600,7 @@ export default function ConversationPage({
     else pending.release(take.recordingId, 'transcribing')
   }, [takeKey])
   const takeFailed = take?.state === 'failed' ? take : null
-  const speech = useMessageSpeech(snapshot, currentChatId, Boolean(settings?.auto_speak) && !mic.recording && !mic.transcribing, active, settings?.tts_rate ?? 1, (settings?.master_volume ?? 100) * (settings?.voice_volume ?? 100) / 10000)
+  const speech = useMessageSpeech(snapshot, currentChatId, Boolean(settings?.auto_speak), active, settings?.tts_rate ?? 1, (settings?.master_volume ?? 100) * (settings?.voice_volume ?? 100) / 10000, mic.recording || mic.transcribing)
   stopSpeechRef.current = () => { speech.stop(); interruptSpeech() }
   const toggleMic = () => { stopSpeechRef.current(); void mic.toggleMic() }
   // Tap or Hold: in Hold the microphone records while the pad is held down.
@@ -668,7 +675,8 @@ export default function ConversationPage({
   const composerActivity = (
     <div className="composer-activity">
       <AiStatus transcribing={mic.transcribing} scheduling={sending && !pendingReply} turns={snapshot?.turns ?? []}
-        synthesizing={speech.phase === 'preparing'} buffering={speech.phase === 'buffering'} latest={latestTurn?.assistant ? latestTurn.execution ?? undefined : undefined} onInspectLatest={inspectLatest} />
+        synthesizing={speech.phase === 'preparing'} buffering={speech.phase === 'buffering'} latest={latestTurn?.assistant ? latestTurn.execution ?? undefined : undefined} onInspectLatest={inspectLatest}
+        beside={null} />
     </div>
   )
   const chatComposer = (
@@ -794,6 +802,7 @@ export default function ConversationPage({
           onTab={setPanelTab}
           autoSendDraft
           draftQuestion={coachDraft}
+          revealRequest={coachRevealRequest}
           onDraftConsumed={consumeCoachDraft}
           pinnedTurn={pinnedTurn}
           nativeLanguageName={nativeLanguageName}
@@ -857,7 +866,7 @@ export default function ConversationPage({
                 {tr("Or set up AI access in another way")}
               </button>
             </div>
-          ) : turns.length === 0 && !error && !pendingMessage && (
+          ) : turns.length === 0 && !readError && !error && !pendingMessage && (
             snapshot && (snapshot.opening ? <OpeningStatus snapshot={snapshot} onActivity={() => useNavigationStore.getState().showOverlay('activity')} /> : startConfiguration && <ConversationStart conversationId={snapshot.conversationId} value={startConfiguration} onChange={value => setStartDraft({ id: snapshot.conversationId, value })} partnerSymbol={contactChoices.find(choice => choice.id === activeContactId)?.symbol} partnerName={details.persona ? personaName(details.persona.details) : undefined} key={snapshot.conversationId} topics={snapshot.topicChoices} busy={sending || pendingReply} onStart={startConversation} targetTag={targetLanguage?.languageTag ?? undefined} targetDir={rtl ? 'rtl' : 'ltr'} recording={mic.recording} transcribing={mic.transcribing} canPartnerStart={!input.trim() && !mic.recording && !mic.transcribing} onChangePartner={() => setPartnerMenuOpen(true)} onAboutPartner={details.persona ? () => setEditingPersonaId(details.persona!.id) : undefined} />)
           )}
           {snapshot?.phraseSeed && <details><summary>{tr('Starting phrase')}</summary><p dir="auto">{snapshot.phraseSeed}</p></details>}

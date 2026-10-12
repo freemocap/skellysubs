@@ -1,6 +1,6 @@
 import { MessageToolMenu } from './MessageToolMenu'
 import { useToolOverflow } from './useToolOverflow'
-import { useInspectorAnchor } from './useInspectorAnchor'
+import { useMessageToolAnchor } from './useMessageToolAnchor'
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { ToolbarIcon, type ToolbarIconName } from '../controls/ToolbarIcon'
 import { useI18n } from '../localization/i18n'
@@ -27,6 +27,7 @@ export interface MessageTool {
 
 /** The message's audio: play or stop reading it aloud. */
 export interface MessagePlay {
+  graphTarget?: Record<string, string>
   playing: boolean
   preparing?: boolean
   disabled?: boolean
@@ -61,7 +62,7 @@ export function MessageTools({ play, inspect, tools, actions, more, pending, men
   const [open, setOpen] = useState(false)
   const { root, measure, visible } = useToolOverflow(more.length, [...tools, ...more].map(tool => tool.key).join('|'), !!menuActions)
   const overflow = more.slice(visible)
-  const anchorInspector = useInspectorAnchor(inspect?.open)
+  const anchorTool = useMessageToolAnchor(JSON.stringify([inspect?.open, ...tools.map(tool => [tool.key, tool.pressed]), ...more.map(tool => [tool.key, tool.pressed])]))
   const panelId = useId()
   const menuButton = useRef<HTMLButtonElement>(null)
   const closeMenu = useCallback(() => setOpen(false), [])
@@ -72,16 +73,21 @@ export function MessageTools({ play, inspect, tools, actions, more, pending, men
     className={`${inMenu ? 'message-tools-item' : 'message-tools-icon'}${tool.pending ? ' is-hydrating' : ''}`}
     aria-label={inMenu ? tool.ariaLabel : tool.ariaLabel ?? tool.label} title={inMenu ? undefined : tool.label}
     aria-pressed={tool.pressed} aria-expanded={tool.pressed} aria-haspopup={tool.opensDialog ? 'dialog' : undefined}
-    aria-hidden={waiting || undefined} disabled={waiting || tool.disabled} onKeyDown={stop} onClick={event => { stop(event); if (inMenu && tool.opensDialog) setOpen(false); tool.onSelect() }}>
+    aria-hidden={waiting || undefined} disabled={waiting || tool.disabled} onKeyDown={stop} onClick={event => {
+      stop(event)
+      if (!inMenu && tool.pressed !== undefined && !tool.opensDialog) anchorTool(event.currentTarget)
+      if (inMenu && tool.opensDialog) setOpen(false)
+      tool.onSelect()
+    }}>
     <ToolbarIcon name={tool.icon} />{inMenu && tool.label}</button>
   return <div className={`message-actions message-tools${waiting ? ' reply-activity' : ''}`} data-pending={waiting ? '' : undefined} dir={uiDirection} ref={root} onDoubleClick={stop}
     onKeyDown={event => { if (event.key === 'Escape' && open) { event.stopPropagation(); setOpen(false) } }}>
     <span className="message-tools-primary" aria-hidden={waiting || undefined} inert={waiting}>
-    {play && <button type="button" className="message-tools-icon message-tools-play" disabled={play.disabled}
+    {play && <button {...play.graphTarget} type="button" className="message-tools-icon message-tools-play" disabled={play.disabled}
       aria-label={tr(play.preparing ? "Cancel speech preparation" : play.playing ? "Stop playback" : "Play")} title={tr(play.preparing ? "Cancel speech preparation" : play.playing ? "Stop playback" : "Play")}
       onClick={event => { stop(event); play.onToggle() }}>{play.preparing ? <><span className="activity-spinner" aria-hidden="true" /><span className="hydrating-announce" role="status">{tr("Preparing audio…")}</span></> : <ToolbarIcon name={play.playing ? 'stop' : 'play'} />}</button>}
     {inspect && <button type="button" className="message-tools-icon" aria-label={tr("Inspect recording")} title={tr("Inspect recording")} aria-pressed={inspect.open} disabled={inspect.disabled}
-      onClick={event => { stop(event); anchorInspector(event.currentTarget); inspect.onToggle() }}><ToolbarIcon name="waveform" /></button>}
+      onClick={event => { stop(event); anchorTool(event.currentTarget); inspect.onToggle() }}><ToolbarIcon name="waveform" /></button>}
     {(play || inspect) && tools.length > 0 && <span className="message-tools-divider" aria-hidden="true" />}
     {tools.map(tool => toolButton(tool, false))}
     </span>

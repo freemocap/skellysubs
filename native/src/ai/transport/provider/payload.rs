@@ -174,11 +174,16 @@ pub fn dispatch_payload(
     }
     let mut body =
         payload_with_output(&dispatch.model, &dispatch.messages, dispatch.route, output)?;
-    if !dispatch.temperature.is_finite() || !(0.0..=2.0).contains(&dispatch.temperature) {
+    validate_temperature(dispatch.temperature)?;
+    body["temperature"] = serde_json::json!(dispatch.temperature);
+    Ok(body)
+}
+
+pub fn validate_temperature(temperature: f64) -> Result<()> {
+    if !temperature.is_finite() || !(0.0..=2.0).contains(&temperature) {
         return Err(structured_error(
             "Temperature must be finite and between 0 and 2.",
         ));
     }
-    body["temperature"] = serde_json::json!(dispatch.temperature);
-    Ok(body)
+    Ok(())
 }

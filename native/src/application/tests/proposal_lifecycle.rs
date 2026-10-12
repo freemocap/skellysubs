@@ -8,14 +8,14 @@ use std::time::Duration;
 async fn failed_shared_dispatch_rolls_back_submission_and_invents_no_usage() {
     let (_dir, app) = app("http://127.0.0.1:1/v1");
     let id = reserve(&app, input()).unwrap();
-    app.lock().unwrap().connection.execute_batch("CREATE TRIGGER block_execution_dispatch BEFORE UPDATE OF dispatched ON inference_executions BEGIN SELECT RAISE(ABORT,'fixture dispatch failure'); END").unwrap();
+    app.lock().unwrap().connection.execute_batch("CREATE TRIGGER block_execution_dispatch BEFORE INSERT ON workspace_graph_transport_identities BEGIN SELECT RAISE(ABORT,'fixture dispatch failure'); END").unwrap();
     assert_eq!(run(&app, &id).await.err().unwrap().code, ErrorCode::Storage);
     let store = app.lock().unwrap();
     let activity = generation_receipts::activity_for(&store.connection, "drill").unwrap();
     assert!(activity.attempts[0].dispatched_at.is_none());
     assert_eq!(activity.usage.attempts, 0);
     assert_eq!(store.profile().unwrap().global.attempts, 0);
-    let source = crate::ai::results::receipt_for_consumer(&store.connection, &id)
+    let source = crate::ai::workspace_graph::receipt(&store.connection, &id)
         .unwrap()
         .unwrap();
     assert_eq!(source["dispatched"], false);
@@ -65,7 +65,7 @@ async fn identical_generation_actions_are_fresh_and_accounted_once_each() {
     let activity = generation_receipts::activity_for(&store.connection, "drill").unwrap();
     assert_eq!(activity.usage.attempts, 2);
     for attempt in activity.attempts {
-        let source = results::receipt_for_consumer(&store.connection, &attempt.id)
+        let source = crate::ai::workspace_graph::receipt(&store.connection, &attempt.id)
             .unwrap()
             .unwrap();
         assert_eq!(source["state"], "succeeded");
@@ -108,7 +108,7 @@ async fn dropped_command_settles_submitted_execution_without_publishing_candidat
             "unknown"
         );
         assert_eq!(
-            results::receipt_for_consumer(&store.connection, &id)
+            crate::ai::workspace_graph::receipt(&store.connection, &id)
                 .unwrap()
                 .unwrap()["state"],
             "pending"
@@ -122,7 +122,7 @@ async fn dropped_command_settles_submitted_execution_without_publishing_candidat
         loop {
             let finished = {
                 let store = app.lock().unwrap();
-                let source = results::receipt_for_consumer(&store.connection, &id)
+                let source = crate::ai::workspace_graph::receipt(&store.connection, &id)
                     .unwrap()
                     .unwrap();
                 source["state"] == "succeeded"
@@ -137,7 +137,7 @@ async fn dropped_command_settles_submitted_execution_without_publishing_candidat
     .unwrap();
     worker.join().unwrap();
     let store = app.lock().unwrap();
-    let receipt = results::receipt_for_consumer(&store.connection, &id)
+    let receipt = crate::ai::workspace_graph::receipt(&store.connection, &id)
         .unwrap()
         .unwrap();
     assert_eq!(receipt["state"], "succeeded");
@@ -169,7 +169,7 @@ async fn dropping_an_unconsumed_delivered_result_cannot_leave_a_running_proposal
     // Let the producer send its result, without polling the command's receiver.
     tokio::time::timeout(Duration::from_secs(5), async {
         loop {
-            let settled = results::receipt_for_consumer(&app.lock().unwrap().connection, &id)
+            let settled = crate::ai::workspace_graph::receipt(&app.lock().unwrap().connection, &id)
                 .unwrap()
                 .is_some_and(|r| r["state"] == "succeeded");
             if settled {
@@ -201,7 +201,7 @@ async fn shared_receipt_failure_refuses_publication_and_keeps_response_diagnosti
         structured_server(|_| json!({"candidates":[candidate("PRIVATE-PROPOSAL")]}).to_string());
     let (_dir, app) = app(&url);
     let id = reserve(&app, input()).unwrap();
-    app.lock().unwrap().connection.execute_batch("CREATE TRIGGER block_execution_finish BEFORE UPDATE OF state ON inference_executions WHEN NEW.state!='pending' BEGIN SELECT RAISE(ABORT,'fixture execution receipt failure'); END").unwrap();
+    app.lock().unwrap().connection.execute_batch("CREATE TRIGGER block_execution_finish BEFORE UPDATE ON workspace_graph_records WHEN json_type(CAST(NEW.payload AS TEXT),'$.value.outcome')='object' BEGIN SELECT RAISE(ABORT,'fixture execution receipt failure'); END").unwrap();
     let error = run(&app, &id).await.err().unwrap();
     worker.join().unwrap();
     assert_eq!(error.code, ErrorCode::Storage);

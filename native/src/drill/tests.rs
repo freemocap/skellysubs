@@ -164,11 +164,11 @@ fn a_drill_recording_receipt_belongs_to_its_item_and_goes_with_it() {
         attempt.transcription_attempt_id.as_deref(),
         Some("recording")
     );
-    // The recording counted once for the language, and never for a partner.
+    // Product publication alone does not record provider execution.
     let profile = store.profile().unwrap();
-    assert_eq!(profile.global.attempts, 1);
+    assert_eq!(profile.global.attempts, 0);
     assert!(profile.personas.iter().all(|persona| persona.attempts == 0));
-    // Deleting the item takes the provider receipt with it.
+    // Deleting the item takes its recording receipt with it.
     store.delete_drill_item(&item.id).unwrap();
     assert!(
         crate::speech::recording::transcription::views(&store.connection, &owner)

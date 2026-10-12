@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import type { Disposition, InspectionSnapshot } from '../../../generated/graph-contracts'
+import definition from '../../../generated/coach-graph.json'
 import type { TurnView } from '../../../generated/contracts'
 import { useConnectionHealth } from '../../../state/session/connection-health'
 import { useNavigationStore } from '../../../state/navigation/navigation'
@@ -19,18 +21,16 @@ function connection(configured: boolean) {
   if (configured) useConnectionHealth.setState({ routes: { hosted: { revision: 1, status: 'connected', checkedAt: 1, error: null } } })
 }
 
-function turn(id: string, operations: [string, string, string][], attempts: Partial<TurnView['attempts'][number]>[] = []): TurnView {
-  return {
-    id, state: 'assisting', paused: false, hold: null, route: 'hosted', replacesTurnId: null, replacedBy: null,
-    operations: operations.map(([operationId, kind, state]) => ({ id: operationId, kind, state, dependencies: [], role: 'standard', contractVersion: 1, sourceMessageId: null })),
-    attempts: attempts.map((attempt, index) => ({ id: `${id}-a${index}`, operationId: 'x', state: 'running', requestedModel: 'model-m', actualModel: null, providerId: null,
-      startedAt: '2026-09-30T10:00:00.000Z', finishedAt: null, inputTokens: null, outputTokens: null, error: null, unpublishedText: null, ...attempt })),
-  }
+function turn(id: string, nodes: Record<string, Disposition>): TurnView {
+  return { id, state: 'assisting', paused: false, hold: null, route: 'hosted', replacesTurnId: null, replacedBy: null,
+      nativeGraph: { ...definition, artifact: definition.artifact as InspectionSnapshot['artifact'],
+      engine: 'engine', revision: '1', run: id, nodes, activation: {}, paused: false, active: true,
+      stepping: null, step_available: false, attempts: {}, reasons: {} } }
 }
 
-const idle = { transcribing: false, scheduling: false, turns: [], synthesizing: false }
-const glossing = turn('t1', [['g', 'persona_word_gloss', 'running']], [{ operationId: 'g', requestedModel: 'gloss-model' }])
-const translating = turn('t1', [['t', 'reply_translation', 'running']], [{ operationId: 't', requestedModel: 'translation-model' }])
+const idle = { transcribing: false, scheduling: false, turns: [], synthesizing: false, beside: null }
+const glossing = turn('t1', { reply_gloss: 'Running' })
+const translating = turn('t1', { reply_translation: 'Running' })
 
 beforeEach(() => {
   useConnectionHealth.setState({ routes: {} })
@@ -119,13 +119,13 @@ it('focuses the popped-out AI window instead of opening a second view', () => {
   expect(useNavigationStore.getState().overlay).toBeNull()
 })
 
-it('moves while an operation runs and names the step, with its kind and model on hover', () => {
+it('moves while a graph node runs and exposes its exact identity', () => {
   connection(true)
   const view = render(<AiStatus {...idle} turns={[glossing]} />)
   expect(view.container.querySelector('.ai-status')).toHaveAttribute('data-busy', 'true')
   const line = view.container.querySelector('.ai-status-line')
-  expect(line).toHaveTextContent('Glossing reply words…')
-  expect(line).toHaveAttribute('title', 'persona_word_gloss · gloss-model')
+  expect(line).toHaveTextContent('reply gloss')
+  expect(line).toHaveAttribute('title', 'reply_gloss')
   // Background work is shown, not announced.
   expect(view.container.querySelector('.ai-status-announce')).toBeEmptyDOMElement()
 })
@@ -141,17 +141,17 @@ it('keeps each line up long enough to read before the next replaces it', () => {
   connection(true)
   const view = render(<AiStatus {...idle} turns={[glossing]} />)
   const text = () => view.container.querySelector('.ai-status-text')?.textContent
-  expect(text()).toBe('Glossing reply words…')
+  expect(text()).toBe('reply gloss…')
   view.rerender(<AiStatus {...idle} turns={[translating]} />)
-  expect(text()).toBe('Glossing reply words…')
+  expect(text()).toBe('reply gloss…')
   act(() => { vi.advanceTimersByTime(1000) })
-  expect(text()).toBe('Translating partner reply…')
+  expect(text()).toBe('reply translation…')
 })
 
 it('shows the longest wording that fits the line, and re-chooses as the line resizes', () => {
   connection(true)
   // Rendered widths of each wording, and the room the line has, as layout would report them.
-  const widths: Record<string, number> = { 'Glossing reply words…': 135, 'Glossing words…': 102, 'Glossing…': 62 }
+  const widths: Record<string, number> = { 'Transcribing recorded audio…': 135, 'Transcribing audio…': 102, 'Transcribing…': 62 }
   let room = 77
   let resized: (() => void) | undefined
   vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { resized = callback } observe() {} disconnect() {} })
@@ -162,10 +162,10 @@ it('shows the longest wording that fits the line, and re-chooses as the line res
     return this.classList.contains('ai-status-line') ? room : 0
   })
   try {
-    const view = render(<AiStatus {...idle} turns={[glossing]} />)
+    const view = render(<AiStatus {...idle} transcribing />)
     const shown = () => view.container.querySelector('.ai-status-text')?.textContent ?? null
-    expect(shown()).toBe('Glossing…')
-    for (const [next, expected] of [[120, 'Glossing words…'], [300, 'Glossing reply words…'], [40, null]] as const) {
+    expect(shown()).toBe('Transcribing…')
+    for (const [next, expected] of [[120, 'Transcribing audio…'], [300, 'Transcribing recorded audio…'], [40, null]] as const) {
       room = next
       act(() => resized?.())
       expect(shown()).toBe(expected)
@@ -179,7 +179,7 @@ it('shows the longest wording that fits the line, and re-chooses as the line res
 it('links the latest exchange’s failed follow-on work to its AI activity', () => {
   connection(true)
   const onInspectLatest = vi.fn()
-  const failed = turn('t1', [['r', 'persona_reply', 'succeeded'], ['g', 'persona_word_gloss', 'failed']])
+  const failed = turn('t1', { reply: 'Adopted', gloss: 'Failed' })
   render(<AiStatus {...idle} turns={[failed]} latest={failed} onInspectLatest={onInspectLatest} />)
   fireEvent.click(screen.getByRole('button', { name: '1 failed' }))
   expect(onInspectLatest).toHaveBeenCalledOnce()

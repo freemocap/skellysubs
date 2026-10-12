@@ -2,11 +2,13 @@ import { expect, it } from 'vitest'
 import type { TurnView } from '../../generated/contracts'
 import { countWords, humanizeKind, operationPhase, retainedReplyText, turnActivity } from './activity-summary'
 
-function turn(operations: [string, string, string][], attempts: Partial<TurnView['attempts'][number]>[] = []) {
-  return {
-    operations: operations.map(([id, kind, state]) => ({ id, kind, state, dependencies: [], role: 'standard', contractVersion: 1, sourceMessageId: null })),
-    attempts: attempts.map((attempt, index) => ({ id: `a${index}`, requestedModel: 'm', actualModel: null, providerId: null, finishedAt: null, inputTokens: null, outputTokens: null, error: null, unpublishedText: null, state: 'running', startedAt: '2026-09-18T10:00:00.000Z', operationId: 'x', ...attempt })),
-  } as Pick<TurnView, 'operations' | 'attempts'>
+import type { InspectionSnapshot } from '../../generated/graph-contracts'
+import definition from '../../generated/coach-graph.json'
+
+function turn(nodes: InspectionSnapshot['nodes']): Pick<TurnView, 'nativeGraph' | 'nativePreview'> {
+  return { nativeGraph: { ...definition, artifact: definition.artifact as InspectionSnapshot['artifact'],
+    engine: 'engine', revision: '1', run: 'run', nodes, activation: {}, paused: false, active: true,
+    stepping: null, step_available: false, attempts: {}, reasons: {} } }
 }
 
 it('groups every recorded state, including held', () => {
@@ -19,23 +21,21 @@ it('names operations only by their kind', () => {
   expect(humanizeKind('persona_word_gloss')).toBe('persona word gloss')
 })
 
-it('summarizes running, waiting, held and finished work in start order', () => {
-  const activity = turnActivity(turn(
-    [['c', 'persona_context', 'succeeded'], ['r', 'persona_reply', 'running'], ['t', 'user_translation', 'running'], ['w', 'reply_translation', 'waiting_dependencies'], ['h', 'skill_assessment', 'held']],
-    [
-      { operationId: 'c', state: 'succeeded', startedAt: '2026-09-18T10:00:00.000Z', finishedAt: '2026-09-18T10:00:00.100Z' },
-      { operationId: 't', startedAt: '2026-09-18T10:00:00.200Z' },
-      { operationId: 'r', startedAt: '2026-09-18T10:00:00.300Z' },
-    ]), '¡Qué bien! Fuiste al mercado.')
-  expect(activity).toMatchObject({ total: 5, done: 1, waiting: 1, held: 1, running: ['user translation', 'persona reply'], replyRunning: true, replyWords: 5, lastFinished: 'persona context', settled: false })
+it('summarizes graph dispositions and leaves unavailable timing unknown', () => {
+  expect(turnActivity(turn({ context: 'Adopted', reply: 'Running', translation: 'Running', gloss: 'Waiting', assessment: 'Held', help: 'Unrequested', speech: 'Failed' })))
+    .toMatchObject({ total: 7, done: 1, waiting: 1, held: 1, failed: 1, running: ['reply', 'translation'], replyRunning: false, lastFinished: null, settled: false, elapsedMs: null })
+  expect(turnActivity(turn({ reply: 'Adopted', help: 'Unrequested' }))).toMatchObject({ settled: true, elapsedMs: null })
 })
 
-it('reports elapsed time once settled', () => {
-  const activity = turnActivity(turn([['c', 'persona_context', 'succeeded'], ['r', 'persona_reply', 'succeeded']], [
-    { operationId: 'c', state: 'succeeded', startedAt: '2026-09-18T10:00:00.000Z', finishedAt: '2026-09-18T10:00:00.500Z' },
-    { operationId: 'r', state: 'succeeded', startedAt: '2026-09-18T10:00:00.500Z', finishedAt: '2026-09-18T10:00:04.000Z' },
-  ]))
-  expect(activity).toMatchObject({ settled: true, elapsedMs: 4000, replyWords: null })
+it('counts only the reply preview associated with the running execution', () => {
+  const current = turn({ reply: 'Running' })
+  current.nativeGraph!.attempts.reply = [{ id: 'a', execution: 'e', state: 'Running', acquisition: 'Produced' }]
+  current.nativePreview = { attempt: 'a', execution: 'e', live: true, complete: false, uncommitted: false, retained_sequence: null,
+    capture: { session: 's', sequence: '1', text: '¡Qué bien! Fuiste al mercado.', failure: null } }
+  expect(turnActivity(current)).toMatchObject({ replyRunning: true, replyWords: 5 })
+  expect(retainedReplyText(current)).toBe('¡Qué bien! Fuiste al mercado.')
+  current.nativePreview.execution = 'other'
+  expect(turnActivity(current)).toMatchObject({ replyRunning: false, replyWords: null })
 })
 
 it('counts words with the platform segmenter, including spaceless scripts', () => {
@@ -44,7 +44,7 @@ it('counts words with the platform segmenter, including spaceless scripts', () =
   expect(countWords('')).toBe(0)
 })
 
-it('exposes the retained text of a reply that never became a message', () => {
-  expect(retainedReplyText(turn([['r', 'persona_reply', 'failed']], [{ operationId: 'r', state: 'failed', unpublishedText: 'Cut off' }]))).toBe('Cut off')
-  expect(retainedReplyText(turn([['t', 'user_translation', 'failed']], [{ operationId: 't', state: 'failed', unpublishedText: 'ignored' }]))).toBeNull()
+it('does not invent activity or retained text without graph evidence', () => {
+  expect(turnActivity({})).toMatchObject({ total: 0, running: [], replyWords: null, elapsedMs: null })
+  expect(retainedReplyText(undefined)).toBeNull()
 })

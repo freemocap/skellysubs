@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
+import { useState } from 'react'
 import { MessageTools } from './MessageTools'
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals() })
@@ -81,4 +82,35 @@ it('keeps owner actions in a keyboard and outside-tap dismissible menu even when
   fireEvent.click(trigger)
   fireEvent.pointerDown(document.body)
   expect(screen.queryByRole('button', { name: 'Explain sentence' })).toBeNull()
+})
+
+it('keeps an inline reading toggle under the pointer as its result grows, until the learner scrolls', () => {
+  const callbacks = new Set<() => void>()
+  vi.stubGlobal('ResizeObserver', class {
+    constructor(callback: () => void) { callbacks.add(callback) }
+    observe() {} disconnect() {} unobserve() {}
+  })
+  let growth = 0
+  let scroller: HTMLDivElement
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+    return { top: 100 + growth - (scroller?.scrollTop ?? 0), width: 300 } as DOMRect
+  })
+  function Example() {
+    const [open, setOpen] = useState(false)
+    return <div style={{ overflowY: 'auto' }}><div className="msg"><MessageTools play={null} inspect={null} actions={null} more={[]}
+      tools={[{ key: 'words', label: 'Words', icon: 'words', pressed: open, onSelect: () => { growth = open ? 0 : 30; setOpen(!open) } }]} /></div></div>
+  }
+  const view = render(<Example />)
+  scroller = view.container.firstElementChild as HTMLDivElement
+  scroller.scrollTop = 20
+  const button = screen.getByRole('button', { name: 'Words' })
+  const top = button.getBoundingClientRect().top
+  fireEvent.click(button)
+  expect(button.getBoundingClientRect().top).toBe(top)
+  act(() => { growth = 45; callbacks.forEach(callback => callback()) })
+  expect(button.getBoundingClientRect().top).toBe(top)
+  fireEvent.wheel(scroller)
+  const stopped = scroller.scrollTop
+  act(() => { growth = 60; callbacks.forEach(callback => callback()) })
+  expect(scroller.scrollTop).toBe(stopped)
 })

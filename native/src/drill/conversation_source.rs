@@ -89,7 +89,7 @@ impl Store {
             (i64::MAX, 0)
         };
         // Bound scans too: a page can be empty and still provide a continuation.
-        let rows=self.connection.prepare("SELECT m.rowid,m.id,m.conversation_id,m.turn_id,m.role,m.text FROM messages m JOIN turns t ON t.id=m.turn_id JOIN conversations c ON c.id=m.conversation_id JOIN contacts p ON p.id=c.contact_id WHERE m.rowid<=?1 AND c.language_id=?2 AND json_extract(t.context,'$.languageContext.variety_id')=?3 AND c.archived=0 AND p.archived=0 AND NOT EXISTS(SELECT 1 FROM turns n WHERE n.replaces_turn_id=t.id) AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=t.id AND o.kind IN ('persona_reply','persona_opening')) ORDER BY m.rowid DESC LIMIT 50")?
+        let rows=self.connection.prepare("SELECT m.rowid,m.id,m.conversation_id,m.turn_id,m.role,m.text FROM messages m JOIN turns t ON t.id=m.turn_id JOIN conversations c ON c.id=m.conversation_id JOIN contacts p ON p.id=c.contact_id WHERE m.rowid<=?1 AND c.language_id=?2 AND json_extract(t.context,'$.languageContext.variety_id')=?3 AND c.archived=0 AND p.archived=0 AND NOT EXISTS(SELECT 1 FROM turns n WHERE n.replaces_turn_id=t.id) AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=t.id AND o.channel IN ('persona_reply','persona_opening')) ORDER BY m.rowid DESC LIMIT 50")?
             .query_map(params![before,scope.language_id,scope.variety_id],|r|Ok((r.get::<_,i64>(0)?,r.get::<_,String>(1)?,r.get::<_,String>(2)?,r.get::<_,String>(3)?,r.get::<_,String>(4)?,r.get::<_,String>(5)?)))?.collect::<rusqlite::Result<Vec<_>>>()?;
         let count = rows.len();
         let mut candidates = Vec::new();

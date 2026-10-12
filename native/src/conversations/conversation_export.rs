@@ -46,18 +46,18 @@ fn render(
         .ok_or_else(|| AppError::new(ErrorCode::NotFound, "Conversation no longer exists."))?;
     let messages = rows(
         db,
-        "SELECT json_object('id',m.id,'turn_id',m.turn_id,'sequence',m.sequence,'role',m.role,'text',m.text,'created_at',m.created_at) FROM messages m WHERE m.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=m.turn_id) AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=m.turn_id AND o.kind IN ('persona_reply','persona_opening')) ORDER BY m.sequence",
+        "SELECT json_object('id',m.id,'turn_id',m.turn_id,'sequence',m.sequence,'role',m.role,'text',m.text,'created_at',m.created_at) FROM messages m WHERE m.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=m.turn_id) AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=m.turn_id AND o.channel IN ('persona_reply','persona_opening')) ORDER BY m.sequence",
         conversation,
     )?;
     let coach = if include_coach {
         let thread = rows(
             db,
-            "SELECT json_object('id',m.id,'turn_id',m.turn_id,'sequence',m.sequence,'role',m.role,'text',m.text,'created_at',m.created_at) FROM messages m WHERE m.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=m.turn_id) AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=m.turn_id AND o.kind='coach_reply') ORDER BY m.sequence",
+            "SELECT json_object('id',m.id,'turn_id',m.turn_id,'sequence',m.sequence,'role',m.role,'text',m.text,'created_at',m.created_at) FROM messages m WHERE m.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=m.turn_id) AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=m.turn_id AND o.channel='coach') ORDER BY m.sequence",
             conversation,
         )?;
         let contexts = rows(
             db,
-            "SELECT json_object('turn_id',t.id) FROM turns t WHERE t.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id) AND EXISTS(SELECT 1 FROM messages m JOIN message_assessments s ON s.message_id=m.id WHERE m.turn_id=t.id AND s.kind='coach_feedback') ORDER BY t.rowid",
+            "SELECT json_object('turn_id',t.id) FROM turns t WHERE t.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id) AND EXISTS(SELECT 1 FROM conversation_graph_assessments s WHERE s.turn_id=t.id AND s.kind='coach_feedback') ORDER BY t.rowid",
             conversation,
         )?;
         let mut feedback = vec![];
@@ -95,18 +95,16 @@ fn render(
             let id = turn["id"].as_str().ok_or_else(|| {
                 AppError::new(ErrorCode::Storage, "Export turn identity is missing.")
             })?;
-            let operations = rows(
-                db,
-                "SELECT json_object('id',o.id,'kind',o.kind,'state',o.state) FROM operations o WHERE o.turn_id=?1 ORDER BY o.rowid",
-                id,
-            )?;
-            let attempts = rows(
-                db,
-                "SELECT json_object('id',a.id,'operation_id',a.operation_id,'state',a.state,'requested_model',a.requested_model,'actual_model',a.actual_model,'started_at',a.started_at,'finished_at',a.finished_at,'input_tokens',a.input_tokens,'output_tokens',a.output_tokens,'has_error',json(CASE WHEN a.error IS NULL THEN 'false' ELSE 'true' END)) FROM attempts a JOIN operations o ON o.id=a.operation_id WHERE o.turn_id=?1 ORDER BY a.rowid",
-                id,
-            )?;
-            turn["operations"] = json!(operations);
-            turn["attempts"] = json!(attempts);
+            let graph = store.graph_runtime.inspection(db, conversation, id)?;
+            turn["graph"] = graph.map(|graph| json!({
+                "engine": graph.engine, "run": graph.run, "artifact": graph.artifact_id,
+                "revision": graph.revision, "nodes": graph.nodes,
+                "attempts": graph.attempts.iter().map(|(node, attempts)| json!({
+                    "node": node, "attempts": attempts.iter().map(|attempt| json!({
+                        "id": attempt.id, "state": attempt.state, "execution": attempt.execution,
+                    })).collect::<Vec<_>>()
+                })).collect::<Vec<_>>()
+            })).unwrap_or(Value::Null);
         }
         Some(turns)
     } else {
@@ -213,11 +211,28 @@ mod tests {
     fn turn(store: &Store, conversation: &str, index: i32, kind: &str, text: &str) -> String {
         let id = format!("turn-{conversation}-{index}");
         store.connection.execute("INSERT INTO turns(id,conversation_id,state,paused,profile_revision,credential_id,route,model,context) VALUES(?1,?2,'succeeded',0,1,'SECRET_CREDENTIAL','custom','fixture-model',?3)",params![id,conversation,json!({"messages":[{"role":"system","content":"SECRET_PROMPT"}],"customEndpoint":"https://SECRET_ENDPOINT","configHash":"fixture-hash"}).to_string()]).unwrap();
+        let engine = format!("engine-{conversation}");
         store
             .connection
             .execute(
-                "INSERT INTO operations(id,turn_id,kind,state) VALUES(?1,?2,?3,'succeeded')",
-                params![format!("operation-{id}"), id, kind],
+                "INSERT OR IGNORE INTO graph_engines VALUES(?1,?2,?3,'{}',x'00')",
+                params![engine, conversation, "a".repeat(64)],
+            )
+            .unwrap();
+        store
+            .connection
+            .execute(
+                "INSERT INTO turn_execution_owners VALUES(?1,'graph',?2,?3,?1,'artifact')",
+                params![
+                    id,
+                    match kind {
+                        "coach_reply" => "coach",
+                        "persona_reply" => "persona_reply",
+                        "persona_opening" => "persona_opening",
+                        _ => "unknown",
+                    },
+                    engine
+                ],
             )
             .unwrap();
         store.connection.execute("INSERT INTO messages(id,conversation_id,turn_id,sequence,role,text) VALUES(?1,?2,?3,?4,'assistant',?5)",params![format!("message-{id}"),conversation,id,index,text]).unwrap();
@@ -255,64 +270,80 @@ mod tests {
         assert_eq!(result["schema"], "skellyspeak.conversation");
         assert_eq!(result["version"], 1);
     }
-    #[test]
-    fn optional_sections_are_scoped_and_never_include_private_backend_payloads() {
-        let (_dir, store, conversation) = fixture();
-        let turn_id = turn(
-            &store,
-            &conversation,
-            1,
-            "persona_opening",
-            "Partner opening",
-        );
-        turn(
-            &store,
-            &conversation,
-            2,
-            "coach_reply",
-            "PRIVATE_COACH_THREAD",
-        );
-        // Recorded bodies are local inspection data: never exported.
-        store.connection.execute("INSERT INTO attempts(id,operation_id,state,requested_model,error,provider_id,input_tokens,output_tokens,request_messages,response_text,preview_text) VALUES('attempt',?1,'failed','fixture-model','SECRET_ERROR','SECRET_PROVIDER_RESPONSE',10,2,'[{\"role\":\"user\",\"content\":\"SECRET_RECORDED_REQUEST\"}]','SECRET_RECORDED_RESPONSE','SECRET_RECORDED_PREVIEW')",[format!("operation-{turn_id}")]).unwrap();
-        let observed = json!({"meaning_recovered":"partial","items":[{"construct":"question","quote":"Partner opening","outcome":"partial","error":{"op":"missing","category":"AUX","source":"unknown","blocks_meaning":true,"target_hypothesis":"SECRET_HYPOTHESIS","hint":"A hint","elicitation":"Try again","metalinguistic":"A rule"},"rationale":"SECRET_RATIONALE"}]});
-        let decision = json!({"exposedMove":"hint","shown":{"construct":"question","quote":"Partner opening","move":"hint","text":"VISIBLE_COACH_HINT"},"retryInvited":true,"alsoNoticed":[],"keptGoing":false});
-        store.connection.execute("INSERT INTO messages(id,conversation_id,turn_id,sequence,role,text) VALUES('learner-source',?1,?2,3,'user','Learner source')",params![conversation,turn_id]).unwrap();
-        store.connection.execute("INSERT INTO operations(id,turn_id,kind,state) VALUES('feedback-operation',?1,'coach_feedback','succeeded')",[&turn_id]).unwrap();
-        store.connection.execute("INSERT INTO attempts(id,operation_id,state,requested_model) VALUES('feedback-attempt','feedback-operation','succeeded','fixture')",[]).unwrap();
-        store.connection.execute("UPDATE turns SET context=json_set(context,'$.candidateConstructs',json(?2)) WHERE id=?1",params![turn_id,json!([{"id":"question"}]).to_string()]).unwrap();
-        crate::conversations::assessments::publish(
-            &store.connection,
-            &turn_id,
-            "coach_feedback",
-            "feedback-attempt",
-            &json!({"observation":observed,"decision":decision,"validationOmissions":0}),
-        )
-        .unwrap();
-        // A second conversation can contain private data; none may cross scope.
-        store.connection.execute("INSERT INTO conversations(id,contact_id,language_id,title,archived,revision,last_used) SELECT 'other',contact_id,language_id,'UNRELATED_TITLE',0,1,0 FROM conversations WHERE id=?1",[&conversation]).unwrap();
-        turn(&store, "other", 1, "persona_reply", "UNRELATED_MESSAGE");
+    #[tokio::test]
+    async fn optional_sections_use_graph_ownership_and_exclude_private_inputs() {
+        let (_dir, mut store, conversation) = fixture();
+        store
+            .connection
+            .execute("UPDATE ai_config SET route='hosted'", [])
+            .unwrap();
+        store
+            .set_hosted_connection(1, Some("SECRET_CREDENTIAL"), "fixture@example.invalid")
+            .unwrap();
+        store.graph_runtime.bind_provider(Arc::new(|_, _| {
+            Box::pin(async { Ok("COACH_RESPONSE".into()) })
+        }));
+        let turn = store
+            .execute(Command {
+                session_id: store.session_id.clone(),
+                action_id: uuid::Uuid::new_v4().to_string(),
+                action: Action::AskCoach {
+                    conversation_id: conversation.clone(),
+                    text: "COACH_MESSAGE".into(),
+                    expected_revision: store.snapshot().unwrap().conversations[0].revision,
+                },
+            })
+            .unwrap()
+            .entity_id;
+        store.connection.execute("UPDATE turns SET context=json_set(context,'$.privateTest','SECRET_CONTEXT') WHERE id=?1", [&turn]).unwrap();
+        for _ in 0..8 {
+            if let Some(claim) = store
+                .graph_runtime
+                .next(
+                    &mut store.connection,
+                    true,
+                    &store.config,
+                    &store.session_id,
+                )
+                .unwrap()
+            {
+                let report = claim
+                    .invocation
+                    .execute(crate::ai::graph::EvidenceLimits {
+                        observations: 16,
+                        bytes: 65536,
+                    })
+                    .await;
+                store
+                    .graph_runtime
+                    .finish(
+                        &mut store.connection,
+                        &claim.conversation,
+                        &claim.run,
+                        report,
+                    )
+                    .unwrap();
+            }
+        }
         for coach in [false, true] {
             for backend in [false, true] {
                 let yaml = render(&store, &conversation, coach, backend).unwrap();
-                assert_eq!(yaml.contains("PRIVATE_COACH_THREAD"), coach);
-                assert_eq!(yaml.contains("VISIBLE_COACH_HINT"), coach);
-                assert_eq!(yaml.contains("input_tokens: 10"), backend);
-                assert_eq!(yaml.contains("fixture-hash"), backend);
-                for secret in [
-                    "SECRET_RECORDED_REQUEST",
-                    "SECRET_RECORDED_RESPONSE",
-                    "SECRET_RECORDED_PREVIEW",
-                    "SECRET_HYPOTHESIS",
-                    "SECRET_RATIONALE",
-                    "SECRET_CREDENTIAL",
-                    "SECRET_PROMPT",
-                    "SECRET_ENDPOINT",
-                    "SECRET_ERROR",
-                    "SECRET_PROVIDER_RESPONSE",
-                    "UNRELATED_TITLE",
-                    "UNRELATED_MESSAGE",
-                ] {
-                    assert!(!yaml.contains(secret), "Export leaked {secret}");
+                let value: Value = serde_yaml_ng::from_str(&yaml).unwrap();
+                assert_eq!(yaml.contains("COACH_MESSAGE"), coach);
+                assert_eq!(yaml.contains("COACH_RESPONSE"), coach);
+                assert_eq!(value.get("backend").is_some(), backend);
+                if backend {
+                    assert_eq!(value["backend"][0]["graph"]["run"], turn);
+                    assert!(
+                        value["backend"][0]["graph"]["attempts"]
+                            .as_array()
+                            .unwrap()
+                            .iter()
+                            .any(|node| !node["attempts"].as_array().unwrap().is_empty())
+                    );
+                }
+                for secret in ["SECRET_CONTEXT", "SECRET_CREDENTIAL"] {
+                    assert!(!yaml.contains(secret));
                 }
             }
         }

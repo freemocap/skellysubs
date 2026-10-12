@@ -94,3 +94,15 @@ it('retains browser filename and line when ErrorEvent has no Error object', asyn
   })
   expect(JSON.stringify(invoke.mock.calls).replaceAll('[secret redacted]', '')).not.toContain('secret')
 })
+
+it('retains playback lifecycle stages without source text or audio', async () => {
+  for (const eventName of ['speech_requested', 'speech_suppressed', 'speech_playing', 'speech_finished'] as const) {
+    await logDiagnostic('speech', null, undefined, 'ui_event', 'info', { eventName })
+  }
+  expect(invoke.mock.calls.map(call => call[1].event.eventName)).toEqual(['speech_requested', 'speech_suppressed', 'speech_playing', 'speech_finished'])
+  for (const [, { event }] of invoke.mock.calls) {
+    expect(event.context).toBe('speech')
+    expect(event.redactedArgs).toBe(0)
+    expect(event.command).toBeNull()
+  }
+})

@@ -46,7 +46,7 @@ impl Store {
     pub fn message_history(&self, conversation: &str, message: &str) -> Result<MessageHistory> {
         let db = &self.connection;
         let turn: String = db.query_row(
-            "SELECT m.turn_id FROM messages m WHERE m.id=?1 AND m.conversation_id=?2 AND m.role='user' AND EXISTS(SELECT 1 FROM operations WHERE turn_id=m.turn_id AND kind='persona_reply')",
+            "SELECT m.turn_id FROM messages m WHERE m.id=?1 AND m.conversation_id=?2 AND m.role='user' AND EXISTS(SELECT 1 FROM turn_execution_owners WHERE turn_id=m.turn_id AND channel='persona_reply')",
             params![message, conversation], |r| r.get(0),
         ).optional()?.ok_or_else(|| AppError::new(ErrorCode::NotFound, "Message history is unavailable in this conversation."))?;
         let root: String = db.query_row(
@@ -69,9 +69,36 @@ impl Store {
                 .transpose()?;
             version.conversation_feedback = super::assessments::feedback(db, &version.turn_id)?;
             version.assessments = db.prepare(
-                "SELECT o.kind,o.state,a.id,a.error FROM operations o LEFT JOIN attempts a ON a.id=(SELECT id FROM attempts WHERE operation_id=o.id ORDER BY rowid DESC LIMIT 1) WHERE o.turn_id=?1 AND o.kind IN ('coach_feedback','conversation_feedback','skill_assessment') ORDER BY o.kind",
-            )?.query_map([&version.turn_id], |r| Ok(VersionAssessmentState {kind:r.get(0)?,state:r.get(1)?,attempt_id:r.get(2)?,error:r.get(3)?}))?
+                "SELECT a.kind,a.attempt_id FROM conversation_graph_assessments a WHERE a.turn_id=?1 AND NOT EXISTS(SELECT 1 FROM conversation_graph_assessments newer WHERE newer.turn_id=a.turn_id AND newer.kind=a.kind AND newer.rowid>a.rowid) ORDER BY a.kind",
+            )?.query_map([&version.turn_id], |r| Ok(VersionAssessmentState {kind:r.get(0)?,state:"succeeded".into(),attempt_id:r.get(1)?,error:None}))?
                 .collect::<rusqlite::Result<Vec<_>>>()?;
+            let source = crate::language::source_graph::SourceText {
+                id: version.message_id.clone(),
+                text: version.text.clone(),
+            };
+            for status in self
+                .graph_runtime
+                .source_status(db, &version.turn_id, &source)?
+            {
+                use crate::learning::coaching::{assessment_graph, feedback_graph};
+                let kind = if status.operation == assessment_graph::operation_contract() {
+                    "skill_assessment"
+                } else if status.operation == feedback_graph::operation_contract() {
+                    "coach_feedback"
+                } else {
+                    continue;
+                };
+                version.assessments.retain(|item| item.kind != kind);
+                if let Some(state) = status.state {
+                    version.assessments.push(VersionAssessmentState {
+                        kind: kind.into(),
+                        state,
+                        attempt_id: status.attempt,
+                        error: status.error,
+                    });
+                }
+            }
+            version.assessments.sort_by(|a, b| a.kind.cmp(&b.kind));
         }
         let root_message_id = versions
             .first()

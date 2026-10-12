@@ -3,6 +3,8 @@ import { LevelUpPresenter } from '../features/skills/levels/LevelUpPresenter'
 import { useSkillLevelEventQueue } from '../state/learning/skill-level-events'
 import { EffortProgressContext } from '../state/learning/EffortProgressContext'
 import { useEffortProgress } from '../state/learning/useEffortProgress'
+import { useStreakProgress } from '../state/learning/useStreakProgress'
+import { StreakProgressContext } from '../state/learning/StreakProgressContext'
 import { onReadingQuestion } from '../platform/ipc/window'
 import { OnboardingSetup } from '../features/settings/onboarding/OnboardingSetup'
 import { Tour } from './tour/Tour'
@@ -22,6 +24,7 @@ import { openOverlay } from '../domain/input/back'
 import { reportFault } from '../platform/diagnostics/faults'
 import { SHORTCUT_DEFAULTS } from '../domain/input/keyboard'
 import { AiViewPanel } from '../features/activity/AiViewPanel'
+import { GraphHoverOverlay } from './shell/GraphHoverOverlay'
 import { useAiWindowSync } from './useAiWindowSync'
 import { ReadingTools } from './ReadingTools'
 import { SettingsModal } from '../features/settings/SettingsModal'
@@ -81,6 +84,7 @@ export function AppShell() {
   // The one owner of level celebrations for the active language.
   useSkillLevelEventQueue(evidence.snapshot, evidence.reload, settings?.xp_effects !== false)
   const effort = useEffortProgress(settings?.target_language ?? '', evidence.snapshot)
+  const streaks = useStreakProgress(settings?.scope?.sessionId ?? '', settings?.xp_effects !== false)
   useAppShortcuts(shortcuts)
   useEffect(() => {
     let closed = false
@@ -102,13 +106,14 @@ export function AppShell() {
       <LevelUpPresenter snapshot={effort.effects ? evidence.snapshot : null} />
       <UpdateBanner />
 
-      <TopBar />
+      <StreakProgressContext value={streaks}><TopBar /></StreakProgressContext>
       <FaultBar />
       <CredentialCleanup />
       <SurfaceHost />
       <MoreDialog />
       {overlay === 'languages' && <LanguageBrowser key={languageInfo} initialLanguage={languageInfo} onClose={closeOverlay} />}
       <AiViewPanel open={overlay === 'activity'} onOpenChange={open => open ? showOverlay('activity') : closeOverlay()} />
+      <GraphHoverOverlay />
       {overlay === 'settings' && <SettingsModal onClose={closeOverlay} onBusyChange={setSettingsBusy} />}
       {TOUR_ENABLED && onboarding?.onboardingHelp && <Tour />}
     </div></EffortProgressContext></ReadingTools></I18nProvider>

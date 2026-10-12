@@ -1,5 +1,4 @@
-import type { AttemptView, OperationView, TurnView } from '../../generated/contracts'
-import { isProseReply } from './reply-state'
+import type { TurnView } from '../../generated/contracts'
 
 /// Operation states, grouped by what a surface should do with them. Every state
 /// the scheduler stores is here, plus `held`, which snapshots derive for ready
@@ -36,17 +35,13 @@ export function countWords(text: string, locale?: string): number {
   return text.split(/\s+/).filter(Boolean).length
 }
 
-export function latestAttempt(turn: Pick<TurnView, 'attempts'>, operationId: string): AttemptView | null {
-  return turn.attempts.filter(attempt => attempt.operationId === operationId).at(-1) ?? null
-}
-
 export interface TurnActivity {
   total: number
   done: number
   waiting: number
   held: number
   failed: number
-  /// Running operations, humanized, in the order they started.
+  /// Running executable node identities in snapshot order.
   running: string[]
   /// Whether a prose reply is being generated in this turn.
   replyRunning: boolean
@@ -60,46 +55,24 @@ export interface TurnActivity {
   elapsedMs: number | null
 }
 
-function time(value: string | null | undefined): number | null {
-  if (!value) return null
-  const parsed = Date.parse(value)
-  return Number.isFinite(parsed) ? parsed : null
+/** Summarize authoritative dispositions without inferring activation or timing. */
+export function turnActivity(turn: Pick<TurnView, 'nativeGraph' | 'nativePreview'>, replyText: string | null = null, locale?: string): TurnActivity {
+  const graph = turn.nativeGraph
+  const entries = Object.entries(graph?.nodes ?? {})
+  const count = (...states: string[]) => entries.filter(([, state]) => states.includes(state)).length
+  const running = entries.filter(([, state]) => state === 'Running').map(([name]) => name)
+  const waiting = count('Ready', 'Waiting', 'Prepared', 'Available')
+  const held = count('Paused', 'Held')
+  const preview = turn.nativePreview
+  const replyRunning = !!preview && running.some(node => graph?.attempts[node]?.some(attempt =>
+    attempt.id === preview.attempt && attempt.execution === preview.execution && attempt.state === 'Running'))
+  const text = replyText ?? preview?.capture.text ?? null
+  return { total: entries.length, done: count('Adopted'), waiting, held, failed: count('Failed', 'Unknown'),
+    running, replyRunning, replyWords: replyRunning && text !== null ? countWords(text, locale) : null,
+    lastFinished: null, settled: !waiting && !held && !running.length, elapsedMs: null }
 }
 
-/// A pure summary of one turn's recorded operations. It names nothing itself:
-/// every word comes from the operations' own kinds and states.
-export function turnActivity(turn: Pick<TurnView, 'operations' | 'attempts'>, replyText: string | null = null, locale?: string): TurnActivity {
-  const phases = turn.operations.map(operation => ({ operation, phase: operationPhase(operation.state) }))
-  const started = (operation: OperationView) => time(latestAttempt(turn, operation.id)?.startedAt) ?? Number.MAX_SAFE_INTEGER
-  const running = phases.filter(item => item.phase === 'running').map(item => item.operation)
-    .sort((a, b) => started(a) - started(b))
-  const replyRunning = running.some(operation => isProseReply(operation.kind))
-  const finished = turn.attempts
-    .filter(attempt => attempt.finishedAt && turn.operations.find(operation => operation.id === attempt.operationId)?.state === 'succeeded')
-    .sort((a, b) => (time(a.finishedAt) ?? 0) - (time(b.finishedAt) ?? 0))
-    .at(-1)
-  const settled = !phases.some(item => item.phase === 'waiting' || item.phase === 'held' || item.phase === 'running')
-  const starts = turn.attempts.map(attempt => time(attempt.startedAt)).filter((value): value is number => value !== null)
-  const ends = turn.attempts.map(attempt => time(attempt.finishedAt)).filter((value): value is number => value !== null)
-  return {
-    total: turn.operations.length,
-    done: phases.filter(item => item.phase === 'succeeded').length,
-    waiting: phases.filter(item => item.phase === 'waiting').length,
-    held: phases.filter(item => item.phase === 'held').length,
-    failed: phases.filter(item => item.phase === 'failed' || item.phase === 'unknown').length,
-    running: running.map(operation => humanizeKind(operation.kind)),
-    replyRunning,
-    replyWords: replyRunning && replyText !== null ? countWords(replyText, locale) : null,
-    lastFinished: finished ? humanizeKind(turn.operations.find(operation => operation.id === finished.operationId)!.kind) : null,
-    settled,
-    elapsedMs: settled && starts.length && ends.length ? Math.max(...ends) - Math.min(...starts) : null,
-  }
-}
-
-/// Text a prose reply received but never published as a message: the attempt
-/// failed, was cancelled, invalidated or interrupted. It stays visible.
-export function retainedReplyText(turn: Pick<TurnView, 'operations' | 'attempts'> | undefined): string | null {
-  const operation = turn?.operations.find(item => isProseReply(item.kind))
-  if (!turn || !operation) return null
-  return latestAttempt(turn, operation.id)?.unpublishedText ?? null
+/** Captured reply text retains the native attempt and execution association. */
+export function retainedReplyText(turn: Pick<TurnView, 'nativePreview'> | undefined): string | null {
+  return turn?.nativePreview?.capture.text ?? null
 }

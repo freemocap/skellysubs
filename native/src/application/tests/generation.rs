@@ -1,7 +1,7 @@
 use super::*;
 
 #[tokio::test]
-async fn persona_proposal_uses_shared_receipts_without_creating_product_records() {
+async fn persona_proposal_uses_native_receipts_without_creating_product_records() {
     let proposed = persona::starter("french").unwrap();
     let body = serde_json::to_string(&proposed).unwrap();
     let (url, worker) = crate::application::test_server::structured_server(move |_| body);
@@ -20,6 +20,7 @@ async fn persona_proposal_uses_shared_receipts_without_creating_product_records(
     let id =
         reserve_persona_generation(&app, "french".into(), Some("PRIVATE-BRIEF".into())).unwrap();
     let details = run_owned_persona_generation(&app, &id).await.unwrap();
+    crate::ai::inspection::verify_workspace_reads(&app.lock().unwrap());
     assert_eq!(details.name, proposed.name);
     let payload = worker.join().unwrap();
     let request = &payload["items"][0]["request"];
@@ -34,6 +35,28 @@ async fn persona_proposal_uses_shared_receipts_without_creating_product_records(
     assert!(run_owned_persona_generation(&app, &id).await.is_err());
     drop(app);
     let store = Store::open(&directory.path().join("generation.sqlite3")).unwrap();
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
+    );
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM workspace_graph_transport_identities",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        1
+    );
     let snapshot = store.snapshot().unwrap();
     assert!(snapshot.personas.is_empty());
     assert!(snapshot.contacts.is_empty());
@@ -220,8 +243,8 @@ fn valid_proposal_publishes_independent_of_finish_label_with_usage() {
         finish_persona_generation(&app, &run.request, completed.as_ref().ok(), outcome).unwrap();
         let view = generation_receipts::activity(&app.lock().unwrap().connection).unwrap();
         assert_eq!(view.attempts[0].state, "succeeded");
-        assert_eq!(view.usage.input_tokens, 9);
-        assert_eq!(view.usage.output_tokens, 14);
+        assert_eq!(view.attempts[0].input_tokens, Some(9));
+        assert_eq!(view.attempts[0].output_tokens, Some(14));
         assert_eq!(view.usage.unknown_usage, 0);
     }
 }
@@ -285,4 +308,82 @@ fn an_unusable_response_is_refused_and_writes_nothing() {
     assert!(after.personas.is_empty());
     assert!(after.contacts.is_empty());
     assert!(after.conversations.is_empty());
+}
+
+#[tokio::test]
+async fn identical_proposals_are_fresh_native_runs() {
+    let proposed = persona::starter("french").unwrap();
+    let (url, worker) = crate::application::test_server::structured_sequence(2, move |_| {
+        serde_json::to_string(&proposed).unwrap()
+    });
+    let (_directory, app) = generation_app();
+    app.lock()
+        .unwrap()
+        .connection
+        .execute(
+            "UPDATE ai_config SET custom_config=json_set(custom_config,'$.baseUrl',?1)",
+            [url],
+        )
+        .unwrap();
+    for _ in 0..2 {
+        let id = reserve_persona_generation(&app, "french".into(), None).unwrap();
+        run_owned_persona_generation(&app, &id).await.unwrap();
+    }
+    let requests = worker.join().unwrap();
+    assert_ne!(
+        requests[0]["items"][0]["attempt_id"],
+        requests[1]["items"][0]["attempt_id"]
+    );
+    let store = app.lock().unwrap();
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
+    );
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM workspace_graph_transport_identities",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        2
+    );
+    assert_eq!(store.profile().unwrap().global.attempts, 2);
+    assert!(store.snapshot().unwrap().personas.is_empty());
+}
+
+#[tokio::test]
+async fn malformed_native_persona_response_keeps_validation_error_and_provider_evidence() {
+    let (url, worker) = crate::application::test_server::structured_server(|_| "{".into());
+    let (_directory, app) = generation_app();
+    app.lock()
+        .unwrap()
+        .connection
+        .execute(
+            "UPDATE ai_config SET custom_config=json_set(custom_config,'$.baseUrl',?1)",
+            [url],
+        )
+        .unwrap();
+    let id = reserve_persona_generation(&app, "french".into(), None).unwrap();
+    let error = run_owned_persona_generation(&app, &id).await.unwrap_err();
+    assert_eq!(error.code, ErrorCode::Validation);
+    worker.join().unwrap();
+    let store = app.lock().unwrap();
+    let activity = generation_receipts::activity(&store.connection).unwrap();
+    assert_eq!(activity.attempts[0].state, "failed");
+    assert_eq!(
+        activity.attempts[0].diagnostics.as_ref().unwrap()["sourceExecution"]["response"]["providerId"],
+        "structured-receipt"
+    );
+    assert_eq!(activity.usage.attempts, 1);
+    assert!(store.snapshot().unwrap().personas.is_empty());
 }

@@ -56,7 +56,27 @@ pub(crate) fn choices(
         })
         .collect()
 }
-pub(crate) fn accept(
+pub(crate) fn accept_native(
+    db: &Connection,
+    snapshot: &Snapshot,
+    registry: &Registry,
+    conversation: &str,
+    configuration: ConversationStartConfig,
+    learner_message: Option<(String, crate::learning::coaching::InputEvidence)>,
+    expected: i32,
+) -> Result<String> {
+    accept_captured(
+        db,
+        snapshot,
+        registry,
+        conversation,
+        configuration,
+        learner_message,
+        expected,
+    )
+}
+#[allow(clippy::too_many_arguments)]
+fn accept_captured(
     db: &Connection,
     snapshot: &Snapshot,
     registry: &Registry,
@@ -71,7 +91,7 @@ pub(crate) fn accept(
             "The conversation changed. Review it before starting.",
         ));
     }
-    let occupied:bool=db.query_row("SELECT EXISTS(SELECT 1 FROM turns WHERE conversation_id=?1 AND (state='pending' OR EXISTS(SELECT 1 FROM operations WHERE turn_id=turns.id AND kind IN ('persona_reply','persona_opening'))))",[conversation],|r|r.get(0))?;
+    let occupied:bool=db.query_row("SELECT EXISTS(SELECT 1 FROM turns WHERE conversation_id=?1 AND (state='pending' OR EXISTS(SELECT 1 FROM turn_execution_owners WHERE turn_id=turns.id AND channel IN ('persona_reply','persona_opening'))))",[conversation],|r|r.get(0))?;
     if occupied || selected(db, conversation)?.is_some() {
         return Err(AppError::new(
             ErrorCode::Conflict,
@@ -102,13 +122,18 @@ pub(crate) fn accept(
         Opening::Partner
     };
     let turn = if let Some((text, input)) = learner_message {
-        let turn = crate::conversations::execution::accept_send(
+        let turn = crate::conversations::execution::capture_native_send(
             db,
             registry,
             &captured,
             conversation,
             &text,
             revision,
+        )?;
+        crate::speech::recording::transcription::validate_sources(
+            db,
+            conversation,
+            input.recording_ids.as_deref().unwrap_or_default(),
         )?;
         if !matches!(input.modality.as_str(), "text" | "speech_transcript") {
             return Err(AppError::new(

@@ -5,6 +5,9 @@ license = "AGPL-3.0-or-later"
 edition = "2024"
 default-run = "skellyspeak"
 
+[features]
+workflow-capture = []
+
 [lib]
 name = "skellyspeak_core"
 crate-type = ["staticlib", "cdylib", "rlib"]
@@ -14,13 +17,14 @@ tauri-build = { version = "2.6.3", features = [] }
 
 [dependencies]
 tauri = { version = "2.11.5", features = [] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde = { version = "1", features = ["derive", "rc"] }
+# Checkpoint checksums and execution identities require exact numeric round trips.
+serde_json = { version = "1", features = ["float_roundtrip"] }
 sys-locale = "0.3.2"
 serde_yaml_ng = "0.10"
 schemars = "0.8.22"
 rusqlite = { version = "0.40.2", features = ["bundled"] }
-ts-rs = { version = "12.0.1", features = ["no-serde-warnings"] }
+ts-rs = { version = "12.0.1", features = ["no-serde-warnings", "serde-json-impl"] }
 uuid = { version = "1", features = ["v4"] }
 
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "multipart"] }
@@ -48,6 +52,7 @@ keyring = { version = "3.6.3", features = ["sync-secret-service", "crypto-rust",
 
 [dev-dependencies]
 tempfile = "3"
+rusqlite = { version = "0.40.2", features = ["hooks"] }
 tauri = { version = "2.11.5", features = ["test"] }
 
 [target.'cfg(unix)'.dependencies]

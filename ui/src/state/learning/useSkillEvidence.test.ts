@@ -26,6 +26,32 @@ beforeEach(() => {
   seed(skillDemo.target)
 })
 
+it('adopts profile-save evidence without another read', async () => {
+  backend.get.mockResolvedValue(skillDemo)
+  const view = mount()
+  await waitFor(() => expect(view.result.current.snapshot).toEqual(skillDemo))
+  const saved = { ...skillDemo, conversation_count: skillDemo.conversation_count + 1 }
+  backend.save.mockResolvedValueOnce(saved)
+  await act(async () => { await useSkillEvidenceStore.getState().save({ version: 1, revision: 1, learner_id: skillDemo.learner_id, target: skillDemo.target, focus: null, excluded_attempts: [] }) })
+  expect(view.result.current.snapshot).toBe(saved)
+  expect(backend.get).toHaveBeenCalledTimes(1)
+})
+
+it('does not publish a profile-save result into a newly selected language', async () => {
+  backend.get.mockResolvedValue(skillDemo)
+  mount()
+  await waitFor(() => expect(useSkillEvidenceStore.getState().snapshot).toEqual(skillDemo))
+  let finish!: (value: SkillSnapshot) => void
+  backend.save.mockReturnValueOnce(new Promise(resolve => { finish = resolve }))
+  const saving = useSkillEvidenceStore.getState().save({ version: 1, revision: 1, learner_id: skillDemo.learner_id, target: skillDemo.target, focus: null, excluded_attempts: [] })
+  const other = { ...skillDemo, target: 'french' }
+  backend.get.mockResolvedValue(other)
+  act(() => seed('french', 1))
+  await waitFor(() => expect(useSkillEvidenceStore.getState().snapshot).toBe(other))
+  await act(async () => { finish(skillDemo); await saving })
+  expect(useSkillEvidenceStore.getState().snapshot?.target).toBe('french')
+})
+
 it('reads once for a language and a settings revision, however many surfaces ask', async () => {
   backend.get.mockResolvedValue(skillDemo)
   const views = [mount(), mount(), mount()]

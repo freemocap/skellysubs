@@ -2,13 +2,29 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ConversationSnapshot } from '../../../generated/contracts'
 import { nativeError, watchConversation } from '../../../platform/ipc/workspace'
 
+type Version = Pick<ConversationSnapshot, 'revision' | 'contentRevision'>
+function validateVersion(value: Version): void {
+  // A reloaded development UI can outlive its older native process. Absence is
+  // not a content identity: undefined === undefined must never suppress updates.
+  if (typeof value.contentRevision !== 'string' || !/^\d+$/.test(value.contentRevision)) {
+    throw new Error('The native app and interface are incompatible: the conversation content revision is missing or invalid. Fully quit the app and launch the matching rebuilt native app; reloading the interface is not enough.')
+  }
+}
+function compareVersion(a: Version, b: Version): number {
+  validateVersion(a); validateVersion(b)
+  if (a.revision !== b.revision) return a.revision - b.revision
+  const left = BigInt(a.contentRevision), right = BigInt(b.contentRevision)
+  return left < right ? -1 : left > right ? 1 : 0
+}
+
 /** Merge bounded pages by durable identity; newer page data wins independently of arrival order. */
 export function mergeConversationPages(pages: ConversationSnapshot[]): ConversationSnapshot {
   if (!pages.length) throw new Error('No conversation page was returned.')
-  const latest = pages.reduce((a, b) => b.revision > a.revision ? b : a)
+  pages.forEach(validateVersion)
+  const latest = pages.reduce((a, b) => compareVersion(b, a) > 0 ? b : a)
   const messages = new Map<string, ConversationSnapshot['messages'][number]>()
   const turns = new Map<string, ConversationSnapshot['turns'][number]>()
-  for (const page of [...pages].sort((a, b) => a.revision - b.revision)) {
+  for (const page of [...pages].sort((a, b) => compareVersion(a, b))) {
     if (page.conversationId !== latest.conversationId || page.sessionId !== latest.sessionId) throw new Error('Conversation snapshot scope mismatch.')
     for (const message of page.messages) messages.set(message.id, message)
     for (const turn of page.turns) turns.set(turn.id, turn)
@@ -23,29 +39,31 @@ export function mergeConversationPages(pages: ConversationSnapshot[]): Conversat
 type Observation = {
   active: boolean; stopped: boolean; chatId: string; snapshot: ConversationSnapshot | null
   floor: number | null; loading: boolean; refreshing: boolean; refresh: ConversationSnapshot | null
-  messageRevisions: Map<string, number>; turnRevisions: Map<string, number>; suffixRevisions: Map<string, number>
+  messageRevisions: Map<string, Version>; turnRevisions: Map<string, Version>; suffixRevisions: Map<string, Version>
 }
 
 /** A merged snapshot's revision describes its newest metadata, not every cached
  * record. Keep per-record revisions so a delayed history read can update older
  * records without undoing a newer reply, translation or replacement marker. */
 function observePage(current: Observation, page: ConversationSnapshot, replace = false): ConversationSnapshot {
+  validateVersion(page)
   const source = current.snapshot
   if (page.conversationId !== current.chatId || (source && page.sessionId !== source.sessionId)) throw new Error('Conversation snapshot scope mismatch.')
   if (replace) { current.messageRevisions.clear(); current.turnRevisions.clear(); current.suffixRevisions.clear() }
-  const merge = <T,>(previous: T[], incoming: T[], revisions: Map<string, number>, key: (value: T) => string): T[] => {
+  const merge = <T,>(previous: T[], incoming: T[], revisions: Map<string, Version>, key: (value: T) => string): T[] => {
     const values = new Map(previous.map(value => [key(value), value]))
     for (const value of incoming) {
       const id = key(value)
-      if (page.revision < (revisions.get(id) ?? -1)) continue
-      values.set(id, value); revisions.set(id, page.revision)
+      const previousVersion = revisions.get(id)
+      if (previousVersion && compareVersion(page, previousVersion) < 0) continue
+      values.set(id, value); revisions.set(id, { revision: page.revision, contentRevision: page.contentRevision })
     }
     return [...values.values()]
   }
   const messages = merge(replace ? [] : source?.messages ?? [], page.messages, current.messageRevisions, value => value.id).sort((a, b) => a.sequence - b.sequence)
   const turns = merge(replace ? [] : source?.turns ?? [], page.turns, current.turnRevisions, value => value.id)
   const revisionSuffixCounts = merge(replace ? [] : source?.revisionSuffixCounts ?? [], page.revisionSuffixCounts, current.suffixRevisions, value => value.turnId)
-  const newest = !source || page.revision >= source.revision
+  const newest = !source || compareVersion(page, source) >= 0
   const order = [...new Set((newest ? [page.turns, turns] : [turns, page.turns]).flat().map(turn => turn.id))]
   const byId = new Map(turns.map(turn => [turn.id, turn]))
   const extendsHistory = !source?.messages.length || (page.messages[0]?.sequence ?? Infinity) <= source.messages[0].sequence
@@ -103,15 +121,26 @@ export function useConversationSnapshot(chatId: string | null) {
     }
     void (async () => {
       let revision = -1
+      let contentRevision: string | null = null
       while (current.active && !current.stopped) {
         const next = await watchConversation(current.chatId, revision)
         if (!current.active || current.stopped) return
-        if (next.conversationId !== current.chatId) throw new Error('Conversation snapshot scope mismatch.')
-        if (next.revision !== revision) {
-          publish(next, current.floor === null)
-          if (current.floor !== null) refreshHistory(next)
+        validateVersion(next)
+        if (next.conversationId !== current.chatId || (current.snapshot && next.sessionId !== current.snapshot.sessionId)) throw new Error('Conversation snapshot scope mismatch.')
+        if (next.revision !== revision || next.contentRevision !== contentRevision) {
+          if (current.snapshot && next.sessionId === current.snapshot.sessionId
+            && next.contentRevision === contentRevision && next.revision >= current.snapshot.revision) {
+            // Native retained the exact live display through navigation. Keep
+            // merged history and its object identities; only metadata advanced.
+            current.snapshot = { ...current.snapshot, revision: next.revision }
+            setSnapshot(current.snapshot)
+          } else {
+            publish(next, current.floor === null)
+            if (current.floor !== null) refreshHistory(next)
+          }
         }
         revision = next.revision
+        contentRevision = next.contentRevision
       }
     })().catch(fail)
     return () => { current.active = false }

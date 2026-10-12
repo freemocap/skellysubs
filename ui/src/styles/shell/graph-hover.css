@@ -1,0 +1,10 @@
+/* Downstream-surface hints: where results that depend on a hovered AI step
+   appear in the app. Drawn over the app, never intercepting input. */
+.graph-hover-layer { position: fixed; inset: 0; z-index: var(--z-popover); pointer-events: none; }
+.graph-hover-box {
+  position: absolute; box-sizing: border-box;
+  border: var(--border-width-strong) solid var(--interaction-mark); border-radius: var(--radius-md);
+  background: var(--interaction-tint);
+  animation: hydrate-arrive var(--dur-fast) var(--ease-out);
+}
+:where(:root[data-motion="reduced"]) .graph-hover-box { animation: none; }

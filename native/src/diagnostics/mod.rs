@@ -1,13 +1,10 @@
 //! Durable, redacted diagnostics; the bounded ring is only a recent-read view.
-pub(crate) mod ai_graphs;
 #[cfg(any(not(target_os = "android"), test))]
 mod archive;
 pub(crate) mod failures;
-pub(crate) mod inference;
 mod policy;
 pub(crate) mod response;
 pub(crate) mod sharing;
-pub(crate) mod speech;
 pub(crate) mod structured;
 use crate::model::AppError;
 use crate::model::ErrorCode;
@@ -80,6 +77,10 @@ pub enum DiagnosticEvent {
     SettingsOpened,
     SettingsLoaded,
     SettingsSaving,
+    SpeechRequested,
+    SpeechSuppressed,
+    SpeechPlaying,
+    SpeechFinished,
     MicrophoneAutosend,
     MicrophoneEmpty,
     ApplicationMounted,

@@ -3,10 +3,13 @@ import { invoke } from '@tauri-apps/api/core'
 import type { EffortProgress } from '../../generated/contracts'
 import { effortPublished } from './effort-events'
 
-export async function recordBotInspection(attemptId: string): Promise<void> {
-  const award = await invoke<import('../../generated/contracts').EffortAward | null>('record_bot_inspection', { attemptId })
-  if (award) publishEffortAwards([award])
-  effortPublished()
+export async function recordBotInspection(selection: Pick<import('../../generated/contracts').NativeAttemptInspection, 'engine' | 'run' | 'revision' | 'node' | 'attempt'>): Promise<void> {
+  const { engine, run, revision, node, attempt } = selection
+  const award = await invoke<import('../../generated/contracts').EffortAward | null>('record_bot_inspection', { engine, run, revision, node, attempt })
+  if (award) {
+    publishEffortAwards([award])
+    effortPublished()
+  }
 }
 
 /** Language totals, or one conversation's when `conversation` is given. */

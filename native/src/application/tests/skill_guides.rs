@@ -40,7 +40,7 @@ async fn english_with_spanish_interface_and_explanations_opens_without_inference
         .unwrap()
         .connection
         .query_row(
-            "SELECT count(*) FROM inference_executions WHERE task='guide_translation'",
+            "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
             [],
             |r| r.get(0),
         )
@@ -94,6 +94,7 @@ async fn translation_is_shared_cached_and_survives_restart_without_credit() {
     let first = a.unwrap();
     let second = b.unwrap();
     worker.join().unwrap();
+    crate::ai::inspection::verify_workspace_reads(&state.lock().unwrap());
     assert_eq!(first.markdown, second.markdown);
     assert_eq!(
         first.provenance["execution"],
@@ -116,12 +117,40 @@ async fn translation_is_shared_cached_and_survives_restart_without_credit() {
     let count: i64 = store
         .connection
         .query_row(
-            "SELECT count(*) FROM inference_executions WHERE task='guide_translation'",
+            "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
             [],
             |r| r.get(0),
         )
         .unwrap();
-    assert_eq!(count, 1);
+    assert_eq!(count, 0);
+    assert!(
+        first.provenance["execution"]
+            .as_str()
+            .unwrap()
+            .starts_with("graph:")
+    );
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM workspace_graph_runs WHERE kind='guide_translation'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        1
+    );
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM workspace_graph_transport_identities",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        1
+    );
     let profile = store.profile().unwrap();
     assert_eq!(profile.global.attempts, 1);
     assert_eq!(
@@ -199,7 +228,27 @@ async fn invalid_translation_has_metadata_and_requires_explicit_retry() {
     .await
     .unwrap_err();
     worker.join().unwrap();
-    assert!(first.diagnostics.is_some());
+    assert!(
+        first
+            .diagnostics
+            .as_ref()
+            .unwrap()
+            .to_string()
+            .contains("guide_translation_validation")
+    );
+    assert_eq!(
+        state
+            .lock()
+            .unwrap()
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
+    );
     let second = load(
         &state,
         "spanish",
@@ -211,6 +260,67 @@ async fn invalid_translation_has_metadata_and_requires_explicit_retry() {
     .await
     .unwrap_err();
     assert!(second.message.contains("explicit retry"));
+    let (base, worker) = structured_server(|source| {
+        let data: serde_json::Value = serde_json::from_str(source).unwrap();
+        let texts: Vec<_> = data["fields"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|field| field[1].clone())
+            .collect();
+        json!({"texts":texts}).to_string()
+    });
+    state
+        .lock()
+        .unwrap()
+        .connection
+        .execute(
+            "UPDATE ai_config SET custom_config=json_set(custom_config,'$.baseUrl',?1)",
+            [&base],
+        )
+        .unwrap();
+    let retried = load(
+        &state,
+        "spanish",
+        "spanish-spain",
+        "time_events",
+        "german",
+        true,
+    )
+    .await
+    .unwrap();
+    worker.join().unwrap();
+    assert!(
+        retried.provenance["execution"]
+            .as_str()
+            .unwrap()
+            .starts_with("graph:")
+    );
+    let store = state.lock().unwrap();
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM workspace_graph_runs WHERE kind='guide_translation'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        2
+    );
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
+    );
+    drop(store);
+
     assert!(
         load(
             &state,
@@ -222,5 +332,124 @@ async fn invalid_translation_has_metadata_and_requires_explicit_retry() {
         )
         .await
         .is_err()
+    );
+}
+
+#[tokio::test]
+async fn interrupted_guide_requires_explicit_retry_without_submitting_again() {
+    use crate::ai::graph::*;
+    use crate::language::reading::guide_graph;
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("guide-interrupted.sqlite3");
+    let state = Application::start(&path, None);
+    let run = {
+        let mut guard = state.lock().unwrap();
+        let store: &mut Store = &mut guard;
+        store.connection.execute("UPDATE ai_config SET route='custom',custom_config=json_set(custom_config,'$.baseUrl','http://127.0.0.1:9/v1','$.bearerAuth',json('false'))",[]).unwrap();
+        let edition = store.config.guide_source("spanish", "time_events").unwrap();
+        let prompt = store.config.guide_translation_prompt();
+        let key = results::digest(
+            &serde_json::to_vec(&json!([
+                "skill-guide-translation-1",
+                store.snapshot().unwrap().learner.id,
+                edition,
+                "german",
+                "spanish-spain",
+                prompt
+            ]))
+            .unwrap(),
+        );
+        let context = store
+            .config
+            .resolve("spanish", Some("spanish-spain"), "german")
+            .unwrap();
+        let request =
+            generation::Request::capture_context(store, "guide_translation", context, None)
+                .unwrap();
+        let graph = guide_graph::compile(Arc::new(|_, _| {
+            Box::pin(async { panic!("Interrupted fixture must never call a provider") })
+        }))
+        .unwrap();
+        let inputs = guide_graph::capture(
+            &request,
+            vec![provider::PromptMessage {
+                role: "user".into(),
+                content: "captured guide".into(),
+            }],
+            1,
+        )
+        .unwrap();
+        let catalog = store
+            .workspace_graphs
+            .begin(
+                &mut store.connection,
+                &request.install_id,
+                Arc::new(graph),
+                &request.id,
+                inputs,
+                &request.id,
+                "guide_translation",
+                &json!({"guideKey":key,"scope":{"language":"spanish"}}),
+                |_, _| Ok(()),
+            )
+            .unwrap();
+        loop {
+            match store
+                .workspace_graphs
+                .poll(
+                    &mut store.connection,
+                    &catalog,
+                    &request.id,
+                    Capacity {
+                        local: 1,
+                        provider: 1,
+                    },
+                    |_, _| Ok(()),
+                )
+                .unwrap()
+            {
+                crate::ai::workspace_graph::Progress::Invoke(_) => break,
+                crate::ai::workspace_graph::Progress::Waiting => {}
+                _ => panic!("Expected an interrupted invocation"),
+            }
+        }
+        request.id
+    };
+    drop(state);
+    let state = Application::start(&path, None);
+    let failure = load(
+        &state,
+        "spanish",
+        "spanish-spain",
+        "time_events",
+        "german",
+        false,
+    )
+    .await
+    .unwrap_err();
+    assert!(failure.message.contains("explicit retry"));
+    let store = state.lock().unwrap();
+    assert_eq!(
+        store
+            .connection
+            .query_row("SELECT count(*) FROM workspace_graph_runs", [], |r| r
+                .get::<_, i64>(0))
+            .unwrap(),
+        1
+    );
+    assert_eq!(
+        cache::receipt(&store.connection, &run).unwrap()["state"],
+        "pending"
+    );
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
     );
 }

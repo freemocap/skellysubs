@@ -5,7 +5,7 @@ import type { ConversationSnapshot, TurnView } from '../../../generated/contract
 import { replyState } from '../../../domain/conversation/reply-state'
 import { ReplyStatus } from './ReplyStatus'
 function execution(state: string, turnState = state): TurnView {
-  return { id: 'turn', state: turnState, paused: false, hold: null, operations: [{ id: 'reply', kind: 'persona_reply', state }], attempts: [{ operationId: 'coach', error: 'Independent coach error' }, { operationId: 'reply', error: 'Provider rejected reply' }] } as TurnView
+  return { id: 'turn', state: turnState, paused: false, hold: state === 'failed' ? { message: 'Provider rejected reply' } : null, operations: [], attempts: [] } as unknown as TurnView
 }
 function project(turn: TurnView, paused = false) {
   return replyState(turn, { turns: [turn], connection: { paused } } as ConversationSnapshot)
@@ -71,5 +71,17 @@ it('gives a pending reply the landed bubble shape: a reading line and an action 
   expect(view.container.querySelector('.msg.bot')).toBe(bubble)
   expect(bubble.querySelector('.reply-received.target-text')).toHaveTextContent('Hola')
   expect(screen.getByRole('status')).toHaveTextContent('Receiving reply…')
+  expect(screen.queryByText('Replying…')).toBeNull()
+})
+
+
+it('shows a loading bubble until the native reply settles', () => {
+  const turn = { ...execution('running', 'pending'), nativeExecutionAvailable: true, channel: 'persona_reply', operations: [], attempts: [] }
+  const view = render(<ReplyStatus reply={project(turn)} />)
+  expect(screen.getByText('Replying…')).toBeInTheDocument()
+  expect(screen.queryByText('Partner reply is unavailable.')).toBeNull()
+  view.rerender(<ReplyStatus reply={project({ ...turn, state: 'failed', hold: { message: 'Provider rejected reply' } as TurnView['hold'] })} />)
+  expect(screen.getByText('Partner reply failed.')).toBeVisible()
+  expect(screen.getByText('Provider rejected reply')).toBeVisible()
   expect(screen.queryByText('Replying…')).toBeNull()
 })

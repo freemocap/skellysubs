@@ -2,7 +2,7 @@
 use crate::learning::learner::{progression, skill_levels::SkillLevelSummary};
 use crate::model::{AppError, ErrorCode, Result};
 use crate::storage::store::Store;
-use rusqlite::{Connection, Transaction, params};
+use rusqlite::{Connection, params};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::sync::Arc;
@@ -63,10 +63,16 @@ fn identity(snapshot: &Value) -> Result<(&str, &str, SkillLevelSummary)> {
 
 /// Borrow the owning publication transaction; do not commit independently.
 pub(crate) fn synchronize(
-    tx: &Transaction<'_>,
+    tx: &Connection,
     snapshot: &Value,
     source: Option<Source<'_>>,
 ) -> Result<()> {
+    if tx.is_autocommit() {
+        return Err(AppError::new(
+            ErrorCode::Conflict,
+            "Skill-level publication requires a transaction.",
+        ));
+    }
     let (learner, target, levels) = identity(snapshot)?;
     let maximum = levels
         .skills
@@ -105,7 +111,7 @@ pub(crate) fn synchronize(
 
 #[allow(clippy::too_many_arguments)]
 fn insert(
-    tx: &Transaction<'_>,
+    tx: &Connection,
     learner: &str,
     target: &str,
     policy: &str,

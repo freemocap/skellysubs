@@ -4,15 +4,23 @@ mod assistance;
 mod conversations;
 mod guide_actions;
 mod learning;
+mod native_execution;
 mod partners;
 mod phrase;
 mod skill_start;
 
 struct Handlers<'a> {
+    graph_runtime: &'a crate::conversations::execution::graph_runtime::Runtime,
+    graph_speech: Option<crate::conversations::execution::graph_runtime::SpeechCommand>,
+    graph_help: Option<crate::conversations::execution::graph_runtime::HelpRequest>,
+    graph_admission: Option<(
+        String,
+        crate::conversations::execution::graph_runtime::Admission,
+    )>,
+    graph_control: Option<(String, TurnControl)>,
     tx: &'a Connection,
     config: &'a crate::configuration::Registry,
     snapshot: &'a Snapshot,
-    speech_delivery: &'a crate::speech::delivery::DeliveryBuffer,
     persona_scope: Option<String>,
     conversation_scope: Option<String>,
 }
@@ -45,16 +53,21 @@ impl Store {
             }
             return Ok(serde_json::from_str(&receipt)?);
         }
+        native_execution::check(&tx, &command.action)?;
         let snapshot = read_snapshot(&tx, &self.session_id, &self.config)?;
         let revision = snapshot
             .revision
             .checked_add(1)
             .ok_or_else(|| AppError::new(ErrorCode::Storage, "Revision capacity exceeded."))?;
         let mut handlers = Handlers {
+            graph_runtime: &self.graph_runtime,
+            graph_help: None,
+            graph_speech: None,
+            graph_admission: None,
+            graph_control: None,
             tx: &tx,
             config: &self.config,
             snapshot: &snapshot,
-            speech_delivery: &self.speech_delivery,
             persona_scope: None,
             conversation_scope: None,
         };
@@ -188,9 +201,10 @@ impl Store {
                 text,
                 expected_revision,
             } => handlers.send_message(input, conversation_id, text, expected_revision)?,
-            Action::RequestMessageSpeech { message_id } => {
-                handlers.request_message_speech(message_id)?
-            }
+            Action::RequestMessageSpeech {
+                message_id,
+                regenerate,
+            } => handlers.request_message_speech(message_id, regenerate.unwrap_or(false))?,
             Action::CancelMessageSpeech { operation_id } => {
                 handlers.cancel_message_speech(operation_id)?
             }
@@ -277,7 +291,22 @@ impl Store {
                 handlers.conversation_scope
             ],
         )?;
-        tx.commit()?;
+        let graph_admission = handlers.graph_admission;
+        let graph_control = handlers.graph_control;
+        let graph_help = handlers.graph_help;
+        let graph_speech = handlers.graph_speech;
+        if let Some((turn, admission)) = graph_admission {
+            self.graph_runtime.admit(tx, &turn, admission)?;
+        } else if let Some((turn, control)) = graph_control {
+            self.graph_runtime.control(tx, &turn, control)?;
+        } else if let Some(request) = graph_help {
+            self.graph_runtime.request_help(tx, request)?;
+        } else if let Some(request) = graph_speech {
+            self.graph_runtime.apply_speech_command(tx, request)?;
+        } else {
+            tx.commit()?;
+        }
+        self.graph_runtime.prune(&self.connection)?;
         Ok(receipt)
     }
 }

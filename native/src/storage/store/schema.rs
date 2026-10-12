@@ -2,7 +2,7 @@ use super::*;
 
 /// Workspace format, including persisted JSON; every bump requires a migration.
 /// Bump when required stored fields or their meaning change, not only for SQL DDL.
-pub(crate) const SCHEMA_VERSION: i32 = 56;
+pub(crate) const SCHEMA_VERSION: i32 = 75;
 pub(super) const GENERATION_SCHEMA: &str = include_str!("../schemas/generation_schema.sql");
 
 pub(crate) fn validate_database(connection: &Connection) -> Result<()> {
@@ -39,12 +39,26 @@ pub(crate) fn validate_current_schema(connection: &Connection) -> Result<()> {
 
 pub(super) fn create_extensions(connection: &Connection) -> Result<()> {
     for sql in [
+        include_str!("../schemas/streaks.sql"),
         include_str!("../schemas/settings.sql"),
         include_str!("../schemas/reading_preloads.sql"),
         include_str!("../schemas/audio_signals.sql"),
         include_str!("../schemas/inference_results.sql"),
         include_str!("../schemas/recording_results.sql"),
         include_str!("../schemas/skill_level_events.sql"),
+        include_str!("../schemas/graph_runtime.sql"),
+        include_str!("../schemas/workspace_graph_runtime.sql"),
+        include_str!("../schemas/turn_execution_owners.sql"),
+        include_str!("../schemas/graph_publications.sql"),
+        include_str!("../schemas/graph_reply_sources.sql"),
+        include_str!("../schemas/graph_assessment_owners.sql"),
+        include_str!("../schemas/graph_audio.sql"),
+        include_str!("../schemas/graph_audio_delivery.sql"),
+        include_str!("../schemas/graph_transport.sql"),
+        include_str!("../schemas/graph_speech_requests.sql"),
+        include_str!("../schemas/graph_helper_requests.sql"),
+        include_str!("../schemas/ai_content.sql"),
+        include_str!("../schemas/inference_blob_references.sql"),
     ] {
         connection.execute_batch(sql)?;
     }

@@ -18,7 +18,7 @@ pub(crate) fn source(db: &Connection, message: &str, phrase: &str) -> Result<Str
         "SELECT m.conversation_id,m.text FROM messages m JOIN turns t ON t.id=m.turn_id
          JOIN conversations c ON c.id=m.conversation_id WHERE m.id=?1 AND m.role IN ('user','assistant')
          AND c.archived=0 AND t.state NOT IN ('cancelled','invalidated')
-         AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=t.id AND o.kind IN ('persona_reply','persona_opening'))
+         AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=t.id AND o.channel IN ('persona_reply','persona_opening'))
          AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id)",
         [message], |r| Ok((r.get(0)?,r.get(1)?))).optional()?;
     let (conversation, text) = source.ok_or_else(|| {

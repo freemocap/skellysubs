@@ -32,7 +32,7 @@ export type TimeScale = 'fit' | 'shared' | 'words'
  * can be read against each other. Each recording has its own play control
  * beside its own timeline, the way a media player does. */
 export function DrillComparison({ target, reference, referenceTime, onSeekReference, onPlayReference, playingReference, referenceNote, referenceFailure,
-  attempt, preview, comparisonAccepted = true, attemptTime = 0, attemptLabel, attemptFailure, onRetryAttempt, attemptUnavailable, direction, onDirection, timeScale, onTimeScale,
+  attempt, attemptAudioReady = attempt !== null, preview, comparisonAccepted = true, attemptTime = 0, attemptLabel, attemptFailure, onRetryAttempt, attemptUnavailable, direction, onDirection, timeScale, onTimeScale,
   holding, playingAttempt, onPlayAttempt, playbackSpeed, onSeekAttempt, referenceScrub, attemptScrub }: {
   /** The phrase itself, in its reading bubble, or null when no card is
    * selected: the bubble area says so, the plots stay empty frames and
@@ -50,6 +50,7 @@ export function DrillComparison({ target, reference, referenceTime, onSeekRefere
   referenceFailure?: ReactNode
   comparisonAccepted?: boolean
   attempt: AudioInspection | null
+  attemptAudioReady?: boolean
   preview?: ClipPreview | null
   /** Static previews start at zero; live playback supplies its observed position. */
   attemptTime?: number
@@ -155,7 +156,7 @@ export function DrillComparison({ target, reference, referenceTime, onSeekRefere
       <div className="drill-timelines" data-time={direction}>
         <>
           <div className="drill-media drill-media-take">
-            <button type="button" className="btn drill-play" aria-label={tr(playingAttempt ? (mobile ? "Pause" : "Stop") : "Play yours")} disabled={!attempt || holding} onClick={onPlayAttempt}>
+            <button type="button" className="btn drill-play" aria-label={tr(playingAttempt ? (mobile ? "Pause" : "Stop") : "Play yours")} disabled={!attemptAudioReady || holding} onClick={onPlayAttempt}>
               <ToolbarIcon name={playingAttempt ? (mobile ? "pause" : "stop") : "play"} size={14} />{tr("Attempt")}
             </button>
             <PlaybackProgress time={attemptTime} duration={attempt?.duration ?? 0} displayDuration={effectiveScale === "shared" ? span : attemptDuration} mapTime={mapTime} direction={direction}

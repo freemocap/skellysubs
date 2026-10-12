@@ -1,18 +1,9 @@
 //! Captured learner message and bounded preceding exchange for Jev presence.
 use crate::ai::transport::provider::PromptMessage;
 use crate::model::*;
-use rusqlite::Connection;
 use serde_json::{Value, json};
 fn fail(s: &str) -> AppError {
     AppError::new(ErrorCode::Validation, format!("Skill assessment: {s}"))
-}
-pub fn prompt(db: &Connection, turn: &str, captured: &Value) -> Result<Vec<PromptMessage>> {
-    let source: String = db.query_row(
-        "SELECT text FROM messages WHERE turn_id=?1 AND role='user'",
-        [turn],
-        |r| r.get(0),
-    )?;
-    prompt_for_source(source, captured)
 }
 
 /// Pure projection shared with the graph-definition inspector.

@@ -43,7 +43,7 @@ pub(super) struct Transcription {
 impl Transcription {
     pub(super) fn capture_permitted(&self, state: &Application) -> Result<()> {
         let store = state.lock()?;
-        if store.snapshot()?.learner.id != self.install {
+        if store.learner_id()? != self.install {
             return Err(AppError::new(
                 ErrorCode::SessionExpired,
                 "Recording belongs to a different workspace.",
@@ -156,7 +156,7 @@ pub(super) fn start_prepared_capture(
     };
     crate::ai::audio::validate_transcription_language(&target, &scope.language)?;
     let microphone = super::microphone::selected(&store.connection)?;
-    let install = store.snapshot()?.learner.id;
+    let install = store.learner_id()?;
     drop(store);
     let recording = Recording {
         id: uuid::Uuid::new_v4().to_string(),
@@ -471,7 +471,7 @@ pub(super) async fn transcribe(
     let recording_id = recording.id.clone();
     let validate = || {
         let store = state.lock()?;
-        if store.snapshot()?.learner.id != recording.install {
+        if store.learner_id()? != recording.install {
             return Err(AppError::new(
                 ErrorCode::SessionExpired,
                 "Recording belongs to a different workspace.",
@@ -485,7 +485,7 @@ pub(super) async fn transcribe(
         .await?;
     {
         let mut store = state.lock()?;
-        if store.snapshot()?.learner.id != recording.install {
+        if store.learner_id()? != recording.install {
             return Err(AppError::new(
                 ErrorCode::SessionExpired,
                 "Recording belongs to a different workspace.",
@@ -535,7 +535,7 @@ pub(super) async fn transcribe(
         });
     {
         let mut store = state.lock()?;
-        if store.snapshot()?.learner.id != recording.install {
+        if store.learner_id()? != recording.install {
             return Err(AppError::new(
                 ErrorCode::SessionExpired,
                 "Recording belongs to a different workspace.",
@@ -561,7 +561,7 @@ pub(super) async fn transcribe(
     let evidence = result.as_ref().ok();
     let text = {
         let mut store = state.lock()?;
-        if store.snapshot()?.learner.id != recording.install {
+        if store.learner_id()? != recording.install {
             return Err(AppError::new(
                 ErrorCode::SessionExpired,
                 "Recording belongs to a different workspace.",

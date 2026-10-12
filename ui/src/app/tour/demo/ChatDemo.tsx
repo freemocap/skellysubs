@@ -28,7 +28,7 @@ export function ChatDemo() {
           </MessageReadingScope>
         </div>
         <div className="composer">
-          <div className="composer-activity"><AiStatus transcribing={false} scheduling={false} turns={[]} synthesizing={false} /></div>
+          <div className="composer-activity"><AiStatus transcribing={false} scheduling={false} turns={[]} synthesizing={false} beside={null} /></div>
           <ComposerInput input="" onInput={noop} available sending={false} recording={false} transcribing={false} autoSend
             targetLanguageTag="es" targetLanguageName="Español" onSend={noop} onToggleRecording={noop} onDiscardRecording={noop} />
         </div>

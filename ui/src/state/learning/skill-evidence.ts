@@ -24,9 +24,8 @@ export interface SkillEvidenceState {
   load: (target: string, revision: number) => void
   /// Read again for the language and revision the store last worked on.
   reload: () => void
-  /// Save the profile choices and read again, because the choices are what the
-  /// evidence is computed from. A failure reaches the caller, which shows it
-  /// where the learner made the change.
+  /// Adopt the native save result when its selected scope is still current.
+  /// A failure reaches the caller where the learner made the change.
   save: (choices: ProfileChoices) => Promise<void>
 }
 
@@ -82,13 +81,18 @@ export const useSkillEvidenceStore = create<SkillEvidenceState>((set, get) => {
     },
 
     save: async (choices) => {
+      const selected = get().read
       set({ saving: true })
       try {
-        await saveSkillProfile(choices)
+        const saved = await saveSkillProfile(choices)
+        if (selected && get().read === selected && selected.target === saved.target && !selected.queued) {
+          // The save result supersedes an earlier read of this same scope.
+          set({ snapshot: saved, scope: selected.revision, error: null,
+            read: { ...selected, request: {}, pending: false, queued: false } })
+        } else get().reload()
       } finally {
         set({ saving: false })
       }
-      get().reload()
     },
   }
 })

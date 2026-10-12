@@ -9,14 +9,14 @@ export function StableTurn({ children, ...props }: ComponentProps<'div'>) {
   const measure = useCallback(() => {
     for (const bubble of root.current?.querySelectorAll<HTMLElement>('.learner-turn > .msg, .partner-turn > .msg') ?? []) {
       const side = bubble.classList.contains('me') ? 'me' : 'bot'
-      const previous = floors.current.get(side)
-      const width = bubble.getBoundingClientRect().width
-      if (previous && previous.width !== width) bubble.style.minBlockSize = ''
       // Inspector geometry is explicitly controlled by the learner.
       const hydrating = bubble.matches('[aria-busy="true"], .aids-reserved') || bubble.querySelector('.hydrating-slot, .reply-unrevealed, .is-hydrating') !== null
       if (bubble.classList.contains('inspecting') || !hydrating) {
         floors.current.delete(side); bubble.style.minBlockSize = ''; continue
       }
+      const previous = floors.current.get(side)
+      const width = bubble.getBoundingClientRect().width
+      if (previous && previous.width !== width) bubble.style.minBlockSize = ''
       const height = Math.max(bubble.getBoundingClientRect().height, previous?.width === width ? previous.height : 0)
       floors.current.set(side, { width, height })
       if (height && bubble.style.minBlockSize !== `${height}px`) bubble.style.minBlockSize = `${height}px`

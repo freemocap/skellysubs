@@ -3,6 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 const native = vi.hoisted(() => ({ invoke: vi.fn() }))
 vi.mock('../ipc/native', () => native)
 import { listMicrophones } from './microphones'
+import { presenceOf } from './useMicrophonePresence'
 
 afterEach(() => { vi.unstubAllGlobals(); native.invoke.mockReset() })
 
@@ -31,5 +32,23 @@ it('lists browser inputs, asking for access only on request to reveal labels', a
   const listed = await listMicrophones(true)
   expect(listed).toMatchObject({ source: 'browser', devices: [{ id: 'mic-a', label: 'Headset' }] })
   expect(getUserMedia).toHaveBeenCalledWith({ audio: true })
+  expect(stop).toHaveBeenCalledOnce()
+})
+
+it.each([{ inputs: [] }, { inputs: [{ kind: 'audioinput', deviceId: '', label: '' }] }])('handles hidden browser inputs without claiming disconnection: $inputs', async ({ inputs }) => {
+  native.invoke.mockResolvedValue({ source: 'browser', devices: [] })
+  const enumerateDevices = vi.fn().mockResolvedValue(inputs)
+  const stop = vi.fn()
+  const getUserMedia = vi.fn(async () => {
+    enumerateDevices.mockResolvedValue([{ kind: 'audioinput', deviceId: 'mic', label: 'Phone microphone' }])
+    return { getTracks: () => [{ stop }] }
+  })
+  vi.stubGlobal('navigator', { mediaDevices: { enumerateDevices, getUserMedia } })
+  const hidden = await listMicrophones(false)
+  expect(presenceOf(hidden, null).state).toBe('unknown')
+  expect(presenceOf(hidden, 'mic').state).toBe('unknown')
+  expect(getUserMedia).not.toHaveBeenCalled()
+  expect((await listMicrophones(true)).devices).toMatchObject([{ id: 'mic', label: 'Phone microphone' }])
+  expect(getUserMedia).toHaveBeenCalledExactlyOnceWith({ audio: true })
   expect(stop).toHaveBeenCalledOnce()
 })

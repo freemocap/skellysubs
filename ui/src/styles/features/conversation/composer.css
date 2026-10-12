@@ -87,7 +87,7 @@
 .composer-assist .reply-help-folded { margin: 0; margin-inline-start: auto; order: 1; }
 .composer-assist:has(.reply-help-folded) .chat-coach { margin-inline-start: 0; }
 .composer-assist .reply-help { flex: 1 1 100%; margin: 0; animation: panel-rise var(--dur-slow) var(--ease-out); }
-@media (prefers-reduced-motion: reduce) { .composer-assist .reply-help { animation: none; } }
+:where(:root[data-motion="reduced"]) .composer-assist .reply-help { animation: none; }
 /* Opened help's top edge is a grip: dragging keeps the tray's height, which
    bounds it while its content scrolls. Folded, there is nothing to size. */
 .composer-assist > .reply-help-resize { flex: 1 1 100%; order: -1; }

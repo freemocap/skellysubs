@@ -512,7 +512,6 @@ mod tests {
             let context = json!({"constructRegistryHash":crate::learning::coaching::construct_hash(&store.config),"catalogVersion":crate::learning::coaching::version_for(&store.config),"translationLanguage":"english","practiceSettings":{"varietyId":"spanish-spain"},"input":{},"skillAssessmentAttempt":turn,"skillAssessment":{"adapter":"jev_choice","answers":{"information_exchange":{"choice":"direct"}}}});
             store.connection.execute("INSERT INTO turns(id,conversation_id,state,paused,profile_revision,credential_id,route,model,context) VALUES(?1,?2,'succeeded',0,1,'fixture','custom','fixture',?3)",rusqlite::params![turn,chat,context.to_string()]).unwrap();
             store.connection.execute("INSERT INTO messages(id,conversation_id,turn_id,sequence,role,text,created_at) VALUES(?1,?2,?1,1,'user',?3,'2020-01-01T00:00:00Z')",rusqlite::params![turn,chat,source]).unwrap();
-            store.connection.execute("INSERT INTO operations(id,turn_id,kind,state) VALUES(?1,?1,'skill_assessment','succeeded')",[turn]).unwrap();
         }
         (dir, store, persona, conversation)
     }

@@ -62,7 +62,10 @@ pub fn activity(store: &Store) -> Result<Vec<serde_json::Value>> {
             let mut receipt: serde_json::Value = serde_json::from_str(&r?)?;
             if let Some(id) = receipt["id"].as_str()
                 && let Some(execution) =
-                    crate::ai::results::receipt_for_consumer(&store.connection, id)?
+                    match crate::ai::workspace_graph::receipt(&store.connection, id)? {
+                        Some(receipt) => Some(receipt),
+                        None => crate::ai::results::receipt_for_consumer(&store.connection, id)?,
+                    }
             {
                 receipt["sourceExecution"] = execution;
             }

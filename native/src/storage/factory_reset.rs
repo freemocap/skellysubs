@@ -383,7 +383,7 @@ pub fn factory_reset(
             .clear_all_browsing_data()
             .map_err(|error| storage_error(format!("Could not clear browser data: {error}")))?;
     }
-    state.reset_streams();
+    state.clear_graph_reports();
     state.stop(AppError::new(
         ErrorCode::Internal,
         "Local data was deleted.",

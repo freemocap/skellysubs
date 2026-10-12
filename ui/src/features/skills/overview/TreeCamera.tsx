@@ -1,3 +1,4 @@
+import { reducedMotion } from '../../../platform/appearance/motion'
 import { useEffect, useRef } from 'react'
 import { useNodesInitialized, useUpdateNodeInternals, useReactFlow, useStore, type Viewport } from '@xyflow/react'
 import type { TreeLayout } from '../../../domain/learning/catalog/skillTree'
@@ -22,7 +23,7 @@ export function TreeCamera({ catalog, request, layout, onRestore, onCanBackChang
     // Wait for the inspector's resize to settle before computing the viewport.
     const frame = requestAnimationFrame(() => {
       const last = previous.current
-      const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 420
+      const duration = reducedMotion() ? 0 : 420
       if (!last || last.layout !== layout) {
         history.current = []
         onCanBackChange(false)

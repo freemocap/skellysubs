@@ -18,6 +18,22 @@ const panel = (props: Partial<Parameters<typeof VoicePanel>[0]> = {}) => <I18nPr
   <VoicePanel label="Message" phase="ready" face={null} mode="tap" onMode={() => {}}
     pad={{ label: 'Record audio', disabled: false, action: { kind: 'press', onPress: () => {} } }} {...props} /></I18nProvider>
 
+it('keeps a permission-hidden mobile microphone neutral before and after a successful recording', async () => {
+  list.mockResolvedValue({ source: 'browser', devices: [] })
+  const { container, rerender } = render(panel({ device: null }))
+  await waitFor(() => expect(list).toHaveBeenCalledTimes(1))
+  expect(container.querySelector('.voice-lamp')).toHaveAttribute('data-tone', 'idle')
+  list.mockResolvedValue({ source: 'browser', devices: [{ id: 'phone', label: 'Phone microphone', isDefault: false, unavailable: null }] })
+  rerender(panel({ device: null, phase: 'recording', health: { signal: 'sound', level: 0.3, detected: true } }))
+  await waitFor(() => expect(list).toHaveBeenCalledTimes(2))
+  expect(container.querySelector('.voice-lamp')).toHaveAttribute('data-tone', 'live')
+  list.mockResolvedValue({ source: 'browser', devices: [] })
+  rerender(panel({ device: null }))
+  await waitFor(() => expect(list).toHaveBeenCalledTimes(3))
+  expect(container.querySelector('.voice-lamp')).toHaveAttribute('data-tone', 'idle')
+  expect(screen.queryByText('Not connected')).not.toBeInTheDocument()
+})
+
 it('leads the control row with the microphone lamp, which opens Recording settings where the check lives', () => {
   const { container } = render(panel({ microphoneSelector: <select aria-label="Microphone" />, microphoneCheck: <p>Check row</p> }))
   const row = container.querySelector('.voice-controls')!

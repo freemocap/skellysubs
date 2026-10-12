@@ -271,7 +271,8 @@
 .drill-take-pending p { margin: 0; color: var(--ink-2); font-size: var(--type-meta); }
 .drill-take-progress { overflow: hidden; height: var(--space-2); background: var(--chrome); border-radius: var(--radius-xs); }
 .drill-take-progress span { display: block; width: 25%; height: 100%; background: var(--interaction-ink); animation: take-progress var(--dur-deliberate) var(--ease-in-out) infinite; }
-@media (prefers-reduced-motion: reduce) { .drill-take-arrival, .drill-take-progress span, .drill-history-entry, .drill-add-ghost { animation: none; } .drill-meter-fill { transition: none; } }
+:where(:root[data-motion="reduced"]) .drill-take-arrival, :where(:root[data-motion="reduced"]) .drill-take-progress span, :where(:root[data-motion="reduced"]) .drill-history-entry, :where(:root[data-motion="reduced"]) .drill-add-ghost { animation: none; }
+:where(:root[data-motion="reduced"]) .drill-meter-fill { transition: none; }
 .drill-more { width: 100%; margin-top: var(--space-3); }
 
 /* A chip states something the comparison established mechanically. There is no
@@ -455,9 +456,7 @@
 .drill-timelines .inspection-plot { min-height: 0; overflow: hidden; transition: width var(--dur-base) var(--ease-out); }
 
 .drill-timelines .drill-track:not(.drill-axis) { flex: 1 1 auto; }
-@media (prefers-reduced-motion: reduce) {
-  .drill-timelines .inspection-plot { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .drill-timelines .inspection-plot { transition: none; }
 
 
 .drill-comparison-panel > .error-notice { position: absolute; inset: auto 0 0; z-index: var(--z-popover); }
@@ -468,7 +467,7 @@
 
 /* Keep both timing choices together when the media toolbar wraps. */
 .drill-timing-controls { display: flex; align-items: center; gap: var(--space-2); flex-wrap: nowrap; }
-@media (prefers-reduced-motion: reduce) { .drill-history-entry[data-expanded] { animation: none; } }
+:where(:root[data-motion="reduced"]) .drill-history-entry[data-expanded] { animation: none; }
 
 
 
@@ -592,7 +591,7 @@ section.drill-bundled-buttons { display: block; padding-top: var(--space-4); }
 .drill-starter .drill-hint { margin-top: var(--space-8); }
 /* "Don't show this again" is the shared form checkbox row, in the footer's type beside Close. */
 .drill-starter-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-6); margin-top: var(--space-8); padding-top: var(--space-6); border-top: var(--border-width) solid var(--line-soft); }
-@media (prefers-reduced-motion: reduce) { .drill-starter-spinner { animation: none; } }
+:where(:root[data-motion="reduced"]) .drill-starter-spinner { animation: none; }
 @media (max-width: 860px) {
   .drill-rail-add { min-height: 10rem; }
   .drill-starter-action, .drill-starter-foot :is(.btn, .check-label) { min-height: var(--touch-target); }

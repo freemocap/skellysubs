@@ -15,27 +15,16 @@ pub(super) fn budget_error(message: &str) -> AppError {
     AppError::new(ErrorCode::AdmissionHeld, message)
 }
 
-pub(super) fn admit_network_work(db: &Connection, additional: i64) -> Result<()> {
-    let outstanding: i64 = db.query_row(
-        "SELECT count(*) FROM operations o JOIN turns t ON t.id=o.turn_id WHERE t.state IN ('pending','assisting') AND o.state IN ('ready','waiting_dependencies','running') AND o.kind NOT IN ('persona_context','coach_context')",
-        [], |r| r.get(0),
-    )?;
+pub(crate) fn admit_network_work(
+    db: &Connection,
+    runtime: &graph_runtime::Runtime,
+    additional: i64,
+) -> Result<()> {
+    let outstanding = graph_runtime::outstanding(db, runtime)?;
     if additional < 0 || additional > OUTSTANDING_NETWORK_LIMIT - outstanding {
         return Err(budget_error(
             "AI work queue is full. Let pending work finish or cancel it before submitting again. This action was not accepted.",
         ));
     }
     Ok(())
-}
-
-pub(super) fn admit_turn_retry(db: &Connection, turn: &str) -> Result<()> {
-    let additional: i64 = db.query_row(
-        "SELECT count(*) FROM operations WHERE turn_id=?1 AND state IN ('failed','unknown') AND kind NOT IN ('persona_context','coach_context','persona_speech')",
-        [turn], |r| r.get(0),
-    )?;
-    if additional == 0 {
-        return Err(fail("Retry speech explicitly from its source message."));
-    }
-    let dependent: i64 = db.query_row("SELECT count(*) FROM operations WHERE turn_id=?1 AND state='waiting_dependencies' AND kind NOT IN ('persona_context','coach_context')", [turn], |r| r.get(0))?;
-    admit_network_work(db, additional + dependent)
 }

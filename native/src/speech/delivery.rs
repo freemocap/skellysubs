@@ -18,7 +18,7 @@ pub struct Source {
     pub voice: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ReadyAudio {
     pub operation_id: String,
     pub attempt_id: String,
@@ -62,6 +62,13 @@ impl DeliveryBuffer {
         let index = entries.iter().position(|a| a.attempt_id == attempt_id)?;
         entries.remove(index)
     }
+    pub fn peek(&self, attempt_id: &str) -> Option<ReadyAudio> {
+        self.entries
+            .borrow()
+            .iter()
+            .find(|audio| audio.attempt_id == attempt_id)
+            .cloned()
+    }
     pub fn discard(&self, attempt_id: &str) {
         self.get(attempt_id);
     }
@@ -73,61 +80,14 @@ impl DeliveryBuffer {
 }
 
 impl crate::storage::store::Store {
-    pub(crate) fn remember_speech_delivery(
-        &self,
-        value: &crate::model::SpeechAudioState,
-    ) -> Result<()> {
-        if let crate::model::SpeechAudioState::Ready {
-            attempt_id,
-            audio_base64,
-            alignment,
-            ..
-        } = value
-        {
-            let audio = crate::speech::alignment::SpeechAudio {
-                audio_base64: audio_base64.clone(),
-                alignment: alignment.clone(),
-            };
-            self.connection.execute("INSERT INTO delivered_speech(attempt_id,audio_digest) VALUES(?1,?2) ON CONFLICT(attempt_id) DO UPDATE SET audio_digest=excluded.audio_digest",
-                rusqlite::params![attempt_id, crate::ai::results::digest(&serde_json::to_vec(&audio)?)])?;
-        }
-        Ok(())
-    }
-
     pub(crate) fn delivered_speech_owner(
         &self,
         operation: &str,
         attempt: &str,
         audio: &crate::speech::alignment::SpeechAudio,
     ) -> Result<crate::speech::recording::owner::RecordingOwner> {
-        use rusqlite::OptionalExtension;
-        let conversation: String = self.connection.query_row(
-            "SELECT m.conversation_id FROM attempts a JOIN operations o ON o.id=a.operation_id JOIN turns t ON t.id=o.turn_id JOIN messages m ON m.turn_id=t.id AND m.role='assistant' WHERE a.id=?1 AND a.operation_id=?2 AND a.state='succeeded' AND o.kind='persona_speech' AND o.state='succeeded' AND t.state NOT IN ('cancelled','invalidated')",
-            rusqlite::params![attempt, operation], |r| r.get(0))?;
-        let expected: Option<String> = self
-            .connection
-            .query_row(
-                "SELECT audio_digest FROM delivered_speech WHERE attempt_id=?1",
-                [attempt],
-                |r| r.get(0),
-            )
-            .optional()?;
-        if expected.as_deref()
-            != Some(crate::ai::results::digest(&serde_json::to_vec(audio)?).as_str())
-        {
-            return Err(AppError::new(
-                ErrorCode::Conflict,
-                "Inspection audio differs from the delivered speech.",
-            ));
-        }
-        let owner = crate::speech::recording::owner::RecordingOwner::Conversation(conversation);
-        if !owner.available(&self.connection)? {
-            return Err(AppError::new(
-                ErrorCode::NotFound,
-                "The audio owner no longer exists.",
-            ));
-        }
-        Ok(owner)
+        self.graph_runtime
+            .delivered_speech_owner(&self.connection, operation, attempt, audio)
     }
 }
 

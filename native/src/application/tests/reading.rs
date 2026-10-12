@@ -120,8 +120,11 @@ async fn speech_request(reference: bool) {
             .lock()
             .unwrap()
             .connection
-            .query_row::<i64, _, _>("SELECT count(*) FROM inference_executions", [], |r| r
-                .get(0))
+            .query_row::<i64, _, _>(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get(0)
+            )
             .unwrap(),
         0
     );
@@ -172,12 +175,25 @@ async fn speech_request(reference: bool) {
         .unwrap()
         .connection
         .query_row(
-            "SELECT count(*) FROM inference_executions WHERE dispatched=1",
+            "SELECT count(*) FROM workspace_graph_transport_identities",
             [],
             |r| r.get(0),
         )
         .unwrap();
     assert_eq!(paid, 1);
+    assert_eq!(
+        state
+            .lock()
+            .unwrap()
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
+    );
     let profile = state.lock().unwrap().profile().unwrap();
     assert_eq!(profile.global.attempts, 1);
     assert_eq!(
@@ -299,12 +315,17 @@ async fn translation_runs_the_conversation_translation_contract_and_is_counted()
             .config
             .resolve_pair("arabic", None, "english", None)
             .unwrap();
-        let captured = serde_json::json!({"targetLanguage":"arabic","translationLanguage":"english","languageContext":context});
         (
             crate::ai::connections::configuration::config(&store.connection)
                 .unwrap()
                 .fast_model,
-            crate::language::translation::prompt("كتاب".into(), &captured).unwrap(),
+            crate::language::translation::Request {
+                source: "كتاب".into(),
+                source_language: "arabic".into(),
+                destination_language: "english".into(),
+                destination_writing: context.guidance("explanation_writing"),
+            }
+            .messages(),
         )
     };
     let before = state.lock().unwrap().profile().unwrap();

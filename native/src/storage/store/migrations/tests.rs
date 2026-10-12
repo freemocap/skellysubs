@@ -1,9 +1,28 @@
 use super::*;
 
+#[path = "blob_reference_tests.rs"]
+mod blob_references;
+
 #[path = "assessment_tests.rs"]
 mod assessment;
 #[path = "execution_tests.rs"]
 mod execution;
+#[path = "graph_assessment_tests.rs"]
+mod graph_assessments;
+#[path = "graph_audio_tests.rs"]
+mod graph_audio;
+#[path = "graph_audio_delivery_tests.rs"]
+mod graph_audio_delivery;
+#[path = "graph_publication_tests.rs"]
+mod graph_publication;
+#[path = "graph_reply_role_tests.rs"]
+mod graph_reply_roles;
+#[path = "graph_reply_source_tests.rs"]
+mod graph_reply_sources;
+#[path = "graph_runtime_tests.rs"]
+mod graph_runtime;
+#[path = "graph_transport_tests.rs"]
+mod graph_transport;
 #[path = "reading_preload_tests.rs"]
 mod reading_preload;
 #[path = "skill_direction_tests.rs"]
@@ -14,6 +33,10 @@ mod speech_default;
 mod speech_fidelity;
 #[path = "speech_reliability_tests.rs"]
 mod speech_reliability;
+#[path = "streak_tests.rs"]
+mod streaks;
+#[path = "turn_owner_tests.rs"]
+mod turn_owner;
 
 fn baseline(path: &Path, extras: bool) -> Connection {
     let db = Connection::open(path).unwrap();
@@ -129,12 +152,7 @@ fn baseline_upgrade_preserves_history_settings_and_has_a_recovery_copy() {
             "reading_attempts",
         ];
         if extras {
-            tables.extend([
-                "voice_playback",
-                "microphone_selection",
-                "skill_choices",
-                "inference_executions",
-            ]);
+            tables.extend(["voice_playback", "microphone_selection", "skill_choices"]);
         }
         let original: Vec<_> = tables.iter().map(|table| rows(&db, table)).collect();
         drop(db);
@@ -148,10 +166,9 @@ fn baseline_upgrade_preserves_history_settings_and_has_a_recovery_copy() {
                     let mut value: serde_json::Value = serde_json::from_str(raw).unwrap();
                     assert_eq!(
                         value.as_object_mut().unwrap().remove("execution").unwrap(),
-                        serde_json::to_value(
-                            crate::configuration::execution::ExecutionPreferences::default()
-                        )
-                        .unwrap()
+                        // Format 47 captured the then-current policy. Later fresh
+                        // defaults must not rewrite saved learner preferences.
+                        serde_json::json!({"assessment":"automatic", "replyBrief":"on_demand", "reading":"on_demand"})
                     );
                     *raw = value.to_string();
                 } else {
@@ -395,6 +412,11 @@ fn upgrade_preserves_conversation_graph_and_allows_continued_workspace_use() {
             },
         })
         .unwrap();
+    // This fixture represents a completed conversation before its schema upgrade.
+    store
+        .connection
+        .execute("UPDATE turns SET state='succeeded'", [])
+        .unwrap();
     let tables = [
         "personas",
         "contacts",
@@ -411,52 +433,42 @@ fn upgrade_preserves_conversation_graph_and_allows_continued_workspace_use() {
     // their version-45 contracts, while milestone receipts were introduced later.
     store
         .connection
-        .execute_batch("DROP TABLE reading_dictionary; DROP TABLE reading_packages; DROP TABLE skill_level_events; UPDATE learner SET preferences=json_remove(preferences,'$.execution');")
+        .execute_batch("DROP TABLE ai_content_chunks; DROP TABLE ai_content_records; DROP TABLE graph_helper_requests; DROP TRIGGER graph_engine_helper_owners; DROP TABLE workspace_transcription_cache; DROP TABLE workspace_graph_consumers; DROP VIEW native_graph_audio_cache; DROP VIEW native_graph_audio_receipts; DROP TABLE workspace_graph_audio_cache; DROP TABLE workspace_graph_audio_receipts; DROP TABLE workspace_reading_cache; DROP TABLE workspace_graph_runs; DROP TABLE workspace_graph_transport_identities; DROP TABLE workspace_graph_archives; DROP TABLE workspace_graph_records; DROP TABLE workspace_graph_engines; DROP VIEW graph_conversation_runs; DROP TABLE graph_speech_requests; DROP TRIGGER graph_engine_speech_owners; DROP TABLE graph_audio_deliveries; DROP TABLE graph_audio_cache; DROP TABLE graph_audio_receipts; DROP TABLE conversation_graph_disclosures; DROP TABLE conversation_graph_assessments; DROP TABLE conversation_graph_reply_sources; DROP TRIGGER conversation_graph_publication_reserved; DROP TABLE graph_transport_identities; DROP TABLE conversation_graph_publications; DROP TABLE conversation_graph_effects; DROP TRIGGER turn_execution_conversation_fixed; DROP TABLE turn_execution_owners; DROP TABLE graph_archives; DROP TABLE graph_records; DROP TABLE graph_engines; DROP TABLE reading_dictionary; DROP TABLE reading_packages; DROP TABLE skill_level_events; UPDATE learner SET preferences=json_remove(preferences,'$.execution');")
         .unwrap();
+    store.connection.execute_batch(OPTIONAL_BASELINE).unwrap();
     store
         .connection
         .pragma_update(None, "user_version", 45)
         .unwrap();
     upgrade(&mut store.connection, &path, &store.config).unwrap();
     for (table, expected) in tables.iter().zip(original) {
-        let mut actual = rows(&store.connection, table);
-        if *table == "turns" {
-            // The migration adds an execution notice; every captured source field remains exact.
-            for row in &mut actual {
-                let rusqlite::types::Value::Text(raw) = &row[10] else {
-                    panic!("context text");
-                };
-                let mut context: serde_json::Value = serde_json::from_str(raw).unwrap();
-                assert!(
-                    context
-                        .as_object_mut()
-                        .unwrap()
-                        .remove("assessmentExecutionNotice")
-                        .is_some()
-                );
-                let rusqlite::types::Value::Text(before) = &expected[0][10] else {
-                    panic!("context text");
-                };
-                assert_eq!(
-                    context,
-                    serde_json::from_str::<serde_json::Value>(before).unwrap()
-                );
-                row[10] = expected[0][10].clone();
-            }
-        }
+        let actual = rows(&store.connection, table);
         assert_eq!(actual, expected, "{table}");
     }
     drop(store);
     let mut store = Store::open(&path).unwrap();
     store.prepare_chat().unwrap();
     assert_eq!(store.snapshot().unwrap().conversations.len(), 1);
-    assert_eq!(
+    let revision = store.snapshot().unwrap().conversations[0].revision;
+    store
+        .execute(Command {
+            session_id: store.session_id.clone(),
+            action_id: id(),
+            action: Action::SendMessage {
+                conversation_id: conversation.clone(),
+                text: "Current inquiry".into(),
+                input: crate::learning::coaching::InputEvidence::default(),
+                expected_revision: revision,
+            },
+        })
+        .unwrap();
+    assert!(
         store
             .conversation_snapshot(&conversation, None)
             .unwrap()
-            .messages[0]
-            .text,
-        "Preserved original text"
+            .messages
+            .iter()
+            .any(|message| message.text == "Current inquiry")
     );
 }
 
@@ -483,4 +495,239 @@ fn step_validation_failure_rolls_back_and_retry_can_succeed() {
     }];
     run_chain(&mut db, 45, 46, &steps, noop).unwrap();
     assert_eq!(version(&db), 46);
+}
+
+#[test]
+fn requested_speech_upgrade_preserves_records_and_rolls_back() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut db = baseline(&dir.path().join("speech-requests"), true);
+    run_chain(
+        &mut db,
+        45,
+        66,
+        &STEPS[..21],
+        v65_graph_audio_delivery::validate,
+    )
+    .unwrap();
+    let before = rows(&db, "messages");
+    assert!(
+        run_chain(&mut db, 66, 67, &STEPS[..22], |_| Err(AppError::new(
+            ErrorCode::Storage,
+            "injected"
+        )))
+        .is_err()
+    );
+    assert_eq!(version(&db), 66);
+    assert!(db.prepare("SELECT * FROM graph_speech_requests").is_err());
+    run_chain(
+        &mut db,
+        66,
+        67,
+        &STEPS[..22],
+        v67_graph_speech_requests::validate,
+    )
+    .unwrap();
+    assert_eq!(before, rows(&db, "messages"));
+    assert!(rows(&db, "graph_speech_requests").is_empty());
+    assert_eq!(
+        include_str!("v67_graph_speech_requests.sql").replace("\r\n", "\n"),
+        include_str!("../../schemas/graph_speech_requests.sql").replace("\r\n", "\n")
+    );
+}
+
+#[test]
+fn workspace_graph_upgrade_is_additive_and_rolls_back() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut db = baseline(&dir.path().join("workspace-graphs"), true);
+    run_chain(
+        &mut db,
+        45,
+        67,
+        &STEPS[..22],
+        v67_graph_speech_requests::validate,
+    )
+    .unwrap();
+    let messages = rows(&db, "messages");
+    assert!(
+        run_chain(&mut db, 67, 68, &STEPS[..23], |_| Err(AppError::new(
+            ErrorCode::Storage,
+            "injected"
+        )))
+        .is_err()
+    );
+    assert_eq!(version(&db), 67);
+    assert!(db.prepare("SELECT * FROM workspace_graph_engines").is_err());
+    run_chain(
+        &mut db,
+        67,
+        68,
+        &STEPS[..23],
+        v68_workspace_graphs::validate,
+    )
+    .unwrap();
+    assert_eq!(messages, rows(&db, "messages"));
+    assert!(rows(&db, "workspace_graph_engines").is_empty());
+    assert_eq!(
+        include_str!("v68_workspace_graphs.sql").replace("\r\n", "\n"),
+        include_str!("../../schemas/workspace_graph_runtime.sql").replace("\r\n", "\n")
+    );
+}
+
+#[test]
+fn helper_owners_upgrade_atomically_without_changing_history() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut db = baseline(&dir.path().join("helper-owners"), true);
+    run_chain(
+        &mut db,
+        45,
+        68,
+        &STEPS[..23],
+        v68_workspace_graphs::validate,
+    )
+    .unwrap();
+    let messages = rows(&db, "messages");
+    assert!(
+        run_chain(&mut db, 68, 69, &STEPS[..24], |_| Err(AppError::new(
+            ErrorCode::Storage,
+            "injected"
+        )))
+        .is_err()
+    );
+    assert_eq!(version(&db), 68);
+    assert!(db.prepare("SELECT * FROM graph_helper_requests").is_err());
+    v68_workspace_graphs::validate(&db).unwrap();
+    run_chain(
+        &mut db,
+        68,
+        69,
+        &STEPS[..24],
+        v69_graph_helper_requests::validate,
+    )
+    .unwrap();
+    assert_eq!(messages, rows(&db, "messages"));
+    assert!(rows(&db, "graph_helper_requests").is_empty());
+    assert_eq!(
+        include_str!("v69_graph_helper_requests.sql").replace("\r\n", "\n"),
+        include_str!("../../schemas/graph_helper_requests.sql").replace("\r\n", "\n")
+    );
+}
+
+#[test]
+fn cache_ownership_upgrade_is_atomic_and_preserves_graph_payloads() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut db = baseline(&dir.path().join("cache-ownership"), true);
+    run_chain(
+        &mut db,
+        45,
+        70,
+        &STEPS[..25],
+        v70_graph_assessment_owners::validate,
+    )
+    .unwrap();
+    db.execute(
+        "INSERT INTO workspace_graph_engines VALUES('engine','learner',?1,'{}',X'00')",
+        ["a".repeat(64)],
+    )
+    .unwrap();
+    db.execute_batch(
+        "INSERT INTO workspace_graph_runs VALUES('run','engine','artifact','reading','{}');
+        INSERT INTO inference_blobs VALUES('shared',X'010203');
+        INSERT INTO workspace_reading_cache VALUES('run','source','shared',1);
+        INSERT INTO inference_executions(id,task,state) VALUES('receipt','reading','succeeded');
+        INSERT INTO inference_results VALUES('receipt','source','shared',0);
+        INSERT INTO inference_consumers VALUES('consumer','receipt');",
+    )
+    .unwrap();
+    let tables = [
+        "workspace_graph_engines",
+        "workspace_graph_runs",
+        "workspace_reading_cache",
+        "inference_blobs",
+        "inference_cache_settings",
+        "effort_awards",
+    ];
+    let original: Vec<_> = tables.iter().map(|table| rows(&db, table)).collect();
+    assert!(
+        run_chain(&mut db, 70, 71, &STEPS[..26], |_| Err(AppError::new(
+            ErrorCode::Storage,
+            "injected"
+        )))
+        .is_err()
+    );
+    assert_eq!(version(&db), 70);
+    assert_eq!(rows(&db, "inference_results").len(), 1);
+    run_chain(&mut db, 70, 71, &STEPS[..26], v71_cache::validate).unwrap();
+    for (table, expected) in tables.iter().zip(original) {
+        assert_eq!(rows(&db, table), expected, "{table}");
+    }
+    assert!(db.prepare("SELECT * FROM inference_executions").is_err());
+    v71_cache::validate(&db).unwrap();
+}
+
+#[test]
+fn motion_format_preserves_old_preferences_and_rolls_back() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("motion");
+    let mut db = baseline(&path, true);
+    run_chain(&mut db, 45, 72, &STEPS[..27], v72_streaks::validate).unwrap();
+    let before = rows(&db, "learner");
+    assert!(
+        run_chain(&mut db, 72, 73, &STEPS[..28], |_| Err(AppError::new(
+            ErrorCode::Storage,
+            "Injected failure."
+        )))
+        .is_err()
+    );
+    assert_eq!(version(&db), 72);
+    assert_eq!(rows(&db, "learner"), before);
+    drop(db);
+    let store = Store::open(&path).unwrap();
+    assert_eq!(version(&store.connection), SCHEMA_VERSION);
+    assert_eq!(rows(&store.connection, "learner"), before);
+    assert_eq!(
+        store
+            .snapshot()
+            .unwrap()
+            .learner
+            .preferences
+            .appearance
+            .motion,
+        crate::configuration::appearance::MotionPreference::System
+    );
+    drop(store);
+    let store = Store::open(&path).unwrap();
+    assert_eq!(rows(&store.connection, "learner"), before);
+}
+
+#[test]
+fn original_content_migration_preserves_history_and_rolls_back_atomically() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("db");
+    let mut db = baseline(&path, true);
+    run_chain(&mut db, 45, 73, &STEPS[..28], |_| Ok(())).unwrap();
+    let before = rows(&db, "learner");
+    assert!(
+        run_chain(&mut db, 73, 74, &STEPS[..29], |_| Err(AppError::new(
+            ErrorCode::Storage,
+            "fixture"
+        )))
+        .is_err()
+    );
+    assert_eq!(version(&db), 73);
+    assert_eq!(rows(&db, "learner"), before);
+    assert!(db.prepare("SELECT id FROM ai_content_records").is_err());
+    drop(db);
+    let store = Store::open(&path).unwrap();
+    assert_eq!(version(&store.connection), SCHEMA_VERSION);
+    assert_eq!(rows(&store.connection, "learner"), before);
+    assert_eq!(
+        store
+            .connection
+            .query_row("SELECT count(*) FROM ai_content_records", [], |r| r
+                .get::<_, i64>(0))
+            .unwrap(),
+        0
+    );
+    drop(store);
+    assert!(Store::open(&path).is_ok());
 }

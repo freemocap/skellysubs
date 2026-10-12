@@ -10,6 +10,14 @@ instructions. The [design system](design-system/) documents generated UI tokens,
 components and icons. [Working notes](notes/README.md) hold investigations,
 proposals and verification reports.
 
+The [AI graph foundations](notes/ai-graph-foundations.md) records the agreed
+architecture-first constraints and formal specification for AI execution and
+its visualization. Future graph work must follow those constraints; they are not
+a claim about current runtime conformance. The linked audit separates existing
+behavior, migration requirements and verification from the proposed architecture.
+The [initial core profile](notes/ai-graph-core-semantics.md) records the isolated
+implementation and the remaining foundation gates before workflow migration.
+
 Former website architecture, plans and audits are retained in
 [docs-site-archive](notes/docs-site-archive/README.md), with their original planning
 status and supersession notices. Old website addresses point readers to the new

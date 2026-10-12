@@ -15,7 +15,8 @@ export function ConversationReadingProvider({ snapshot, conversation, children }
       ...(message.wordGloss ? [{ text: message.text, segments: message.wordGloss.segments, scope: { ...(message.readingScope ?? scope), language: message.wordGloss.targetLanguageId, explanation: message.wordGloss.explanationLanguageId } }] : []),
       ...(message.suggestedReplies ?? []).map(reply => ({ text: reply.text, segments: reply.segments, scope: message.readingScope ?? scope })),
     ])
-  }, [snapshot, conversation])
-  const scope = conversation ? { language: conversation.languageId, variety: conversation.settings.varietyId, explanation: conversation.settings.explanationLanguage, explanationVariety: conversation.settings.explanationVarietyId } : inheritedScope
+  }, [snapshot?.messages, snapshot?.coachMessages, snapshot?.conversationId, conversation?.id, conversation?.languageId, conversation?.settings.varietyId, conversation?.settings.explanationLanguage, conversation?.settings.explanationVarietyId])
+  const scope = useMemo(() => conversation ? { language: conversation.languageId, variety: conversation.settings.varietyId, explanation: conversation.settings.explanationLanguage, explanationVariety: conversation.settings.explanationVarietyId } : inheritedScope,
+    [conversation?.languageId, conversation?.settings.varietyId, conversation?.settings.explanationLanguage, conversation?.settings.explanationVarietyId, inheritedScope])
   return <ReadingConversationContext value={attribution}><SavedReadingProvider sources={sources}><ReadingScopeContext value={scope}>{children}</ReadingScopeContext></SavedReadingProvider></ReadingConversationContext>
 }

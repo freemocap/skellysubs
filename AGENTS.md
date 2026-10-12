@@ -14,6 +14,26 @@ behavior, verification results and unresolved questions distinct.
 Discuss ownership and user behavior before choosing storage,
 frameworks, IPC or provider contracts. Do not present plans as working features.
 
+## AI graph architecture
+
+Before changing AI graph composition, scheduling, execution identity, result
+sharing or graph visualization, read
+[AI graph foundations](docs/notes/ai-graph-foundations.md) and the
+[audit and staged plan](docs/notes/executable-ai-graphs-audit-and-plan-2026-10-08.md).
+The agreed direction is architecture first: specify the shared ontology and
+execution semantics, verify the core with domain-independent cases, then rebuild
+and reconnect product workflows. Individual bugs and existing workflow branches
+must not define the architecture. Preserve the distinction between agreed
+constraints, draft contracts, implemented behavior and verified guarantees.
+
+Execution and visualization must derive from the same validated executable graph
+artifact through a short deterministic path. Do not add a separately maintained
+viewer topology, operation catalog or interpretation of runtime semantics.
+Generic serialization, generated contracts, layout and presentation adapters are
+allowed; they must preserve semantic identities and authoritative runtime facts.
+Changes to the ontology require explicit specification review and invariant tests;
+temporary workflow-specific exceptions must not silently become architecture.
+
 ## Language-independent behavior
 
 This rule applies throughout the app: UI, native code, server, prompts, matching,

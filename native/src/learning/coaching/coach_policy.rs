@@ -2,7 +2,7 @@
 //! display decisions contain only the help the learner has chosen to see.
 use crate::learning::coaching::*;
 use crate::model::*;
-use rusqlite::{Connection, OptionalExtension, params};
+use rusqlite::{Connection, OptionalExtension};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::HashMap;
@@ -258,9 +258,13 @@ pub(crate) fn control(db: &Connection, turn: &str, control: CoachControl) -> Res
     }
     let attempt = context["coachObservationAttempt"].clone();
     let decision = serde_json::to_value(decision)?;
-    db.execute(
-        "INSERT INTO assessment_disclosures(attempt_id,decision) VALUES(?1,?2) ON CONFLICT(attempt_id) DO UPDATE SET decision=excluded.decision",
-        params![attempt.as_str(), decision.to_string()],
+    crate::conversations::assessments::disclose(
+        db,
+        turn,
+        attempt
+            .as_str()
+            .ok_or_else(|| invalid("Missing assessment receipt."))?,
+        &decision,
     )?;
     Ok(turn.into())
 }

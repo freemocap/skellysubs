@@ -1,12 +1,24 @@
 use super::*;
 
 pub(crate) struct Application {
-    pub(super) coaching_pending:
-        crate::ai::results::pending::Registry<crate::ai::results::Retained>,
+    pub(super) scheduler_idle: Mutex<super::scheduler::Idle>,
+    pub(super) conversation_reads: Mutex<super::conversation_reads::Cache>,
+    inspection_cache: Mutex<super::response_cache::Cache>,
+    pub(super) learning_reads: Mutex<super::learning_reads::Cache>,
+    #[cfg(feature = "workflow-capture")]
+    pub(super) local_timings: super::local_timing::Measurements,
+    pub(super) scheduler_wake: tokio::sync::Notify,
+    pub(super) conversation_changed: tokio::sync::Notify,
+    /// Protected reports whose storage acknowledgement failed. Never diagnostics
+    /// and never automatically resubmitted; reset explicitly clears this buffer.
+    pub(super) graph_reports: Mutex<Vec<crate::ai::graph::InvocationReport>>,
     pub(super) reading_pending: crate::ai::results::pending::Registry<crate::ai::results::Retained>,
     pub(super) transcription_pending:
         crate::ai::results::pending::Registry<crate::ai::results::Retained>,
     pub(super) speech_streams: Mutex<crate::speech::stream_delivery::Registry>,
+    pub(super) native_transcription_hosts: Mutex<super::native_transcription::Hosts>,
+    pub(super) native_speech_hosts: Mutex<super::native_speech::Hosts>,
+    pub(super) native_audio_slots: tokio::sync::Semaphore,
     pub(super) speech_pending: crate::ai::results::pending::Registry<crate::ai::results::Retained>,
     pub(super) reading: crate::language::reading::Registry,
     pub(crate) admission: admission::Admission,
@@ -30,25 +42,86 @@ pub(crate) struct Application {
     pub(super) auth_epoch: std::sync::atomic::AtomicU64,
     /// The AI View's place, kept while it moves between the panel and its window.
     pub(super) ai_view_selection: Mutex<Option<crate::model::AiViewSelection>>,
-    /// Streamed text of running attempts, between the transport and windows.
-    pub(super) streams: Mutex<super::streams::StreamRegistry>,
-    /// Whether each grouped target (URL, connection revision) speaks protocol
-    /// version 2. Only successful answers are kept; a failed probe is retried.
-    pub(super) delta_support: Mutex<std::collections::HashMap<(String, i32), bool>>,
 }
-pub(crate) struct StoreGuard<'a>(MutexGuard<'a, Option<Store>>);
+pub(crate) struct StoreGuard<'a> {
+    store: Option<MutexGuard<'a, Option<Store>>>,
+    #[cfg(feature = "workflow-capture")]
+    timing: Option<super::local_timing::Pending<'a>>,
+}
 impl Deref for StoreGuard<'_> {
     type Target = Store;
     fn deref(&self) -> &Self::Target {
-        self.0.as_ref().expect("application store is unavailable")
+        self.store
+            .as_ref()
+            .expect("store guard released")
+            .as_ref()
+            .expect("application store is unavailable")
     }
 }
 impl DerefMut for StoreGuard<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.0.as_mut().expect("application store is unavailable")
+        self.store
+            .as_mut()
+            .expect("store guard released")
+            .as_mut()
+            .expect("application store is unavailable")
+    }
+}
+#[cfg(feature = "workflow-capture")]
+impl Drop for StoreGuard<'_> {
+    fn drop(&mut self) {
+        let released = std::time::Instant::now();
+        drop(self.store.take());
+        if let Some(timing) = self.timing.take() {
+            timing.released(released);
+        }
     }
 }
 impl Application {
+    pub(crate) fn inspect_cached<T: serde::Serialize + serde::de::DeserializeOwned>(
+        &self,
+        key: String,
+        read: impl FnOnce() -> Result<T>,
+    ) -> Result<T> {
+        let cached = self
+            .inspection_cache
+            .lock()
+            .map_err(|_| internal())?
+            .get(&key);
+        if let Some(bytes) = cached {
+            return Ok(serde_json::from_slice(&bytes)?);
+        }
+        let value = read()?;
+        let bytes = serde_json::to_vec(&value)?;
+        self.inspection_cache
+            .lock()
+            .map_err(|_| internal())?
+            .insert(key, bytes);
+        Ok(value)
+    }
+    pub(crate) fn clear_graph_reports(&self) {
+        *self
+            .learning_reads
+            .lock()
+            .unwrap_or_else(|p| p.into_inner()) = Default::default();
+        *self
+            .scheduler_idle
+            .lock()
+            .unwrap_or_else(|p| p.into_inner()) = Default::default();
+        *self
+            .conversation_reads
+            .lock()
+            .unwrap_or_else(|p| p.into_inner()) = Default::default();
+        *self
+            .inspection_cache
+            .lock()
+            .unwrap_or_else(|p| p.into_inner()) = Default::default();
+        self.graph_reports
+            .lock()
+            .unwrap_or_else(|poison| poison.into_inner())
+            .clear();
+    }
+
     /// Open the workspace without ever aborting the launch. A refused database is
     /// an ordinary outcome, and it has to reach a screen that can reset it.
     /// `cleanup` is the failure, if any, of finishing a previous reset; the caller
@@ -63,11 +136,24 @@ impl Application {
             Err(error) => (None, Some(error)),
         };
         Arc::new(Self {
+            scheduler_idle: Default::default(),
+            conversation_reads: Default::default(),
+            inspection_cache: Default::default(),
+            learning_reads: Default::default(),
+            #[cfg(feature = "workflow-capture")]
+            local_timings: Default::default(),
+            scheduler_wake: Default::default(),
+            conversation_changed: Default::default(),
+            graph_reports: Mutex::new(Vec::new()),
             speech_streams: Default::default(),
             speech_pending: Default::default(),
+            native_transcription_hosts: Default::default(),
+            native_speech_hosts: Default::default(),
+            native_audio_slots: tokio::sync::Semaphore::new(
+                crate::speech::delivery::DELIVERY_ENTRIES,
+            ),
             transcription_pending: Default::default(),
             reading_pending: Default::default(),
-            coaching_pending: Default::default(),
             admission: admission::Admission::new(),
             reading: Default::default(),
             generations: generation::Registry::default(),
@@ -84,15 +170,6 @@ impl Application {
             signing_in: tokio::sync::Mutex::new(()),
             auth_epoch: std::sync::atomic::AtomicU64::new(0),
             ai_view_selection: Mutex::new(None),
-            // Seconds since the epoch: a later launch always has a higher
-            // generation, so windows adopt it and drop anything older.
-            streams: Mutex::new(super::streams::StreamRegistry::new(
-                std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .map(|elapsed| elapsed.as_secs() as u32)
-                    .unwrap_or(1),
-            )),
-            delta_support: Mutex::new(std::collections::HashMap::new()),
         })
     }
     fn snapshot_error(slot: &Mutex<Option<AppError>>) -> Option<AppError> {
@@ -115,7 +192,10 @@ impl Application {
             credential_cleanup: Self::snapshot_error(&self.credential_cleanup),
         }
     }
+    #[track_caller]
     pub(crate) fn lock(&self) -> Result<StoreGuard<'_>> {
+        #[cfg(feature = "workflow-capture")]
+        let started = std::time::Instant::now();
         if let Some(error) = self
             .fatal
             .lock()
@@ -128,6 +208,10 @@ impl Application {
             .store
             .lock()
             .map_err(|_| crate::diagnostics::failures::poisoned(internal()))?;
+        #[cfg(feature = "workflow-capture")]
+        let timing = self
+            .local_timings
+            .acquired(std::panic::Location::caller(), started);
         if store.is_none() {
             if let Some(error) = self
                 .refusal
@@ -139,7 +223,11 @@ impl Application {
             }
             return Err(internal());
         }
-        Ok(StoreGuard(store))
+        Ok(StoreGuard {
+            store: Some(store),
+            #[cfg(feature = "workflow-capture")]
+            timing,
+        })
     }
     pub(crate) fn credential_operation(&self) -> Result<MutexGuard<'_, ()>> {
         self.credential_operations

@@ -143,7 +143,7 @@ fn gloss_error(error: adapter::AdapterError, completion: &Completion) -> AppErro
     )
     .with_diagnostics(error.diagnostics())
 }
-fn project(
+pub(super) fn project(
     source: &Source,
     analysis: linguistics::ValidatedAnalysis,
     operation: &str,

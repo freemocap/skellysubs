@@ -21,7 +21,7 @@ pub fn accept_coach(
     )
 }
 
-pub fn accept_send(
+pub(crate) fn capture_native_send(
     db: &Connection,
     registry: &crate::configuration::Registry,
     snapshot: &Snapshot,
@@ -162,14 +162,11 @@ fn accept_turn(
         opening.is_some(),
         conversation_id,
     )?;
-    let channel = if coach {
-        "coach_reply"
-    } else {
-        "persona_reply"
-    };
+    // Channel belongs to the turn, independently of its execution machinery.
+    let channel = if coach { "coach" } else { "persona_reply" };
     if coach {
-        let exchange = db.prepare("SELECT m.role,m.text FROM messages m WHERE m.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=m.turn_id) AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=m.turn_id AND o.kind IN ('persona_reply','persona_opening')) ORDER BY m.sequence DESC LIMIT 20")?.query_map([conversation_id],|r|Ok(PromptMessage{role:r.get(0)?,content:r.get(1)?}))?.collect::<rusqlite::Result<Vec<_>>>()?;
-        let saved: Vec<(String,String)> = db.prepare("SELECT t.id,t.context FROM turns t WHERE t.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id) AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=t.id AND o.kind IN ('persona_reply','persona_opening')) ORDER BY t.rowid DESC LIMIT 4")?.query_map([conversation_id], |r|Ok((r.get(0)?,r.get(1)?)))?.collect::<rusqlite::Result<_>>()?;
+        let exchange = db.prepare("SELECT m.role,m.text FROM messages m WHERE m.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=m.turn_id) AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=m.turn_id AND o.channel IN ('persona_reply','persona_opening')) ORDER BY m.sequence DESC LIMIT 20")?.query_map([conversation_id],|r|Ok(PromptMessage{role:r.get(0)?,content:r.get(1)?}))?.collect::<rusqlite::Result<Vec<_>>>()?;
+        let saved: Vec<(String,String)> = db.prepare("SELECT t.id,t.context FROM turns t WHERE t.conversation_id=?1 AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id) AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=t.id AND o.channel IN ('persona_reply','persona_opening')) ORDER BY t.rowid DESC LIMIT 4")?.query_map([conversation_id], |r|Ok((r.get(0)?,r.get(1)?)))?.collect::<rusqlite::Result<_>>()?;
         let mut support = saved.iter().map(|(turn, raw)| -> Result<serde_json::Value> {
             let context: serde_json::Value = serde_json::from_str(raw)?;
             let feedback = crate::conversations::assessments::feedback(db, turn)?;
@@ -220,7 +217,7 @@ fn accept_turn(
         .map(|skill| serde_json::json!({"id":skill.id,"label":skill.name,"criterion":skill.overview,"opportunity":skill.boundary}))
         .collect();
 
-    let mut history=db.prepare("SELECT role,text,id FROM messages m WHERE conversation_id=?1 AND (?3 IS NULL OR m.turn_id!=?3) AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=m.turn_id) AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=m.turn_id AND (o.kind=?2 OR (?2='persona_reply' AND o.kind='persona_opening'))) ORDER BY sequence DESC LIMIT 40")?.query_map(params![conversation_id,channel,replaced],|r|Ok((PromptMessage{role:r.get(0)?,content:r.get(1)?},r.get::<_,String>(2)?)))?.collect::<rusqlite::Result<Vec<_>>>()?;
+    let mut history=db.prepare("SELECT role,text,id FROM messages m WHERE conversation_id=?1 AND (?3 IS NULL OR m.turn_id!=?3) AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=m.turn_id) AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=m.turn_id AND (o.channel=?2 OR (?2='persona_reply' AND o.channel='persona_opening'))) ORDER BY sequence DESC LIMIT 40")?.query_map(params![conversation_id,channel,replaced],|r|Ok((PromptMessage{role:r.get(0)?,content:r.get(1)?},r.get::<_,String>(2)?)))?.collect::<rusqlite::Result<Vec<_>>>()?;
     if coach {
         // A guide belongs to its original question in the coach thread. Carry it
         // with that history message so follow-ups retain their referent, while
@@ -283,24 +280,7 @@ fn accept_turn(
     } else {
         None
     };
-    let plan = if coach {
-        COACH_PLAN
-    } else if opening.is_some() {
-        OPENING_PLAN
-    } else {
-        PLAN
-    };
-    admit_network_work(
-        db,
-        plan.iter()
-            .filter(|node| {
-                node.role != "local"
-                    && node.activation.enabled(speech_enabled)
-                    && snapshot.learner.preferences.execution.automatic(node.kind)
-            })
-            .count() as i64,
-    )?;
-    let coach_sources = db.prepare("SELECT id,role,text FROM messages m WHERE conversation_id=?1 AND EXISTS(SELECT 1 FROM operations o WHERE o.turn_id=m.turn_id AND o.kind='coach_reply') ORDER BY sequence DESC LIMIT 8")?.query_map([conversation_id], |r| Ok(serde_json::json!({"id":r.get::<_,String>(0)?,"role":r.get::<_,String>(1)?,"text":r.get::<_,String>(2)?})))?.collect::<rusqlite::Result<Vec<_>>>()?;
+    let coach_sources = db.prepare("SELECT id,role,text FROM messages m WHERE conversation_id=?1 AND EXISTS(SELECT 1 FROM turn_execution_owners o WHERE o.turn_id=m.turn_id AND o.channel='coach') ORDER BY sequence DESC LIMIT 8")?.query_map([conversation_id], |r| Ok(serde_json::json!({"id":r.get::<_,String>(0)?,"role":r.get::<_,String>(1)?,"text":r.get::<_,String>(2)?})))?.collect::<rusqlite::Result<Vec<_>>>()?;
     let presence_skills = registry
         .skills_for_language(&conversation.language_id)?
         .iter()
@@ -324,98 +304,9 @@ fn accept_turn(
     if opening.is_none() {
         db.execute("INSERT INTO messages(id,conversation_id,turn_id,sequence,role,text) SELECT ?1,?2,?3,COALESCE(MAX(sequence),0)+1,'user',?4 FROM messages WHERE conversation_id=?2",params![id(),conversation_id,turn,text])?;
     }
-    for node in plan {
-        if !node.activation.enabled(speech_enabled)
-            || !snapshot.learner.preferences.execution.automatic(node.kind)
-        {
-            continue;
-        }
-        db.execute(
-            "INSERT INTO operations(id,turn_id,kind,state) VALUES(?1,?2,?3,?4)",
-            params![
-                id(),
-                turn,
-                node.kind,
-                if node.dependencies.is_empty() {
-                    "ready"
-                } else {
-                    "waiting_dependencies"
-                }
-            ],
-        )?;
-    }
     db.execute(
         "UPDATE conversations SET revision=revision+1,last_used=MAX(CAST((julianday('now')-2440587.5)*86400000 AS INTEGER),COALESCE((SELECT MAX(last_used) FROM conversations),0)+1) WHERE id=?1",
         params![conversation_id],
     )?;
     Ok(turn)
-}
-
-pub fn control_turn(db: &Connection, turn: &str, control: TurnControl) -> Result<String> {
-    let (conversation, state): (String, String) = db
-        .query_row(
-            "SELECT conversation_id,state FROM turns WHERE id=?1",
-            [turn],
-            |r| Ok((r.get(0)?, r.get(1)?)),
-        )
-        .optional()?
-        .ok_or_else(|| fail("Turn no longer exists."))?;
-    match control {
-        TurnControl::Cancel => {
-            if state != "pending" && state != "assisting" {
-                return Err(fail("Only pending turns can be cancelled."));
-            }
-            db.execute("UPDATE turns SET state='cancelled' WHERE id=?1", [turn])?;
-            db.execute("UPDATE operations SET state='cancelled',permit=0 WHERE turn_id=?1 AND state!='succeeded'",[turn])?;
-            db.execute("UPDATE attempts SET state='cancelled',finished_at=strftime('%Y-%m-%dT%H:%M:%fZ','now'),error='Cancelled locally; provider execution and billing may continue.' WHERE operation_id IN (SELECT id FROM operations WHERE turn_id=?1) AND state='running'",[turn])?;
-        }
-        TurnControl::Pause | TurnControl::Resume => {
-            if state != "pending" && state != "assisting" {
-                return Err(fail("This turn is not pending."));
-            }
-            if matches!(control, TurnControl::Resume) {
-                release_hold(db, turn, false)?;
-            }
-            db.execute(
-                "UPDATE turns SET paused=?2 WHERE id=?1",
-                params![turn, matches!(control, TurnControl::Pause)],
-            )?;
-            db.execute("UPDATE operations SET permit=0 WHERE turn_id=?1", [turn])?;
-        }
-        TurnControl::Step => {
-            release_hold(db, turn, true)?;
-            if (state != "pending" && state != "assisting") || config(db)?.paused {
-                return Err(fail(
-                    "Resume the app-wide gate before stepping a pending turn.",
-                ));
-            }
-            let operation: Option<String>=db.query_row("SELECT id FROM operations WHERE turn_id=?1 AND state='ready' AND permit=0 ORDER BY rowid LIMIT 1",[turn],|r|r.get(0)).optional()?;
-            let operation = operation.ok_or_else(|| {
-                fail("No operation is ready to step; it may be running or waiting on a dependency.")
-            })?;
-            let running: i32 = db.query_row(
-                "SELECT count(*) FROM operations WHERE state='running'",
-                [],
-                |r| r.get(0),
-            )?;
-            if running >= crate::ai::policy::admission::NETWORK_CAPACITY as i32 {
-                return Err(fail(
-                    "Execution capacity is occupied. Step again after an attempt ends.",
-                ));
-            }
-            db.execute("UPDATE turns SET paused=1 WHERE id=?1", [turn])?;
-            db.execute("UPDATE operations SET permit=1 WHERE id=?1", [operation])?;
-        }
-        TurnControl::Retry => {
-            if state != "failed" && state != "unknown" {
-                return Err(fail("Only a failed or unknown turn can be retried."));
-            }
-            if db.query_row("SELECT EXISTS(SELECT 1 FROM turns WHERE conversation_id=?1 AND rowid>(SELECT rowid FROM turns WHERE id=?2)) AND NOT EXISTS(SELECT 1 FROM messages WHERE turn_id=?2 AND role='assistant')",params![conversation,turn],|r|r.get::<_,bool>(0))? { return Err(fail("A later turn exists. Start a new exchange instead of inserting a reply into an earlier exchange.")); }
-            admit_turn_retry(db, turn)?;
-            connections::bind_retry(db, turn, None)?;
-            db.execute("UPDATE turns SET state=CASE WHEN EXISTS(SELECT 1 FROM operations WHERE turn_id=?1 AND kind IN ('persona_reply','persona_opening','coach_reply') AND state IN ('ready','waiting_dependencies','running')) THEN 'pending' ELSE 'assisting' END WHERE id=?1", [turn])?;
-            db.execute("UPDATE operations SET state='ready',permit=0 WHERE turn_id=?1 AND state IN ('failed','unknown') AND kind!='persona_speech'",[turn])?;
-        }
-    }
-    Ok(conversation)
 }

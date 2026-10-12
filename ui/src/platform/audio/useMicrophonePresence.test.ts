@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, expect, it, vi } from 'vitest'
-import { useMicrophonePresence } from './useMicrophonePresence'
+import { presenceOf, useMicrophonePresence } from './useMicrophonePresence'
 const list = vi.hoisted(() => vi.fn())
 const reportFault = vi.hoisted(() => vi.fn())
 vi.mock('./microphones', () => ({ listMicrophones: list }))
@@ -93,4 +93,37 @@ it('reports a failed listing as unknown, with the reason, and as a fault', async
   await act(async () => {})
   expect(result.current).toEqual({ state: 'unknown', label: null, detail: 'The system would not list microphones' })
   expect(reportFault).toHaveBeenCalledExactlyOnceWith('Listing microphones', expect.any(Error))
+})
+
+it.each([null, 'saved-mic'])('does not infer disconnection from an empty browser inventory for %s', device => {
+  expect(presenceOf({ source: 'browser', devices: [] }, device)).toEqual({ state: 'unknown', label: null, detail: null })
+})
+
+it('does not infer a saved browser device is missing from a permission-filtered list', () => {
+  expect(presenceOf({ source: 'browser', devices: [builtIn] }, 'saved-mic').state).toBe('unknown')
+})
+
+it('refreshes across capture without relying on devicechange and ignores the old in-flight list', async () => {
+  let resolveInitial!: (value: { source: 'native'; devices: typeof usb[] }) => void
+  list.mockReturnValueOnce(new Promise(resolve => { resolveInitial = resolve }))
+  const { result, rerender } = renderHook(({ recording }) => useMicrophonePresence(null, recording), { initialProps: { recording: false } })
+  list.mockResolvedValueOnce({ source: 'native', devices: [usb] })
+  await act(async () => { rerender({ recording: true }) })
+  expect(result.current?.state).toBe('connected')
+  await act(async () => { resolveInitial({ source: 'native', devices: [] }) })
+  expect(result.current?.state).toBe('connected')
+  list.mockResolvedValueOnce({ source: 'native', devices: [usb] })
+  await act(async () => { rerender({ recording: false }) })
+  expect(result.current?.state).toBe('connected')
+  expect(list).toHaveBeenCalledTimes(3)
+})
+
+it('ignores an older inventory that finishes after a devicechange refresh', async () => {
+  let resolveInitial!: (value: { source: 'native'; devices: typeof usb[] }) => void
+  list.mockReturnValueOnce(new Promise(resolve => { resolveInitial = resolve }))
+  const { result } = renderHook(() => useMicrophonePresence(null))
+  list.mockResolvedValueOnce({ source: 'native', devices: [usb] })
+  await act(async () => { devices.dispatchEvent(new Event('devicechange')) })
+  await act(async () => { resolveInitial({ source: 'native', devices: [] }) })
+  expect(result.current?.state).toBe('connected')
 })

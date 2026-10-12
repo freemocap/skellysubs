@@ -66,14 +66,6 @@ impl Admission {
         }
     }
 
-    // Called only when eligible work is actually waiting, never on idle polls.
-    pub fn warn_chat_wait(&self) {
-        crate::diagnostics::native_event(
-            "chat_capacity_wait",
-            &[("limit", NETWORK_CAPACITY as u64)],
-        );
-    }
-
     pub fn try_chat(&self) -> Option<OwnedSemaphorePermit> {
         self.network.clone().try_acquire_owned().ok()
     }

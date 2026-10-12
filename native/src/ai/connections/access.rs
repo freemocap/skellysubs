@@ -19,6 +19,26 @@ pub enum Capability {
     Transcription,
     Speech,
 }
+
+/// Recheck the captured destination after asynchronous credential/protocol work.
+/// Model choice remains captured; profile changes are handled by owner authority.
+pub fn check_captured(
+    db: &Connection,
+    capability: Capability,
+    captured: &ResolvedTarget,
+) -> Result<()> {
+    let current = resolve(db, capability)?;
+    if current.route != captured.route
+        || current.url != captured.url
+        || current.credential != captured.credential
+    {
+        return Err(AppError::new(
+            ErrorCode::Conflict,
+            "AI destination or credentials changed before dispatch. Retry using current settings.",
+        ));
+    }
+    Ok(())
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResolvedTarget {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -307,11 +327,13 @@ pub async fn response_bytes(
             error(format!("{label}: response interrupted.")),
         )
     })? {
+        crate::ai::content::capture::chunk(&chunk)?;
         if body.len() + chunk.len() > limit {
             return Err(error(format!("{label}: response exceeds the size limit.")));
         }
         body.extend_from_slice(&chunk);
     }
+    crate::ai::content::capture::complete()?;
     Ok(body)
 }
 #[tauri::command]
@@ -319,6 +341,24 @@ pub async fn check_access(
     state: tauri::State<'_, Arc<Application>>,
     expected_revision: i32,
 ) -> Result<AccessCheck> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        return crate::ai::transport::workflow::unary::protocol(
+            serde_json::json!({"operation":"custom-access-check","revision":expected_revision}),
+            "",
+            check_access_live(state, expected_revision),
+        )
+        .await;
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    check_access_live(state, expected_revision).await
+}
+async fn check_access_live(
+    state: tauri::State<'_, Arc<Application>>,
+    expected_revision: i32,
+) -> Result<AccessCheck> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let (url, credential) = {
         let store = state.lock()?;
         let access = settings(&store.connection)?;

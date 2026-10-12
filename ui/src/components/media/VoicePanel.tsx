@@ -91,7 +91,7 @@ export function VoicePanel({ label, phase, starting = false, health, deviceLabel
   const closeSettings = () => { setSettingsOpen(false); setCheckAtOnce(false) }
   const elapsed = useElapsed(recording)
   const reading = useUiDirection()
-  const presence = useMicrophonePresence(device)
+  const presence = useMicrophonePresence(device, recording)
   const padSide = layout?.padSide ?? (reading === 'rtl' ? 'left' : 'right')
   // Grid areas follow the reading direction, so the physical side becomes start or end.
   const padAt = (padSide === 'right') === (reading === 'ltr') ? 'end' : 'start'

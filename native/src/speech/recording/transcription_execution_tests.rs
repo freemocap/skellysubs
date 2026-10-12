@@ -175,7 +175,12 @@ fn setup(
 
 #[tokio::test]
 async fn chat_and_drill_share_recognition_but_publish_independently_and_reuse_after_restart() {
-    let (url, ready, release, worker) = server(reply());
+    // A real decimal timestamp that an approximate JSON reader changes by one
+    // ULP. It must survive graph settlement, publication, cache and restart.
+    let end = 0.9163588435374149;
+    let mut response = reply();
+    response["response"]["words"][0]["end"] = json!(end);
+    let (url, ready, release, worker) = server(response);
     let (dir, app, drill, input) = setup(&url);
     let mut chat = drill.clone();
     chat.id = "chat-take".into();
@@ -197,6 +202,7 @@ async fn chat_and_drill_share_recognition_but_publish_independently_and_reuse_af
     );
     let a = a.unwrap();
     let b = b.unwrap();
+    crate::ai::inspection::verify_workspace_reads(&app.lock().unwrap());
     assert_eq!(a.text, "Hola");
     assert_eq!(a.text, b.text);
     assert_eq!(
@@ -210,6 +216,10 @@ async fn chat_and_drill_share_recognition_but_publish_independently_and_reuse_af
             .get("drill_reliability")
             .is_some()
     );
+    let reliability = &a.diagnostics.as_ref().unwrap()["drill_reliability"];
+    assert_eq!(reliability["source"], "segment_logprobs");
+    assert!((reliability["confidence"].as_f64().unwrap() - (-0.05_f64).exp()).abs() < 1e-9);
+    assert_eq!(reliability["noSpeechProbability"], 0.01);
     assert!(
         b.diagnostics
             .as_ref()
@@ -250,6 +260,28 @@ async fn chat_and_drill_share_recognition_but_publish_independently_and_reuse_af
             1
         );
         assert_eq!(profile.personas.iter().map(|p| p.attempts).sum::<i32>(), 1);
+        assert_eq!(
+            store
+                .connection
+                .query_row(
+                    "SELECT count(*) FROM workspace_graph_transport_identities",
+                    [],
+                    |r| r.get::<_, i64>(0)
+                )
+                .unwrap(),
+            1
+        );
+        assert_eq!(
+            store
+                .connection
+                .query_row(
+                    "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                    [],
+                    |r| r.get::<_, i64>(0)
+                )
+                .unwrap(),
+            0
+        );
         let receipts = super::super::transcription::views(&store.connection, &drill.owner).unwrap();
         assert!(
             receipts[0]
@@ -330,7 +362,7 @@ async fn chat_and_drill_share_recognition_but_publish_independently_and_reuse_af
         .unwrap()
         .words[0]
             .end,
-        0.6
+        end
     );
     let receipt = results::receipt_for_consumer(&app.lock().unwrap().connection, &drill.id)
         .unwrap()
@@ -363,6 +395,13 @@ async fn leaving_one_or_all_consumers_does_not_abandon_submitted_recognition() {
     for keep_second in [true, false] {
         let (url, ready, release, worker) = server(reply());
         let (_dir, app, recording, input) = setup(&url);
+        // Each consumer now owns an independently retained source recording.
+        for id in ["a", "b", "later"] {
+            app.lock()
+                .unwrap()
+                .begin_transcription(id, &recording.owner, &recording.target)
+                .unwrap();
+        }
         let alive = AtomicBool::new(true);
         let validate = || {
             if alive.load(Ordering::SeqCst) {
@@ -404,7 +443,35 @@ async fn leaving_one_or_all_consumers_does_not_abandon_submitted_recognition() {
                     .unwrap()
                     .unwrap();
                 if receipt["state"] == "succeeded" {
-                    break;
+                    let store = app.lock().unwrap();
+                    let history = crate::ai::workspace_graph::inspection(
+                        &store.connection,
+                        receipt["nativeEngine"].as_str().unwrap(),
+                    )
+                    .unwrap();
+                    let view = history
+                        .snapshot(
+                            receipt["nativeRun"].as_str().unwrap(),
+                            crate::ai::graph::ExportLimits {
+                                bytes: 4 * 1024 * 1024,
+                                attempts: 4096,
+                            },
+                        )
+                        .unwrap();
+                    assert!(
+                        !view
+                            .nodes
+                            .values()
+                            .any(|state| *state == crate::ai::graph::Disposition::Cancelled),
+                        "Closing consumers must not cancel already submitted recognition"
+                    );
+                    if view
+                        .nodes
+                        .values()
+                        .all(|state| *state == crate::ai::graph::Disposition::Adopted)
+                    {
+                        break;
+                    }
                 }
                 tokio::time::sleep(Duration::from_millis(5)).await;
             }
@@ -417,7 +484,20 @@ async fn leaving_one_or_all_consumers_does_not_abandon_submitted_recognition() {
             })
             .await
             .unwrap();
-        assert!(saved.cached);
+        // A later consumer may join the settled producer before its delivery
+        // task exits, or adopt its cache afterwards. Both must reuse exactly the
+        // same native execution, without another provider submission.
+        let store = app.lock().unwrap();
+        let first = results::receipt_for_consumer(&store.connection, "a")
+            .unwrap()
+            .unwrap();
+        let later = results::receipt_for_consumer(&store.connection, "later")
+            .unwrap()
+            .unwrap();
+        assert_eq!(first["nativeEngine"], later["nativeEngine"]);
+        assert_eq!(first["nativeExecution"], later["nativeExecution"]);
+        assert!(first["nativeExecution"].is_u64());
+        drop(store);
         let decoded: TranscriptionResult = serde_json::from_slice(&saved.payload).unwrap();
         assert_eq!(decoded.timing.unwrap().words[0].word, "Hola");
         assert_eq!(app.lock().unwrap().profile().unwrap().global.attempts, 1);
@@ -543,7 +623,7 @@ async fn removing_the_recording_owner_prevents_publication_but_retains_paid_exec
 async fn cache_write_failure_retains_provider_metadata_and_admission_failure_is_not_paid() {
     let (url, ready, release, worker) = server(reply());
     let (_dir, app, recording, input) = setup(&url);
-    app.lock().unwrap().connection.execute_batch("CREATE TRIGGER reject_cache BEFORE INSERT ON inference_results BEGIN SELECT RAISE(ABORT,'cache refused'); END;").unwrap();
+    app.lock().unwrap().connection.execute_batch("CREATE TRIGGER reject_cache BEFORE INSERT ON workspace_transcription_cache BEGIN SELECT RAISE(ABORT,'cache refused'); END;").unwrap();
     let gate = async {
         ready.await.unwrap();
         release.send(()).unwrap();
@@ -560,6 +640,10 @@ async fn cache_write_failure_retains_provider_metadata_and_admission_failure_is_
     assert_eq!(receipt["state"], "failed");
     assert!(receipt.to_string().contains("recognition-fixture"));
     assert!(!receipt.to_string().contains("Hola"));
+    app.lock()
+        .unwrap()
+        .begin_transcription("held", &recording.owner, &recording.target)
+        .unwrap();
     app.lock()
         .unwrap()
         .connection
@@ -588,12 +672,28 @@ fn carries(request: &[u8], wav: &[u8]) -> bool {
 
 #[tokio::test]
 async fn a_failed_take_is_held_and_retried_with_its_audio_as_a_new_attempt() {
+    failed_take_retry(false).await;
+}
+
+#[tokio::test]
+async fn conversation_failed_take_retries_through_native_execution() {
+    failed_take_retry(true).await;
+}
+
+async fn failed_take_retry(conversation: bool) {
     let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let (url, ready, release, worker) = server_on(
         listener.try_clone().unwrap(),
         json!({"request_id":"failed-recognition","text":3}),
     );
-    let (_dir, app, recording, input) = setup(&url);
+    let (_dir, app, mut recording, input) = setup(&url);
+    if conversation {
+        let mut store = app.lock().unwrap();
+        store.prepare_chat().unwrap();
+        recording.owner =
+            RecordingOwner::Conversation(store.snapshot().unwrap().conversations[0].id.clone());
+        recording.visit = None;
+    }
     let gate = async {
         ready.await.unwrap();
         release.send(()).unwrap();

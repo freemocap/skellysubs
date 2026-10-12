@@ -1,7 +1,5 @@
-import type { AttemptView, TurnView } from '../../generated/contracts'
+import type { TurnView } from '../../generated/contracts'
 import { messageKey } from '../localization/messages'
-import { latestAttempt, operationPhase } from '../conversation/activity-summary'
-import { isProseReply } from '../conversation/reply-state'
 
 /// One step in three wordings, longest first: at most three words, then two,
 /// then one. The composer shows the longest that fits beside the AI pill.
@@ -26,31 +24,8 @@ export const STEP_WORDS = {
   cardAudio: [messageKey('Fetching card audio…'), messageKey('Fetching audio…'), messageKey('Fetching…')],
 } as const satisfies Record<string, StatusWords>
 
-const CONTEXT: StatusWords = [messageKey('Validating conversation context…'), messageKey('Validating context…'), messageKey('Validating…')]
 const SPEECH: StatusWords = [messageKey('Synthesizing partner voice…'), messageKey('Synthesizing voice…'), messageKey('Synthesizing…')]
 const BUFFERING: StatusWords = [messageKey('Buffering partner voice…'), messageKey('Buffering voice…'), messageKey('Buffering…')]
-
-/// Recorded operations by scheduler kind, worded from what each one does
-/// (native/src/diagnostics/ai_graphs.rs describes them). A kind missing here
-/// is shown by its own name, as the AI panel shows it.
-export const OPERATION_WORDS: Readonly<Record<string, StatusWords>> = {
-  persona_context: CONTEXT,
-  coach_context: CONTEXT,
-  coach_feedback: [messageKey('Coach correcting message…'), messageKey('Finding corrections…'), messageKey('Correcting…')],
-  conversation_feedback: [messageKey('Scoring your message…'), messageKey('Scoring message…'), messageKey('Scoring…')],
-  coach_reaction: [messageKey('Rating partner understanding…'), messageKey('Rating understanding…'), messageKey('Rating…')],
-  skill_assessment: [messageKey('Detecting skill evidence…'), messageKey('Detecting skills…'), messageKey('Detecting…')],
-  skill_attribution: [messageKey('Locating skill evidence…'), messageKey('Locating evidence…'), messageKey('Locating…')],
-  reply_assistance: [messageKey('Drafting reply suggestions…'), messageKey('Drafting suggestions…'), messageKey('Drafting…')],
-  reply_explanations: [messageKey('Explaining reply grammar…'), messageKey('Explaining grammar…'), messageKey('Explaining…')],
-  reply_brief: [messageKey('Writing message brief…'), messageKey('Writing brief…'), messageKey('Briefing…')],
-  persona_word_gloss: [messageKey('Glossing reply words…'), messageKey('Glossing words…'), messageKey('Glossing…')],
-  user_word_gloss: [messageKey('Glossing your words…'), messageKey('Glossing words…'), messageKey('Glossing…')],
-  reply_translation: [messageKey('Translating partner reply…'), messageKey('Translating reply…'), messageKey('Translating…')],
-  user_translation: [messageKey('Translating your message…'), messageKey('Translating message…'), messageKey('Translating…')],
-  persona_speech: SPEECH,
-  coach_suggestions: [messageKey('Drafting coach suggestions…'), messageKey('Drafting suggestions…'), messageKey('Drafting…')],
-}
 
 /// What one recording surface is doing. Chat supplies its turns; Practice has
 /// none and reports its attempts' transcription and its cards' audio.
@@ -60,9 +35,7 @@ export interface AiStatusInput {
   /// A send is with native storage, before its turn is recorded.
   scheduling: boolean
   /// The conversation's recorded turns, newest first.
-  turns: readonly Pick<TurnView, 'id' | 'operations' | 'attempts'>[]
-  /// Attempts whose streamed text has begun to arrive.
-  streaming: ReadonlySet<string>
+  turns: readonly Pick<TurnView, 'id' | 'channel' | 'nativeGraph' | 'nativePreview'>[]
   /// Speech audio requested for playback, until it plays: a partner message's
   /// voice being synthesized, or a practice card's audio being fetched.
   audio: 'partner' | 'buffering' | 'card' | null
@@ -79,7 +52,7 @@ export interface AiStatusLine {
   announce: boolean
   /// Catalog wordings, longest first; null names the operation by its kind.
   words: StatusWords | null
-  /// Scheduler kinds and requested models behind the line.
+  /// Executable node identities and known requested models behind the line.
   kinds: string[]
   models: string[]
 }
@@ -88,27 +61,24 @@ function line(id: string, words: StatusWords | null, details: Partial<AiStatusLi
   return { id, tone: 'work', announce: false, words, kinds: [], models: [], ...details }
 }
 
-function started(attempt: AttemptView | null): number {
-  const time = attempt ? Date.parse(attempt.startedAt) : Number.NaN
-  return Number.isFinite(time) ? time : Number.NEGATIVE_INFINITY
-}
-
-/// The newest turn's running work: its prose reply while that runs, otherwise
-/// the operation that started most recently, so the line follows the graph.
-function runningWork(turns: AiStatusInput['turns'], streaming: ReadonlySet<string>): AiStatusLine | null {
+/// Report the newest turn with running graph work. The reply preview identifies
+/// its producing attempt; node names and ordering come from the artifact snapshot.
+function runningWork(turns: AiStatusInput['turns']): AiStatusLine | null {
   for (const turn of turns) {
-    const running = turn.operations
-      .map((operation, index) => ({ operation, index, attempt: latestAttempt(turn, operation.id) }))
-      .filter(item => operationPhase(item.operation.state) === 'running')
+    const graph = turn.nativeGraph
+    if (!graph) continue
+    const running = Object.entries(graph.nodes).filter(([, state]) => state === 'Running').map(([node]) => node)
     if (!running.length) continue
-    const reply = running.find(item => isProseReply(item.operation.kind))
-    const { operation, attempt } = reply ?? running.sort((a, b) => started(b.attempt) - started(a.attempt) || b.index - a.index)[0]
-    const details = { kinds: [operation.kind], models: attempt ? [attempt.actualModel ?? attempt.requestedModel] : [] }
-    if (!reply) return line(`run:${operation.kind}`, OPERATION_WORDS[operation.kind] ?? null, details)
-    const streamed = attempt !== null && streaming.has(attempt.id)
-    const coach = operation.kind === 'coach_reply'
-    const words = streamed ? (coach ? STEP_WORDS.coachStream : STEP_WORDS.replyStream) : (coach ? STEP_WORDS.coachRequest : STEP_WORDS.replyRequest)
-    return line(`${streamed ? 'stream' : 'request'}:${operation.kind}`, words, { ...details, announce: !streamed })
+    const preview = turn.nativePreview
+    const reply = preview && running.find(node => graph.attempts[node]?.some(attempt =>
+      attempt.id === preview.attempt && attempt.execution === preview.execution && attempt.state === 'Running'))
+    if (reply) {
+      const streamed = preview.live && preview.capture.text.length > 0
+      const coach = turn.channel === 'coach'
+      const words = streamed ? (coach ? STEP_WORDS.coachStream : STEP_WORDS.replyStream) : (coach ? STEP_WORDS.coachRequest : STEP_WORDS.replyRequest)
+      return line(`${streamed ? 'stream' : 'request'}:${turn.id}:${reply}`, words, { kinds: [reply], announce: !streamed })
+    }
+    return line(`run:${turn.id}:${running.join(':')}`, null, { kinds: running })
   }
   return null
 }
@@ -118,8 +88,8 @@ function runningWork(turns: AiStatusInput['turns'], streaming: ReadonlySet<strin
 /// speech; the connection speaks only when nothing else does. Held and failed
 /// operations are not work: the latest turn's activity line reports them.
 export function aiStatus(input: AiStatusInput): { busy: boolean; line: AiStatusLine | null } {
-  const running = runningWork(input.turns, input.streaming)
-  const queued = !running && input.turns.some(turn => turn.operations.some(operation => operation.state === 'ready'))
+  const running = runningWork(input.turns)
+  const queued = !running && input.turns.some(turn => Object.values(turn.nativeGraph?.nodes ?? {}).some(state => state === 'Ready' || state === 'Prepared' || state === 'Available'))
   const busy = input.transcribing || input.scheduling || input.audio !== null || running !== null || queued
   const model = (name: string | null) => name ? [name] : []
   if (input.transcribing) return { busy, line: line('transcribe', STEP_WORDS.transcribe,

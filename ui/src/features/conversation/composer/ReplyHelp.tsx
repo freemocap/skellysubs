@@ -13,8 +13,9 @@ import { ToolbarIcon } from '../../../components/controls/ToolbarIcon'
 
 
 /** Three independent help lanes; rendering and opening saved data never generate. */
-export function ReplyHelp({ brief, briefPending = false, onRequestBrief, onAsk, grammar, onExplainGrammar,
+export function ReplyHelp({ graphTargets, brief, briefPending = false, onRequestBrief, onAsk, grammar, onExplainGrammar,
   replies, starters, onSuggestReply, opened = [], busy, errors, onUse, lanes, onRetry, onInspect, inline = false }: {
+  graphTargets?: { brief?: Record<string, string>; grammar?: Record<string, string>; replies?: Record<string, string> }
   inline?: boolean
   lanes?: Record<ReplyHelpKind, HelpLane>
   onRetry?: (kind: ReplyHelpKind) => Promise<void>
@@ -62,7 +63,7 @@ export function ReplyHelp({ brief, briefPending = false, onRequestBrief, onAsk, 
       onClick={() => { if (!hintOpen) openBrief(); setHintOpen(value => !value) }}><ToolbarIcon name="help" size={15} />{tr("Help understanding this message")}</button>}
     <div id={`${id}-hint`} hidden={inline && !hintOpen}>
       {(!inline || hintOpen) && <>
-        <div className="reply-help-brief">
+        <div className="reply-help-brief" {...(brief ? graphTargets?.brief : {})}>
           {brief
             ? <Markdown text={brief} onTerm={onAsk ? term => onAsk(`Explain [[${term}]] in this conversation.`) : undefined} />
             : briefPending || summary.pending ? null
@@ -83,7 +84,7 @@ export function ReplyHelp({ brief, briefPending = false, onRequestBrief, onAsk, 
 
     {explain.shown && <div id={`${id}-grammar`} className="reply-help-panel" aria-live="polite" aria-busy={explain.pending}>
       {status('grammar', explain, grammarLane, tr('Working out the grammar…'))}
-      {grammar?.map(card => <article className="grammar-card" key={card.title}>
+      {grammar?.map(card => <article {...graphTargets?.grammar} className="grammar-card" key={card.title}>
         <h4 className="grammar-title"><MixedText text={card.title} /></h4>
         {card.quote && <TargetMessage provenance={null} layout="compact" text={card.quote} segments={[]} segmentsKey={card.quote} translation={null} romanization={null} pronunciation={null} translateLabel={null} segmentsPending={false} lookupWords status={null} annotation={null} speech={null} analysis={null} focused={false} rtl={false} />}
         <Markdown text={card.body} onTerm={onAsk ? term => onAsk(`Explain [[${term}]] in this conversation.`) : undefined} />
@@ -95,7 +96,7 @@ export function ReplyHelp({ brief, briefPending = false, onRequestBrief, onAsk, 
 
     {suggest.shown && <div id={`${id}-replies`} className="reply-help-panel" aria-live="polite" aria-busy={suggest.pending}>
       {status('replies', suggest, repliesLane, tr('Writing reply ideas…'))}
-      {replies && replies.length > 0 && <ul className="help-replies" aria-label={tr("Suggested replies")}>
+      {replies && replies.length > 0 && <ul {...graphTargets?.replies} className="help-replies" aria-label={tr("Suggested replies")}>
         {replies.map(reply => <li className="help-reply" key={reply.text}>
           <div className="help-reply-text"><TargetMessage provenance={null} layout="compact" text={reply.text} segments={[]} segmentsKey={reply.text} translation={reply.translation} romanization={reply.romanization} pronunciation={reply.pronunciation} translateLabel={null} segmentsPending={false} lookupWords status={null} annotation={null} speech={null} analysis={null} focused={false} rtl={false} /></div>
           <button type="button" className="help-insert" disabled={busy} title={tr("Insert reply")}
@@ -103,7 +104,7 @@ export function ReplyHelp({ brief, briefPending = false, onRequestBrief, onAsk, 
             onClick={() => onUse(reply.text, 'suggestion')}><span aria-hidden="true">↗</span></button>
         </li>)}
       </ul>}
-      {starters && starters.length > 0 && <ReadingTemplateContext value={true}><div className="help-starters">
+      {starters && starters.length > 0 && <ReadingTemplateContext value={true}><div {...graphTargets?.replies} className="help-starters">
         <span className="help-starters-label">{tr("Sentence starters")}</span>
         <ul>{starters.map(text => <li key={text}>
           <div className="help-starter"><TargetMessage provenance={null} layout="compact" text={text} segments={[]} segmentsKey={text} translation={null} romanization={null} pronunciation={null} translateLabel={null} segmentsPending={false} lookupWords status={null} annotation={null} speech={null} analysis={null} focused={false} rtl={false} /><button type="button" className="help-insert" disabled={busy}

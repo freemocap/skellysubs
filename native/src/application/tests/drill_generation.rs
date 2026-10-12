@@ -42,6 +42,39 @@ async fn skill_target_reaches_generation_and_survives_acceptance_without_xp() {
     let captured = previews::input(&app.lock().unwrap().connection, &id).unwrap();
     assert_eq!(captured.skill_focus.unwrap().skill.id, "time_events");
     let preview = run(&app, &id).await.unwrap();
+    crate::ai::inspection::verify_workspace_reads(&app.lock().unwrap());
+    {
+        let store = app.lock().unwrap();
+        assert_eq!(
+            store
+                .connection
+                .query_row(
+                    "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                    [],
+                    |r| r.get::<_, i64>(0)
+                )
+                .unwrap(),
+            0
+        );
+        assert_eq!(
+            store
+                .connection
+                .query_row(
+                    "SELECT count(*) FROM workspace_graph_runs WHERE run_id=?1 AND kind='drill'",
+                    [&id],
+                    |r| r.get::<_, i64>(0)
+                )
+                .unwrap(),
+            1
+        );
+        assert_eq!(
+            crate::ai::workspace_graph::receipt(&store.connection, &id)
+                .unwrap()
+                .unwrap()["state"],
+            "succeeded"
+        );
+    }
+
     worker.join().unwrap();
     let items = app
         .lock()
@@ -143,6 +176,38 @@ async fn preview_acceptance_is_durable_partial_idempotent_and_never_repeats_infe
             .is_empty()
     );
     let preview = run(&app, &id).await.unwrap();
+    {
+        let store = app.lock().unwrap();
+        assert_eq!(
+            store
+                .connection
+                .query_row(
+                    "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                    [],
+                    |r| r.get::<_, i64>(0)
+                )
+                .unwrap(),
+            0
+        );
+        assert_eq!(
+            store
+                .connection
+                .query_row(
+                    "SELECT count(*) FROM workspace_graph_runs WHERE run_id=?1 AND kind='drill'",
+                    [&id],
+                    |r| r.get::<_, i64>(0)
+                )
+                .unwrap(),
+            1
+        );
+        assert_eq!(
+            crate::ai::workspace_graph::receipt(&store.connection, &id)
+                .unwrap()
+                .unwrap()["state"],
+            "succeeded"
+        );
+    }
+
     let payload = worker.join().unwrap();
     let prompt = payload["items"][0]["request"]["messages"][0]["content"]
         .as_str()
@@ -242,6 +307,23 @@ async fn invalid_provider_output_keeps_receipt_usage_and_does_not_create_candida
     let store = app.lock().unwrap();
     let activity = generation_receipts::activity_for(&store.connection, "drill").unwrap();
     assert_eq!(activity.attempts[0].state, "failed");
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
+    );
+    assert_eq!(
+        crate::ai::workspace_graph::receipt(&store.connection, &id)
+            .unwrap()
+            .unwrap()["state"],
+        "failed"
+    );
     assert_eq!(activity.attempts[0].input_tokens, Some(21));
     assert!(activity.attempts[0].diagnostics.is_some());
     assert!(store.drill_preview(&id).is_err());

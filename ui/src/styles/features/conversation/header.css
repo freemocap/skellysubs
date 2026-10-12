@@ -208,9 +208,7 @@
 .conversation-settings-export:hover:not(:disabled) { text-decoration: underline; }
 .conversation-settings-export:disabled { opacity: .5; cursor: default; }
 
-@media (prefers-reduced-motion: reduce) {
-  .conversation-setting input[role=switch], .conversation-setting input[role=switch]::after { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .conversation-setting input[role=switch], :where(:root[data-motion="reduced"]) .conversation-setting input[role=switch]::after { transition: none; }
 
 .chat-head .persona-picker-toggle { max-width: 100%; border: 0; border-radius: var(--radius-pill); background: transparent; gap: var(--space-4); padding: var(--space-1) var(--space-2); height: auto; }
 .chat-head .persona-picker-toggle:hover { background: var(--bubble-learner-bg); }

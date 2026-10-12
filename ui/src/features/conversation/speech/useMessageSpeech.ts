@@ -1,3 +1,4 @@
+import { logDiagnostic } from '../../../platform/diagnostics/log'
 import { errorDetails, errorMessage } from '../../../platform/diagnostics/error-details'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { readMessageAudio } from '../../../platform/ipc/message-speech'
@@ -14,7 +15,7 @@ export interface MessageAudio {
 }
 
 /** Snapshot observation reads audio only; generation is exclusive to explicit replay. */
-export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversationId: string | null, enabled: boolean, active: boolean, rate = 1, volume = 1) {
+export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversationId: string | null, enabled: boolean, active: boolean, rate = 1, volume = 1, suspended = false) {
   const playback = useRef({ rate, volume }); playback.current = { rate, volume }
   const latest = useRef(snapshot); latest.current = snapshot
   const generation = useRef(0)
@@ -51,7 +52,7 @@ export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversa
     return stop
   }, [conversationId, active, stop])
 
-  useEffect(() => { if (!enabled) stop() }, [enabled, stop])
+  useEffect(() => { if (!enabled || suspended) stop() }, [enabled, suspended, stop])
   useEffect(() => { playerRef.current?.setRate(rate) }, [rate])
   useEffect(() => { playerRef.current?.setVolume(volume) }, [volume])
 
@@ -61,6 +62,7 @@ export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversa
     let cursor: { sampleOffset: number; executionId: string } | undefined
     const finish = () => {
       if (scope === generation.current) {
+        void logDiagnostic('speech', null, undefined, 'ui_event', 'info', { eventName: 'speech_finished' })
         const previous = current.current
         generation.current++
         current.current = null; playerRef.current = null; setMessageId(null); setPhase('idle')
@@ -74,13 +76,13 @@ export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversa
       sourceText: latest.current?.messages.find(message => message.id === sourceId)?.text,
       startSeconds,
       onReady: (handle: PlaybackHandle | null) => { if (scope === generation.current) playerRef.current = handle },
-      onPlaying: (playing: boolean) => { streamPlaying = playing; if (scope === generation.current && current.current?.messageId === sourceId) setPhase(playing ? 'playing' : stream ? 'buffering' : 'preparing') },
+      onPlaying: (playing: boolean) => { if (playing && !streamPlaying && scope === generation.current) void logDiagnostic('speech', null, undefined, 'ui_event', 'info', { eventName: 'speech_playing' }); streamPlaying = playing; if (scope === generation.current && current.current?.messageId === sourceId) setPhase(playing ? 'playing' : stream ? 'buffering' : 'preparing') },
       onTime: (seconds: number, total: number) => { if (scope === generation.current) { duration.current = total; setTime(seconds) } },
     }
     while (scope === generation.current) {
       const audio = await readMessageAudio(sessionId, operationId, cursor)
       if (scope !== generation.current) return
-      if (speechPlaybackPermit() !== permit) { stop(); return }
+      if (speechPlaybackPermit() !== permit) { void logDiagnostic('speech', null, undefined, 'ui_event', 'info', { eventName: 'speech_suppressed' }); stop(); return }
       if (audio.operationId !== operationId || audio.messageId !== sourceId) throw new Error('Speech does not belong to this reply.')
       if (audio.status === 'streaming') {
         if (cursor && cursor.executionId !== audio.executionId) throw new Error('Speech execution changed during playback.')
@@ -116,7 +118,11 @@ export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversa
   const start = useCallback(async (sourceId: string, operationId?: string, startSeconds = 0) => {
     const state = latest.current
     const permit = interruptSpeech()
-    if (!permit || !state || state.conversationId !== conversationId || !active) return
+    if (!permit || !state || state.conversationId !== conversationId || !active) {
+      void logDiagnostic('speech', null, undefined, 'ui_event', 'info', { eventName: 'speech_suppressed' })
+      return
+    }
+    void logDiagnostic('speech', null, undefined, 'ui_event', 'info', { eventName: 'speech_requested' })
     stop()
     const scope = generation.current
     current.current = { messageId: sourceId, operationId: operationId ?? null, sessionId: state.sessionId }
@@ -129,7 +135,7 @@ export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversa
         if (scope !== generation.current) { cancelOperation(state.sessionId, operationId); return }
         current.current = { messageId: sourceId, operationId, sessionId: state.sessionId }
       }
-      if (speechPlaybackPermit() !== permit) { stop(); return }
+      if (speechPlaybackPermit() !== permit) { void logDiagnostic('speech', null, undefined, 'ui_event', 'info', { eventName: 'speech_suppressed' }); stop(); return }
       await consume(scope, permit, state.sessionId, operationId, sourceId, startSeconds)
     } catch (error) {
       if (scope === generation.current) { stop(); setFailure({ messageId: sourceId, text: errorMessage(error), details: errorDetails(error) }); reportFault('Speech', error) }
@@ -140,7 +146,7 @@ export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversa
     if (!snapshot || snapshot.conversationId !== conversationId) return
     const messages = snapshot.messages.filter(item => item.role === 'assistant' && !item.replacedBy)
     if (current.current && snapshot.messages.some(item => item.id === current.current?.messageId && item.replacedBy)) stop()
-    const operations = snapshot.turns.filter(turn => !turn.replacedBy).flatMap(turn => turn.operations).filter(item => item.kind === 'persona_speech')
+    const operations = snapshot.turns.filter(turn => !turn.replacedBy).flatMap(turn => turn.speech ? [turn.speech] : [])
     if (!baseline.current || baseline.current.conversation !== conversationId) {
       baseline.current = { conversation: conversationId, messages: new Set(messages.map(item => item.id)), eligible: new Set(), operations: new Set(operations.filter(item => item.sourceMessageId).map(item => item.id)) }
       return
@@ -151,13 +157,16 @@ export function useMessageSpeech(snapshot: ConversationSnapshot | null, conversa
       seen.messages.add(item.id)
     }
     if (!enabled || !active) seen.eligible.clear()
+    // Keep newly arriving replies eligible while capture/transcription blocks playback.
+    // Disabling Read aloud or leaving still discards them; resuming does not replay history.
+    if (suspended) return
     for (const operation of operations) {
       if (seen.operations.has(operation.id) || !operation.sourceMessageId) continue
       seen.operations.add(operation.id)
       if (!seen.eligible.delete(operation.sourceMessageId) || current.current?.messageId === operation.sourceMessageId) continue
       void start(operation.sourceMessageId, operation.id)
     }
-  }, [snapshot, conversationId, enabled, active, start, stop])
+  }, [snapshot, conversationId, enabled, active, suspended, start, stop])
 
   const toggle = useCallback((sourceId: string) => {
     if (current.current?.messageId === sourceId) stop()

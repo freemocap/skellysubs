@@ -1,6 +1,6 @@
 import { SKILL_CATALOG_VERSION } from '../../../generated/contracts'
 import { skillDemo } from '../../../domain/learning/catalog/skillDemo'
-import type { AudioInspection, ConversationFeedback, DrillAttemptView, InspectionSpectrogram, TurnView, WordComparison, WordOutcome } from '../../../generated/contracts'
+import type { AudioInspection, ConversationFeedback, DrillAttemptView, InspectionSpectrogram, WordComparison, WordOutcome } from '../../../generated/contracts'
 import type { SkillSnapshot } from '../../../domain/learning/evidence/skills'
 import type { GuidedTurnResult } from '../../../types'
 
@@ -134,26 +134,3 @@ function progressSnapshot(): SkillSnapshot {
   return snapshot
 }
 export const PROGRESS_SNAPSHOT = progressSnapshot()
-
-// ── AI panel ─────────────────────────────────────────────────────────────
-const AI_PLAN: [string, string[], string][] = [
-  ['persona_context', [], 'local'], ['persona_reply', ['persona_context'], 'standard'], ['skill_assessment', ['persona_context'], 'fast'],
-  ['coach_feedback', ['persona_context'], 'standard'], ['user_word_gloss', ['persona_context'], 'standard'], ['user_translation', ['persona_context'], 'standard'],
-  ['persona_word_gloss', ['persona_reply'], 'standard'], ['persona_speech', ['persona_reply'], 'speech'], ['reply_translation', ['persona_reply'], 'standard'],
-  ['reply_explanations', ['persona_reply'], 'standard'], ['reply_assistance', ['persona_reply'], 'standard'], ['conversation_feedback', ['persona_reply'], 'standard'],
-]
-const AI_ORIGIN = Date.parse('2026-09-18T10:00:00.000Z')
-function aiTurn(): TurnView {
-  const at = (ticks: number) => new Date(AI_ORIGIN + ticks * 450).toISOString()
-  const operations = AI_PLAN.map(([kind, dependencies, role]) => ({
-    sourceMessageId: null, id: `demo-${kind}`, kind, contractVersion: 1, dependencies: dependencies.map(dep => `demo-${dep}`), role, state: 'succeeded' as const,
-  }))
-  const attempts = AI_PLAN.map(([kind]) => ({
-    id: `demo-${kind}-attempt`, operationId: `demo-${kind}`, state: 'succeeded' as const,
-    requestedModel: 'google/gemini-2.5-flash', actualModel: 'google/gemini-2.5-flash', providerId: null,
-    startedAt: at(0), finishedAt: at(4), inputTokens: 1200, outputTokens: 90, error: null, unpublishedText: null,
-  }))
-  return { replacesTurnId: null, replacedBy: null, route: 'hosted', id: 'demo', state: 'succeeded', paused: false, hold: null, operations, attempts }
-}
-export const AI_TURN = aiTurn()
-export const AI_NOW = AI_ORIGIN + 16 * 450

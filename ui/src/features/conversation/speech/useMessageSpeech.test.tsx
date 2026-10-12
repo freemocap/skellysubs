@@ -10,7 +10,7 @@ vi.mock('../../../platform/ipc/workspace', () => ({ executeAction: native.execut
 vi.mock('../../../platform/diagnostics/faults', () => ({ reportFault: native.fault }))
 vi.mock('../../../platform/audio/speech-player', () => ({ playSpeechAudio: native.player }))
 function snapshot(ids: string[], operation = true): ConversationSnapshot {
-  return { conversationId: 'chat', sessionId: 'session', revision: ids.length, messages: ids.map((id, i) => ({ id, sequence: i, role: 'assistant', text: id })), turns: operation ? ids.map(id => ({ operations: [{ id: `speech-${id}`, kind: 'persona_speech', sourceMessageId: id }] })) : [] } as unknown as ConversationSnapshot
+  return { conversationId: 'chat', sessionId: 'session', revision: ids.length, messages: ids.map((id, i) => ({ id, sequence: i, role: 'assistant', text: id })), turns: operation ? ids.map(id => ({ speech: { id: `speech-${id}`, state: 'running', sourceMessageId: id } })) : [] } as unknown as ConversationSnapshot
 }
 beforeEach(() => {
   setPlaybackAllowed(true)
@@ -129,7 +129,7 @@ it('surfaces playback rejection without falling back or regenerating', async () 
 
 it('waits for source binding on a pre-created speech operation', async () => {
   const first = snapshot(['old'])
-  first.turns.push({ operations: [{ id: 'speech-new', kind: 'persona_speech', sourceMessageId: null }] } as never)
+  first.turns.push({ speech: null } as never)
   const view = renderHook(({ state }) => useMessageSpeech(state, 'chat', true, true), { initialProps: { state: first } })
   view.rerender({ state: snapshot(['old', 'new']) })
   await waitFor(() => expect(native.play).toHaveBeenCalledTimes(1))
@@ -192,4 +192,33 @@ it('preserves the speech failure explanation and request metadata beside the mes
   expect(view.result.current.failure?.details).toMatchObject({ metadata: { request_id: 'req-7', requested_model: 'speech-model', attemptId: 'attempt-7', operationId: 'manual' } })
   expect(native.execute).toHaveBeenCalledTimes(1)
   expect(native.play).not.toHaveBeenCalled()
+})
+
+
+it('autoplays the native snapshot speech operation without requesting generation', async () => {
+  const operationId = 'graph:["engine","run","audio"]'
+  const view = renderHook(({ state }) => useMessageSpeech(state, 'chat', true, true), { initialProps: { state: snapshot(['old']) } })
+  const next = snapshot(['old', 'new'])
+  next.turns[1].nativeExecutionAvailable = true
+  next.turns[1].speech!.id = operationId
+  native.invoke.mockResolvedValue({ status: 'ready', operationId, messageId: 'new', attemptId: 'native', mime: 'audio/mpeg', audioBase64: '' })
+  view.rerender({ state: next })
+  await waitFor(() => expect(native.play).toHaveBeenCalledOnce())
+  view.rerender({ state: next })
+  expect(native.execute).not.toHaveBeenCalled()
+  expect(native.invoke).toHaveBeenCalledOnce()
+  view.unmount()
+})
+
+it('plays a new reply after transcription releases playback without replaying old messages', async () => {
+  const view = renderHook(({ state, suspended }) => useMessageSpeech(state, 'chat', true, true, 1, 1, suspended),
+    { initialProps: { state: snapshot(['old']), suspended: false } })
+  view.rerender({ state: snapshot(['old']), suspended: true })
+  view.rerender({ state: snapshot(['old', 'new']), suspended: true })
+  expect(native.invoke).not.toHaveBeenCalled()
+  view.rerender({ state: snapshot(['old', 'new']), suspended: false })
+  await waitFor(() => expect(native.play).toHaveBeenCalledOnce())
+  expect(native.invoke).toHaveBeenCalledWith('read_speech_audio', { sessionId: 'session', operationId: 'speech-new' })
+  expect(native.execute).not.toHaveBeenCalled()
+  view.unmount()
 })

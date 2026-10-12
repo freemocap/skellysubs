@@ -33,6 +33,23 @@ pub(in crate::ai) async fn transcribe(
     input: TranscriptionRequest,
     install: &str,
 ) -> Result<TranscriptionOutcome> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        super::workflow::audio::transcription(client, target, key, input, install).await
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    {
+        transcribe_live(client, target, key, input, install).await
+    }
+}
+
+pub(super) async fn transcribe_live(
+    client: &reqwest::Client,
+    target: &ResolvedTarget,
+    key: &str,
+    input: TranscriptionRequest,
+    install: &str,
+) -> Result<TranscriptionOutcome> {
     let mut outcome = execute(client, target, key, input, install).await;
     let diagnostics = match &mut outcome {
         Ok(value) => &mut value.diagnostics,
@@ -53,6 +70,8 @@ async fn execute(
     input: TranscriptionRequest,
     install: &str,
 ) -> Result<TranscriptionOutcome> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let private_context = input.context.clone().unwrap_or_default();
     let wav = &input.wav;
     if wav.is_empty() || wav.len() > 25 * 1024 * 1024 {
@@ -61,7 +80,7 @@ async fn execute(
     let duration = hound::WavReader::new(std::io::Cursor::new(&input.wav))
         .ok()
         .map(|reader| reader.duration() as f64 / reader.spec().sample_rate as f64);
-    let form = Adapter::form(&target.model, input)?;
+    let form = Adapter::form(&target.model, input, key)?;
     let request = client.post(&target.url);
     let request = if key.is_empty() {
         request
@@ -185,19 +204,41 @@ mod tests {
             model: "custom-whisper".into(),
             credential: None,
         };
-        let result = transcribe(
-            &provider::client().unwrap(),
-            &target,
-            "",
-            TranscriptionRequest {
-                wav: b"RIFF-test-audio".to_vec(),
-                language: test_language("es"),
-                context: Some("Spanish — Spain".into()),
-            },
-            "private-install-id",
+        let (writer, events) = crate::ai::content::tests::capture_events();
+        let result = crate::ai::content::capture::scope(
+            writer,
+            transcribe(
+                &provider::client().unwrap(),
+                &target,
+                "",
+                TranscriptionRequest {
+                    wav: b"RIFF-test-audio".to_vec(),
+                    language: test_language("es"),
+                    context: Some("Spanish — Spain".into()),
+                },
+                "private-install-id",
+            ),
         )
         .await
         .unwrap();
+        assert_eq!(
+            crate::ai::content::tests::captured(&events, "transcription.audio"),
+            b"RIFF-test-audio"
+        );
+        let fields = String::from_utf8(crate::ai::content::tests::captured(
+            &events,
+            "transcription.multipart-fields.request",
+        ))
+        .unwrap();
+        assert!(
+            fields.contains("custom-whisper")
+                && fields.contains("Spanish — Spain")
+                && fields.contains("timestamp_granularities")
+        );
+        assert_eq!(
+            crate::ai::content::tests::captured(&events, "transcription.multipart-fields.response"),
+            r#"{"version":3,"response":{"text":"Hola, ¿cómo estás?"}}"#.as_bytes()
+        );
         assert_eq!(result.result.text, "Hola, ¿cómo estás?");
         assert!(result.result.timing.is_none());
         worker.join().unwrap();

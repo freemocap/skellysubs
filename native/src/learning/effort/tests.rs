@@ -51,6 +51,12 @@ fn database() -> Connection {
     let db = Connection::open_in_memory().unwrap();
     db.execute_batch(include_str!("../../storage/schemas/schema.sql"))
         .unwrap();
+    db.execute_batch(include_str!("../../storage/schemas/graph_runtime.sql"))
+        .unwrap();
+    db.execute_batch(include_str!(
+        "../../storage/schemas/turn_execution_owners.sql"
+    ))
+    .unwrap();
     db
 }
 #[test]

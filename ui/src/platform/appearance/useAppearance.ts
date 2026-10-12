@@ -1,11 +1,13 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { DEFAULT_APPEARANCE } from '../../generated/contracts'
+import { applyMotion } from './motion'
 import type { Settings } from '../../types'
 
 /** Apply learner-owned appearance at the app boundary, including portaled overlays. */
 export function useAppearance(settings: Settings | null) {
   const appearance = settings?.appearance ?? DEFAULT_APPEARANCE
   const theme = settings?.theme ?? 'light'
+  useLayoutEffect(() => applyMotion(appearance.motion), [appearance.motion])
   useEffect(() => {
     const root = document.documentElement
     const media = window.matchMedia('(prefers-color-scheme: dark)')

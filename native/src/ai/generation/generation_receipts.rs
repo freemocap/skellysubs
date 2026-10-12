@@ -33,9 +33,6 @@ pub fn dispatch(store: &mut Store, request: &Request) -> Result<()> {
     if tx.execute("UPDATE generation_attempts SET state='running',dispatched_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?1 AND attempt_id=?2 AND state='pending'", params![request.id,request.attempt])? != 1 {
         return Err(unavailable());
     }
-    if let Some(source) = crate::ai::results::receipt_for_consumer(&tx, &request.id)? {
-        crate::ai::results::dispatched(&tx, source["id"].as_str().ok_or_else(unavailable)?)?;
-    }
     changed(&tx)?;
     tx.commit()?;
     Ok(())
@@ -173,17 +170,14 @@ pub fn recover(db: &Connection) -> Result<()> {
     Ok(())
 }
 
-/// Unlinked receipts only; profile totals add shared executions separately.
-pub fn unshared_usage(db: &Connection, language: Option<&str>) -> Result<PersonaGenerationUsage> {
-    usage_for(db, language, None, false)
-}
-fn usage_for(
-    db: &Connection,
-    language: Option<&str>,
-    kind: Option<&str>,
-    include_shared: bool,
-) -> Result<PersonaGenerationUsage> {
-    Ok(db.query_row("SELECT count(*),COALESCE(SUM(COALESCE(json_extract(e.metadata,'$.inputTokens'),g.input_tokens)),0),COALESCE(SUM(COALESCE(json_extract(e.metadata,'$.outputTokens'),g.output_tokens)),0),COALESCE(SUM(COALESCE(json_extract(e.metadata,'$.inputTokens'),g.input_tokens) IS NULL OR COALESCE(json_extract(e.metadata,'$.outputTokens'),g.output_tokens) IS NULL),0) FROM generation_attempts g LEFT JOIN inference_consumers u ON u.consumer_id=g.id LEFT JOIN inference_executions e ON e.id=u.execution_id WHERE COALESCE(e.dispatched,g.dispatched_at IS NOT NULL)=1 AND (?1 IS NULL OR g.language_id=?1) AND (?2 IS NULL OR g.kind=?2) AND (?3 OR u.execution_id IS NULL)", params![language,kind,include_shared], |r| Ok(PersonaGenerationUsage { attempts:r.get(0)?,input_tokens:r.get(1)?,output_tokens:r.get(2)?,unknown_usage:r.get(3)? }))?)
+fn usage_for(db: &Connection, kind: &str) -> Result<PersonaGenerationUsage> {
+    let usage = crate::ai::workspace_graph::usage_for_kind(db, None, None, Some(kind))?;
+    Ok(PersonaGenerationUsage {
+        attempts: usage.attempts,
+        input_tokens: usage.input,
+        output_tokens: usage.output,
+        unknown_usage: usage.unknown,
+    })
 }
 
 pub fn activity(db: &Connection) -> Result<PersonaGenerationActivity> {
@@ -227,7 +221,7 @@ pub(crate) fn activity_for(db: &Connection, kind: &str) -> Result<PersonaGenerat
         .map(|row| {
             let (route, mut view) = row?;
             view.route = ConnectionRoute::parse(&route)?;
-            if let Some(source) = crate::ai::results::receipt_for_consumer(db, &view.id)? {
+            if let Some(source) = crate::ai::workspace_graph::receipt(db, &view.id)? {
                 let response = &source["response"];
                 view.actual_model = view.actual_model.or(source_field(response, "actualModel")?);
                 view.provider_id = view.provider_id.or(source_field(response, "providerId")?);
@@ -251,7 +245,7 @@ pub(crate) fn activity_for(db: &Connection, kind: &str) -> Result<PersonaGenerat
     Ok(PersonaGenerationActivity {
         revision: db.query_row("SELECT revision FROM metadata", [], |r| r.get(0))?,
         attempts,
-        usage: usage_for(db, None, Some(kind), true)?,
+        usage: usage_for(db, kind)?,
     })
 }
 
@@ -311,30 +305,8 @@ mod tests {
         assert_eq!(effort.bot, 1);
         assert_eq!(effort.explorations, 0);
         assert!(effort.recent[0].conversation_id.is_none());
-        let profile = store.profile().unwrap();
-        assert_eq!(profile.global.attempts, 1);
-        assert_eq!(profile.global.input_tokens, 12);
-        assert_eq!(profile.global.output_tokens, 7);
-        assert_eq!(profile.global.unknown_usage, 0);
-        assert_eq!(
-            profile
-                .languages
-                .iter()
-                .find(|l| l.id == "spanish")
-                .unwrap()
-                .attempts,
-            1
-        );
-        assert_eq!(
-            profile
-                .languages
-                .iter()
-                .find(|l| l.id == "french")
-                .unwrap()
-                .attempts,
-            0
-        );
-        assert!(profile.personas.iter().all(|p| p.attempts == 0));
+        // A domain receipt alone is not a dispatched graph execution.
+        assert_eq!(store.profile().unwrap().global.attempts, 0);
         drop(store);
         let store = Store::open(&dir.path().join("workspace.sqlite3")).unwrap();
         let view = activity(&store.connection).unwrap();
@@ -347,7 +319,7 @@ mod tests {
         assert!(view.attempts[0].finished_at.is_some());
         let json = serde_json::to_string(&view).unwrap();
         assert!(!json.contains("PRIVATE-"));
-        assert_eq!(view.usage.attempts, 1);
+        assert_eq!(view.usage.attempts, 0);
     }
 
     #[test]
@@ -358,7 +330,7 @@ mod tests {
         cancel(&mut store, &pending).unwrap();
         cancel(&mut store, &pending).unwrap();
         assert!(dispatch(&mut store, &pending).is_err());
-        assert_eq!(unshared_usage(&store.connection, None).unwrap().attempts, 0);
+        assert_eq!(usage_for(&store.connection, "persona").unwrap().attempts, 0);
         let running = request(&store, "spanish");
         submit(&mut store, &running);
         cancel(&mut store, &running).unwrap();
@@ -380,10 +352,10 @@ mod tests {
         let view = activity(&store.connection).unwrap();
         assert_eq!(view.attempts[0].state, "unknown");
         assert_eq!(view.attempts[1].state, "cancelled");
-        assert_eq!(view.usage.attempts, 1);
-        assert_eq!(view.usage.input_tokens, 5);
-        assert_eq!(view.usage.output_tokens, 0);
-        assert_eq!(view.usage.unknown_usage, 1);
+        assert_eq!(view.usage.attempts, 0);
+        assert_eq!(view.attempts[0].input_tokens, Some(5));
+        assert_eq!(view.attempts[0].output_tokens, None);
+        assert_eq!(view.usage.unknown_usage, 0);
         // A second terminal callback cannot replace already reported metadata.
         let mut duplicate = completed(Some(500), Some(9));
         duplicate.actual_model = "different-model".into();
@@ -391,8 +363,8 @@ mod tests {
             finish::<PersonaDetails>(&mut store, &running, Some(&duplicate), &outcome).is_err()
         );
         let view = activity(&store.connection).unwrap();
-        assert_eq!(view.usage.input_tokens, 5);
-        assert_eq!(view.usage.output_tokens, 9);
+        assert_eq!(view.attempts[0].input_tokens, Some(5));
+        assert_eq!(view.attempts[0].output_tokens, Some(9));
         assert_eq!(
             view.attempts[0].actual_model.as_deref(),
             Some("reported-model")
@@ -423,8 +395,8 @@ mod tests {
                 .bot,
             0
         );
-        assert_eq!(view.usage.input_tokens, 3);
-        assert_eq!(view.usage.output_tokens, 4);
+        assert_eq!(view.attempts[0].input_tokens, Some(3));
+        assert_eq!(view.attempts[0].output_tokens, Some(4));
         assert_eq!(view.usage.unknown_usage, 0);
         assert!(!serde_json::to_string(&view).unwrap().contains("PRIVATE-"));
         assert!(
@@ -446,8 +418,8 @@ mod tests {
         let view = activity(&store.connection).unwrap();
         assert_eq!(view.attempts[0].state, "unknown");
         assert_eq!(view.attempts[1].state, "cancelled");
-        assert_eq!(view.usage.attempts, 1);
-        assert_eq!(view.usage.unknown_usage, 1);
+        assert_eq!(view.usage.attempts, 0);
+        assert_eq!(view.usage.unknown_usage, 0);
         let rows = serde_json::to_string(&view.attempts).unwrap();
         drop(store);
         let store = Store::open(&dir.path().join("workspace.sqlite3")).unwrap();
@@ -455,7 +427,7 @@ mod tests {
             serde_json::to_string(&activity(&store.connection).unwrap().attempts).unwrap(),
             rows
         );
-        assert_eq!(store.profile().unwrap().global.attempts, 1);
+        assert_eq!(store.profile().unwrap().global.attempts, 0);
     }
 
     #[test]
@@ -477,8 +449,8 @@ mod tests {
         }
         let view = activity(&store.connection).unwrap();
         assert_eq!(view.attempts.len(), 50);
-        assert_eq!(view.usage.attempts, 55);
-        assert_eq!(view.usage.unknown_usage, 55);
+        assert_eq!(view.usage.attempts, 0);
+        assert_eq!(view.usage.unknown_usage, 0);
         let request = request(&store, "spanish");
         submit(&mut store, &request);
         let revision = store.snapshot().unwrap().revision;
@@ -521,13 +493,13 @@ mod tests {
             view.attempts[0].error.as_deref(),
             Some(refusal.message.as_str())
         );
-        assert_eq!(view.usage.attempts, 1);
-        assert_eq!(view.usage.unknown_usage, 1);
+        assert_eq!(view.usage.attempts, 0);
+        assert_eq!(view.usage.unknown_usage, 0);
         let next = Request::capture(&store, "spanish".into(), None).unwrap();
         begin(&mut store, &next).unwrap();
         let view = activity(&store.connection).unwrap();
         assert_eq!(view.attempts[0].state, "pending");
         assert_eq!(view.attempts[1].state, "failed");
-        assert_eq!(view.usage.attempts, 1); // Capturing new work never dispatches the failed attempt.
+        assert_eq!(view.usage.attempts, 0); // Capturing new work never dispatches the failed attempt.
     }
 }

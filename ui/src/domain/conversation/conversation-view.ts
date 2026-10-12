@@ -8,6 +8,7 @@ import { replyState } from './reply-state'
 export function conversationTurns(snapshot: ConversationSnapshot): StoredTurn[] {
   const turns: StoredTurn[] = []
   const byIdentity = new Map<string, StoredTurn>()
+  const executions = new Map(snapshot.turns.map(turn => [turn.id, turn]))
   for (const message of snapshot.messages) {
     if (!message.turnId) throw new Error('Conversation message is missing its durable turn identity.')
     if (message.wordGloss && message.wordGloss.sourceMessageId !== message.id) {
@@ -15,15 +16,15 @@ export function conversationTurns(snapshot: ConversationSnapshot): StoredTurn[] 
     }
     let turn = byIdentity.get(message.turnId)
     if (!turn) {
-      const execution = snapshot.turns.find(item => item.id === message.turnId)
-      turn = { replyState: replyState(execution, snapshot), execution, id: message.sequence, turnId: message.turnId, replacesTurnId: message.replacesTurnId, replacedBy: message.replacedBy, fixes: fixCount(message.turnId, snapshot.turns), user: null, assistant: null, analysisState: null }
+      const execution = executions.get(message.turnId)
+      turn = { replyState: replyState(execution, snapshot), execution, id: message.sequence, turnId: message.turnId, replacesTurnId: message.replacesTurnId, replacedBy: message.replacedBy, fixes: fixCount(message.turnId, executions), user: null, assistant: null, analysisState: null }
       byIdentity.set(message.turnId, turn)
       turns.push(turn)
     }
     if (message.role === 'user') {
       turn.userMessageId = message.id
       const feedback = message.feedback
-      Object.assign(turn, { userGlossOperationId: message.glossOperationId, userSavedGloss: message.wordGloss, userTranslation: message.translation, userTranslationState: message.translationState, userGlossError: message.glossError, userGlossState: message.glossState, id: message.sequence, user: message.text, conversationFeedback: message.conversationFeedback, feedbackContext: message.feedbackContext, analysisState: feedback || message.conversationFeedback ? 'done' : ['ready', 'running', 'waiting_dependencies'].includes(message.feedbackState ?? '') || turn.execution?.operations.some(operation => operation.kind === 'skill_assessment' && ['ready', 'running', 'waiting_dependencies'].includes(operation.state)) ? 'pending' : null, coachError: message.feedbackError ?? undefined,
+      Object.assign(turn, { assessmentState: message.assessmentState, assessmentError: message.assessmentError, feedbackState: message.feedbackState, userGlossOperationId: message.glossOperationId, userSavedGloss: message.wordGloss, userTranslation: message.translation, userTranslationState: message.translationState, userGlossError: message.glossError, userGlossState: message.glossState, id: message.sequence, user: message.text, conversationFeedback: message.conversationFeedback, feedbackContext: message.feedbackContext, analysisState: feedback || message.conversationFeedback ? 'done' : ['ready', 'running', 'waiting_dependencies'].includes(message.feedbackState ?? '') || ['ready', 'running', 'waiting_dependencies'].includes(message.assessmentState ?? '') ? 'pending' : null, coachError: message.feedbackError ?? undefined,
         ...(feedback ? { coach: feedback } : {}), ...(message.coachDecision ? { coachDecision: message.coachDecision } : {}) })
     } else if (message.role === 'assistant') {
       turn.reaction = message.reaction ?? undefined

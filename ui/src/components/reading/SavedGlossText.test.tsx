@@ -24,6 +24,17 @@ const houses = [
   { start: 2, end: 6, kind: 'gloss' as const, gloss: 'houses', romanization: 'buyūt', pronunciation: 'buyuut' },
 ]
 
+it('tags only displayed gloss annotations or an open word helper', () => {
+  const graphTarget = { 'data-graph-results': '["gloss"]' }
+  const view = render(<SavedGlossText graphTarget={graphTarget} text="البيوت" segments={houses} />)
+  expect(document.querySelector('[data-graph-results]')).toBeNull()
+  view.rerender(<ReadingPreferencesContext value={enabled}><SavedGlossText graphTarget={graphTarget} showAids text="البيوت" segments={houses} /></ReadingPreferencesContext>)
+  expect(document.querySelector('.wg')).toHaveAttribute('data-graph-results', '["gloss"]')
+  expect(screen.getByRole('button', { name: 'البيوت' })).not.toHaveAttribute('data-graph-results')
+  fireEvent.click(screen.getByRole('button', { name: 'البيوت' }))
+  expect(screen.getByRole('group', { name: 'Word help' })).toHaveAttribute('data-graph-results', '["gloss"]')
+})
+
 it('groups each Arabic part once with unlabeled romanization and no redundant pronunciation', () => {
   render(<SavedGlossText text="البيوت" segments={houses} />)
   fireEvent.click(screen.getByRole('button', { name: 'البيوت' }))

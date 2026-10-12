@@ -582,12 +582,12 @@ it('keeps pending word meanings out of the layout and follow-on activity out of 
 it('shows coaching progress and then error marks without opening Analysis, independently of Jev', () => {
   const input = props()
   input.turn.conversationFeedback = { grammar: 4, conversation: 3 } as never
-  input.turn.execution = { state: 'assisting', operations: [{ id: 'coach', kind: 'coach_feedback', state: 'running' }], attempts: [] } as never
+  input.turn.feedbackState = 'running'
   const view = render(<TurnView {...input} />)
   expect(view.container.querySelector('.message-coaching-pending')).toHaveTextContent('Hola')
   expect(view.container.querySelector('.msg.bot')).toHaveTextContent('Hola')
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  input.turn.execution = { state: 'succeeded', operations: [{ id: 'coach', kind: 'coach_feedback', state: 'succeeded' }], attempts: [] } as never
+  input.turn.feedbackState = 'succeeded'
   input.turn.coach = { issues: [{ quote: 'Hola', severity: 'error' }], corrections: [], notes: [], meaningRecovered: 'full', candidatesSent: 1, itemsReturned: 1, items: [] }
   view.rerender(<TurnView {...input} />)
   expect(view.container.querySelector('.message-coaching-pending')).toBeNull()
@@ -598,7 +598,7 @@ it('shows coaching progress and then error marks without opening Analysis, indep
 
 it.each(['succeeded', 'failed', 'unknown', 'cancelled', 'held'])('stops the coaching underline when work is %s', state => {
   const input = props()
-  input.turn.execution = { state: 'assisting', operations: [{ kind: 'coach_feedback', state }], attempts: [] } as never
+  input.turn.feedbackState = state
   const view = render(<TurnView {...input} reviewing />)
   expect(view.container.querySelector('.message-coaching-pending')).toBeNull()
 })

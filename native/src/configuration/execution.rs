@@ -22,7 +22,7 @@ impl Default for ExecutionPreferences {
         Self {
             assessment: ExecutionMode::Automatic,
             reply_brief: ExecutionMode::OnDemand,
-            reading: ExecutionMode::OnDemand,
+            reading: ExecutionMode::Automatic,
         }
     }
 }

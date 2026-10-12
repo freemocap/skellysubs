@@ -9,7 +9,7 @@ fn source(path: &Path) -> Connection {
 }
 
 #[test]
-fn execution_preferences_preserve_accepted_work_and_match_fresh_defaults() {
+fn execution_preferences_preserve_accepted_work_and_historical_defaults() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("workspace");
     let mut db = source(&path);
@@ -22,8 +22,7 @@ fn execution_preferences_preserve_accepted_work_and_match_fresh_defaults() {
     let mut value: serde_json::Value = serde_json::from_str(&value).unwrap();
     assert_eq!(
         value.as_object_mut().unwrap().remove("execution").unwrap(),
-        serde_json::to_value(crate::configuration::execution::ExecutionPreferences::default())
-            .unwrap()
+        serde_json::json!({"assessment":"automatic", "replyBrief":"on_demand", "reading":"on_demand"})
     );
     assert_eq!(
         before[0][4],

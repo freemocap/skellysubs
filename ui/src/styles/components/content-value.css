@@ -1,0 +1,18 @@
+/* A value from the conversation's record laid out to be read: text as
+   paragraphs, a record as its fields, a list as its items, identifiers behind a
+   toggle. Used by the record's field cards and the AI steps' details. */
+
+.content-text { margin: 0; font-size: var(--type-ui); line-height: var(--leading-snug); overflow-wrap: anywhere; }
+.content-scalar { font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-2); }
+.content-list { margin: 0; padding-inline-start: var(--space-6); display: flex; flex-direction: column; gap: var(--space-2); }
+.content-more { list-style: none; margin-inline-start: calc(-1 * var(--space-6)); color: var(--ink-3); font-size: var(--type-meta); }
+.content-fields { margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.content-field { display: grid; grid-template-columns: minmax(5rem, max-content) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.content-field > dt { font-family: var(--font-mono); font-size: var(--type-meta); color: var(--ink-3); overflow-wrap: anywhere; }
+.content-field > dd { margin: 0; min-width: 0; }
+.content-field.is-plumbing { grid-template-columns: minmax(0, 1fr); }
+.content-ids { padding: 0; border: 0; background: transparent; color: var(--ink-3); font: inherit; font-size: var(--type-meta); text-decoration: underline dotted; cursor: pointer; }
+.content-ids:hover { color: var(--ink); }
+
+.original-content { min-width: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.original-content pre { max-block-size: var(--content-source-max-height); overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: var(--type-meta); }

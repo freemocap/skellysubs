@@ -9,9 +9,9 @@ const message: ChatMessage = {
   replyBrief: { explanation: 'Who joined you?' }, briefState: 'succeeded',
   replyExplanations: { cards: [] }, explanationsState: 'succeeded',
 }
-it('uses native operation identities and preserves empty saved grammar and hold metadata', () => {
-  const turn = {operations:[{id:'g',kind:'native-owned-name',replyHelpKind:'grammar',state:'held'}],attempts:[],hold:{message:'Budget hold'}} as unknown as TurnView
-  const view=replyHelp(message,turn)
+it('uses published message state and preserves empty saved grammar and hold metadata', () => {
+  const turn = {hold:{message:'Budget hold'}} as unknown as TurnView
+  const view=replyHelp({...message, explanationsState: 'held'},turn)
   expect(view.grammar?.cards).toEqual([])
   expect(view.lanes.grammar.state).toBe('held')
   expect(view.lanes.grammar.details).toMatchObject({hold:{message:'Budget hold'}})

@@ -124,9 +124,7 @@
   65% { opacity: 1; }
   100% { opacity: 0; transform: translateY(calc(-1 * var(--space-13))) scale(.85); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .message-xp-coin { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .message-xp-coin { animation: none; }
 
 /* The chat header's counters: skill points, then XP. Quieter than the top
    bar's filled pill, so the two never read as duplicates. */

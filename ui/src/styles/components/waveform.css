@@ -21,7 +21,7 @@
    drift apart; without it the box simply spans both from the start. */
 @keyframes live-cut-grow { from { height: var(--live-wave-height); } to { height: 100%; } }
 @keyframes live-cut-send { from { opacity: 0; transform: translateX(calc(-1 * var(--space-8))); } to { opacity: 1; transform: translateX(0); } }
-@media (prefers-reduced-motion: reduce) { .live-take-region, .live-cut-notice { animation: none; } }
+:where(:root[data-motion="reduced"]) .live-take-region, :where(:root[data-motion="reduced"]) .live-cut-notice { animation: none; }
 
 .live-recording-plots > .inspection-plot { min-height: 64px; background: var(--spectrogram-low); }
 

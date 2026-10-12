@@ -246,3 +246,22 @@ it('splits saved mixed-script grammar examples into source and separate reading 
   fireEvent.click(screen.getByRole('button', { name: 'Pronunciation' }))
   expect(screen.getByText('mādhā ta’kulu?')).toHaveAttribute('dir', 'auto')
 })
+
+
+it('opens saved grammar in the coach controls immediately without requesting it again', () => {
+  const request = vi.fn().mockResolvedValue(undefined)
+  const card = { title: 'Saved construction', quote: '', body: 'Already available explanation.', example: '', contrast: '' }
+  render(<ReplyHelp {...base} inline grammar={[card]} onExplainGrammar={request} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Explain grammar' }))
+  expect(screen.getByText('Already available explanation.')).toBeVisible()
+  expect(request).not.toHaveBeenCalled()
+})
+
+
+it('attaches native surface tags to saved help content rather than hidden request controls', () => {
+  const view = render(<ReplyHelp {...base} grammar={grammar} replies={replies} opened={['grammar', 'replies']}
+    graphTargets={{ brief: { 'data-graph-results': 'brief-result' }, grammar: { 'data-graph-results': 'grammar-result' }, replies: { 'data-graph-results': 'ideas-result' } }} />)
+  expect(view.container.querySelector('[data-graph-results="brief-result"]')).toHaveTextContent(base.brief)
+  expect(view.container.querySelector('[data-graph-results="grammar-result"]')).toHaveTextContent(grammar[0].title)
+  expect(view.container.querySelector('[data-graph-results="ideas-result"]')).toHaveTextContent(replies[0].text)
+})

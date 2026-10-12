@@ -10,7 +10,7 @@ import { ErrorNotice } from '../../../components/feedback/ErrorNotice'
 import { useI18n } from '../../../components/localization/i18n'
 
 /** Saved learner evidence only; reading a partner's explanation earns no credit. */
-export function MessageSkillAnalysis({ messageId, source, conversationId }: { messageId: number; source: string; conversationId?: string }) {
+export function MessageSkillAnalysis({ messageId, source, conversationId, graphTarget }: { graphTarget?: Record<string, string>; messageId: number; source: string; conversationId?: string }) {
   const tr = useI18n()
   const { snapshot, error } = useContext(SkillEvidenceContext)
   const practice = useContext(PracticeContext)
@@ -23,7 +23,7 @@ export function MessageSkillAnalysis({ messageId, source, conversationId }: { me
   if (!rows.length) return null
   return <section className="xp-evidence-report message-skill-credit" aria-label={tr('Skills')}>
     <details><summary>{tr('Skills')} <span className="message-skill-credit-count">{tr.number(rows.length)}</span></summary>
-    {rows.map(({ record, judgment, skill }) => <article className="practice-credit" key={`${record.attempt_id}:${skill.id}`}>
+    {rows.map(({ record, judgment, skill }) => <article {...graphTarget} className="practice-credit" key={`${record.attempt_id}:${skill.id}`}>
       <header><strong>{tr(skill.label)}</strong></header>
       <ReadingLanguageScope language={record.target} variety={record.variety} explanation={record.native}>
         {(judgment.quotes.length ? judgment.quotes : [source]).map((quote, i) => <blockquote key={i}><TargetPhrase text={quote} /></blockquote>)}

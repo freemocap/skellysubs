@@ -46,7 +46,6 @@ pub(super) fn pause_related(
                 "UPDATE turns SET paused=1,refusal_hold=?2 WHERE id=?1",
                 params![id, serde_json::to_string(error)?],
             )?;
-            db.execute("UPDATE operations SET permit=0 WHERE turn_id=?1", [&id])?;
         }
     }
     bump(db)

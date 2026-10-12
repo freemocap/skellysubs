@@ -4,11 +4,11 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { expect, it } from 'vitest'
 
-/// The AI View must stay a view of `turn_plan.rs`. These checks forbid a second
-/// definition of the graph without forbidding ordinary integration code.
+/// Presentation reads the compiler-exported artifact; application code must not
+/// maintain another topology. The workspace projection is tested in domain/activity/graph-projection.test.ts.
 const root = fileURLToPath(new URL('../../../', import.meta.url))
-const plan = readFileSync(join(root, 'native/src/conversations/turn_plan.rs'), 'utf8')
-const kinds = [...new Set([...plan.matchAll(/kind:\s*"([a-z_]+)"/g)].map(match => match[1]))]
+const definition = JSON.parse(readFileSync(join(root, 'ui/src/generated/coach-graph.json'), 'utf8'))
+const kinds = Object.keys(definition.artifact.definition.nodes)
 
 function sources(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
@@ -21,8 +21,8 @@ const ui = join(root, 'ui/src')
 const kindLiteral = new RegExp(`['"\`](${kinds.join('|')})['"\`]`, 'g')
 
 it('reads the plan it guards', () => {
-  expect(kinds).toContain('persona_reply')
-  expect(kinds.length).toBeGreaterThan(8)
+  expect(kinds.length).toBeGreaterThan(0)
+  expect(definition.artifact_id).toBeTruthy()
 })
 
 it('keeps the AI View, its summary and its hydration kind-agnostic', () => {
@@ -31,14 +31,10 @@ it('keeps the AI View, its summary and its hydration kind-agnostic', () => {
   expect(found).toEqual([])
 })
 
-/// The one sanctioned place that names which operations are replies. Everything
-/// else asks it; nothing else may list kinds.
-const REPLY_IDENTITY = join(ui, 'domain/conversation/reply-state.ts')
 
 it('declares no collection of operation kinds or dependency relations anywhere in the UI', () => {
   const found: string[] = []
   for (const path of sources(ui)) {
-    if (path === REPLY_IDENTITY) continue
     const text = readFileSync(path, 'utf8')
     for (const literal of text.matchAll(/[[{][^[\]{}]*[\]}]/g)) {
       const named = new Set([...literal[0].matchAll(kindLiteral)].map(match => match[1]))

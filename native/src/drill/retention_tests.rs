@@ -119,7 +119,7 @@ fn pruning_pending_blobs_reclaims_database_pages_not_just_logical_audio_bytes() 
 }
 
 #[test]
-fn production_publication_under_keep_none_keeps_usage_and_comparison_but_no_audio() {
+fn publication_under_keep_none_keeps_receipt_and_comparison_but_no_audio() {
     let (_dir, mut store, item) = setup();
     store.connection.execute("UPDATE ai_config SET route='custom',custom_config=json_set(custom_config,'$.baseUrl','http://127.0.0.1:8765/v1','$.bearerAuth',json('false'))", []).unwrap();
     let target = crate::ai::connections::access::resolve(
@@ -146,7 +146,10 @@ fn production_publication_under_keep_none_keeps_usage_and_comparison_but_no_audi
     assert_eq!(items[0].attempts.len(), 1);
     assert_eq!(items[0].attempts[0].transcript, "Hola");
     assert!(items[0].attempts[0].audio_bytes.is_none());
-    assert_eq!(store.profile().unwrap().global.attempts, 1);
+    let receipts =
+        crate::speech::recording::transcription::views(&store.connection, &owner).unwrap();
+    assert_eq!(receipts[0].state, "succeeded");
+    assert_eq!(store.profile().unwrap().global.attempts, 0);
     assert_eq!(store.drill_storage().unwrap().recording_bytes, 0);
     assert!(!store.drill_audio.exists());
 }

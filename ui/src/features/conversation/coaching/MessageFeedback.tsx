@@ -21,7 +21,8 @@ import { useUiDirection } from '../../../components/localization/useUiDirection'
  * feedback; under the bubble, one quiet line holds the verdict (how many
  * errors the coach flagged, or Clean), Fix it and `reward` (the message's
  * XP). The verdict opens the same feedback. */
-export function MessageFeedback({ requests, id, text, conversationFeedback, feedback, decision, error, reviewing, onEdit, onAsk, onControl, bubble, reward, analysis, skills, onRetry, feedbackContext, onAddContext }: {
+export function MessageFeedback({ graphTargets, requests, id, text, conversationFeedback, feedback, decision, error, reviewing, onEdit, onAsk, onControl, bubble, reward, analysis, skills, onRetry, feedbackContext, onAddContext }: {
+  graphTargets?: { feedback?: Record<string, string>; assessment?: Record<string, string> }
   requests?: ReactNode
   feedbackContext?: string
   onAddContext?: (note: string) => Promise<void>
@@ -50,7 +51,7 @@ export function MessageFeedback({ requests, id, text, conversationFeedback, feed
     if (!decision || decision.keptGoing || (decision.shown && decision.exposedMove === decision.shown.move) || (!decision.shown && !onControl)) { setOpen(true); return }
     if (!onControl) { setFailure('Coaching disclosure is unavailable.'); return }
     pending.current = true; setBusy(true)
-    try { await onControl('open_card'); setOpen(true) }
+    try { await onControl('open_card') }
     catch (reason) { setFailure(nativeError(reason)) }
     finally { pending.current = false; setBusy(false) }
   }
@@ -71,7 +72,9 @@ export function MessageFeedback({ requests, id, text, conversationFeedback, feed
     void openCard()
   }, [open, id, decision, onControl])
   const askCoach = (question: string) => { close(); onAsk(question) }
-  const shown = decision?.shown && decision.exposedMove === decision.shown.move ? decision.shown : null
+  // The learner has opened this view: rendering saved help does not wait for
+  // the disclosure receipt or a conversation refresh. Fix-it keeps its own gate.
+  const shown = decision?.keptGoing ? null : decision?.shown
   const label = decision ? tr("Feedback") : null
   // The badge counts the coach's suggestions. They are not confirmed errors: grammar and understanding are separate
   // assessments shown inside. With no suggestion and a message the coach fully understood, it marks it clean.
@@ -95,13 +98,13 @@ export function MessageFeedback({ requests, id, text, conversationFeedback, feed
     {open && <AskCoachContext value={askCoach}><DetailDialog title={tr("Feedback on your message")} onClose={close}>
       {analysis}
       {requests}
-      <CoachEntry feedback={feedback} decision={decision} source={analysis ? null : text} error={error} />
-      {conversationFeedback && <ConversationFeedbackCard feedback={conversationFeedback} />}
+      <CoachEntry graphTarget={feedback ? graphTargets?.feedback : undefined} revealSelected feedback={feedback} decision={decision} source={analysis ? null : text} error={error} />
+      {conversationFeedback && <ConversationFeedbackCard graphTarget={conversationFeedback ? graphTargets?.assessment : undefined} feedback={conversationFeedback} />}
       {!requests && !decision && !error && !conversationFeedback && <p role="status">{reviewing ? tr("The coach is reviewing this message.") : feedback ? tr("Coaching decision is unavailable.") : tr("No feedback was saved for this message.")}</p>}
       {skills}
       <div className="detail-actions">
         {error && onRetry && <button type="button" className="detail-action" disabled={busy} onClick={async () => { setBusy(true); setFailure(null); try { await onRetry() } catch (reason) { setFailure(nativeError(reason)) } finally { setBusy(false) } }}>{tr("Retry failed help")}</button>}
-        {decision?.shown && decision.exposedMove !== decision.shown.move && <button type="button" disabled={busy} className="detail-action" onClick={() => void openCard()}>{tr("View coaching help")}</button>}
+        {failure && decision?.shown && decision.exposedMove !== decision.shown.move && <button type="button" disabled={busy} className="detail-action" onClick={() => void openCard()}>{tr("View coaching help")}</button>}
         {onEdit && <button type="button" disabled={busy} className="detail-action" onClick={() => { close(); onEdit() }}><ToolbarIcon name="edit" size={15} /> {tr("Edit and resend message")}</button>}
         {onControl && decision?.shown && decision.exposedMove === decision.shown.move && decision.shown.move !== 'explicit' && !decision.keptGoing && <button type="button" disabled={busy} className="detail-action" onClick={() => void control('show_answer')}>{tr("Show answer")}</button>}
         {onControl && decision && !decision.keptGoing && <button type="button" disabled={busy} className="detail-action" onClick={() => void control('keep_going')}>{tr("Keep going")}</button>}

@@ -36,7 +36,7 @@ impl Handlers<'_> {
             params![conversation, serde_json::to_string(&settings)?],
         )?;
         let current = snapshot::read_snapshot(self.tx, &self.snapshot.session_id, self.config)?;
-        crate::conversations::openers::accept(
+        let turn = crate::conversations::openers::accept_native(
             self.tx,
             &current,
             self.config,
@@ -50,6 +50,12 @@ impl Handlers<'_> {
             None,
             current.revision,
         )?;
+        self.graph_admission = Some((
+            turn,
+            crate::conversations::execution::graph_runtime::Admission::Partner(
+                crate::conversations::execution::context::Kind::Opening,
+            ),
+        ));
         Ok(conversation)
     }
 }

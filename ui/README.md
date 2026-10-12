@@ -396,3 +396,14 @@ Retained timing is preferred, with estimated pacing when timing cannot be mapped
 The highlight is a reading aid, not pronunciation or assessment evidence.
 `/tools/speech-follow-preview.html` exercises this with silent local audio,
 including speed, seeking, reading aids and dialogs.
+
+## Motion preferences
+
+Settings → Appearance → Animation offers Follow system (default), Full animation
+and Reduced motion. The choice is learner-owned and saved by native preferences.
+`platform/appearance/motion.ts` resolves that choice with the operating system's
+reduced-motion preference; `useAppearance` applies it at each window's root.
+CSS uses `:where(:root[data-motion="reduced"])`; JavaScript uses `reducedMotion()`
+or the reactive `useReducedMotion()` hook. Keep OS detection in that shared owner
+so explicit choices work consistently. XP effects and sound settings retain their
+own controls; Full animation does not enable effects the learner switched off.

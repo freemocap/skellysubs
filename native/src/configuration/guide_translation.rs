@@ -102,33 +102,12 @@ impl Edition {
         fields
     }
 
-    pub fn schema(&self, variety: &str) -> Value {
-        let count = self.fields(variety).len();
-        json!({"type":"object","additionalProperties":false,"properties":{"texts":{"type":"array","items":{"type":"string"},"minItems":count,"maxItems":count}},"required":["texts"]})
-    }
-
     pub fn translated(&self, variety: &str, output: &str) -> model::Result<String> {
-        #[derive(serde::Deserialize)]
-        #[serde(deny_unknown_fields)]
-        struct Translation {
-            texts: Vec<String>,
-        }
-        let invalid = || {
-            model::AppError::new(model::ErrorCode::Provider, "Guide translation failed validation.")
-            .with_diagnostics(json!({"stage":"guide_translation_validation","path":"texts","expected":"one nonempty bounded string per source field"}))
-        };
-        let translated: Translation = serde_json::from_str(output).map_err(|_| invalid())?;
         let fields = self.fields(variety);
-        if translated.texts.len() != fields.len()
-            || translated
-                .texts
-                .iter()
-                .any(|s| s.trim().is_empty() || s.len() > 16000 || s.contains('\0'))
-        {
-            return Err(invalid());
-        }
+        let texts = decode_texts(output, fields.len())?;
+        let invalid = invalid_translation;
         let mut value = json!({"shared":self.shared,"guide":self.guide});
-        for ((path, _), text) in fields.iter().zip(translated.texts) {
+        for ((path, _), text) in fields.iter().zip(texts) {
             *value.pointer_mut(path).ok_or_else(invalid)? = json!(text);
         }
         let shared = serde_json::from_value(value["shared"].clone()).map_err(|_| invalid())?;
@@ -137,6 +116,33 @@ impl Edition {
             &shared, &guide, variety,
         ))
     }
+}
+
+pub(crate) fn translation_schema(count: usize) -> Value {
+    json!({"type":"object","additionalProperties":false,"properties":{"texts":{"type":"array","items":{"type":"string"},"minItems":count,"maxItems":count}},"required":["texts"]})
+}
+
+/// Shared provider-output validation for native execution and rendering.
+pub(crate) fn decode_texts(output: &str, count: usize) -> model::Result<Vec<String>> {
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Translation {
+        texts: Vec<String>,
+    }
+    let value: Translation = serde_json::from_str(output).map_err(|_| invalid_translation())?;
+    if value.texts.len() != count
+        || value
+            .texts
+            .iter()
+            .any(|s| s.trim().is_empty() || s.len() > 16000 || s.contains('\0'))
+    {
+        return Err(invalid_translation());
+    }
+    Ok(value.texts)
+}
+fn invalid_translation() -> model::AppError {
+    model::AppError::new(model::ErrorCode::Provider, "Guide translation failed validation.")
+        .with_diagnostics(json!({"stage":"guide_translation_validation","path":"texts","expected":"one nonempty bounded string per source field"}))
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]

@@ -73,7 +73,9 @@ async fn invalid_independent_input_fails_before_execution() {
         .lock()
         .unwrap()
         .connection
-        .query_row("SELECT count(*) FROM inference_consumers", [], |r| r.get(0))
+        .query_row("SELECT count(*) FROM workspace_graph_consumers", [], |r| {
+            r.get(0)
+        })
         .unwrap();
     assert_eq!(count, 0);
 }
@@ -116,7 +118,7 @@ async fn paused_speech_has_an_undispatched_shared_receipt() {
     let receipt = results::receipt_for_consumer(&store.connection, "paused-consumer")
         .unwrap()
         .unwrap();
-    assert_eq!(receipt["state"], "failed");
+    assert_eq!(receipt["state"], "cancelled");
     assert_eq!(receipt["dispatched"], false);
     assert!(!receipt.to_string().contains("PRIVATE-UNSENT"));
     assert_eq!(store.profile().unwrap().global.attempts, 0);
@@ -185,12 +187,12 @@ async fn revoking_stream_authority_retains_redacted_partial_receipt_without_cach
                 let id: Option<String> = store
                     .connection
                     .query_row(
-                        "SELECT execution_id FROM inference_consumers WHERE consumer_id='consumer'",
+                        "SELECT stream_id FROM workspace_graph_consumers WHERE consumer_id='consumer'",
                         [],
-                        |r| r.get(0),
+                        |r| r.get::<_, Option<String>>(0),
                     )
                     .optional()
-                    .unwrap();
+                    .unwrap().flatten();
                 id.is_some_and(|id| {
                     state
                         .speech_streams
@@ -243,8 +245,10 @@ async fn cancellation(cancel_all: bool, reject_blob: bool, streamed: bool) {
     if !cancel_all && !reject_blob {
         results::set_capacity(&state.lock().unwrap().connection, 0).unwrap();
     }
+    // Fail derived audio publication after transport capture, not the new
+    // original request write that must succeed before any provider dispatch.
     if reject_blob {
-        state.lock().unwrap().connection.execute_batch("CREATE TRIGGER reject_speech_blob BEFORE INSERT ON inference_blobs BEGIN SELECT RAISE(ABORT,'fixture cache failure'); END").unwrap();
+        state.lock().unwrap().connection.execute_batch("CREATE TRIGGER reject_speech_cache BEFORE INSERT ON workspace_graph_audio_cache BEGIN SELECT RAISE(ABORT,'fixture cache failure'); END").unwrap();
     }
     let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let (target, install) = {
@@ -272,17 +276,22 @@ async fn cancellation(cancel_all: bool, reject_blob: bool, streamed: bool) {
             serde_json::from_str(wire.split_once("\r\n\r\n").unwrap().1).unwrap();
         assert_eq!(body.as_object().unwrap().len(), 3);
         assert!(body["language_code"].is_null());
+        let chunks = if streamed { 80 } else { 1 };
         let terminal = format!(
             "{}\n",
-            json!({"version":3,"seq":2,"type":"complete","total_samples":1,"alignment":null,
+            json!({"version":3,"seq":chunks+1,"type":"complete","total_samples":chunks,"alignment":null,
             "usage":{"requested_model":model,"actual_model":model,"request_id":"shared-request","cost_micros":null}})
         );
         if streamed {
-            let prefix = format!(
-                "{}\n{}\n",
-                json!({"version":3,"seq":0,"type":"start","format":"pcm_s16le","sample_rate":24000,"channels":1}),
-                json!({"version":3,"seq":1,"type":"audio","response":{"audio_base64":"ZAA=","alignment":null},"receipt":{"request_id":"shared-request"}})
+            // More audio chunks than the evidence limit: unchanged response
+            // metadata must not be counted as another observation per chunk.
+            let mut prefix = format!(
+                "{}\n",
+                json!({"version":3,"seq":0,"type":"start","format":"pcm_s16le","sample_rate":24000,"channels":1})
             );
+            for sequence in 1..=chunks {
+                prefix.push_str(&format!("{}\n",json!({"version":3,"seq":sequence,"type":"audio","response":{"audio_base64":"ZAA=","alignment":null},"receipt":{"request_id":"shared-request"}})));
+            }
             write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/x-ndjson\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",prefix.len()+terminal.len(),prefix).unwrap();
             socket.flush().unwrap();
         }
@@ -335,14 +344,16 @@ async fn cancellation(cancel_all: bool, reject_blob: bool, streamed: bool) {
             .lock()
             .unwrap()
             .connection
-            .query_row("SELECT count(*) FROM inference_consumers", [], |r| r.get(0))
+            .query_row("SELECT count(*) FROM workspace_graph_consumers", [], |r| {
+                r.get(0)
+            })
             .unwrap();
         assert_eq!(count, 2);
         if streamed {
             tokio::time::timeout(Duration::from_secs(5), async {
                 loop {
-                    let id: String = state.lock().unwrap().connection.query_row("SELECT execution_id FROM inference_consumers WHERE consumer_id='first'", [], |r|r.get(0)).unwrap();
-                    if state.speech_streams.lock().unwrap().read(&id,0).unwrap() == Some(&[100,0][..]) { break; }
+                    let id: String = state.lock().unwrap().connection.query_row("SELECT stream_id FROM workspace_graph_consumers WHERE consumer_id='first'", [], |r|r.get(0)).unwrap();
+                    if state.speech_streams.lock().unwrap().read(&id,0).unwrap().is_some_and(|pcm|pcm.starts_with(&[100,0])) { break; }
                     tokio::time::sleep(Duration::from_millis(10)).await;
                 }
             }).await.unwrap();
@@ -404,9 +415,9 @@ async fn cancellation(cancel_all: bool, reject_blob: bool, streamed: bool) {
                 .unwrap()
                 .is_none()
         );
-        assert!(receipt["response"]["storageError"].is_object());
+        assert_eq!(receipt["state"], "failed");
     } else if !cancel_all {
-        assert_eq!(receipt["id"], saved.unwrap().execution);
+        assert!(saved.unwrap().execution.starts_with("graph-audio:"));
     }
     assert_eq!(
         receipt["state"],
@@ -427,5 +438,114 @@ async fn cancellation(cancel_all: bool, reject_blob: bool, streamed: bool) {
             .unwrap()
             .unwrap(),
         receipt
+    );
+}
+
+#[tokio::test]
+async fn native_playback_reuses_cache_across_restart_and_only_regenerates_when_requested() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("native-speech.sqlite3");
+    let state = Application::start(&path, None);
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let (target, install) = {
+        let store = state.lock().unwrap();
+        store.connection.execute("UPDATE ai_config SET route='custom',custom_config=json_set(custom_config,'$.baseUrl',?1,'$.bearerAuth',json('false'))",[format!("http://{}/v1",listener.local_addr().unwrap())]).unwrap();
+        (
+            access::resolve(&store.connection, access::Capability::Speech).unwrap(),
+            store.snapshot().unwrap().learner.id,
+        )
+    };
+    let worker = std::thread::spawn(move || {
+        for _ in 0..2 {
+            let (mut socket, _) = listener.accept().unwrap();
+            request(&mut socket);
+            respond(
+                &mut socket,
+                json!({"version":3,"response":{"audio_base64":"ZAA="},"usage":{"request_id":"native-audio-request"}}),
+            );
+        }
+    });
+    let input = audio::SpeechInput {
+        text: "¿Qué? 日本語 e\u{301}".into(),
+        language_tag: "es".into(),
+        language: "Spanish".into(),
+        voice: "unused".into(),
+    };
+    let first = state
+        .shared_speech(
+            target.clone(),
+            input.clone(),
+            install.clone(),
+            "one",
+            || Ok(()),
+        )
+        .await
+        .unwrap();
+    assert!(!first.cached);
+    let second = state
+        .shared_speech(
+            target.clone(),
+            input.clone(),
+            install.clone(),
+            "two",
+            || Ok(()),
+        )
+        .await
+        .unwrap();
+    assert!(second.cached);
+    assert_eq!(first.execution, second.execution);
+    drop(state);
+    let state = Application::start(&path, None);
+    let third = state
+        .shared_speech(
+            target.clone(),
+            input.clone(),
+            install.clone(),
+            "three",
+            || Ok(()),
+        )
+        .await
+        .unwrap();
+    crate::ai::inspection::verify_workspace_reads(&state.lock().unwrap());
+    assert!(third.cached);
+    assert_eq!(first.execution, third.execution);
+    results::set_capacity(&state.lock().unwrap().connection, 0).unwrap();
+    let fourth = state
+        .shared_speech(target, input, install, "four", || Ok(()))
+        .await
+        .unwrap();
+    assert!(!fourth.cached);
+    assert_ne!(first.execution, fourth.execution);
+    worker.join().unwrap();
+    let store = state.lock().unwrap();
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        0
+    );
+    assert_eq!(
+        store
+            .connection
+            .query_row("SELECT count(*) FROM workspace_graph_runs", [], |r| r
+                .get::<_, i64>(0))
+            .unwrap(),
+        4
+    );
+    assert_eq!(
+        store
+            .connection
+            .query_row(
+                "SELECT count(*) FROM workspace_graph_audio_receipts",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
+            .unwrap(),
+        2
     );
 }

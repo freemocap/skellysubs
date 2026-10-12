@@ -52,6 +52,20 @@ pub fn recover(
     completion: &provider::Completion,
     context: &crate::configuration::LanguageContext,
 ) -> Result<Recovered, AdapterError> {
+    recover_with_settings(
+        identity,
+        source,
+        completion,
+        &settings::Settings::from(context),
+    )
+}
+
+pub fn recover_with_settings(
+    identity: &SourceIdentity,
+    source: &str,
+    completion: &provider::Completion,
+    context: &settings::Settings,
+) -> Result<Recovered, AdapterError> {
     if completion.finish_reason == "error" {
         return Err(AdapterError::InvalidTermination);
     }
@@ -73,7 +87,7 @@ pub fn recover(
     let mut rejected = Vec::new();
     for (index, item) in wire.spans.into_iter().enumerate() {
         let raw = serde_json::json!({"spans":[item.0]}).to_string();
-        match decode_word_gloss_with_context(identity, source, &raw, context) {
+        match decode_word_gloss_context(identity, source, &raw, Some(context)) {
             Ok(value) => {
                 for segment in value
                     .segments()

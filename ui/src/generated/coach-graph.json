@@ -1,0 +1,185 @@
+{
+  "protocol": 1,
+  "artifact_id": "fbb5ff3738600809efb66fbc432cd68c533bbe75e6535cf92740e2bf2849712f",
+  "artifact": {
+    "definition": {
+      "contract": "1:conversation.coach",
+      "inputs": {
+        "context": {
+          "contract": "1:conversation.captured-context",
+          "optional": false
+        },
+        "credential": {
+          "contract": "1:ai.credential-reference",
+          "optional": true
+        },
+        "install_id": {
+          "contract": "1:ai.install-id",
+          "optional": false
+        },
+        "target": {
+          "contract": "1:ai.text-target",
+          "optional": false
+        },
+        "temperature": {
+          "contract": "1:ai.temperature",
+          "optional": false
+        }
+      },
+      "outputs": {
+        "text": {
+          "contract": "1:conversation.generated-text",
+          "optional": false
+        }
+      },
+      "nodes": {
+        "context": {
+          "operation": "1:conversation.validate-context",
+          "inputs": {
+            "context": {
+              "Input": "context"
+            }
+          },
+          "after": [],
+          "guard": null,
+          "activation": "Automatic"
+        },
+        "reply": {
+          "operation": "1:conversation.generate-prose",
+          "inputs": {
+            "context": {
+              "Output": {
+                "node": "context",
+                "port": "context"
+              }
+            },
+            "credential": {
+              "Input": "credential"
+            },
+            "install_id": {
+              "Input": "install_id"
+            },
+            "target": {
+              "Input": "target"
+            },
+            "temperature": {
+              "Input": "temperature"
+            }
+          },
+          "after": [],
+          "guard": null,
+          "activation": "Automatic"
+        }
+      },
+      "results": {
+        "text": {
+          "Output": {
+            "node": "reply",
+            "port": "text"
+          }
+        }
+      },
+      "compositions": {}
+    },
+    "operations": {
+      "1:conversation.generate-prose": {
+        "contract": "1:conversation.generate-prose",
+        "implementation": "conversations/execution/prose/1",
+        "inputs": {
+          "context": {
+            "contract": "1:conversation.validated-context",
+            "optional": false
+          },
+          "credential": {
+            "contract": "1:ai.credential-reference",
+            "optional": true
+          },
+          "install_id": {
+            "contract": "1:ai.install-id",
+            "optional": false
+          },
+          "target": {
+            "contract": "1:ai.text-target",
+            "optional": false
+          },
+          "temperature": {
+            "contract": "1:ai.temperature",
+            "optional": false
+          }
+        },
+        "outputs": {
+          "text": {
+            "contract": "1:conversation.generated-text",
+            "optional": false
+          }
+        },
+        "resource": "Provider",
+        "reuse": "Fresh"
+      },
+      "1:conversation.validate-context": {
+        "contract": "1:conversation.validate-context",
+        "implementation": "conversations/execution/context/validate/1",
+        "inputs": {
+          "context": {
+            "contract": "1:conversation.captured-context",
+            "optional": false
+          }
+        },
+        "outputs": {
+          "context": {
+            "contract": "1:conversation.validated-context",
+            "optional": false
+          }
+        },
+        "resource": "Local",
+        "reuse": "Exact"
+      }
+    },
+    "types": {
+      "1:ai.credential-reference": "Text",
+      "1:ai.install-id": "Text",
+      "1:ai.temperature": "Text",
+      "1:ai.text-target": {
+        "Record": {
+          "model": "Text",
+          "revision": "Integer",
+          "route": "Text",
+          "url": "Text"
+        }
+      },
+      "1:conversation.captured-context": {
+        "Record": {
+          "kind": "Text",
+          "messages": {
+            "List": {
+              "Record": {
+                "content": "Text",
+                "role": "Text"
+              }
+            }
+          },
+          "sourceIds": {
+            "List": "Text"
+          }
+        }
+      },
+      "1:conversation.generated-text": "Text",
+      "1:conversation.validated-context": {
+        "Record": {
+          "kind": "Text",
+          "messages": {
+            "List": {
+              "Record": {
+                "content": "Text",
+                "role": "Text"
+              }
+            }
+          },
+          "sourceIds": {
+            "List": "Text"
+          }
+        }
+      }
+    }
+  }
+}

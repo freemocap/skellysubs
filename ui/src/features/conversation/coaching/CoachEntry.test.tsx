@@ -58,3 +58,23 @@ it('shows hints as the quote and coach text, without a replacement diff', () => 
   expect(screen.queryByRole('list', { name: 'Changed words' })).toBeNull()
   expect(screen.getByText(shown.text)).toBeVisible()
 })
+
+
+it('does not call a pending disclosure clean and reveals the saved correction afterward', () => {
+  const shown = { construct: 'form', quote: 'source', text: 'replacement', move: 'explicit' as const }
+  const feedback = { issues: [{ quote: 'source', severity: 'partial' as const }], corrections: [], notes: [], meaningRecovered: 'full' as const, items: [], candidatesSent: 1, itemsReturned: 1 }
+  const decision = { shown, exposedMove: null, retryInvited: false, alsoNoticed: [], keptGoing: false }
+  const view = render(<CoachEntry source={null} feedback={feedback} decision={decision} />)
+  expect(view.container).toHaveTextContent('1 suggestion')
+  expect(view.container).not.toHaveTextContent('No correction identified.')
+  expect(screen.queryByText('replacement')).toBeNull()
+  view.rerender(<CoachEntry source={null} feedback={feedback} decision={{ ...decision, exposedMove: 'explicit' }} />)
+  expect(view.container.querySelector('.cor-replacement')).toHaveTextContent('replacement')
+})
+
+it('does not call omitted evidence clean', () => {
+  const feedback = { issues: [], corrections: [], notes: ['Unusable assessment item omitted.'], meaningRecovered: 'full' as const, items: [], candidatesSent: 1, itemsReturned: 0 }
+  const view = render(<CoachEntry source={null} feedback={feedback} />)
+  expect(view.container).not.toHaveTextContent('No correction identified.')
+  expect(view.container).toHaveTextContent('Unusable assessment item omitted.')
+})

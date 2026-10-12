@@ -1,7 +1,7 @@
 //! Steering and deliberate inspection, independent of learning evidence.
 use super::{EffortDimension, award};
 use crate::model::Result;
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, OptionalExtension, params};
 
 pub(crate) fn persona(db: &Connection, request: &crate::ai::generation::Request) -> Result<()> {
     award(
@@ -45,38 +45,92 @@ pub(crate) fn steering(
 
 /// Only called after an explicitly selected attempt's details were displayed.
 /// IDs resolve their own attribution; the caller never supplies a language or count.
-pub(crate) fn inspect(db: &mut Connection, attempt: &str) -> Result<Option<super::EffortAward>> {
-    let tx = db.transaction()?;
-    let (conversation, language, variety, available): (String, String, String, bool) = tx.query_row(
-        "SELECT t.conversation_id,c.language_id,json_extract(t.context,'$.practiceSettings.varietyId'),a.request_messages IS NOT NULL OR a.response_text IS NOT NULL OR a.preview_text IS NOT NULL FROM attempts a JOIN operations o ON o.id=a.operation_id JOIN turns t ON t.id=o.turn_id JOIN conversations c ON c.id=t.conversation_id WHERE a.id=?1",
-        [attempt], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?)))?;
-    let mut earned = None;
-    if available {
-        award(
-            &tx,
-            EffortDimension::Bot,
-            &format!("inspection:{attempt}"),
-            &language,
-            &variety,
-            Some(&conversation),
-        )?;
-        // Refresh other windows through the existing revision polling path.
-        if tx.changes() != 0 {
-            earned = super::read_scoped(&tx, &language, Some(&conversation))?
-                .recent
-                .into_iter()
-                .find(|item| item.source_id == format!("inspection:{attempt}"));
-            tx.execute("UPDATE metadata SET revision=revision+1", params![])?;
-        }
+#[cfg(test)]
+pub(crate) fn inspect(
+    db: &mut Connection,
+    engine: &str,
+    run: &str,
+    revision: &str,
+    node: &str,
+    attempt: &str,
+) -> Result<Option<super::EffortAward>> {
+    let detail = crate::ai::inspection::attempt(db, engine, run, revision, node, attempt)?;
+    award_inspection(db, &detail)
+}
+
+fn award_inspection(
+    db: &mut Connection,
+    detail: &crate::ai::inspection::NativeAttemptInspection,
+) -> Result<Option<super::EffortAward>> {
+    let (engine, run, attempt) = (&detail.engine, &detail.run, &detail.attempt);
+    let source = format!("inspection:{}", serde_json::to_string(&(engine, attempt))?);
+    if db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM effort_awards WHERE dimension='bot' AND source_id=?1)",
+        [&source],
+        |r| r.get::<_, bool>(0),
+    )? {
+        return Ok(None);
     }
+    if detail.evidence.is_none() && detail.retained_text.is_none() {
+        return Ok(None);
+    }
+    let tx = db.transaction()?;
+    let owner: Option<(String,String,String)> = tx.query_row(
+        "SELECT t.conversation_id,c.language_id,json_extract(t.context,'$.practiceSettings.varietyId') FROM graph_conversation_runs r JOIN turns t ON t.id=r.turn_id JOIN conversations c ON c.id=t.conversation_id WHERE r.engine_id=?1 AND r.run_id=?2 AND t.conversation_id=?3",
+        params![engine,run,detail.owner], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?))).optional()?;
+    let Some((conversation, language, variety)) = owner else {
+        return Ok(None);
+    };
+    award(
+        &tx,
+        EffortDimension::Bot,
+        &source,
+        &language,
+        &variety,
+        Some(&conversation),
+    )?;
+    let earned = if tx.changes() != 0 {
+        let earned = super::read_scoped(&tx, &language, Some(&conversation))?
+            .recent
+            .into_iter()
+            .find(|item| item.source_id == source);
+        tx.execute("UPDATE metadata SET revision=revision+1", [])?;
+        earned
+    } else {
+        None
+    };
     tx.commit()?;
     Ok(earned)
 }
 
 #[tauri::command]
-pub(crate) fn record_bot_inspection(
+pub(crate) async fn record_bot_inspection(
     state: tauri::State<'_, std::sync::Arc<crate::application::Application>>,
-    attempt_id: String,
+    engine: String,
+    run: String,
+    revision: String,
+    node: String,
+    attempt: String,
 ) -> Result<Option<super::EffortAward>> {
-    inspect(&mut state.lock()?.connection, &attempt_id)
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let prepared = crate::ai::inspection::prepare(&state.lock()?.connection, &engine, &run)?;
+        let key =
+            serde_json::to_string(&(prepared.cache_identity()?, &run, &revision, &node, &attempt))?;
+        let detail = state.inspect_cached(key, || {
+            prepared.attempt(&engine, &run, &revision, &node, &attempt)
+        })?;
+        award_inspection(&mut state.lock()?.connection, &detail)
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(
+            &cause,
+            "inspection_credit_worker",
+            crate::model::AppError::new(
+                crate::model::ErrorCode::Internal,
+                "Inspection credit worker failed.",
+            ),
+        )
+    })?
 }

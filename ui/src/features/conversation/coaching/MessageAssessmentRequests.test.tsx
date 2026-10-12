@@ -4,7 +4,6 @@ import { beforeEach, expect, it, vi } from 'vitest'
 import { MessageAssessmentRequests } from './MessageAssessmentRequests'
 import { MessageFeedback } from './MessageFeedback'
 import type { MessageTool } from '../../../components/reading/MessageTools'
-import type { TurnView } from '../../../generated/contracts'
 const request = vi.hoisted(() => vi.fn())
 vi.mock('../../../platform/ipc/message-help', () => ({ requestMessageHelp: request }))
 beforeEach(() => {
@@ -24,8 +23,7 @@ it('requests missing help only when the message card opens', async () => {
   expect(screen.queryByText('No feedback was saved for this message.')).toBeNull()
 })
 it.each(['ready', 'running', 'waiting_dependencies', 'succeeded', 'failed', 'unknown'])('does not request existing %s work on open', state => {
-  const execution = { operations: [{ id: 'a', kind: 'skill_assessment', state }, { id: 'c', kind: 'coach_feedback', state }], attempts: [] } as unknown as TurnView
-  render(<MessageAssessmentRequests messageId="source" assessed={state === 'succeeded'} coached={state === 'succeeded'} execution={execution} />)
+  render(<MessageAssessmentRequests messageId="source" assessed={state === 'succeeded'} coached={state === 'succeeded'} assessmentState={state} feedbackState={state} />)
   expect(request).not.toHaveBeenCalled()
   if (state === 'failed' || state === 'unknown') {
     fireEvent.click(screen.getAllByRole('button', { name: 'Retry' })[0])

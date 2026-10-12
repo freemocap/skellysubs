@@ -1,8 +1,7 @@
 //! Combined, source-bound Jev assessment and deterministic skill-credit projection.
-use crate::ai::transport::provider::{Completion, PromptMessage};
+use crate::ai::transport::provider::Completion;
 use crate::learning::practice_assessment::{Instructions, SkillPrompt};
 use crate::model::{AppError, AssessmentAdapter, ErrorCode, Result};
-use rusqlite::Connection;
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
 
@@ -11,60 +10,21 @@ pub const VERSION: &str = "jev-turn-assessment-1";
 pub fn version(_: AssessmentAdapter) -> &'static str {
     VERSION
 }
-pub fn selected(captured: &Value) -> Result<AssessmentAdapter> {
-    if captured["assessmentAdapter"] != "jev_choice" {
-        return Err(fail("Skill presence requires the captured Jev adapter."));
-    }
-    Ok(AssessmentAdapter::JevChoice)
-}
 fn fail(message: &str) -> AppError {
     AppError::new(ErrorCode::Validation, message)
 }
-pub(super) fn skills(captured: &Value) -> Result<Vec<SkillPrompt>> {
-    if !captured["presenceContentError"].is_null() {
-        return Err(fail("Skill guidance is unavailable for this language and variety.")
-            .with_diagnostics(json!({"validation":{"stage":"skill_content","path":captured["presenceContentError"]["path"],"expected":"guidance for every selected skill and variety"}})));
-    }
-    serde_json::from_value(captured["presenceSkills"].clone()).map_err(|cause| {
-        crate::diagnostics::response::json_context(
-            &cause,
-            "skill_content",
-            fail("Missing captured skill content."),
-        )
-    })
-}
-pub fn request(messages: &[PromptMessage], captured: &Value) -> Result<Value> {
-    let mut state: Value = serde_json::from_str(
-        &messages
-            .get(1)
-            .ok_or_else(|| fail("Missing assessment input."))?
-            .content,
-    )?;
-    state
-        .as_object_mut()
-        .ok_or_else(|| fail("Invalid assessment state."))?
-        .remove("criteria");
-    let shared: Instructions = serde_json::from_value(captured["presenceInstructions"].clone())?;
-    let message = serde_json::from_value(captured["messageAssessmentQuestions"].clone())?;
-    crate::learning::turn_assessment::request(state, &skills(captured)?, &shared, &message)
-}
-pub fn validate(
-    db: &Connection,
-    turn: &str,
+
+/// Pure result validation and credit eligibility projection. Publication and
+/// source authority remain the owner's transaction; no current settings lookup.
+pub fn validate_captured(
     output: &Completion,
-    adapter: AssessmentAdapter,
+    skills: &[SkillPrompt],
+    config: &Instructions,
 ) -> Result<Value> {
-    if adapter != AssessmentAdapter::JevChoice
-        || output.finish_reason == "error"
-        || output.text.len() > 100000
-    {
+    if output.finish_reason == "error" || output.text.len() > 100000 {
         return Err(fail("Skill presence requires a bounded Jev completion."));
     }
-    let raw: String = db.query_row("SELECT context FROM turns WHERE id=?1", [turn], |r| {
-        r.get(0)
-    })?;
-    let captured: Value = serde_json::from_str(&raw)?;
-    let ids: BTreeSet<_> = skills(&captured)?.into_iter().map(|s| s.id).collect();
+    let ids: BTreeSet<_> = skills.iter().map(|s| s.id.clone()).collect();
     let raw: Value = serde_json::from_str(&output.text).map_err(|cause| {
         crate::diagnostics::response::json_context(
             &cause,
@@ -74,7 +34,6 @@ pub fn validate(
     })?;
     let assessment = crate::learning::turn_assessment::validate(&raw, &ids)?;
     let answers = &assessment.skills;
-    let config: Instructions = serde_json::from_value(captured["presenceInstructions"].clone())?;
     config.attribution.validate()?;
     let presence = answers
         .iter()

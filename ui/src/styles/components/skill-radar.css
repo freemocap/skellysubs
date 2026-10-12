@@ -60,7 +60,6 @@
 .skill-radar-glyph .skill-radar-edge { stroke-width: 0.8; }
 .skill-radar-glyph .skill-radar-earned { stroke-width: 0.8; stroke-dasharray: 2 2; }
 
-@media (prefers-reduced-motion: reduce) {
-  .skill-radar-wedge, .skill-radar-line, .skill-radar-label, .skill-radar-glide, .skill-radar-tip { transition: none; }
-  .skill-radar-ring-tag { animation: none; }
-}
+:where(:root[data-motion="reduced"]) .skill-radar-wedge, :where(:root[data-motion="reduced"]) .skill-radar-line, :where(:root[data-motion="reduced"]) .skill-radar-label, :where(:root[data-motion="reduced"]) .skill-radar-glide, :where(:root[data-motion="reduced"]) .skill-radar-tip { transition: none; }
+
+:where(:root[data-motion="reduced"]) .skill-radar-ring-tag { animation: none; }

@@ -90,8 +90,7 @@ async fn run(state: &Arc<Application>, id: &str) -> Result<previews::DrillGenera
             &input,
             captured.skill_focus.as_ref(),
         ),
-        schema: drill_generation::schema(input.length),
-        name: "drill_candidates",
+        length: input.length,
         max_output_tokens: input.output_budget(),
     };
     let output = super::proposal_execution::execute(

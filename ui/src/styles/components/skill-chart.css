@@ -1,6 +1,6 @@
 /* Skill chart (components/learning/SkillChart.tsx): one card with a control
-   row across the top (points shown, chart type, scale and zoom on one line,
-   folding into a settings button and menu when the card is too narrow), a
+   row across the top (chart type, scale and zoom, folding into a settings
+   button only when that row cannot fit), a separate points-shown row, a
    square stage holding the radar or the bars, and the notes (key, conversation
    legend, hints) along the bottom.
    The stage fades in when the chart type changes; marks glide when the scale or
@@ -12,10 +12,13 @@
 .skill-chart-switch button:hover:not(:disabled) { color: var(--ink); }
 .skill-chart-switch button:disabled { opacity: 0.4; cursor: default; }
 .skill-chart-switch button[aria-pressed='true'] { background: var(--interaction-tint); color: var(--interaction-ink); }
-/* The row across the top, never wrapping: points shown first, then type and
-   scale, zoom at the end. Folded, the settings button takes the end instead;
+/* The first row prioritizes type, scale and zoom with compact horizontal spacing.
+   Points shown has its own second row and never affects the first row's fit.
+   Folded, the settings button takes the end instead;
    with nothing else in the row, the row floats over the chart's top end corner. */
-.skill-chart-bar { position: relative; display: flex; flex-wrap: nowrap; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: var(--border-width) solid var(--line-soft); }
+.skill-chart-bar { position: relative; display: flex; flex-wrap: nowrap; align-items: center; gap: var(--space-2); padding: var(--space-3); border-bottom: var(--border-width) solid var(--line-soft); }
+.skill-chart-bar > .skill-chart-switch:not(.skill-chart-zoom) button { padding-inline: var(--space-2); }
+.skill-chart-scope { display: flex; padding: var(--space-3); border-bottom: var(--border-width) solid var(--line-soft); }
 .skill-chart-bar .skill-chart-zoom, .skill-chart-settings { margin-inline-start: auto; }
 .skill-chart-bar[data-floating] { position: absolute; inset-block-start: var(--space-3); inset-inline-end: var(--space-3); z-index: var(--z-dropdown); padding: 0; border: 0; }
 .skill-chart-settings { position: relative; display: flex; }
@@ -55,7 +58,6 @@
 .skill-bars-tag:dir(rtl) { transform: translateX(50%); }
 .skill-bars-ring[data-goal] .skill-bars-tag { top: auto; bottom: 100%; border-color: var(--progress-line); background: var(--progress-tint); color: var(--progress-ink); }
 
-@media (prefers-reduced-motion: reduce) {
-  .skill-chart-stage, .skill-chart-menu { animation: none; }
-  .skill-chart-switch button, .skill-bar, .skill-bar-fill, .skill-bar-conversation, .skill-bars-ring, .skill-bars-tag { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .skill-chart-stage, :where(:root[data-motion="reduced"]) .skill-chart-menu { animation: none; }
+
+:where(:root[data-motion="reduced"]) .skill-chart-switch button, :where(:root[data-motion="reduced"]) .skill-bar, :where(:root[data-motion="reduced"]) .skill-bar-fill, :where(:root[data-motion="reduced"]) .skill-bar-conversation, :where(:root[data-motion="reduced"]) .skill-bars-ring, :where(:root[data-motion="reduced"]) .skill-bars-tag { transition: none; }

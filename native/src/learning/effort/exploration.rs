@@ -7,45 +7,19 @@ use crate::{
 use rusqlite::{Connection, params};
 use serde_json::{Value, json};
 
-/// Called inside successful conversation publication. Operation identity survives retries.
-pub(crate) fn conversation(db: &Connection, operation: &str) -> Result<()> {
-    let (kind, state, conversation, language, raw): (String, String, String, String, String) = db.query_row(
-        "SELECT o.kind,o.state,t.conversation_id,c.language_id,t.context FROM operations o JOIN turns t ON t.id=o.turn_id JOIN conversations c ON c.id=t.conversation_id WHERE o.id=?1",
-        [operation], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?,r.get(4)?)),
+/// Award an adopted coach inquiry through its immutable domain effect.
+/// The recorded source and policy determine attribution and deduplication.
+pub(crate) fn graph_coach_reply(db: &Connection, effect: &str) -> Result<()> {
+    let (source, language, variety, conversation): (String, String, String, String) = db.query_row(
+        "SELECT e.award_source,e.language_id,e.variety_id,t.conversation_id FROM conversation_graph_effects e JOIN conversation_graph_publications p ON p.effect_id=e.id JOIN turn_execution_owners o ON o.turn_id=e.turn_id JOIN turns t ON t.id=e.turn_id WHERE e.id=?1 AND e.role='coach_reply' AND o.executor='graph' AND o.channel='coach'",
+        [effect], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?)),
     )?;
-    if state != "succeeded" {
-        return Ok(());
-    }
-    let context: Value = serde_json::from_str(&raw)?;
-    let source = match kind.as_str() {
-        "reply_explanations" | "reply_assistance" | "coach_reply" => operation.to_owned(),
-        // Automatic assessment is excluded; adding context is an explicit new inquiry.
-        "coach_feedback" | "coach_retry_check"
-            if context["feedbackContext"]
-                .as_str()
-                .is_some_and(|s| !s.is_empty()) =>
-        {
-            format!(
-                "{operation}:{}",
-                crate::ai::results::digest(&serde_json::to_vec(&context["feedbackContext"])?)
-            )
-        }
-        _ => return Ok(()),
-    };
-    let variety = context["practiceSettings"]["varietyId"]
-        .as_str()
-        .ok_or_else(|| {
-            crate::model::AppError::new(
-                crate::model::ErrorCode::Validation,
-                "Missing exploration source variety.",
-            )
-        })?;
     award(
         db,
         EffortDimension::Explorations,
         &source,
         &language,
-        variety,
+        &variety,
         Some(&conversation),
     )
 }
@@ -122,5 +96,22 @@ pub(crate) fn practice_proposal(
         &context.language_id,
         &context.variety_id,
         None,
+    )
+}
+
+/// Repeated attempts for the same source/note cannot create another exploration.
+pub(crate) fn graph_feedback(db: &Connection, turn: &str, note: &str) -> Result<()> {
+    let (conversation,language,variety):(String,String,String)=db.query_row("SELECT t.conversation_id,c.language_id,json_extract(t.context,'$.practiceSettings.varietyId') FROM turns t JOIN conversations c ON c.id=t.conversation_id WHERE t.id=?1",[turn],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?)))?;
+    let source = format!(
+        "graph-feedback:{turn}:{}",
+        crate::ai::results::digest(&serde_json::to_vec(note)?)
+    );
+    award(
+        db,
+        EffortDimension::Explorations,
+        &source,
+        &language,
+        &variety,
+        Some(&conversation),
     )
 }

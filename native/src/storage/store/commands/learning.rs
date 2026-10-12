@@ -30,6 +30,10 @@ impl Handlers<'_> {
             expected_revision,
         )?;
         self.conversation_scope = Some(conversation_id);
+        self.graph_admission = Some((
+            turn_id.clone(),
+            crate::conversations::execution::graph_runtime::Admission::Coach,
+        ));
         Ok(turn_id)
     }
 

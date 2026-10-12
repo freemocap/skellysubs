@@ -28,6 +28,8 @@ fn failure(message: &str) -> AppError {
 }
 #[tauri::command]
 pub async fn latest_github_release() -> Result<LatestRelease> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(20))
         .redirect(reqwest::redirect::Policy::none())

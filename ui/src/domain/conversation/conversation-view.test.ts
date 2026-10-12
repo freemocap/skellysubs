@@ -8,7 +8,7 @@ function message(sequence: number, role: string, text: string, translation: stri
 function snapshot(messages: ChatMessage[]): ConversationSnapshot {
   return {
     opening: null, topicChoices: [], starterGreeting: { text: 'hola', romanized: null }, revisionSuffixCounts: [], messages, turns: [], coachMessages: [], transcriptionAttempts: [],
-    conversationId: 'conversation', sessionId: 'session', revision: 1, hasOlder: false,
+    conversationId: 'conversation', sessionId: 'session', revision: 1, contentRevision: '1', hasOlder: false,
     connection: { route: 'hosted', signedIn: true, email: '', revision: 1, configured: true, assessmentAdapter: 'jev_choice' as const, standardModel: 'google/gemini-2.5-flash', fastModel: '', audio: { transcription: { model: 'whisper-large-v3' }, speech: { model: 'openai/gpt-audio-mini' } }, paused: false },
   }
 }
@@ -16,7 +16,7 @@ function snapshot(messages: ChatMessage[]): ConversationSnapshot {
 describe('durable conversation projection', () => {
   it('keeps the learner source identity and exposes pending assessment independently of coaching', () => {
     const source = snapshot([message(1, 'user', 'Hola')])
-    source.turns = [{ id: 'turn-1', operations: [{ kind: 'skill_assessment', state: 'running' }] }] as unknown as ConversationSnapshot['turns']
+    source.messages[0].assessmentState = 'running'
     const turn = conversationTurns(source)[0]
     expect(turn.userMessageId).toBe('source-1')
     expect(turn.analysisState).toBe('pending')
@@ -135,10 +135,10 @@ it('groups by durable identity despite interleaving and retains repeated revisio
 
 it('retains reply failure and pause state independently of successful saved assistance', () => {
   const source = snapshot([message(1, 'user', 'Question')])
-  source.turns = [{ id: 'turn-1', state: 'failed', paused: false, hold: null, route: 'hosted', replacesTurnId: null, replacedBy: null, operations: [{ id: 'reply', kind: 'persona_reply', state: 'failed', sourceMessageId: null, contractVersion: 1, dependencies: [], role: 'standard' }], attempts: [] }]
+  source.turns = [{ id: 'turn-1', state: 'failed', paused: false, hold: null, route: 'hosted', replacesTurnId: null, replacedBy: null,   }]
   source.messages[0].feedback = { issues: [], corrections: [], notes: [], meaningRecovered: 'full', items: [], candidatesSent: 1, itemsReturned: 0 }
   expect(conversationTurns(source)[0]).toMatchObject({ analysisState: 'done', assistant: null, replyState: { state: 'failed', control: 'retry' } })
-  source.turns[0].state = 'pending'; source.turns[0].operations[0].state = 'ready'; source.turns[0].paused = true
+  source.turns[0].state = 'pending'; source.turns[0].paused = true
   expect(conversationTurns(source)[0]).toMatchObject({ analysisState: 'done', replyState: { state: 'paused', control: 'resume' } })
 })
 
@@ -157,4 +157,16 @@ it('projects independent support on its own exchange without manufacturing skill
   expect(turns[0].assistant?.assistance).toEqual(assistance)
   expect(turns[0].assistant?.mechanics[0].quote).toBe('Hola')
   expect(turns[1].conversationFeedback).toBeUndefined()
+})
+
+it('counts replacement history from the same loaded executions used for display', () => {
+  const source = snapshot([message(1, 'user', 'Earlier'), message(3, 'user', 'Revised'), message(5, 'user', 'Unrelated')])
+  source.turns = [
+    { id: 'turn-1', replacesTurnId: 'outside-page', replacedBy: 'turn-2', state: 'succeeded', paused: false, hold: null, route: 'hosted' },
+    { id: 'turn-2', replacesTurnId: 'turn-1', replacedBy: null, state: 'pending', paused: false, hold: null, route: 'hosted' },
+  ]
+  const projected = conversationTurns(source)
+  expect(projected.map(turn => turn.fixes)).toEqual([1, 2, 0])
+  expect(projected[1].execution).toBe(source.turns[1])
+  expect(projected[2].execution).toBeUndefined()
 })

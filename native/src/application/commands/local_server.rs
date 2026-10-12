@@ -12,6 +12,8 @@ pub(in crate::application) async fn connect_local_server(
     state: tauri::State<'_, Arc<Application>>,
     expected_revision: i32,
 ) -> Result<AccessSettings> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     #[cfg(all(debug_assertions, desktop))]
     {
         let token = read_token(
@@ -42,6 +44,8 @@ pub(in crate::application) async fn connect_local_server(
 
 #[tauri::command]
 pub(in crate::application) async fn open_local_admin(app: tauri::AppHandle) -> Result<()> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     #[cfg(all(debug_assertions, desktop))]
     {
         use tauri_plugin_opener::OpenerExt;

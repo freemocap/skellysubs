@@ -369,6 +369,9 @@ pub enum Action {
     },
     RequestMessageSpeech {
         message_id: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[ts(optional)]
+        regenerate: Option<bool>,
     },
     CancelMessageSpeech {
         operation_id: String,
@@ -625,6 +628,8 @@ pub fn bindings() -> String {
         crate::learning::effort::EffortDimension::decl(&config),
         crate::learning::effort::EffortAward::decl(&config),
         crate::learning::effort::EffortProgress::decl(&config),
+        crate::learning::streaks::commands::StreakCounter::decl(&config),
+        crate::learning::streaks::commands::StreakSnapshot::decl(&config),
         crate::learning::learner::progression::LanguageTotals::decl(&config),
         crate::learning::effort::report::EffortActivity::decl(&config),
         crate::learning::effort::report::EffortHistoryEntry::decl(&config),
@@ -633,6 +638,7 @@ pub fn bindings() -> String {
         crate::learning::learner::learner_state::ConstructState::decl(&config),
         ConnectionRoute::decl(&config),
         crate::configuration::appearance::SurfacePalette::decl(&config),
+        crate::configuration::appearance::MotionPreference::decl(&config),
         crate::configuration::appearance::AppearancePreferences::decl(&config),
         crate::configuration::execution::ExecutionMode::decl(&config),
         crate::configuration::execution::ExecutionPreferences::decl(&config),
@@ -701,19 +707,18 @@ pub fn bindings() -> String {
         crate::learning::coaching::conversation_support::ReplyExplanation::decl(&config),
         crate::learning::coaching::conversation_support::ReplyExplanations::decl(&config),
         ChatMessage::decl(&config),
-        OperationView::decl(&config),
-        AttemptView::decl(&config),
+        SpeechRequestView::decl(&config),
         TurnView::decl(&config),
         TurnHistoryPage::decl(&config),
         RecordedMessage::decl(&config),
-        AttemptDetail::decl(&config),
-        AttemptStreamUpdate::decl(&config),
-        AttemptStreamRead::decl(&config),
         AiViewSelection::decl(&config),
-        AiDefinitionSelection::decl(&config),
-        crate::diagnostics::ai_graphs::AiGraphDefinition::decl(&config),
-        crate::diagnostics::ai_graphs::AiOperationDefinition::decl(&config),
-        crate::diagnostics::ai_graphs::AiPromptTemplate::decl(&config),
+        AiElsewhereSelection::decl(&config),
+        AiRevisionSelection::decl(&config),
+        crate::ai::inspection::NativeAttemptInspection::decl(&config),
+        crate::ai::content::ContentRecord::decl(&config),
+        crate::ai::content::ContentPayload::decl(&config),
+        crate::ai::inspection::NativeRunEntry::decl(&config),
+        crate::ai::inspection::NativeRunPage::decl(&config),
         AiWindowState::decl(&config),
         ConversationSnapshot::decl(&config),
         crate::conversations::message_history::MessageHistory::decl(&config),
@@ -953,6 +958,10 @@ pub struct WordGlossView {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ChatMessage {
+    #[ts(optional)]
+    pub assessment_state: Option<String>,
+    #[ts(optional)]
+    pub assessment_error: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[ts(optional, type = "unknown")]
     pub guide_context: Option<serde_json::Value>,
@@ -1012,40 +1021,38 @@ pub struct ChatMessage {
 }
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
-pub struct OperationView {
-    #[ts(optional)]
-    pub reply_help_kind: Option<crate::learning::coaching::conversation_support::ReplyHelpKind>,
-    pub source_message_id: Option<String>,
+pub struct SpeechRequestView {
+    pub source_message_id: String,
     pub id: String,
-    pub kind: String,
-    pub contract_version: i32,
-    pub dependencies: Vec<String>,
-    pub role: String,
     pub state: String,
-}
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[serde(rename_all = "camelCase")]
-pub struct AttemptView {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[ts(optional, type = "unknown")]
-    pub diagnostics: Option<serde_json::Value>,
-    pub id: String,
-    pub operation_id: String,
-    pub state: String,
-    pub requested_model: String,
-    pub actual_model: Option<String>,
-    pub provider_id: Option<String>,
-    pub started_at: String,
-    pub finished_at: Option<String>,
-    pub input_tokens: Option<i32>,
-    pub output_tokens: Option<i32>,
-    pub error: Option<String>,
-    /// Text a prose reply received but did not publish as a message.
-    pub unpublished_text: Option<String>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct TurnView {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub recording_ids: Option<Vec<String>>,
+    /// Structural product-field associations, not value/attempt provenance.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub native_surfaces: Option<std::collections::BTreeMap<String, Vec<String>>>,
+    #[ts(optional)]
+    pub award_sources: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional, type = "unknown")]
+    pub native_response: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub channel: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional, type = "import('./graph-contracts').AttemptPreview")]
+    pub native_preview: Option<crate::ai::graph::AttemptPreview>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional, type = "import('./graph-contracts').InspectionSnapshot")]
+    pub native_graph: Option<crate::ai::graph::InspectionSnapshot>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub native_execution_available: Option<bool>,
     pub replaces_turn_id: Option<String>,
     pub replaced_by: Option<String>,
     pub route: ConnectionRoute,
@@ -1053,8 +1060,8 @@ pub struct TurnView {
     pub state: String,
     pub paused: bool,
     pub hold: Option<AppError>,
-    pub operations: Vec<OperationView>,
-    pub attempts: Vec<AttemptView>,
+    #[ts(optional)]
+    pub speech: Option<SpeechRequestView>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
@@ -1064,8 +1071,8 @@ pub struct AiWindowState {
 }
 /// What the AI View is looking at, handed between the docked panel and the
 /// popped-out window so neither loses the learner's place. `turn_id` is None
-/// while the view follows the newest turn. The operation is named by kind so
-/// the selection carries over to whichever turn is shown.
+/// while the view follows the newest turn. `operation_kind` retains its wire
+/// name but carries the executable graph's operation identity.
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AiViewSelection {
@@ -1074,45 +1081,28 @@ pub struct AiViewSelection {
     pub operation_kind: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[ts(optional)]
-    pub definition: Option<AiDefinitionSelection>,
+    pub elsewhere: Option<AiElsewhereSelection>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional)]
+    pub revision: Option<AiRevisionSelection>,
+}
+/// Presentation selection only; retained in application memory across windows.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+pub enum AiElsewhereSelection {
+    Workspace {
+        entry: crate::ai::inspection::NativeRunEntry,
+    },
+    Transcription {
+        id: String,
+    },
 }
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct AiDefinitionSelection {
-    pub graph_id: String,
-    pub operation_kind: Option<String>,
-}
-/// One streaming attempt's state, pushed to every window and returned by
-/// reads. `text` is always the full text so far and `seq` rises on every
-/// change, so any single update is complete and ordering is unambiguous.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[serde(rename_all = "camelCase")]
-pub struct AttemptStreamUpdate {
-    pub generation: u32,
-    pub attempt_id: String,
-    pub conversation_id: String,
-    pub turn_id: String,
-    pub operation_id: String,
-    pub kind: String,
-    pub seq: u32,
-    pub text: String,
-    pub terminal: Option<String>,
-}
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[serde(rename_all = "camelCase")]
-pub struct AttemptStreamRead {
-    pub generation: u32,
-    pub entries: Vec<AttemptStreamUpdate>,
-}
-/// The bodies recorded for one attempt, read only when inspected.
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[serde(rename_all = "camelCase")]
-pub struct AttemptDetail {
-    #[ts(optional, type = "unknown")]
-    pub decision_request: Option<serde_json::Value>,
-    pub request_messages: Option<Vec<RecordedMessage>>,
-    pub response_text: Option<String>,
-    pub preview_text: Option<String>,
+#[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+pub enum AiRevisionSelection {
+    Live,
+    Structure,
+    Revision { revision: String },
 }
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
@@ -1132,6 +1122,9 @@ pub struct TurnHistoryPage {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ConversationSnapshot {
+    /// Ephemeral display identity, scoped by session, conversation and page.
+    /// Navigation may advance revision while retaining identical display fields.
+    pub content_revision: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[ts(optional)]
     pub phrase_seed: Option<String>,

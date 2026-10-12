@@ -35,3 +35,17 @@ it('never pairs a new phrase with old attempts, including effects before history
   expect(result.current.attempts).toEqual([])
   expect(result.current.loading).toBe(false)
 })
+
+
+it('makes retained audio available while inspection is pending and keeps it playable on inspection failure', async () => {
+  const take = { id: 'take-ready', audioBytes: 12n, audioPrunedAt: null } as DrillAttemptView
+  let reject!: (error: Error) => void
+  api.audio.mockResolvedValue('saved-audio')
+  api.inspect.mockImplementation(() => new Promise((_, fail) => { reject = fail }))
+  const { result } = renderHook(() => useAttemptAudio('phrase', take))
+  await waitFor(() => expect(result.current.audio?.base64).toBe('saved-audio'))
+  expect(result.current.audio?.inspection).toBeNull()
+  await act(async () => { reject(new Error('Inspection failed')) })
+  expect(result.current.audio?.base64).toBe('saved-audio')
+  expect(result.current.failure).toEqual(new Error('Inspection failed'))
+})

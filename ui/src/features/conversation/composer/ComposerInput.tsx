@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useI18n } from '../../../components/localization/i18n'
 import { ToolbarIcon } from '../../../components/controls/ToolbarIcon'
 import type { MicrophoneHealth } from '../../../domain/audio/microphone-health'
@@ -58,11 +58,7 @@ export function ComposerInput({ input, available, sending, starting = false, hea
   // The draft shows while there is text or the learner asked to type; the
   // stream takes its place while the microphone records.
   const drafting = !recording && (typing || input.length > 0)
-  useLayoutEffect(() => {
-    const field = inputRef.current
-    if (field) { field.style.height = 'auto'; field.style.height = `${Math.min(field.scrollHeight, 160)}px` }
-  }, [input, drafting])
-  useEffect(() => { if (typing) inputRef.current?.focus() }, [typing])
+  useEffect(() => { if (typing) inputRef.current?.focus({ preventScroll: true }) }, [typing])
   const canSend = available && !sending && !starting && !recording && !transcribing && input.trim().length > 0
   const padLabel = recording ? (autoSend ? tr("Stop and send recording") : tr("Stop and transcribe recording")) : tr("Record audio")
   const draft = <form className="voice-draft" onSubmit={event => { event.preventDefault(); if (canSend) onSend(input) }}>

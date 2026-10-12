@@ -31,8 +31,11 @@ fn every_bundled_entry_is_available_without_provider_execution() {
     assert_eq!(
         store
             .connection
-            .query_row("SELECT count(*) FROM inference_executions", [], |r| r
-                .get::<_, i64>(0))
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+                [],
+                |r| r.get::<_, i64>(0)
+            )
             .unwrap(),
         0
     );
@@ -90,9 +93,11 @@ fn imports_are_atomic_idempotent_and_do_not_impersonate_inference() {
     let path = dir.path().join("workspace.sqlite3");
     let mut store = Store::open(&path).unwrap();
     let count = |db: &Connection| {
-        db.query_row("SELECT count(*) FROM inference_executions", [], |r| {
-            r.get::<_, i64>(0)
-        })
+        db.query_row(
+            "SELECT count(*) FROM sqlite_master WHERE name='inference_executions'",
+            [],
+            |r| r.get::<_, i64>(0),
+        )
         .unwrap()
     };
     let before = count(&store.connection);
@@ -147,10 +152,7 @@ fn imports_are_atomic_idempotent_and_do_not_impersonate_inference() {
         .is_err()
     );
     // Imports are outside ordinary inference cache pruning.
-    store
-        .connection
-        .execute("DELETE FROM inference_results", [])
-        .unwrap();
+    crate::ai::results::set_capacity(&store.connection, 0).unwrap();
     drop(store);
     let store = Store::open(&path).unwrap();
     assert!(

@@ -1,12 +1,13 @@
+import { batchRead } from './batch-read'
 import { bindRewardOrigin, captureRewardOrigin, inheritRewardOrigin } from './reward-origin'
 import { effortPublished } from './effort-events'
 import { errorMessage } from '../diagnostics/error-details'
 import { invoke } from './native'
-import type { Action, Command, Conversation, ConversationSnapshot, PersonaDetails, PersonaGenerationActivity, Receipt, Snapshot, TurnHistoryPage, AttemptDetail } from '../../generated/contracts'
+import type { Action, Command, Conversation, ConversationSnapshot, PersonaDetails, PersonaGenerationActivity, Receipt, Snapshot, TurnHistoryPage } from '../../generated/contracts'
 
-export function readWorkspace(): Promise<Snapshot> {
-  return invoke<Snapshot>('get_snapshot')
-}
+/** Coalesce one synchronous notification burst; subsequent reads always observe
+ * fresh state, including invalidations received while a prior read is pending. */
+export const readWorkspace = batchRead(() => invoke<Snapshot>('get_snapshot'))
 
 /** Commands carry the native session and a unique delivery identity; never retry automatically. */
 export function executeAction(snapshot: Pick<Snapshot, 'sessionId'>, action: Action): Promise<Receipt> {
@@ -50,11 +51,21 @@ export async function createContact(languageId: string, details: PersonaDetails)
   return receipt.entityId
 }
 
+const conversationReads = new Map<string, Promise<ConversationSnapshot>>()
+
 export function watchConversation(conversationId: string, afterRevision = -1, before: number | null = null): Promise<ConversationSnapshot> {
-  return invoke<ConversationSnapshot>('watch_conversation', { conversationId, afterRevision, before }).then(snapshot => {
-    for (const turn of snapshot.turns) for (const operation of turn.operations) inheritRewardOrigin(operation.id, turn.id)
+  const key = JSON.stringify([conversationId, afterRevision, before])
+  const pending = conversationReads.get(key)
+  if (pending) return pending
+  const read = invoke<ConversationSnapshot>('watch_conversation', { conversationId, afterRevision, before }).then(snapshot => {
+    for (const turn of snapshot.turns) {
+      for (const source of turn.awardSources ?? []) inheritRewardOrigin(source, turn.id)
+      if (turn.speech) inheritRewardOrigin(turn.speech.id, turn.id)
+    }
     return snapshot
-  })
+  }).finally(() => conversationReads.delete(key))
+  conversationReads.set(key, read)
+  return read
 }
 
 export function selectedConversation(snapshot: Snapshot, languageId?: string): Conversation | null {
@@ -69,9 +80,4 @@ export function nativeError(error: unknown): string {
 /** Older turns keyed by turn, so history reaches turns that never produced a message. */
 export function listTurnHistory(conversationId: string, before: string | null, limit = 40): Promise<TurnHistoryPage> {
   return invoke<TurnHistoryPage>('list_turn_history', { conversationId, before, limit })
-}
-
-/** The request and response recorded for one attempt, fetched only on inspection. */
-export function readAttemptDetail(attemptId: string): Promise<AttemptDetail> {
-  return invoke<AttemptDetail>('get_attempt_detail', { attemptId })
 }

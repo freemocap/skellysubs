@@ -1,3 +1,4 @@
+import { reducedMotion } from '../../platform/appearance/motion'
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { ToolbarIcon } from '../controls/ToolbarIcon'
@@ -30,7 +31,7 @@ export function ActionRewardBursts({ enabled }: { enabled: boolean }) {
   const done = useCallback((id: string) => setBursts(current => current.filter(item => item.award.id !== id)), [])
   useEffect(trackRewardActivations, [])
   useEffect(() => onActionReward(reward => {
-    if (enabled && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) setBursts(current => [...current.slice(-11), reward])
+    if (enabled && !reducedMotion()) setBursts(current => [...current.slice(-11), reward])
   }), [enabled])
   return enabled ? bursts.map(reward => <Burst key={reward.award.id} reward={reward} done={done} />) : null
 }

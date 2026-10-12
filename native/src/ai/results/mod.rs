@@ -1,13 +1,12 @@
 //! Workspace-wide request results and evictable blobs. No product owner or UI state.
 use crate::model::{AppError, ErrorCode, Result};
-use rusqlite::{Connection, OptionalExtension, params};
+use rusqlite::{Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use ts_rs::TS;
 
 pub mod pending;
 pub mod speech;
-pub mod text;
 pub mod transcription;
 
 #[derive(Clone)]
@@ -60,25 +59,60 @@ pub fn initialize(db: &Connection) -> Result<()> {
         }
     }
     db.execute_batch(schema)?;
-    db.execute_batch(
-        "DROP TABLE IF EXISTS drill_references; DROP TABLE IF EXISTS inference_profiles;",
-    )?;
+    if !db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE name='graph_audio_receipts')",
+        [],
+        |r| r.get::<_, bool>(0),
+    )? {
+        db.execute_batch(include_str!("../../storage/schemas/graph_audio.sql"))?;
+    }
+    if !db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE name='workspace_reading_cache')",
+        [],
+        |r| r.get::<_, bool>(0),
+    )? {
+        db.execute_batch(include_str!(
+            "../../storage/schemas/workspace_reading_cache.sql"
+        ))?;
+    }
+    if !db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE name='workspace_graph_audio_receipts')",
+        [],
+        |r| r.get::<_, bool>(0),
+    )? {
+        db.execute_batch(include_str!(
+            "../../storage/schemas/workspace_graph_audio.sql"
+        ))?;
+    }
+    if !db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE name='workspace_transcription_cache')",
+        [],
+        |r| r.get::<_, bool>(0),
+    )? {
+        db.execute_batch(include_str!(
+            "../../storage/schemas/workspace_transcription_cache.sql"
+        ))?;
+    }
+    db.execute_batch(include_str!("../../storage/schemas/ai_content.sql"))?;
+    db.execute_batch(include_str!(
+        "../../storage/schemas/inference_blob_references.sql"
+    ))?;
     recover(db)
 }
 
 pub(crate) fn recover(db: &Connection) -> Result<()> {
     crate::speech::analysis::signal_cache::recover(db)?;
     let transaction = db.unchecked_transaction()?;
-    // The former speech cache stored only WAV bytes. Invalidate that known
-    // regenerable format; keep every execution receipt and recording untouched.
-    transaction.execute("DELETE FROM inference_results WHERE id IN (SELECT r.id FROM inference_results r JOIN inference_executions e ON e.id=r.id JOIN inference_blobs b ON b.digest=r.blob_digest WHERE e.task='speech' AND substr(b.payload,1,4)=x'52494646' AND substr(b.payload,9,4)=x'57415645')", [])?;
+    transaction.execute(
+        "UPDATE ai_content_records SET state='interrupted' WHERE state='pending'",
+        [],
+    )?;
     prune(&transaction)?;
-    transaction.execute("UPDATE inference_executions SET state=CASE WHEN dispatched=1 THEN 'unknown' ELSE 'cancelled' END, finished_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE state='pending'", [])?;
     transaction.commit()?;
     Ok(())
 }
 
-fn tick(db: &Connection) -> Result<i64> {
+pub(crate) fn tick(db: &Connection) -> Result<i64> {
     Ok(db.query_row(
         "UPDATE inference_cache_settings SET clock=clock+1 WHERE singleton=1 RETURNING clock",
         [],
@@ -87,22 +121,40 @@ fn tick(db: &Connection) -> Result<i64> {
 }
 
 pub fn settings(db: &Connection) -> Result<CacheSettings> {
+    let (capacity_bytes, used_bytes) = byte_usage(db)?;
     Ok(CacheSettings {
-        capacity_bytes: db.query_row(
+        capacity_bytes,
+        used_bytes,
+        // Reusable result count excludes private originals.
+        result_count: db.query_row("SELECT (SELECT count(*) FROM native_graph_audio_cache)+(SELECT count(*) FROM workspace_reading_cache)+(SELECT count(*) FROM workspace_transcription_cache)", [], |r| {
+            r.get::<_, i64>(0)
+        })? as u64,
+    })
+}
+
+fn byte_usage(db: &Connection) -> Result<(u64, u64)> {
+    Ok((
+        db.query_row(
             "SELECT capacity_bytes FROM inference_cache_settings WHERE singleton=1",
             [],
             |r| r.get::<_, i64>(0),
         )? as u64,
-        used_bytes: (db.query_row(
+        (db.query_row(
             "SELECT COALESCE(SUM(length(payload)),0) FROM inference_blobs",
             [],
             |r| r.get::<_, i64>(0),
-        )? + crate::speech::analysis::signal_cache::bytes(db, "inference")?)
-            as u64,
-        result_count: db.query_row("SELECT count(*) FROM inference_results", [], |r| {
-            r.get::<_, i64>(0)
-        })? as u64,
-    })
+        )? + crate::speech::analysis::signal_cache::bytes(db, "inference")?) as u64,
+    ))
+}
+
+/// Add-only writes need eviction only when the byte budget is exceeded. Startup,
+/// owner cleanup and capacity changes still use full reachability maintenance.
+pub(crate) fn enforce_capacity(db: &Connection) -> Result<()> {
+    let (capacity, used) = byte_usage(db)?;
+    if used > capacity {
+        prune(db)?;
+    }
+    Ok(())
 }
 
 pub fn set_capacity(db: &Connection, bytes: u64) -> Result<CacheSettings> {
@@ -124,157 +176,99 @@ pub fn set_capacity(db: &Connection, bytes: u64) -> Result<CacheSettings> {
 
 pub(crate) fn prune(db: &Connection) -> Result<()> {
     loop {
-        db.execute("DELETE FROM inference_blobs WHERE NOT EXISTS(SELECT 1 FROM inference_results WHERE blob_digest=inference_blobs.digest)", [])?;
-        let removed = db.prepare("SELECT id FROM audio_signal_sources WHERE kind='inference' AND NOT EXISTS(SELECT 1 FROM inference_results r WHERE r.id=audio_signal_sources.id)")?
+        db.execute("DELETE FROM inference_blobs WHERE NOT EXISTS(SELECT 1 FROM native_graph_audio_cache WHERE blob_digest=inference_blobs.digest) AND NOT EXISTS(SELECT 1 FROM workspace_reading_cache WHERE blob_digest=inference_blobs.digest) AND NOT EXISTS(SELECT 1 FROM workspace_transcription_cache WHERE blob_digest=inference_blobs.digest) AND NOT EXISTS(SELECT 1 FROM ai_content_chunks WHERE blob_digest=inference_blobs.digest)", [])?;
+        let removed = db.prepare("SELECT id FROM audio_signal_sources WHERE kind='inference' AND NOT EXISTS(SELECT 1 FROM native_graph_audio_cache g WHERE g.receipt_id=audio_signal_sources.id)")?
             .query_map([], |r| r.get::<_, String>(0))?.collect::<rusqlite::Result<Vec<_>>>()?;
         for id in removed {
             crate::speech::analysis::signal_cache::release(db, "inference", &id)?;
         }
-        let current = settings(db)?;
-        if current.used_bytes <= current.capacity_bytes {
+        let (capacity, used) = byte_usage(db)?;
+        if used <= capacity {
             return Ok(());
         }
-        db.execute("DELETE FROM inference_results WHERE id=(SELECT id FROM inference_results ORDER BY last_used,id LIMIT 1)", [])?;
-    }
-}
-
-pub fn lookup(db: &Connection, key: &str) -> Result<Option<Retained>> {
-    let id: Option<String> = db.query_row("SELECT r.id FROM inference_results r JOIN inference_executions e ON e.id=r.id WHERE r.request_key=?1 ORDER BY e.rowid DESC LIMIT 1", [key], |r| r.get(0)).optional()?;
-    id.map(|id| read(db, &id)).transpose().map(Option::flatten)
-}
-
-pub fn read(db: &Connection, id: &str) -> Result<Option<Retained>> {
-    let value: Option<(Vec<u8>,String,String)> = db.query_row("SELECT b.payload,e.metadata,b.digest FROM inference_results r JOIN inference_blobs b ON b.digest=r.blob_digest JOIN inference_executions e ON e.id=r.id WHERE r.id=?1 AND e.state='succeeded'", [id], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?))).optional()?;
-    value
-        .map(|(payload, metadata, expected_digest)| {
-            if digest(&payload) != expected_digest {
-                return Err(AppError::new(
-                    ErrorCode::Storage,
-                    "Cached result failed its integrity check.",
-                ));
-            }
-            let metadata = serde_json::from_str(&metadata)?;
-            let task: String = db.query_row(
-                "SELECT task FROM inference_executions WHERE id=?1",
-                [id],
-                |r| r.get(0),
-            )?;
-            if task == "speech" {
-                let audio = crate::speech::alignment::SpeechAudio::decode(&payload)?;
-                crate::speech::analysis::signal_cache::retain(db, "inference", id, &audio.wav()?)?;
-            }
+        let (native, id): (i32, String) = db.query_row("SELECT native,id FROM (SELECT 1 AS native,receipt_id AS id,last_used FROM graph_audio_cache UNION ALL SELECT 2 AS native,run_id AS id,last_used FROM workspace_reading_cache UNION ALL SELECT 3 AS native,receipt_id AS id,last_used FROM workspace_graph_audio_cache UNION ALL SELECT 4 AS native,run_id AS id,last_used FROM workspace_transcription_cache UNION ALL SELECT 5 AS native,id,last_used FROM ai_content_records WHERE EXISTS(SELECT 1 FROM ai_content_chunks WHERE record_id=ai_content_records.id)) ORDER BY last_used,id,native LIMIT 1", [], |r| Ok((r.get(0)?,r.get(1)?)))?;
+        if native == 5 {
             db.execute(
-                "UPDATE inference_results SET last_used=?2 WHERE id=?1",
-                params![id, tick(db)?],
+                "UPDATE ai_content_records SET availability='evicted' WHERE id=?1",
+                [&id],
             )?;
-            Ok(Retained {
-                cached: true,
-                execution: id.into(),
-                payload,
-                metadata,
-            })
-        })
-        .transpose()
-}
-
-pub fn begin(db: &Connection, id: &str, task: &str) -> Result<()> {
-    db.execute(
-        "INSERT INTO inference_executions(id,task,state) VALUES(?1,?2,'pending')",
-        params![id, task],
-    )?;
-    Ok(())
-}
-pub fn dispatched(db: &Connection, id: &str) -> Result<()> {
-    if db.execute("UPDATE inference_executions SET dispatched=1 WHERE id=?1 AND state='pending' AND dispatched=0", [id])? != 1 {
-        return Err(AppError::new(ErrorCode::Conflict, "Execution is no longer pending."));
-    }
-    Ok(())
-}
-
-pub fn record_retry(db: &Connection, id: &str, error: &AppError) -> Result<()> {
-    let metadata = crate::diagnostics::response::retained(None, Some(error));
-    if db.execute("UPDATE inference_executions SET metadata=json_set(metadata,'$.retry',json(?2)) WHERE id=?1 AND state='pending'",params![id,metadata])? != 1 {
-        return Err(AppError::new(ErrorCode::Conflict,"Execution ended before retry."));
-    }
-    Ok(())
-}
-
-/// One transaction retains the receipt and makes only validated complete payloads reusable.
-/// Caller supplies redacted metadata; content belongs only in the payload.
-pub fn finish(
-    db: &Connection,
-    id: &str,
-    key: &str,
-    metadata: &serde_json::Value,
-    payload: Option<&[u8]>,
-    error: Option<&AppError>,
-) -> Result<()> {
-    let tx = db.unchecked_transaction()?;
-    let state = if error.is_some_and(|e| e.code == ErrorCode::UnknownOutcome) {
-        "unknown"
-    } else if error.is_some() {
-        "failed"
-    } else {
-        "succeeded"
-    };
-    if tx.execute("UPDATE inference_executions SET state=?2,metadata=CASE WHEN json_type(metadata,'$.retry') IS NOT NULL THEN json_set(?3,'$.retry',json_extract(metadata,'$.retry')) ELSE ?3 END,finished_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?1 AND state='pending'", params![id,state,serde_json::to_string(metadata)?])? != 1 {
-        return Err(AppError::new(ErrorCode::Conflict, "Execution already settled."));
-    }
-    if error.is_none()
-        && let Some(payload) = payload.filter(|v| !v.is_empty())
-    {
-        let capacity = settings(&tx)?.capacity_bytes;
-        if payload.len() as u64 <= capacity {
-            let hash = digest(payload);
-            tx.execute(
-                "INSERT OR IGNORE INTO inference_blobs(digest,payload) VALUES(?1,?2)",
-                params![hash, payload],
-            )?;
-            tx.execute("INSERT INTO inference_results(id,request_key,blob_digest,last_used) VALUES(?1,?2,?3,?4)", params![id,key,hash,tick(&tx)?])?;
-            let task: String = tx.query_row(
-                "SELECT task FROM inference_executions WHERE id=?1",
-                [id],
-                |r| r.get(0),
-            )?;
-            if task == "speech" {
-                let audio = crate::speech::alignment::SpeechAudio::decode(payload)?;
-                crate::speech::analysis::signal_cache::retain(&tx, "inference", id, &audio.wav()?)?;
-            }
-            prune(&tx)?;
+            db.execute("DELETE FROM ai_content_chunks WHERE record_id=?1", [&id])?;
+            continue;
         }
+        db.execute(
+            if native == 4 {
+                "DELETE FROM workspace_transcription_cache WHERE run_id=?1"
+            } else if native == 3 {
+                "DELETE FROM workspace_graph_audio_cache WHERE receipt_id=?1"
+            } else if native == 2 {
+                "DELETE FROM workspace_reading_cache WHERE run_id=?1"
+            } else {
+                "DELETE FROM graph_audio_cache WHERE receipt_id=?1"
+            },
+            [id],
+        )?;
     }
-    tx.commit()?;
-    Ok(())
 }
 
-pub fn associate(db: &Connection, consumer: &str, execution: &str) -> Result<()> {
-    db.execute("INSERT INTO inference_consumers(consumer_id,execution_id) VALUES(?1,?2) ON CONFLICT(consumer_id) DO UPDATE SET execution_id=excluded.execution_id",params![consumer,execution])?;
-    Ok(())
-}
-
+#[cfg(test)]
 pub fn for_consumer(db: &Connection, consumer: &str) -> Result<Option<Retained>> {
-    let id: Option<String> = db
-        .query_row(
-            "SELECT execution_id FROM inference_consumers WHERE consumer_id=?1",
+    if native_consumer(db, consumer)?.is_some() {
+        let stream: Option<String> = db.query_row(
+            "SELECT stream_id FROM workspace_graph_consumers WHERE consumer_id=?1",
             [consumer],
             |r| r.get(0),
-        )
-        .optional()?;
-    id.map(|id| read(db, &id)).transpose().map(Option::flatten)
+        )?;
+        let Some(stream) = stream else {
+            return Ok(None);
+        };
+        let tx = db.unchecked_transaction()?;
+        let audio = crate::speech::graph_audio::read(&tx, &stream)?;
+        tx.commit()?;
+        return audio
+            .map(|audio| {
+                Ok(Retained {
+                    cached: true,
+                    execution: audio.receipt.id,
+                    payload: serde_json::to_vec(&crate::speech::alignment::SpeechAudio::new(
+                        &audio.wav,
+                        audio.alignment,
+                    ))?,
+                    metadata: receipt_for_consumer(db, consumer)?.unwrap_or_default()["response"]
+                        .clone(),
+                })
+            })
+            .transpose();
+    }
+    Ok(None)
 }
 
 /// Receipts remain inspectable after payload eviction or consumer cancellation.
 pub fn receipt_for_consumer(db: &Connection, consumer: &str) -> Result<Option<serde_json::Value>> {
-    let row: Option<(String, String, bool, String)> = db.query_row(
-        "SELECT e.id,e.state,e.dispatched,e.metadata FROM inference_consumers c JOIN inference_executions e ON e.id=c.execution_id WHERE c.consumer_id=?1",
-        [consumer], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?)),
-    ).optional()?;
-    row.map(|(id, state, dispatched, metadata)| {
-        let response: serde_json::Value = serde_json::from_str(&metadata)?;
-        Ok(serde_json::json!({"id":id,"state":state,"dispatched":dispatched,"response":response}))
-    })
-    .transpose()
+    if let Some(run) = native_consumer(db, consumer)? {
+        let source: Option<(String,String)> = db.query_row("SELECT a.engine_id,a.execution_id FROM workspace_graph_consumers c JOIN native_graph_audio_receipts a ON a.id=c.stream_id WHERE c.consumer_id=?1",[consumer],|r|Ok((r.get(0)?,r.get(1)?))).optional()?;
+        if let Some((engine, execution)) = source {
+            let mut receipt = crate::ai::workspace_graph::execution_receipt(
+                db,
+                &engine,
+                serde_json::from_str(&execution)?,
+            )?;
+            receipt["nativeRun"] = serde_json::json!(run);
+            return Ok(Some(receipt));
+        }
+        return crate::ai::workspace_graph::receipt(db, &run);
+    }
+    Ok(None)
 }
 
 #[cfg(test)]
 mod tests;
+
+fn native_consumer(db: &Connection, consumer: &str) -> Result<Option<String>> {
+    Ok(db
+        .query_row(
+            "SELECT run_id FROM workspace_graph_consumers WHERE consumer_id=?1",
+            [consumer],
+            |r| r.get(0),
+        )
+        .optional()?)
+}

@@ -39,12 +39,12 @@ export const shownOn = (view: SkillChartView, conversation: number[] | null): Sk
 
 /** The language's skills as a radar or as bars in one framed card: a row of
  * controls across the top, the chart in a fixed square under it, and
- * `children` (the key and notes) along the bottom. The row holds, in order,
- * whose points are shown (only with a conversation: language, conversation or
- * both), the chart type, the scale and the zoom, kept to one line. When the
+ * `children` (the key and notes) along the bottom. The first row holds the
+ * chart type, scale and zoom. A second row chooses whose points are shown
+ * (only with a conversation: language, conversation or both). When the
  * card is too narrow for them, type, scale and zoom fold into a settings
  * button and its menu (closed by a press outside or Escape), and the row
- * unfolds again when the card grows; with no points-shown switch the button
+ * unfolds again when the card grows; without a conversation the button
  * floats over the chart's corner instead of keeping a row. While zoomed, the
  * button shows the zoom. Switching type never moves the rest of the page; the
  * new chart fades in. Switching scale or zoom keeps the chart and glides every
@@ -94,8 +94,6 @@ export function SkillChart({ levels, conversation, view, selected, onSelect, chi
   </div>
   return <figure className="skill-chart" data-scale={view.scale} ref={card}>
     <div className="skill-chart-bar" role="group" aria-label={tr('Chart controls')} ref={row} data-floating={folded && !conversation ? 'true' : undefined}>
-      {conversation && <Switch label={tr('Points shown')} value={view.shown} onChange={view.setShown}
-        options={[{ value: 'language', label: tr('Language') }, { value: 'conversation', label: tr('Conversation') }, { value: 'both', label: tr('Both') }]} />}
       {folded
         ? <div className="skill-chart-settings" ref={settings}>
           <button type="button" className="skill-chart-menu-button" aria-label={tr('Chart settings')} title={tr('Chart settings')}
@@ -110,6 +108,10 @@ export function SkillChart({ levels, conversation, view, selected, onSelect, chi
         </div>
         : <>{typeSwitch}{scaleSwitch}{zoomGroup}</>}
     </div>
+    {conversation && <div className="skill-chart-scope">
+      <Switch label={tr('Points shown')} value={view.shown} onChange={view.setShown}
+        options={[{ value: 'language', label: tr('Language') }, { value: 'conversation', label: tr('Conversation') }, { value: 'both', label: tr('Both') }]} />
+    </div>}
     {/* Keyed by chart type, so a change of type replays the chart's entrance. */}
     <div className="skill-chart-stage" key={view.type}>
       {view.type === 'radial'

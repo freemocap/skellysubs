@@ -67,6 +67,9 @@ export type PersonaReaction = import('./generated/contracts').PartnerReaction
 /// transient by definition and never written to disk.
 export interface StoredTurn {
   userMessageId?: string
+  assessmentState?: string | null
+  assessmentError?: string | null
+  feedbackState?: string | null
   replyState?: import('./domain/conversation/reply-state').ReplyState
   /// The turn's recorded operations and attempts, for live activity.
   execution?: import('./generated/contracts').TurnView

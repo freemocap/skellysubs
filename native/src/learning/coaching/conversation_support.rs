@@ -3,7 +3,6 @@
 use crate::ai::transport::provider::{Completion, PromptMessage};
 use crate::language::script_text::requires_romanization;
 use crate::model::*;
-use rusqlite::{Connection, OptionalExtension, params};
 use serde_json::{Value, json};
 pub(crate) mod types;
 pub use types::*;
@@ -13,9 +12,6 @@ pub const ASSISTANCE: &str = "reply_assistance";
 pub const EXPLANATIONS: &str = "reply_explanations";
 /// Model role for conversation support tasks, in turns and explicit reading requests.
 pub(crate) const ROLE: &str = "standard";
-pub fn owns(kind: &str) -> bool {
-    matches!(kind, BRIEF | ASSISTANCE | EXPLANATIONS)
-}
 fn rejected(message: &str) -> AppError {
     AppError::new(
         ErrorCode::Validation,
@@ -85,28 +81,6 @@ pub fn schema_for_context(kind: &str, captured: &Value) -> Value {
         );
     }
     schema
-}
-pub fn prompt(
-    db: &Connection,
-    turn: &str,
-    kind: &str,
-    captured: &Value,
-) -> Result<Vec<PromptMessage>> {
-    let partner: String = db.query_row(
-        "SELECT text FROM messages WHERE turn_id=?1 AND role='assistant'",
-        [turn],
-        |r| r.get(0),
-    )?;
-    // The capture ends with the learner source (or opening brief). Include it
-    // exactly once, outside the bounded preceding exchange.
-    let latest: Option<String> = db
-        .query_row(
-            "SELECT text FROM messages WHERE turn_id=?1 AND role='user'",
-            [turn],
-            |r| r.get(0),
-        )
-        .optional()?;
-    prompt_for_exchange(partner, latest, kind, captured)
 }
 
 /// Pure projection shared with the graph-definition inspector.
@@ -296,13 +270,6 @@ pub fn validate(kind: &str, output: &Completion) -> Result<Value> {
         _ => return Err(rejected("unknown task")),
     }
     Ok(value)
-}
-pub fn publish(db: &Connection, turn: &str, kind: &str, value: &Value) -> Result<()> {
-    db.execute(
-        "UPDATE turns SET context=json_set(context,?2,json(?3)) WHERE id=?1",
-        params![turn, format!("$.{kind}"), value.to_string()],
-    )?;
-    Ok(())
 }
 
 #[cfg(test)]

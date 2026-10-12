@@ -46,8 +46,10 @@ it('shows a failed save without claiming the requested value was saved', async (
   render(<Controls />)
   fireEvent.click(screen.getByText('Automatic AI work'))
   const control = screen.getByRole('combobox', { name: 'Reading support' })
-  fireEvent.change(control, { target: { value: 'automatic' } })
+  expect(control).toHaveValue(DEFAULT_EXECUTION.reading)
+  const requested = DEFAULT_EXECUTION.reading === 'automatic' ? 'on_demand' : 'automatic'
+  fireEvent.change(control, { target: { value: requested } })
   await waitFor(() => expect(screen.getByText('Fixture save failed')).toBeVisible())
-  expect(control).toHaveValue('on_demand')
+  expect(control).toHaveValue(DEFAULT_EXECUTION.reading)
   expect(control).not.toBeDisabled()
 })

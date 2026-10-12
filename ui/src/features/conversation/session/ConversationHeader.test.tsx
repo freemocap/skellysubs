@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, render } from '@testing-library/react'
+import { act, render, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { ConversationHeader, type DifficultyPlace } from './ConversationHeader'
 
@@ -47,7 +47,7 @@ it.each([
   expect(onPlace).toHaveBeenLastCalledWith(place)
 })
 
-it('brings difficulty back into the header as soon as the row has room for it again', () => {
+it('brings difficulty back into the header as soon as the row has room for it again', async () => {
   room = 200
   const onPlace = vi.fn()
   render(<Header onPlace={onPlace} />)
@@ -55,6 +55,6 @@ it('brings difficulty back into the header as soon as the row has room for it ag
   // A side panel closes or the window widens: the header's own box grows.
   room = 400
   act(() => resized.forEach(callback => callback()))
-  expect(head()).toHaveAttribute('data-fit', 'full')
-  expect(onPlace).toHaveBeenLastCalledWith('header')
+  await waitFor(() => expect(head()).toHaveAttribute('data-fit', 'full'))
+  await waitFor(() => expect(onPlace).toHaveBeenLastCalledWith('header'))
 })

@@ -1,168 +1,4 @@
 use super::*;
-fn complete(db: &Connection, id: &str, key: &str, bytes: &[u8]) {
-    begin(db, id, "test-task").unwrap();
-    dispatched(db, id).unwrap();
-    finish(
-        db,
-        id,
-        key,
-        &serde_json::json!({"request_id":id}),
-        Some(bytes),
-        None,
-    )
-    .unwrap();
-}
-#[test]
-fn obsolete_discovery_state_is_removed_without_losing_audio_or_receipts() {
-    let db = Connection::open_in_memory().unwrap();
-    initialize(&db).unwrap();
-    complete(&db, "saved", "saved-key", b"audio");
-    associate(&db, "consumer", "saved").unwrap();
-    let receipt = receipt_for_consumer(&db, "consumer").unwrap();
-    db.execute_batch(
-        "CREATE TABLE inference_profiles(scope TEXT PRIMARY KEY, profile TEXT NOT NULL);
-        INSERT INTO inference_profiles VALUES('scope','retired');",
-    )
-    .unwrap();
-    initialize(&db).unwrap();
-    let count: i64 = db
-        .query_row(
-            "SELECT count(*) FROM sqlite_master WHERE name='inference_profiles'",
-            [],
-            |r| r.get(0),
-        )
-        .unwrap();
-    assert_eq!(count, 0);
-    assert_eq!(receipt_for_consumer(&db, "consumer").unwrap(), receipt);
-    assert_eq!(
-        for_consumer(&db, "consumer").unwrap().unwrap().payload,
-        b"audio"
-    );
-}
-#[test]
-fn restart_reuse_lru_shared_blobs_and_receipts_have_independent_lifetimes() {
-    let directory = tempfile::tempdir().unwrap();
-    let path = directory.path().join("results.sqlite3");
-    {
-        let db = Connection::open(&path).unwrap();
-        initialize(&db).unwrap();
-        set_capacity(&db, 6).unwrap();
-        complete(&db, "first", "one", b"aaa");
-        complete(&db, "second", "two", b"bbb");
-        complete(&db, "same-blob", "three", b"aaa");
-        assert_eq!(settings(&db).unwrap().used_bytes, 6);
-        assert_eq!(lookup(&db, "one").unwrap().unwrap().payload, b"aaa");
-        complete(&db, "fourth", "four", b"ccc");
-        assert!(lookup(&db, "two").unwrap().is_none());
-        assert!(lookup(&db, "one").unwrap().is_some());
-    }
-    let db = Connection::open(&path).unwrap();
-    initialize(&db).unwrap();
-    assert_eq!(
-        lookup(&db, "four").unwrap().unwrap().metadata["request_id"],
-        "fourth"
-    );
-    set_capacity(&db, 0).unwrap();
-    assert_eq!(settings(&db).unwrap().used_bytes, 0);
-    assert_eq!(settings(&db).unwrap().result_count, 0);
-    let receipts: i64 = db
-        .query_row("SELECT count(*) FROM inference_executions", [], |r| {
-            r.get(0)
-        })
-        .unwrap();
-    assert_eq!(receipts, 4);
-}
-#[test]
-fn interrupted_failed_and_oversized_payloads_are_not_reused() {
-    let db = Connection::open_in_memory().unwrap();
-    initialize(&db).unwrap();
-    begin(&db, "pending", "test").unwrap();
-    dispatched(&db, "pending").unwrap();
-    initialize(&db).unwrap();
-    assert_eq!(
-        db.query_row(
-            "SELECT state FROM inference_executions WHERE id='pending'",
-            [],
-            |r| r.get::<_, String>(0)
-        )
-        .unwrap(),
-        "unknown"
-    );
-    begin(&db, "failed", "test").unwrap();
-    let failure = AppError::new(ErrorCode::Provider, "failed");
-    finish(
-        &db,
-        "failed",
-        "key",
-        &serde_json::json!({}),
-        Some(b"partial"),
-        Some(&failure),
-    )
-    .unwrap();
-    assert!(lookup(&db, "key").unwrap().is_none());
-    set_capacity(&db, 2).unwrap();
-    complete(&db, "big", "big", b"abc");
-    assert!(lookup(&db, "big").unwrap().is_none());
-    assert!(finish(&db, "big", "big", &serde_json::json!({}), Some(b"a"), None).is_err());
-}
-
-#[test]
-fn damaged_payload_and_unrecognized_schema_fail_without_resetting_data() {
-    let db = Connection::open_in_memory().unwrap();
-    initialize(&db).unwrap();
-    complete(&db, "valid", "key", b"audio");
-    db.execute(
-        "UPDATE inference_blobs SET payload=?1",
-        [b"broken".as_slice()],
-    )
-    .unwrap();
-    assert!(matches!(lookup(&db,"key"),Err(e) if e.code == ErrorCode::Storage));
-    db.execute_batch("ALTER TABLE inference_results ADD COLUMN unknown_field TEXT;")
-        .unwrap();
-    assert!(matches!(initialize(&db),Err(e) if e.code == ErrorCode::Storage));
-    assert_eq!(
-        db.query_row("SELECT count(*) FROM inference_executions", [], |r| r
-            .get::<_, i64>(0))
-            .unwrap(),
-        1
-    );
-}
-
-#[test]
-fn settlement_preserves_retry_metadata_and_explicit_unknown_cost() {
-    let db = Connection::open_in_memory().unwrap();
-    initialize(&db).unwrap();
-    begin(&db, "retrying", "speech").unwrap();
-    dispatched(&db, "retrying").unwrap();
-    let mut failure = AppError::new(ErrorCode::Provider, "Rate limited.");
-    failure.diagnostics = Some(serde_json::json!({"status":429,"request_id":"limited-request"}));
-    record_retry(&db, "retrying", &failure).unwrap();
-    associate(&db, "consumer", "retrying").unwrap();
-    finish(
-        &db,
-        "retrying",
-        "key",
-        &serde_json::json!({"costMicros":null}),
-        Some(
-            &serde_json::to_vec(&crate::speech::alignment::SpeechAudio::new(b"audio", None))
-                .unwrap(),
-        ),
-        None,
-    )
-    .unwrap();
-    let receipt = receipt_for_consumer(&db, "consumer").unwrap().unwrap();
-    assert!(
-        receipt["response"]
-            .get("costMicros")
-            .is_some_and(serde_json::Value::is_null)
-    );
-    assert!(
-        receipt["response"]["retry"]
-            .to_string()
-            .contains("limited-request")
-    );
-}
-
 #[test]
 fn speech_identity_preserves_exact_inputs_and_effective_access_scope() {
     use crate::ai::{audio::SpeechInput, connections::access::ResolvedTarget};
@@ -213,86 +49,51 @@ fn speech_identity_preserves_exact_inputs_and_effective_access_scope() {
     changed_target.url = "http://localhost/other/audio/speech".into();
     assert_ne!(scope, speech::scope(&changed_target, "workspace").unwrap());
     assert_ne!(scope, speech::scope(&target, "other-workspace").unwrap());
-    let db = Connection::open_in_memory().unwrap();
-    initialize(&db).unwrap();
-    complete(&db, "saved-speech", &key, b"old audio");
-    assert!(
-        speech::lookup(&db, &target, &input, "workspace")
-            .unwrap()
-            .is_some()
-    );
-    let original = target.clone();
-    let mut target = target.clone();
-    target.model = "other-model".into();
-    assert!(
-        speech::lookup(&db, &target, &input, "workspace")
-            .unwrap()
-            .is_none()
-    );
-    assert!(
-        speech::lookup(&db, &original, &input, "workspace")
-            .unwrap()
-            .is_some()
-    );
-    // Existing associations still reference the original result after configuration changes.
-    assert_eq!(
-        read(&db, "saved-speech").unwrap().unwrap().payload,
-        b"old audio"
-    );
 }
 
 #[test]
-fn inspecting_an_older_result_does_not_make_it_the_current_answer() {
+fn cache_capacity_counts_shared_blobs_once_and_evicts_least_recent_use() {
     let db = Connection::open_in_memory().unwrap();
+    db.execute_batch("CREATE TABLE workspace_graph_runs(run_id TEXT PRIMARY KEY);")
+        .unwrap();
     initialize(&db).unwrap();
-    complete(&db, "original", "same-key", b"partial");
-    complete(&db, "repair", "same-key", b"complete");
-    read(&db, "original").unwrap();
-    assert_eq!(
-        lookup(&db, "same-key").unwrap().unwrap().execution,
-        "repair"
-    );
-}
-
-#[test]
-fn audio_only_development_cache_cleanup_preserves_receipts_and_complete_results() {
-    let db = Connection::open_in_memory().unwrap();
-    initialize(&db).unwrap();
-    begin(&db, "old-speech", "speech").unwrap();
-    // Construct the retired on-disk format directly; current writers require
-    // a complete speech payload and must not emit that old representation.
+    let insert = |run: &str, payload: &[u8]| {
+        db.execute("INSERT INTO workspace_graph_runs VALUES(?1)", [run])
+            .unwrap();
+        let hash = digest(payload);
+        db.execute(
+            "INSERT OR IGNORE INTO inference_blobs(digest,payload) VALUES(?1,?2)",
+            rusqlite::params![hash, payload],
+        )
+        .unwrap();
+        db.execute(
+            "INSERT INTO workspace_reading_cache VALUES(?1,?1,?2,?3)",
+            rusqlite::params![run, hash, tick(&db).unwrap()],
+        )
+        .unwrap();
+    };
+    insert("first", b"aaa");
+    insert("second", b"bbb");
+    insert("shared", b"aaa");
+    assert_eq!(settings(&db).unwrap().used_bytes, 6);
+    assert_eq!(settings(&db).unwrap().result_count, 3);
     db.execute(
-        "UPDATE inference_executions SET state='succeeded' WHERE id='old-speech'",
-        [],
+        "UPDATE workspace_reading_cache SET last_used=?1 WHERE run_id='first'",
+        [tick(&db).unwrap()],
     )
     .unwrap();
-    let old = b"RIFF1234WAVEpayload";
-    let hash = digest(old);
-    db.execute(
-        "INSERT INTO inference_blobs(digest,payload) VALUES(?1,?2)",
-        params![hash, old.as_slice()],
-    )
-    .unwrap();
-    db.execute("INSERT INTO inference_results(id,request_key,blob_digest,last_used) VALUES('old-speech','old-key',?1,1)", [hash]).unwrap();
-    associate(&db, "old-consumer", "old-speech").unwrap();
-    let complete_audio =
-        serde_json::to_vec(&crate::speech::alignment::SpeechAudio::new(b"audio", None)).unwrap();
-    begin(&db, "new-speech", "speech").unwrap();
-    finish(
-        &db,
-        "new-speech",
-        "new-key",
-        &serde_json::json!({}),
-        Some(&complete_audio),
-        None,
-    )
-    .unwrap();
-    let receipt = receipt_for_consumer(&db, "old-consumer").unwrap();
-    initialize(&db).unwrap();
-    assert!(read(&db, "old-speech").unwrap().is_none());
-    assert_eq!(receipt_for_consumer(&db, "old-consumer").unwrap(), receipt);
-    assert_eq!(
-        read(&db, "new-speech").unwrap().unwrap().payload,
-        complete_audio
-    );
+    insert("fourth", b"ccc");
+    set_capacity(&db, 6).unwrap();
+    let ids = db
+        .prepare("SELECT run_id FROM workspace_reading_cache ORDER BY run_id")
+        .unwrap()
+        .query_map([], |r| r.get::<_, String>(0))
+        .unwrap()
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .unwrap();
+    assert_eq!(ids, ["first", "fourth", "shared"]);
+    set_capacity(&db, 0).unwrap();
+    assert_eq!(settings(&db).unwrap().used_bytes, 0);
+    assert_eq!(settings(&db).unwrap().result_count, 0);
+    assert!(set_capacity(&db, u64::MAX).is_err());
 }

@@ -6,27 +6,14 @@ export interface ReplyState {
   control: 'retry' | 'resume' | null
 }
 
-/** The one place the UI names which operations produce a conversation reply.
- * Partner replies (including openings) drive the chat; coach replies are prose
- * too, for streaming and summaries. Everything else reads these helpers. */
-export function isPartnerReply(kind: string): boolean {
-  return kind === 'persona_reply' || kind === 'persona_opening'
-}
-export function isProseReply(kind: string): boolean {
-  return isPartnerReply(kind) || kind === 'coach_reply'
-}
-
-/** Operation state wins over sibling assistance; only an active reply may show progress. */
+/** Native turn state follows the declared reply publication effect. */
 export function replyState(turn: TurnView | undefined, snapshot: Pick<ConversationSnapshot, 'connection' | 'turns'>): ReplyState {
-  const operation = turn?.operations.find(item => isPartnerReply(item.kind))
-  if (!turn || !operation) return { state: 'unavailable', error: null, control: null }
-  const error = turn.hold?.message ?? turn.attempts.filter(attempt => attempt.operationId === operation.id && attempt.error).at(-1)?.error ?? null
+  if (!turn) return { state: 'unavailable', error: null, control: null }
   const retry = ['failed', 'unknown'].includes(turn.state) && snapshot.turns[0]?.id === turn.id ? 'retry' : null
-  if (operation.state === 'failed') return { state: 'failed', error, control: retry }
-  if (['unknown', 'unknown_outcome'].includes(operation.state)) return { state: 'unknown', error, control: retry }
-  if (operation.state === 'cancelled') return { state: 'cancelled', error, control: null }
-  if (!['ready', 'waiting_dependencies', 'running'].includes(operation.state)) return { state: 'unavailable', error, control: null }
-  if (turn.hold) return { state: 'held', error: turn.hold.message, control: ['pending', 'assisting'].includes(turn.state) && !snapshot.connection.paused ? 'resume' : retry }
+  if (turn.state === 'failed') return { state: 'failed', error: turn.hold?.message ?? null, control: retry }
+  if (turn.state === 'unknown') return { state: 'unknown', error: turn.hold?.message ?? null, control: retry }
+  if (turn.state === 'cancelled' || turn.state === 'invalidated') return { state: 'cancelled', error: null, control: null }
+  if (turn.hold) return { state: 'held', error: turn.hold.message, control: snapshot.connection.paused ? null : 'resume' }
   if (turn.paused || snapshot.connection.paused) return { state: 'paused', error: null, control: snapshot.connection.paused ? null : 'resume' }
-  return { state: 'pending', error: null, control: null }
+  return { state: turn.state === 'pending' ? 'pending' : 'unavailable', error: null, control: null }
 }

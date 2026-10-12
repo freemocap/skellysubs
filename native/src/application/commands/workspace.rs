@@ -1,4 +1,5 @@
 use super::*;
+use crate::application::conversation_reads::read_conversation_since;
 
 /// Ordered operating-system preferences, read without changing device settings.
 #[tauri::command]
@@ -31,10 +32,15 @@ pub(in crate::application) async fn retry_credential_cleanup(
 }
 
 #[tauri::command]
-pub(in crate::application) fn get_snapshot(
+pub(in crate::application) async fn get_snapshot(
     state: tauri::State<'_, Arc<Application>>,
 ) -> Result<Snapshot> {
-    state.lock()?.snapshot()
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || state.lock()?.snapshot())
+        .await
+        .map_err(|cause| {
+            crate::diagnostics::failures::join(&cause, "activity_read_worker", internal())
+        })?
 }
 
 #[tauri::command]
@@ -42,7 +48,10 @@ pub(in crate::application) fn execute_command(
     state: tauri::State<'_, Arc<Application>>,
     command: Command,
 ) -> Result<Receipt> {
-    state.lock()?.execute(command)
+    let result = state.execute_command(command);
+    state.scheduler_wake.notify_waiters();
+    state.conversation_changed.notify_waiters();
+    result
 }
 
 #[tauri::command]
@@ -55,59 +64,68 @@ pub(in crate::application) fn get_message_history(
 }
 
 #[tauri::command]
-pub(in crate::application) fn read_speech_audio(
+pub(in crate::application) async fn read_speech_audio(
     state: tauri::State<'_, Arc<Application>>,
     session_id: String,
     operation_id: String,
     sample_offset: Option<u32>,
     execution_id: Option<String>,
 ) -> Result<model::SpeechAudioState> {
-    let store = state.lock()?;
-    if session_id != store.session_id {
-        return Err(AppError::new(
-            ErrorCode::SessionExpired,
-            "The application session changed. Refresh before continuing.",
-        ));
-    }
-    let audio = store.speech_audio(&operation_id, &store.speech_delivery)?;
-    let source_execution = store.speech_stream_execution(&operation_id)?;
-    if !matches!(audio, model::SpeechAudioState::Unavailable { .. })
-        && execution_id
-            .as_ref()
-            .is_some_and(|previous| source_execution.as_ref() != Some(previous))
-    {
-        return Err(AppError::new(
-            ErrorCode::Conflict,
-            "Speech execution changed during playback.",
-        ));
-    }
-    if let model::SpeechAudioState::Pending { message_id, .. } = &audio
-        && let Some(id) = source_execution
-    {
-        let streams = state
-            .speech_streams
-            .lock()
-            .map_err(|_| crate::diagnostics::failures::poisoned(internal()))?;
-        let offset = sample_offset.unwrap_or(0);
-        if let Some(pcm) = streams.read(&id, offset as usize)? {
-            use base64::Engine;
-            return Ok(model::SpeechAudioState::Streaming {
-                operation_id,
-                message_id: message_id.clone(),
-                execution_id: id.clone(),
-                sample_offset: offset,
-                alignment: streams.alignment(&id),
-                audio_base64: base64::engine::general_purpose::STANDARD.encode(pcm),
-            });
-        }
-        if execution_id.is_some() {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let store = state.lock()?;
+        if session_id != store.session_id {
             return Err(AppError::new(
-                ErrorCode::Conflict,
-                "Speech stream delivery expired.",
+                ErrorCode::SessionExpired,
+                "The application session changed. Refresh before continuing.",
             ));
         }
-    }
-    Ok(audio)
+        let audio = store.speech_audio(&operation_id)?;
+        let source_execution = store.speech_stream_execution(&operation_id)?;
+        if !matches!(audio, model::SpeechAudioState::Unavailable { .. })
+            && execution_id
+                .as_ref()
+                .is_some_and(|previous| source_execution.as_ref() != Some(previous))
+        {
+            return Err(AppError::new(
+                ErrorCode::Conflict,
+                "Speech execution changed during playback.",
+            ));
+        }
+        if let model::SpeechAudioState::Pending { message_id, .. } = &audio
+            && let Some(id) = source_execution
+        {
+            let streams = state
+                .speech_streams
+                .lock()
+                .map_err(|_| crate::diagnostics::failures::poisoned(internal()))?;
+            let offset = sample_offset.unwrap_or(0);
+            if let Some(pcm) = streams.read(&id, offset as usize)? {
+                use base64::Engine;
+                let pcm = pcm.to_vec();
+                let alignment = streams.alignment(&id);
+                drop(streams);
+                drop(store);
+                return Ok(model::SpeechAudioState::Streaming {
+                    operation_id,
+                    message_id: message_id.clone(),
+                    execution_id: id.clone(),
+                    sample_offset: offset,
+                    alignment,
+                    audio_base64: base64::engine::general_purpose::STANDARD.encode(pcm),
+                });
+            }
+            if execution_id.is_some() {
+                return Err(AppError::new(
+                    ErrorCode::Conflict,
+                    "Speech stream delivery expired.",
+                ));
+            }
+        }
+        Ok(audio)
+    })
+    .await
+    .map_err(|cause| crate::diagnostics::failures::join(&cause, "speech_audio_read", internal()))?
 }
 
 /// Inspect the exact audio already delivered to playback; never consume delivery twice.
@@ -256,37 +274,51 @@ pub(in crate::application) fn get_ai_view_selection(
         .clone())
 }
 
-/// The request and response recorded for one attempt, for inspection.
-#[tauri::command]
-pub(in crate::application) fn get_attempt_detail(
-    state: tauri::State<'_, Arc<Application>>,
-    attempt_id: String,
-) -> Result<crate::model::AttemptDetail> {
-    state.lock()?.attempt_detail(&attempt_id)
-}
-
-/// The current text of every streaming attempt in a conversation, for windows
-/// that open or reload mid-stream.
-#[tauri::command]
-pub(in crate::application) fn read_attempt_streams(
-    state: tauri::State<'_, Arc<Application>>,
-    conversation_id: String,
-) -> Result<crate::model::AttemptStreamRead> {
-    state.read_streams(&conversation_id)
-}
-
 /// Older turns of one conversation, keyed by turn so the AI View's history
 /// reaches every recorded turn.
 #[tauri::command]
-pub(in crate::application) fn list_turn_history(
+pub(in crate::application) async fn list_turn_history(
     state: tauri::State<'_, Arc<Application>>,
     conversation_id: String,
     before: Option<String>,
     limit: u32,
 ) -> Result<crate::model::TurnHistoryPage> {
-    state
-        .lock()?
-        .turn_history(&conversation_id, before.as_deref(), limit)
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        state
+            .lock()?
+            .turn_history(&conversation_id, before.as_deref(), limit)
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(&cause, "activity_read_worker", internal())
+    })?
+}
+
+#[tauri::command]
+pub(in crate::application) async fn read_graph_history(
+    state: tauri::State<'_, Arc<Application>>,
+    conversation_id: String,
+    run_id: String,
+    before: Option<String>,
+    limit: u32,
+) -> Result<crate::ai::graph::RunHistory> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let prepared = {
+            let store = state.lock()?;
+            let engine: String = store.connection.query_row(
+                "SELECT r.engine_id FROM graph_conversation_runs r JOIN turns t ON t.id=r.turn_id WHERE r.run_id=?1 AND t.conversation_id=?2",
+                rusqlite::params![run_id, conversation_id], |r| r.get(0))?;
+            crate::ai::inspection::prepare(&store.connection, &engine, &run_id)?
+        };
+        let key = serde_json::to_string(&(prepared.cache_identity()?, &run_id, &before, limit))?;
+        state.inspect_cached(key, || prepared.history(&run_id, before.as_deref(), limit))
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(&cause, "activity_read_worker", internal())
+    })?
 }
 
 /// Conditional full snapshots combine observation and hydration without an event gap.
@@ -296,18 +328,27 @@ pub(in crate::application) async fn watch_conversation(
     conversation_id: String,
     after_revision: i32,
     before: Option<i32>,
-) -> Result<ConversationSnapshot> {
+) -> Result<tauri::ipc::Response> {
     let deadline = tokio::time::Instant::now() + Duration::from_secs(20);
     loop {
-        if let Some(snapshot) = state.lock()?.conversation_snapshot_since(
-            &conversation_id,
+        let changed = state.conversation_changed.notified();
+        tokio::pin!(changed);
+        changed.as_mut().enable();
+        if let Some(snapshot) = read_conversation_since(
+            state.inner().clone(),
+            conversation_id.clone(),
             before,
             after_revision,
             tokio::time::Instant::now() >= deadline,
-        )? {
-            return Ok(snapshot);
+        )
+        .await?
+        {
+            return Ok(snapshot.response());
         }
-        tokio::time::sleep(Duration::from_millis(150)).await;
+        tokio::select! {
+            _ = changed => {},
+            _ = tokio::time::sleep(Duration::from_millis(150)) => {},
+        }
     }
 }
 
@@ -393,11 +434,6 @@ pub(in crate::application) fn preview_conversation_prompt(
 }
 
 /// Application blueprints, available without a selected conversation or AI access.
-#[tauri::command]
-pub(in crate::application) fn get_ai_graph_definitions()
--> Result<Vec<crate::diagnostics::ai_graphs::AiGraphDefinition>> {
-    crate::diagnostics::ai_graphs::definitions()
-}
 
 #[tauri::command]
 pub(in crate::application) fn get_practice_view(
@@ -411,4 +447,87 @@ pub(in crate::application) fn set_practice_view(
     view: crate::model::PracticeView,
 ) -> Result<()> {
     state.lock()?.set_practice_view(view)
+}
+
+/// Inspect retained evidence at the selected cut without dispatch or disclosure writes.
+#[tauri::command]
+pub(in crate::application) async fn read_native_graph_attempt(
+    state: tauri::State<'_, Arc<Application>>,
+    engine: String,
+    run: String,
+    revision: String,
+    node: String,
+    attempt: String,
+) -> Result<crate::ai::inspection::NativeAttemptInspection> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let prepared = crate::ai::inspection::prepare(&state.lock()?.connection, &engine, &run)?;
+        let key =
+            serde_json::to_string(&(prepared.cache_identity()?, &run, &revision, &node, &attempt))?;
+        state.inspect_cached(key, || {
+            prepared.attempt(&engine, &run, &revision, &node, &attempt)
+        })
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(&cause, "activity_read_worker", internal())
+    })?
+}
+
+#[tauri::command]
+pub(in crate::application) async fn list_native_workspace_runs(
+    state: tauri::State<'_, Arc<Application>>,
+    before: Option<String>,
+) -> Result<crate::ai::inspection::NativeRunPage> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        crate::ai::inspection::workspace_runs(&state.lock()?.connection, before.as_deref())
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(&cause, "activity_read_worker", internal())
+    })?
+}
+#[tauri::command]
+pub(in crate::application) async fn read_native_run_history(
+    state: tauri::State<'_, Arc<Application>>,
+    engine: String,
+    run: String,
+    before: Option<String>,
+) -> Result<crate::ai::graph::RunHistory> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let prepared = crate::ai::inspection::prepare(&state.lock()?.connection, &engine, &run)?;
+        let key = serde_json::to_string(&(prepared.cache_identity()?, &run, &before, 32))?;
+        state.inspect_cached(key, || prepared.history(&run, before.as_deref(), 32))
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(&cause, "activity_read_worker", internal())
+    })?
+}
+
+#[tauri::command]
+pub(in crate::application) async fn read_native_workspace_graph(
+    state: tauri::State<'_, Arc<Application>>,
+    engine: String,
+    run: String,
+    after: Option<String>,
+) -> Result<Option<crate::ai::graph::InspectionSnapshot>> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let store = state.lock()?;
+        crate::ai::inspection::current(
+            &store.connection,
+            &store.workspace_graphs,
+            &store.graph_runtime,
+            &engine,
+            &run,
+            after.as_deref(),
+        )
+    })
+    .await
+    .map_err(|cause| {
+        crate::diagnostics::failures::join(&cause, "activity_read_worker", internal())
+    })?
 }

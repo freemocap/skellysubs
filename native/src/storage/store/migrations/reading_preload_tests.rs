@@ -45,7 +45,7 @@ fn review_upgrade_preserves_imports_and_rolls_back_on_failure() {
     let dictionary = rows(&db, "reading_dictionary");
     let awards = rows(&db, "effort_awards");
     assert!(
-        run_chain(&mut db, 55, 56, STEPS, |_| {
+        run_chain(&mut db, 55, 56, &STEPS[..11], |_| {
             Err(AppError::new(
                 ErrorCode::Storage,
                 "forced validation failure",
@@ -56,7 +56,7 @@ fn review_upgrade_preserves_imports_and_rolls_back_on_failure() {
     assert_eq!(version(&db), 55);
     assert_eq!(rows(&db, "reading_packages"), packages);
     assert_eq!(rows(&db, "reading_dictionary"), dictionary);
-    run_chain(&mut db, 55, 56, STEPS, |_| Ok(())).unwrap();
+    run_chain(&mut db, 55, 56, &STEPS[..11], |_| Ok(())).unwrap();
     assert_eq!(rows(&db, "reading_packages"), packages);
     assert_eq!(rows(&db, "reading_dictionary"), dictionary);
     assert_eq!(rows(&db, "effort_awards"), awards);

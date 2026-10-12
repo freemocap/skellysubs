@@ -8,9 +8,9 @@ import type { ReactNode } from 'react'
 /** The card a progress button shows first: XP plus the owner's effort units, each
  * in the colour of the place it comes from, optional owner content, and the way
  * on to the full view. The owner positions it and supplies the data. */
-export function ProgressCard({ title, xp, effort, units, error, expandLabel, onExpand, children, icon = 'star', tone = 'progress' }: {
+export function ProgressCard({ title, xp, effort, units, error, expandLabel, onExpand, children, headerAccessory, icon = 'star', tone = 'progress' }: {
   title: string; xp: number | null; effort: EffortProgress | null; units?: readonly EffortField[]; error?: string | null
-  expandLabel: string; onExpand: () => void; children?: ReactNode
+  expandLabel: string; onExpand: () => void; children?: ReactNode; headerAccessory?: ReactNode
   /** The XP mark and colour family: progress gold for the learner overall, coach green for a conversation. */
   icon?: ToolbarIconName; tone?: 'progress' | 'coach'
 }) {
@@ -19,6 +19,7 @@ export function ProgressCard({ title, xp, effort, units, error, expandLabel, onE
   return <section className="progress-card" data-tone={tone} role="dialog" aria-label={title}>
     <header className="progress-card-heading">
       <strong className="progress-card-xp" data-icon={icon}><ToolbarIcon name={icon} size={16} />{xp === null ? '—' : tr.number(xp)}<span>{tr(' XP')}</span></strong>
+      {headerAccessory}
       <span className="progress-card-title">{title}</span>
     </header>
     {shown.length > 0 && <ul className="progress-card-units">{shown.map(({ field, icon, label }) => {

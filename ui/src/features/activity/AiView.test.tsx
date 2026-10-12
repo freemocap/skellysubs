@@ -1,384 +1,206 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { useNavigationStore } from '../../state/navigation/navigation'
 import { AiView } from './AiView'
 
-const credit = vi.hoisted(() => ({ recordBotInspection: vi.fn() }))
-vi.mock('../../platform/ipc/effort', () => credit)
-const api = vi.hoisted(() => ({ readWorkspace: vi.fn(), watchConversation: vi.fn(), listTurnHistory: vi.fn(), readAttemptDetail: vi.fn() }))
-const windowApi = vi.hoisted(() => ({ getAiViewSelection: vi.fn(), setAiViewSelection: vi.fn(), getAiGraphDefinitions: vi.fn() }))
-const flow = vi.hoisted(() => ({ fitView: async (_options?: { nodes?: { id: string }[] }) => true }))
-vi.mock('../../platform/ipc/workspace', () => ({ ...api, selectedConversation: (workspace: { selected: string | null }) => workspace.selected ? { id: workspace.selected } : null, nativeError: String }))
-vi.mock('../../platform/ipc/window', () => windowApi)
-vi.mock('../../platform/ipc/attempt-streams', () => ({ onAttemptStream: async () => () => {}, readAttemptStreams: async () => ({ generation: 1, entries: [] }) }))
-vi.mock('./GenerationActivity', () => ({ GenerationActivity: () => <div>Generation receipts</div> }))
-vi.mock('@xyflow/react', () => ({
-  ReactFlow: ({ nodes, edges, children }: { nodes: { id: string; data: { label: string; phase: string | null; onSelect: () => void } }[]; edges: unknown[]; children?: React.ReactNode }) => <div>
-    <pre data-testid="graph">{JSON.stringify({ nodes: nodes.map(node => ({ id: node.id, label: node.data.label, phase: node.data.phase })), edges })}</pre>
-    {nodes.map(node => <button key={node.id} type="button" data-testid={`node-${node.id}`} onClick={node.data.onSelect}>{node.data.label}</button>)}
-    {children}
-  </div>,
-  Background: () => null, Controls: () => null, Handle: () => null, Position: { Left: 'left', Right: 'right' }, useReactFlow: () => flow,
+const api = vi.hoisted(() => ({
+  readWorkspace: vi.fn(), watchConversation: vi.fn(), listTurnHistory: vi.fn(), getAiViewSelection: vi.fn(), setAiViewSelection: vi.fn(),
+  readGraphHistory: vi.fn(), listNativeWorkspaceRuns: vi.fn(), readNativeWorkspaceGraph: vi.fn(), readNativeRunHistory: vi.fn(),
+  original: vi.fn(), currentWindowLabel: vi.fn(), emitGraphHover: vi.fn(), onGraphHoverReply: vi.fn(), workspace: vi.fn(), workspaceRun: vi.fn(),
 }))
-beforeEach(() => {
-  vi.resetAllMocks()
-  credit.recordBotInspection.mockResolvedValue(undefined)
-  HTMLDialogElement.prototype.showModal = function () { this.open = true }
-  HTMLDialogElement.prototype.close = function () { this.open = false }
-  useNavigationStore.setState({ aiInspection: null })
-  windowApi.getAiViewSelection.mockResolvedValue(null)
-  windowApi.setAiViewSelection.mockResolvedValue(undefined)
-  api.readAttemptDetail.mockResolvedValue({ requestMessages: null, responseText: null, previewText: null })
-})
+vi.mock('../../platform/ipc/workspace', () => ({ ...api, selectedConversation: (workspace: { selected: string | null }) => workspace.selected ? { id: workspace.selected } : null, nativeError: String }))
+vi.mock('../../platform/ipc/window', () => api)
+vi.mock('../../components/feedback/OriginalContent', () => ({ OriginalContent: (props: unknown) => { api.original(props); return <div data-testid="original-content" /> } }))
+vi.mock('./workspace/RunWorkspace', () => ({ RunWorkspace: (props: { graph: { run: string }; popover: string | null; onPopover: (node: string) => void; orientation: string; onHoverResults: (results: string[] | null) => void }) => {
+  api.workspace(props)
+  return <div data-testid="run" data-orientation={props.orientation}>{props.graph.run}<span>{props.popover}</span>
+    <button onClick={() => props.onPopover('reply')}>Inspect reply</button>
+    <button onClick={() => props.onHoverResults(['text'])}>Hover reply</button></div>
+} }))
+vi.mock('./WorkspaceRunView', () => ({ WorkspaceRunView: (props: { entry: { run: string } }) => { api.workspaceRun(props); return <div data-testid="workspace-run">{props.entry.run}</div> } }))
 
-function attempt(operationId: string, overrides: Record<string, unknown> = {}) {
-  return { id: `${operationId}-attempt`, operationId, state: 'succeeded', requestedModel: 'model', actualModel: null, providerId: null, startedAt: '2026-09-18T10:00:00.000Z', finishedAt: '2026-09-18T10:00:02.000Z', inputTokens: 10, outputTokens: 4, error: null, unpublishedText: null, ...overrides }
+function turn(id: string) {
+  return { id, channel: 'coach', state: 'pending', paused: false, route: 'hosted', hold: null, nativeGraph: { engine: 'engine', run: id, artifact_id: 'a', revision: '1', artifact: { definition: { inputs: {}, results: {} } }, nodes: { reply: 'Running', helper: 'Unrequested' }, attempts: {} } }
 }
-function turn(id: string, operations: { id: string; kind: string; state: string; dependencies: string[] }[], attempts: unknown[] = []) {
-  return { id, state: 'assisting', paused: false, hold: null, operations: operations.map(op => ({ role: 'standard', contractVersion: 1, sourceMessageId: null, ...op })), attempts }
+function snapshot(conversationId: string, revision: number, turns = [turn('run')]) {
+  return { conversationId, revision, turns, messages: [], connection: { paused: false }, transcriptionAttempts: [] }
 }
-function snapshot(conversationId: string, revision: number, turns: unknown[]) {
-  return { conversationId, revision, transcriptionAttempts: [], turns }
-}
-
-it('renders actual dependency IDs and watches updates without dispatching AI', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 2, [turn('turn', [
-    { id: 'reply', kind: 'persona_reply', state: 'succeeded', dependencies: [] },
-    { id: 'gloss', kind: 'persona_word_gloss', state: 'running', dependencies: ['reply'] },
-  ], [attempt('reply'), attempt('gloss', { state: 'running', finishedAt: null })])])).mockImplementation(() => new Promise(() => {}))
-  render(<AiView mode="docked" actions={null} />)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('"label":"persona word gloss","phase":"running"'))
-  expect(screen.getByTestId('graph')).toHaveTextContent('"source":"reply","target":"gloss"')
-  expect(api.watchConversation).toHaveBeenLastCalledWith('chat', 2)
-})
-
-it('maps every recorded state, including snapshot-derived held, and inspects the selected operation', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  const states = ['waiting_dependencies', 'ready', 'held', 'running', 'succeeded', 'failed', 'unknown', 'cancelled', 'invalidated']
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, [turn('turn', states.map(state => ({ id: state, kind: `kind_${state}`, state, dependencies: [] })), [attempt('failed', { state: 'failed', error: 'Provider refused' })])]))
-    .mockImplementation(() => new Promise(() => {}))
-  render(<AiView mode="docked" actions={null} />)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('kind held'))
-  const graph = JSON.parse(screen.getByTestId('graph').textContent!) as { nodes: { id: string; phase: string }[] }
-  expect(Object.fromEntries(graph.nodes.map(node => [node.id, node.phase]))).toEqual({
-    waiting_dependencies: 'waiting', ready: 'waiting', held: 'held', running: 'running', succeeded: 'succeeded',
-    failed: 'failed', unknown: 'unknown', cancelled: 'ended', invalidated: 'ended',
-  })
-  fireEvent.click(screen.getByTestId('node-failed'))
-  const inspector = screen.getByRole('complementary', { name: 'Selected operation' })
-  expect(within(inspector).getByRole('heading', { level: 3 })).toHaveTextContent('kind failed')
-  expect(within(inspector).getByRole('alert')).toHaveTextContent('Provider refused')
-  await waitFor(() => expect(windowApi.setAiViewSelection).toHaveBeenLastCalledWith({ conversationId: 'chat', turnId: null, operationKind: 'kind_failed' }))
-})
-
-it('pins an older exchange from the operation history and pages turns by turn', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  const recent = Array.from({ length: 50 }, (_, index) => turn(`turn-${50 - index}`, [{ id: `reply-${50 - index}`, kind: 'persona_reply', state: 'succeeded', dependencies: [] }], [attempt(`reply-${50 - index}`)]))
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 3, recent)).mockImplementation(() => new Promise(() => {}))
-  api.listTurnHistory.mockResolvedValue({ turns: [turn('turn-0', [{ id: 'reply-0', kind: 'persona_reply', state: 'failed', dependencies: [] }], [attempt('reply-0', { state: 'failed', error: 'Old failure' })])], hasOlder: false })
-  render(<AiView mode="docked" actions={null} />)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('reply-50'))
-  fireEvent.click(await screen.findByRole('button', { name: 'Older' }))
-  await waitFor(() => expect(api.listTurnHistory).toHaveBeenCalledWith('chat', 'turn-1', 40))
-  const history = await screen.findAllByRole('button', { name: /failed/ })
-  fireEvent.click(history.at(-1)!)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('reply-0'))
-  expect(screen.getByRole('button', { name: 'Follow live' })).toHaveAttribute('aria-pressed', 'false')
-  expect(screen.queryByRole('button', { name: 'Older' })).toBeNull()
-  fireEvent.click(screen.getByRole('button', { name: 'Follow live' }))
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('reply-50'))
-})
-
 function deferred<T>() {
   let resolve!: (value: T) => void
-  let reject!: (failure: Error) => void
-  const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail })
-  return { promise, resolve, reject }
+  const promise = new Promise<T>(done => { resolve = done })
+  return { promise, resolve }
 }
-function single(conversationId: string, revision: number, operation: string) {
-  return snapshot(conversationId, revision, [turn(`${conversationId}-turn`, [{ id: operation, kind: operation, state: 'running', dependencies: [] }])])
+const openPicker = () => {
+  const details = document.querySelector('.ai-run-picker') as HTMLDetailsElement
+  details.open = true
+  fireEvent(details, new Event('toggle'))
 }
+beforeEach(() => {
+  vi.resetAllMocks()
+  useNavigationStore.setState({ aiInspection: null })
+  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
+  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1)).mockImplementation(() => new Promise(() => {}))
+  api.getAiViewSelection.mockResolvedValue(null)
+  api.setAiViewSelection.mockResolvedValue(undefined)
+  api.onGraphHoverReply.mockResolvedValue(() => {})
+  api.currentWindowLabel.mockResolvedValue('main')
+  api.emitGraphHover.mockResolvedValue(undefined)
+})
 
-it('follows native selection while mounted and rejects the abandoned watch response', async () => {
-  let selected = 'first'
-  api.readWorkspace.mockImplementation(async () => ({ selected }))
-  const oldWait = deferred<unknown>()
-  const nextWait = deferred<unknown>()
-  api.watchConversation.mockImplementation((id: string, revision: number) => {
-    if (id === 'first' && revision === -1) return Promise.resolve(single('first', 1, 'first_operation'))
-    if (id === 'first') return oldWait.promise
-    if (id === 'second' && revision === -1) return nextWait.promise
-    return new Promise(() => {})
-  })
+it('shows the selected executable run and persists the inspected operation', async () => {
   render(<AiView mode="docked" actions={null} />)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('first operation'))
-  selected = 'second'
-  await act(async () => { oldWait.resolve(single('first', 2, 'obsolete_operation')) })
-  await waitFor(() => expect(api.watchConversation).toHaveBeenLastCalledWith('second', -1))
-  expect(screen.queryByTestId('graph')).toBeNull()
-  await act(async () => { nextWait.resolve(single('second', 3, 'second_operation')) })
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('second operation'))
-  expect(api.watchConversation).toHaveBeenLastCalledWith('second', 3)
+  expect(await screen.findByTestId('run')).toHaveTextContent('run')
+  expect(screen.getByText('Automatic AI work').closest('details')).not.toHaveAttribute('open')
+  fireEvent.click(screen.getByRole('button', { name: 'Inspect reply' }))
+  await waitFor(() => expect(api.setAiViewSelection).toHaveBeenLastCalledWith({ conversationId: 'chat', turnId: null, operationKind: 'reply' }))
+  expect(api.watchConversation).toHaveBeenLastCalledWith('chat', 1)
 })
 
-it('starts watching when a conversation is selected after an empty workspace', async () => {
-  vi.useFakeTimers()
-  try {
-    let selected: string | null = null
-    api.readWorkspace.mockImplementation(async () => ({ selected }))
-    api.watchConversation.mockImplementation(() => new Promise(() => {}))
-    const view = render(<AiView mode="docked" actions={null} />)
-    await act(async () => {})
-    expect(api.watchConversation).not.toHaveBeenCalled()
-    selected = 'later'
-    await act(async () => { await vi.advanceTimersByTimeAsync(500) })
-    expect(api.watchConversation).toHaveBeenCalledExactlyOnceWith('later', -1)
-    view.unmount()
-  } finally { vi.useRealTimers() }
-})
-
-it('ignores a rejected abandoned scope but reports failure of the current scope', async () => {
-  let selected = 'first'
-  api.readWorkspace.mockImplementation(async () => ({ selected }))
-  const oldWait = deferred<unknown>()
-  api.watchConversation.mockImplementation((id: string) => id === 'first' ? oldWait.promise : Promise.reject(new Error('Current scope failed')))
+it.each([
+  ['waiting_dependencies', 'waiting'], ['ready', 'waiting'], ['running', 'running'],
+  ['succeeded', 'done'], ['held', 'held'], ['failed', 'problem'],
+  ['unknown', 'problem'], ['cancelled', 'ended'], ['unrequested', 'ask'],
+])('renders a speech request in state %s without crashing the activity view', async (state, tone) => {
+  const run = { ...turn('speech-run'), speech: { id: 'speech', sourceMessageId: 'message', state } }
+  Object.assign(run.nativeGraph.artifact.definition.results, { audio: { node: 'speech', port: 'audio' } })
+  api.watchConversation.mockReset().mockResolvedValueOnce(snapshot('chat', 1, [run])).mockImplementation(() => new Promise(() => {}))
   render(<AiView mode="docked" actions={null} />)
-  await waitFor(() => expect(api.watchConversation).toHaveBeenCalledWith('first', -1))
-  selected = 'second'
-  await act(async () => { oldWait.reject(new Error('Abandoned scope deleted')) })
-  expect(await screen.findByRole('alert')).toHaveTextContent('Current scope failed')
-  expect(screen.queryByText('Abandoned scope deleted')).toBeNull()
+  expect(await screen.findByTestId('run')).toHaveTextContent('speech-run')
+  expect(api.workspace.mock.lastCall![0].stations).toEqual([expect.objectContaining({
+    id: 'station:playback', tone,
+    rows: expect.arrayContaining([expect.objectContaining({ value: state })]),
+  })])
 })
 
-it('does not restart reads or adopt a pending response after unmount', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'first' })
-  const waiting = deferred<unknown>()
-  api.watchConversation.mockReturnValue(waiting.promise)
+it('reads history only through the selected run identity', async () => {
+  api.readGraphHistory.mockResolvedValue({ engine: 'engine', run: 'run', current_revision: '1', frames: [], before: null })
+  render(<AiView mode="docked" actions={null} />)
+  await screen.findByTestId('run')
+  const props = api.workspace.mock.lastCall![0] as { loadHistory: (before: string | null) => Promise<unknown> }
+  expect(api.readGraphHistory).not.toHaveBeenCalled()
+  await props.loadHistory('4')
+  expect(api.readGraphHistory).toHaveBeenCalledWith('chat', 'run', '4')
+})
+
+it.each(['screen', 'tray'] as const)('stacks the graph down the screen in %s mode', async mode => {
+  render(<AiView mode={mode} actions={null} />)
+  expect(await screen.findByTestId('run')).toHaveAttribute('data-orientation', 'down')
+})
+
+it('pins the explicitly selected run when another run arrives, and follows live again on request', async () => {
+  const next = deferred<ReturnType<typeof snapshot>>()
+  api.watchConversation.mockReset().mockResolvedValueOnce(snapshot('chat', 1, [turn('first')])).mockReturnValueOnce(next.promise).mockImplementation(() => new Promise(() => {}))
+  render(<AiView mode="docked" actions={null} />)
+  await screen.findByTestId('run')
+  openPicker()
+  fireEvent.click(screen.getByRole('button', { name: /coach · first/ }))
+  await act(async () => next.resolve(snapshot('chat', 2, [turn('second'), turn('first')])))
+  expect(screen.getByTestId('run')).toHaveTextContent('first')
+  openPicker()
+  fireEvent.click(screen.getByRole('button', { name: 'Follow live' }))
+  expect(screen.getByTestId('run')).toHaveTextContent('second')
+})
+
+it('restores a run outside the live page before displaying it', async () => {
+  const recent = Array.from({ length: 50 }, (_, i) => turn(`run-${50 - i}`))
+  api.watchConversation.mockReset().mockResolvedValueOnce(snapshot('chat', 1, recent)).mockImplementation(() => new Promise(() => {}))
+  api.getAiViewSelection.mockResolvedValue({ conversationId: 'chat', turnId: 'run-0', operationKind: 'reply' })
+  api.listTurnHistory.mockResolvedValue({ turns: [turn('run-0')], hasOlder: false })
+  render(<AiView mode="window" actions={null} />)
+  await waitFor(() => expect(screen.getByTestId('run')).toHaveTextContent('run-0'))
+  expect(api.listTurnHistory).toHaveBeenCalledWith('chat', 'run-1', 40)
+  expect(screen.getByTestId('run')).toHaveTextContent('reply')
+})
+
+it('reports restoration failure without replacing the pinned selection', async () => {
+  api.watchConversation.mockReset().mockResolvedValueOnce(snapshot('chat', 1, Array.from({ length: 50 }, (_, i) => turn(String(i))))).mockImplementation(() => new Promise(() => {}))
+  api.getAiViewSelection.mockResolvedValue({ conversationId: 'chat', turnId: 'missing', operationKind: null })
+  api.listTurnHistory.mockRejectedValue(new Error('History read failed'))
+  render(<AiView mode="window" actions={null} />)
+  expect(await screen.findByRole('alert')).toHaveTextContent('History read failed')
+  expect(screen.queryByTestId('run')).toBeNull()
+  expect(api.listTurnHistory).toHaveBeenCalledTimes(1)
+})
+
+it('rejects a response from an abandoned conversation and follows the selected scope', async () => {
+  const first = deferred<ReturnType<typeof snapshot>>()
+  api.watchConversation.mockReset().mockReturnValueOnce(first.promise).mockResolvedValueOnce(snapshot('other', 2, [turn('other-run')])).mockImplementation(() => new Promise(() => {}))
+  api.readWorkspace.mockResolvedValueOnce({ selected: 'chat' }).mockResolvedValue({ selected: 'other' })
+  render(<AiView mode="window" actions={null} />)
+  await waitFor(() => expect(api.watchConversation).toHaveBeenCalledWith('chat', -1))
+  await act(async () => first.resolve(snapshot('chat', 1, [turn('abandoned')])))
+  await waitFor(() => expect(screen.getByTestId('run')).toHaveTextContent('other-run'))
+  expect(screen.queryByText('abandoned')).toBeNull()
+})
+
+it('accepts a direct inspection link while mounted', async () => {
+  api.watchConversation.mockReset().mockResolvedValueOnce(snapshot('chat', 1, [turn('new'), turn('selected')])).mockImplementation(() => new Promise(() => {}))
+  render(<AiView mode="docked" actions={null} />)
+  await screen.findByTestId('run')
+  act(() => useNavigationStore.setState({ aiInspection: { conversationId: 'chat', turnId: 'selected', operationKind: 'reply' } }))
+  await waitFor(() => expect(screen.getByTestId('run')).toHaveTextContent('selected'))
+  expect(screen.getByTestId('run')).toHaveTextContent('reply')
+})
+
+it('lists runs elsewhere in the app only on request and shows the chosen one', async () => {
+  api.listNativeWorkspaceRuns.mockResolvedValue({ runs: [{ engine: 'engine', run: 'reading-1', artifact: 'artifact', kind: 'translation' }], before: null })
+  render(<AiView mode="docked" actions={null} />)
+  await screen.findByTestId('run')
+  openPicker()
+  expect(api.listNativeWorkspaceRuns).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button', { name: 'Show runs from the rest of the app' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'translation · reading-1' }))
+  expect(screen.getByTestId('workspace-run')).toHaveTextContent('reading-1')
+  expect(screen.queryByTestId('run')).toBeNull()
+})
+
+it('publishes downstream-surface hints for the selected turn in the main window', async () => {
+  const { useGraphHoverStore } = await import('../../state/navigation/graph-hover')
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => { callback(0); return 1 })
+  render(<AiView mode="docked" actions={null} />)
+  await screen.findByTestId('run')
+  fireEvent.click(screen.getByRole('button', { name: 'Hover reply' }))
+  expect(useGraphHoverStore.getState().target).toEqual({ key: { scope: 'conversation', conversationId: 'chat', turnId: 'run' }, results: ['text'] })
+  expect(api.emitGraphHover).not.toHaveBeenCalled()
+})
+
+it('does not resume reads after unmount', async () => {
+  const next = deferred<ReturnType<typeof snapshot>>()
+  api.watchConversation.mockReset().mockReturnValue(next.promise)
   const view = render(<AiView mode="docked" actions={null} />)
-  await waitFor(() => expect(api.watchConversation).toHaveBeenCalledOnce())
+  await waitFor(() => expect(api.watchConversation).toHaveBeenCalledTimes(1))
   view.unmount()
-  await act(async () => { waiting.resolve(single('first', 1, 'late')) })
+  await act(async () => next.resolve(snapshot('chat', 1)))
   expect(api.readWorkspace).toHaveBeenCalledTimes(1)
-  expect(api.watchConversation).toHaveBeenCalledTimes(1)
 })
 
-it('shows retained transcription receipt details', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  api.watchConversation.mockResolvedValueOnce({ ...single('chat', 1, 'reply'), transcriptionAttempts: [
-    { id: 'stt', model: 'scribe_v2', state: 'failed', error: 'Provider refused transcription', diagnostics: { request_id: 'receipt-123', status: 403, error: { code: 'missing_permissions' } } },
-  ] }).mockImplementation(() => new Promise(() => {}))
-  render(<AiView mode="docked" actions={null} />)
-  expect(await screen.findByText(/receipt-123/)).toHaveTextContent('missing_permissions')
-})
-
-it('adopts the place handed over by the other window', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  windowApi.getAiViewSelection.mockResolvedValue({ conversationId: 'chat', turnId: 'old', operationKind: 'persona_word_gloss' })
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, [
-    turn('new', [{ id: 'new-reply', kind: 'persona_reply', state: 'running', dependencies: [] }]),
-    turn('old', [{ id: 'old-reply', kind: 'persona_reply', state: 'succeeded', dependencies: [] }, { id: 'old-gloss', kind: 'persona_word_gloss', state: 'succeeded', dependencies: ['old-reply'] }]),
-  ])).mockImplementation(() => new Promise(() => {}))
+it('restores workspace selection and its recorded revision from the native handoff', async () => {
+  const elsewhere = { kind: 'workspace', entry: { engine: 'engine', run: 'reading-1', artifact: 'artifact', kind: 'translation' } }
+  const revision = { kind: 'revision', revision: '4' }
+  api.getAiViewSelection.mockResolvedValue({ conversationId: 'chat', turnId: null, operationKind: null, elsewhere, revision })
   render(<AiView mode="window" actions={null} />)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('old-gloss'))
-  expect(within(screen.getByRole('complementary', { name: 'Selected operation' })).getByRole('heading', { level: 3 })).toHaveTextContent('persona word gloss')
+  expect(await screen.findByTestId('workspace-run')).toHaveTextContent('reading-1')
+  expect(api.workspaceRun.mock.lastCall![0]).toMatchObject({ entry: elsewhere.entry, initialRevision: revision })
+  await waitFor(() => expect(api.setAiViewSelection).toHaveBeenLastCalledWith({ conversationId: 'chat', turnId: null, operationKind: null, elsewhere, revision }))
 })
 
-it.each(['window', 'docked'] as const)('restores a selection beyond the live page in %s mode before displaying a graph', async mode => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  const selection = deferred<{ conversationId: string; turnId: string; operationKind: string }>()
-  windowApi.getAiViewSelection.mockReturnValue(selection.promise)
-  const recent = Array.from({ length: 50 }, (_, i) => turn(`turn-${100 - i}`, [{ id: `reply-${100 - i}`, kind: 'persona_reply', state: 'succeeded', dependencies: [] }]))
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, recent)).mockImplementation(() => new Promise(() => {}))
-  const olderPage = deferred<unknown>()
-  api.listTurnHistory.mockResolvedValueOnce({ turns: [turn('turn-50', [], [])], hasOlder: true }).mockReturnValueOnce(olderPage.promise)
-  render(<AiView mode={mode} actions={null} />)
-  await waitFor(() => expect(windowApi.getAiViewSelection).toHaveBeenCalledOnce())
-  expect(windowApi.setAiViewSelection).not.toHaveBeenCalled()
-  expect(screen.queryByTestId('graph')).toBeNull()
-  await act(async () => { selection.resolve({ conversationId: 'chat', turnId: 'turn-10', operationKind: 'persona_reply' }) })
-  await waitFor(() => expect(api.listTurnHistory).toHaveBeenLastCalledWith('chat', 'turn-50', 40))
-  expect(screen.queryByTestId('graph')).toBeNull()
-  expect(screen.getByRole('button', { name: 'Follow live' })).toHaveAttribute('aria-pressed', 'false')
-  await act(async () => { olderPage.resolve({ turns: [turn('turn-10', [{ id: 'old-reply', kind: 'persona_reply', state: 'succeeded', dependencies: [] }])], hasOlder: false }) })
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('old-reply'))
-  expect(windowApi.setAiViewSelection).toHaveBeenLastCalledWith({ conversationId: 'chat', turnId: 'turn-10', operationKind: 'persona_reply' })
-})
-
-it('reports restoration failures without substituting the newest exchange or retrying forever', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  windowApi.getAiViewSelection.mockResolvedValue({ conversationId: 'chat', turnId: 'old', operationKind: null })
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, Array.from({ length: 50 }, (_, i) => turn(`turn-${i}`, [], []))))
-    .mockImplementation(() => new Promise(() => {}))
-  api.listTurnHistory.mockRejectedValue(new Error('History unavailable'))
-  render(<AiView mode="window" actions={null} />)
-  expect(await screen.findByRole('alert')).toHaveTextContent('History unavailable')
-  expect(screen.queryByTestId('graph')).toBeNull()
-  expect(api.listTurnHistory).toHaveBeenCalledOnce()
-})
-
-const definitions = [
-  { id: 'first_graph', description: 'First declared graph', operations: [
-    { kind: 'capture', dependencies: [], role: 'local', contractVersion: 1, description: 'Captures inputs', source: 'capture.rs', templates: [], outputSchema: null },
-    { kind: 'generate', dependencies: ['capture'], role: 'standard', contractVersion: 2, description: 'Generates a reply', source: 'prompt.rs', templates: [{ label: 'system', text: 'Use {{targetLanguage}}.' }], outputSchema: { type: 'string' } },
-  ] },
-  { id: 'second_graph', description: 'Second declared graph', operations: [
-    { kind: 'inspect', dependencies: [], role: 'fast', contractVersion: 3, description: 'Independent inspection', source: 'inspect.rs', templates: [{ label: 'system', text: 'Inspect {{sourceMessage}}.' }], outputSchema: null },
-  ] },
-]
-
-it('explores definitions without a conversation, follows dependencies, and remembers manual graph selection', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: null })
-  windowApi.getAiGraphDefinitions.mockResolvedValue(definitions)
+it('pins a replayed revision to its turn and clears replay when following live', async () => {
   render(<AiView mode="docked" actions={null} />)
-  const explore = screen.getByRole('button', { name: 'Graph definitions' })
-  await waitFor(() => expect(explore).toBeEnabled())
-  fireEvent.click(explore)
-  const graph = await screen.findByRole('combobox', { name: 'Graph' })
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('"source":"capture","target":"generate"'))
-  fireEvent.change(screen.getByRole('combobox', { name: 'Operation' }), { target: { value: 'generate' } })
-  expect(await screen.findByText('Use {{targetLanguage}}.')).toBeVisible()
-  fireEvent.click(within(screen.getByRole('complementary')).getByRole('button', { name: 'capture' }))
-  expect(screen.getByRole('combobox', { name: 'Operation' })).toHaveValue('capture')
-  fireEvent.change(graph, { target: { value: 'second_graph' } })
-  expect(screen.getByTestId('graph')).toHaveTextContent('inspect')
-  expect(screen.getByTestId('graph')).not.toHaveTextContent('generate')
-  expect(screen.queryByRole('button', { name: 'Follow live' })).toBeNull()
-  await waitFor(() => expect(windowApi.setAiViewSelection).toHaveBeenLastCalledWith({ conversationId: null, turnId: null, operationKind: null, definition: { graphId: 'second_graph', operationKind: null } }))
-  fireEvent.click(screen.getByRole('button', { name: 'Recorded runs' }))
-  fireEvent.click(screen.getByRole('button', { name: 'Graph definitions' }))
-  expect(await screen.findByRole('combobox', { name: 'Graph' })).toHaveValue('second_graph')
-  expect(api.watchConversation).not.toHaveBeenCalled()
-  expect(api.readAttemptDetail).not.toHaveBeenCalled()
+  await screen.findByTestId('run')
+  act(() => api.workspace.mock.lastCall![0].onRevision({ kind: 'revision', revision: '1' }))
+  await waitFor(() => expect(api.setAiViewSelection).toHaveBeenLastCalledWith({ conversationId: 'chat', turnId: 'run', operationKind: null, revision: { kind: 'revision', revision: '1' } }))
+  openPicker()
+  fireEvent.click(screen.getByRole('button', { name: 'Follow live' }))
+  await waitFor(() => expect(api.setAiViewSelection).toHaveBeenLastCalledWith({ conversationId: 'chat', turnId: null, operationKind: null }))
 })
 
-it.each(['window', 'docked'] as const)('restores a static graph and prompt in %s mode while live activity changes', async mode => {
-  windowApi.getAiViewSelection.mockResolvedValue({ conversationId: null, turnId: null, operationKind: null, definition: { graphId: 'second_graph', operationKind: 'inspect' } })
-  windowApi.getAiGraphDefinitions.mockResolvedValue(definitions)
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  const update = deferred<unknown>()
-  api.watchConversation.mockResolvedValueOnce(single('chat', 1, 'live_one')).mockReturnValueOnce(update.promise).mockImplementation(() => new Promise(() => {}))
-  render(<AiView mode={mode} actions={null} />)
-  expect(await screen.findByText('Inspect {{sourceMessage}}.')).toBeVisible()
-  await act(async () => { update.resolve(single('chat', 2, 'live_two')) })
-  expect(screen.getByRole('combobox', { name: 'Graph' })).toHaveValue('second_graph')
-  expect(screen.getByTestId('graph')).toHaveTextContent('inspect')
-  expect(screen.getByTestId('graph')).not.toHaveTextContent('live')
-})
-
-it('reports graph catalog failures and retries only when requested', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: null })
-  windowApi.getAiViewSelection.mockResolvedValue({ conversationId: null, turnId: null, operationKind: null, definition: { graphId: 'second_graph', operationKind: null } })
-  windowApi.getAiGraphDefinitions.mockRejectedValueOnce(new Error('Catalog unavailable')).mockResolvedValueOnce(definitions)
-  render(<AiView mode="window" actions={null} />)
-  expect(await screen.findByRole('alert')).toHaveTextContent('Catalog unavailable')
-  expect(windowApi.getAiGraphDefinitions).toHaveBeenCalledOnce()
-  fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
-  expect(await screen.findByText('Inspect {{sourceMessage}}.')).toBeVisible()
-})
-
-
-it('accepts an error link while already open and pins its operation in an older exchange', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, [
-    turn('latest', [{id:'latest-reply',kind:'persona_reply',state:'succeeded',dependencies:[]}]),
-    turn('older', [{id:'old-help',kind:'reply_assistance',state:'failed',dependencies:[]}], [attempt('old-help', {state:'failed',error:'Invalid romanization'})]),
-  ])).mockImplementation(() => new Promise(() => {}))
+it('opens the exact recording source when selecting a transcription', async () => {
+  api.watchConversation.mockReset().mockResolvedValueOnce({ ...snapshot('chat', 1), transcriptionAttempts: [{ id: 'recording-source', model: 'recognizer', state: 'succeeded', diagnostics: null }] }).mockImplementation(() => new Promise(() => {}))
   render(<AiView mode="docked" actions={null} />)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('latest-reply'))
-  act(() => useNavigationStore.getState().inspectAi({conversationId:'chat',turnId:'older',operationKind:'reply_assistance'}))
-  await waitFor(() => expect(screen.getByRole('complementary', {name:'Selected operation'})).toHaveTextContent('Invalid romanization'))
-  expect(screen.getByTestId('graph')).toHaveTextContent('old-help')
-  expect(useNavigationStore.getState().aiInspection).toBeNull()
-  await waitFor(() => expect(windowApi.setAiViewSelection).toHaveBeenLastCalledWith({conversationId:'chat',turnId:'older',operationKind:'reply_assistance'}))
-})
-
-it('puts failed-node errors and provider reasons before long bodies and resets inspection scroll', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  api.readAttemptDetail.mockResolvedValue({ requestMessages: [{ role: 'user', content: 'Long recorded request '.repeat(100) }], responseText: null, previewText: null })
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, [turn('turn', [
-    { id: 'assessment', kind: 'skill_assessment', state: 'failed', dependencies: [] },
-    { id: 'gloss', kind: 'user_word_gloss', state: 'failed', dependencies: [] },
-  ], [
-    attempt('assessment', { state: 'failed', error: 'Skill assessment: quote does not bind to learner source' }),
-    attempt('gloss', { state: 'failed', error: 'Word meanings rejected: gloss_invalid_termination.', diagnostics: {
-      response: { id: 'provider-request', choices: [{ finish_reason: 'error', error: { code: 429, message: 'Model is temporarily rate-limited upstream.' } }] },
-    } }),
-  ])])).mockImplementation(() => new Promise(() => {}))
-  render(<AiView mode="docked" actions={null} />)
-  const gloss = await screen.findByTestId('node-gloss')
-  const inspector = screen.getByRole('complementary', { name: 'Selected operation' })
-  inspector.scrollTop = 900
-  fireEvent.click(gloss)
-  expect(inspector.scrollTop).toBe(0)
-  const error = within(inspector).getByRole('alert')
-  expect(error).toHaveTextContent('gloss_invalid_termination')
-  expect(error).toHaveTextContent('429: Model is temporarily rate-limited upstream.')
-  const request = await within(inspector).findByRole('heading', { name: 'Request' })
-  expect(error.compareDocumentPosition(request) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-  expect(within(inspector).getByText('Response details').compareDocumentPosition(request) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-  fireEvent.click(within(inspector).getByRole('button', { name: 'Open user word gloss in full view' }))
-  const dialog = screen.getByRole('dialog')
-  expect(within(dialog).getByRole('alert')).toHaveTextContent('429: Model is temporarily rate-limited upstream.')
-  expect(within(dialog).getByRole('alert').compareDocumentPosition(within(dialog).getByRole('heading', { name: 'Request' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-})
-
-it("leads the phone's full screen with the live graph, stacked down the screen as a tree", async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, [turn('turn', [
-    { id: 'context', kind: 'persona_context', state: 'succeeded', dependencies: [] },
-    { id: 'reply', kind: 'persona_reply', state: 'succeeded', dependencies: ['context'] },
-    { id: 'skills', kind: 'skill_assessment', state: 'running', dependencies: ['context'] },
-    { id: 'gloss', kind: 'persona_word_gloss', state: 'running', dependencies: ['reply'] },
-  ], [attempt('context'), attempt('reply'), attempt('skills', { state: 'running', finishedAt: null }), attempt('gloss', { state: 'running', finishedAt: null })])]))
-    .mockImplementation(() => new Promise(() => {}))
-  render(<AiView mode="screen" actions={null} />)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('persona word gloss'))
-  const graph = JSON.parse(screen.getByTestId('graph').textContent!) as { nodes: { id: string; phase: string }[] }
-  // Down the screen: the gloss follows the reply it depends on, before its sibling branch.
-  expect(graph.nodes.map(node => node.id)).toEqual(['context', 'reply', 'gloss', 'skills'])
-  expect(graph.nodes.find(node => node.id === 'gloss')!.phase).toBe('running')
-  // Secondary views stay off the phone's first screen.
-  expect(screen.queryByRole('figure', { name: 'Attempts over time' })).toBeNull()
-})
-
-it('keeps the tray above the recording panel to the live graph under a single header line', async () => {
-  const fit = vi.spyOn(flow, 'fitView')
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, [turn('turn', [
-    { id: 'context', kind: 'persona_context', state: 'succeeded', dependencies: [] },
-    { id: 'reply', kind: 'persona_reply', state: 'running', dependencies: ['context'] },
-  ], [attempt('context'), attempt('reply', { state: 'running', finishedAt: null })])]))
-    .mockImplementation(() => new Promise(() => {}))
-  render(<AiView mode="tray" actions={<button type="button">Close AI activity</button>} />)
-  await waitFor(() => expect(screen.getByTestId('graph')).toHaveTextContent('persona reply'))
-  const graph = JSON.parse(screen.getByTestId('graph').textContent!) as { nodes: { id: string }[] }
-  expect(graph.nodes.map(node => node.id)).toEqual(['context', 'reply'])
-  // One line: the title, what is running and the tray's controls; exchanges
-  // and definitions wait for the full screen.
-  expect(screen.queryByRole('group', { name: 'Exchanges' })).toBeNull()
-  expect(screen.queryByRole('group', { name: 'AI activity view' })).toBeNull()
-  expect(screen.queryByText('Other AI activity')).toBeNull()
-  expect(screen.getByRole('button', { name: 'Close AI activity' })).toBeInTheDocument()
-  // Too short to show the whole graph legibly, the tray keeps the running reply in view.
-  await waitFor(() => expect(fit).toHaveBeenLastCalledWith(expect.objectContaining({ nodes: [{ id: 'reply' }] })))
-})
-
-it('credits deliberate node inspection only after recorded details load', async () => {
-  api.readWorkspace.mockResolvedValue({ selected: 'chat' })
-  api.watchConversation.mockResolvedValueOnce(snapshot('chat', 1, [turn('turn', [
-    { id: 'reply', kind: 'persona_reply', state: 'succeeded', dependencies: [] },
-  ], [attempt('reply')])])).mockImplementation(() => new Promise(() => {}))
-  const pending = deferred<{ requestMessages: null; responseText: string; previewText: null }>()
-  api.readAttemptDetail.mockReturnValue(pending.promise)
-  render(<AiView mode="docked" actions={null} />)
-  await screen.findByTestId('node-reply')
-  expect(credit.recordBotInspection).not.toHaveBeenCalled()
-  fireEvent.click(screen.getByTestId('node-reply'))
-  expect(credit.recordBotInspection).not.toHaveBeenCalled()
-  await act(async () => pending.resolve({ requestMessages: null, responseText: 'Recorded response', previewText: null }))
-  await waitFor(() => expect(credit.recordBotInspection).toHaveBeenCalledExactlyOnceWith('reply-attempt'))
-  fireEvent.click(screen.getByTestId('node-reply'))
-  expect(credit.recordBotInspection).toHaveBeenCalledTimes(1)
+  await screen.findByTestId('run')
+  openPicker()
+  fireEvent.click(screen.getByRole('button', { name: 'recognizer · succeeded' }))
+  expect(await screen.findByTestId('original-content')).toBeInTheDocument()
+  expect(api.original).toHaveBeenLastCalledWith(expect.objectContaining({ source: { recording: 'recording-source' } }))
 })

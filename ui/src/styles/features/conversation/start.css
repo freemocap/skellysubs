@@ -141,9 +141,7 @@
 .topic-chip-roman { font-size: var(--type-meta); font-style: italic; color: var(--ink-3); line-height: var(--leading-snug); }
 .topic-chip-translation { font-size: var(--type-meta); color: var(--ink-3); line-height: var(--leading-snug); }
 
-@media (prefers-reduced-motion: reduce) {
-  .start-options-body, .start-options-content, .start-options-toggle, .start-options-toggle > svg:last-child, .topic-start, .topic-chip { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .start-options-body, :where(:root[data-motion="reduced"]) .start-options-content, :where(:root[data-motion="reduced"]) .start-options-toggle, :where(:root[data-motion="reduced"]) .start-options-toggle > svg:last-child, :where(:root[data-motion="reduced"]) .topic-start, :where(:root[data-motion="reduced"]) .topic-chip { transition: none; }
 @media (max-width: 480px) {
   .conversation-start { gap: var(--space-8); padding-inline: 0; }
   /* The start takes its own row under the partner. */

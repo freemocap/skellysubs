@@ -241,6 +241,4 @@
 @media (pointer: coarse) {
   .help-insert, .reply-help-hide, .reply-help-open { min-width: var(--control-height); min-height: var(--control-height); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .reply-help-action, .reply-help-action > svg:last-child { transition: none; }
-}
+:where(:root[data-motion="reduced"]) .reply-help-action, :where(:root[data-motion="reduced"]) .reply-help-action > svg:last-child { transition: none; }

@@ -74,11 +74,11 @@ function ScoreMeter({ label, value }: { label: string; value: number | null }) {
     <span className="coach-score-row"><ScoreBar label={label} value={value} /><strong aria-hidden="true">{scoreText(value)}</strong></span>
   </div>
 }
-export function ConversationFeedbackCard({ feedback }: { feedback: ConversationFeedback }) {
+export function ConversationFeedbackCard({ feedback, graphTarget }: { feedback: ConversationFeedback; graphTarget?: Record<string, string> }) {
   const tr = useI18n()
   const grammar = feedback.answers.grammar
   const understanding = feedback.answers.understandability
-  return <section className="coach-assessment" aria-label={tr('Message assessment')}>
+  return <section {...graphTarget} className="coach-assessment" aria-label={tr('Message assessment')}>
     {grammar && understanding && <p className="coach-assessment-note">{tr('Each check is judged on its own and can differ from the coach’s suggestion.')}</p>}
     <div className="coach-scores" data-layout={grammar && understanding ? 'judgments' : 'meters'}>{grammar && understanding ? <>
       <Judgment label={tr('Grammar')} answer={grammar} />

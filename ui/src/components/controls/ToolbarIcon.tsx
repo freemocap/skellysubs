@@ -1,15 +1,16 @@
 import {
-  AudioLines, Bot, BicepsFlexed, BookOpen, BookOpenText, Check, ChevronDown, ChevronLeft, CircleCheck, Cpu,
+  AudioLines, Bot, BicepsFlexed, BookOpen, BookOpenText, Check, ChevronDown, ChevronLeft, CircleCheck, Cloud, Cpu,
   Database, Download, Ellipsis, ExternalLink, Globe, KeyRound, Languages,
-  Keyboard, Lightbulb, Maximize2, Menu, MessageSquare, Mic,
+  Keyboard, Layers, Lightbulb, LockKeyhole, Maximize2, Menu, MessageSquare, Mic,
   Minimize2, Moon, PanelTopClose, Pause, Pencil, Play, ScanSearch,
   Plus, RotateCw, Settings, SlidersHorizontal, Smile, Square,
-  Star, Sun, Telescope, Trash2, TriangleAlert, UserRound, Volume2, WholeWord,
+  Star, Sun, Telescope, Trash2, TriangleAlert, UserRound, Volume2, WholeWord, Workflow,
   X
 } from 'lucide-react'
 
 const LIBRARY_ICONS = {
   telescope: Telescope,
+  record: Workflow,
   bot: Bot,
   smile: Smile,
   practice: BicepsFlexed,
@@ -54,6 +55,9 @@ const LIBRARY_ICONS = {
   popin: PanelTopClose,
   waveform: AudioLines,
   edit: Pencil,
+  cloud: Cloud,
+  layers: Layers,
+  lock: LockKeyhole,
 }
 
 // Deliberate custom variants retained after icon review.

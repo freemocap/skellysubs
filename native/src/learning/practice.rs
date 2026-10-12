@@ -2,7 +2,7 @@
 //! The caller supplies validated observations inside its completion transaction.
 //! Invoked by skill-assessment publication before the owning attempt completes.
 use crate::model::{AppError, ErrorCode, Result};
-use rusqlite::{OptionalExtension, Transaction, params};
+use rusqlite::{Connection, OptionalExtension, params};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -61,14 +61,30 @@ pub fn credits(
         .collect()
 }
 
-/// Persist once in the caller's transaction, binding the result to its current
-/// running operation and learner turn. No separate commit or legacy award occurs.
-pub fn publish(
-    tx: &Transaction<'_>,
+/// Native receipt publication already checked the current source and adopted
+/// execution in the graph owner transaction. Preserve the same credit algorithm.
+pub(crate) fn publish_graph(
+    db: &Connection,
+    turn: &str,
+    receipt: &str,
+    presence: BTreeMap<String, Presence>,
+    expected_skills: &BTreeSet<String>,
+) -> Result<Observation> {
+    if db.is_autocommit() {
+        return Err(invalid("Practice publication requires a transaction."));
+    }
+    publish_checked(db, turn, receipt, presence, expected_skills, || {
+        Ok(db.query_row("SELECT EXISTS(SELECT 1 FROM conversation_graph_assessments a JOIN turns t ON t.id=a.turn_id WHERE a.id=?1 AND t.id=?2 AND a.kind='skill_assessment' AND t.state NOT IN ('cancelled','invalidated') AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id))",params![receipt,turn],|r|r.get(0))?)
+    })
+}
+
+fn publish_checked(
+    tx: &Connection,
     turn: &str,
     attempt: &str,
     presence: BTreeMap<String, Presence>,
     expected_skills: &BTreeSet<String>,
+    eligible: impl FnOnce() -> Result<bool>,
 ) -> Result<Observation> {
     if expected_skills.is_empty()
         || presence.keys().any(|k| k.is_empty())
@@ -95,7 +111,7 @@ pub fn publish(
         }
         return Ok(saved);
     }
-    let eligible:bool=tx.query_row("SELECT EXISTS(SELECT 1 FROM attempts a JOIN operations o ON o.id=a.operation_id JOIN turns t ON t.id=o.turn_id WHERE a.id=?1 AND t.id=?2 AND a.state='running' AND o.state='running' AND o.kind='skill_assessment' AND t.state IN ('pending','assisting') AND NOT EXISTS(SELECT 1 FROM turns child WHERE child.replaces_turn_id=t.id))",params![attempt,turn],|r|r.get(0))?;
+    let eligible = eligible()?;
     if !eligible {
         return Err(invalid(
             "Practice source or inference attempt is no longer current.",

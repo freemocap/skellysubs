@@ -420,7 +420,7 @@ export function SettingsModal({
         </div>
       ),
     },
-    appearance: { section: 'appearance', label: tr('Appearance'), kw: 'theme light dark system palette color warm cool appearance', node: <AppearanceSettings settings={settings} onChange={setSettings} /> },
+    appearance: { section: 'appearance', label: tr('Appearance'), kw: 'theme light dark system palette color warm cool appearance animation motion follow reduced full', node: <AppearanceSettings settings={settings} onChange={setSettings} /> },
     text_size: {
       section: 'appearance', label: tr('Text size'), kw: 'font text size reading display accessibility',
       node: <div className="form-row"><label htmlFor="reading-size">{tr("Text size · ")}{settings.text_size}%</label>

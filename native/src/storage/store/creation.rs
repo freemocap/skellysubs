@@ -37,6 +37,9 @@ pub(super) fn create_conversation(
     title: &str,
     settings: &PracticeSettings,
 ) -> Result<String> {
+    #[cfg(feature = "workflow-capture")]
+    let conversation_id = crate::ai::transport::workflow::conversation_identity()?;
+    #[cfg(not(feature = "workflow-capture"))]
     let conversation_id = id();
     db.execute("INSERT INTO conversations(id,contact_id,language_id,title,archived,revision,last_used) VALUES(?1,?2,?3,?4,0,1,MAX(CAST((julianday('now')-2440587.5)*86400000 AS INTEGER),COALESCE((SELECT MAX(last_used) FROM conversations),0)+1))", params![conversation_id, contact_id, language_id, title])?;
     db.execute(

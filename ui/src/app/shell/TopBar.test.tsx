@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { TopBar } from './TopBar'
 import { useConnectionHealth } from '../../state/session/connection-health'
@@ -95,6 +95,7 @@ it('opens the language browser from the compact selector', () => {
 it('shows the all-languages card on the first press and opens the XP tab on the second', () => {
   render(<TopBar />)
   const xp = screen.getByRole('button', { name: 'Language XP' })
+  expect(xp).toHaveAccessibleDescription('App streak: 1')
   fireEvent.click(xp)
   expect(screen.getByRole('dialog', { name: 'All languages' })).toBeVisible()
   expect(useNavigationStore.getState().page).toBe('guided')
@@ -125,6 +126,18 @@ it('shows the total across languages behind a globe, and every language with its
   expect(within(card).getByRole('button', { name: 'Practice' })).toBeVisible()
 })
 
+it('groups the app streak with global XP and identifies the selected language skill level without duplicate effort totals', async () => {
+  evidence.snapshot = { ...skillDemo, target: 'spanish' }
+  render(<TopBar />)
+  fireEvent.click(screen.getByRole('button', { name: 'Language XP' }))
+  const card = screen.getByRole('dialog', { name: 'All languages' })
+  await waitFor(() => expect(card.querySelector('.progress-card-levels')).toHaveTextContent('Spanish'))
+  expect(card.querySelector('.progress-card-levels')).toHaveTextContent('Skill level 0')
+  expect(card.querySelector('.progress-card-heading .streak-count')).toHaveAccessibleName('App streak: 1')
+  expect(card.querySelector('.progress-card-units')).toBeNull()
+  expect(card.querySelectorAll('.streak-count')).toHaveLength(1)
+})
+
 /// jsdom has no layout. In this model the language's own name needs 60px; its
 /// box has `room` pixels while the XP number shows, and 40px more once the pill
 /// folds to the skill level. A folded XP button has no boxes, as under display: none.
@@ -152,7 +165,7 @@ function measureBar(room: () => number) {
   }
 }
 
-it('folds the progress pill to the skill level while the language’s own name would be cut off, and unfolds it when the bar has room', () => {
+it('folds the progress pill to the skill level while the language’s own name would be cut off, and unfolds it when the bar has room', async () => {
   evidence.snapshot = { ...skillDemo, target: 'spanish' }
   let room = 40
   const bar = measureBar(() => room)
@@ -163,7 +176,7 @@ it('folds the progress pill to the skill level while the language’s own name w
     expect(screen.getByRole('button', { name: 'Skill level 0' })).toBeInTheDocument()
     room = 80
     bar.resize()
-    expect(row).toHaveAttribute('data-fit', 'full')
+    await waitFor(() => expect(row).toHaveAttribute('data-fit', 'full'))
   } finally {
     bar.restore()
   }

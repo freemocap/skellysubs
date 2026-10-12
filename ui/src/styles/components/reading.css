@@ -255,7 +255,7 @@
 .reading-audio-actions { display: flex; justify-content: flex-end; gap: var(--space-3); }
 .reading-audio-status[data-placement='slot'] { position: static; width: auto; max-width: none; margin: 0 var(--space-3) var(--space-3); }
 @media (pointer: coarse) { .reading-audio-status .btn { min-height: var(--touch-target); } }
-@media (prefers-reduced-motion: reduce) { .reading-audio-status { animation: none; } }
+:where(:root[data-motion="reduced"]) .reading-audio-status { animation: none; }
 @media (pointer: coarse) { .token-audio, .token-coach { min-width: 44px; min-height: 44px; } }
 
 /* Source words inherit their sentence metrics. Hover/focus never creates a new

@@ -13,13 +13,13 @@ beforeEach(() => { vi.clearAllMocks(); stop = trackRewardActivations(); unsubscr
 afterEach(() => { stop(); unsubscribe() })
 const earned = (sourceId: string): EffortAward => ({ id: sourceId, sourceId, dimension: 'explorations', createdAt: new Date().toISOString(), claimed: false, language: 'spanish', variety: 'standard', conversationId: null, policy: 'test' })
 function click(x: number) { document.body.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1, clientX: x, clientY: 100 })) }
-it('links a coach command receipt through its operation to the original click', async () => {
-  native.invoke.mockResolvedValueOnce({ entityId: 'coach-turn' }).mockResolvedValueOnce({ turns: [{ id: 'coach-turn', operations: [{ id: 'coach-operation' }] }] })
+it('links a coach command receipt through its native award source to the original click', async () => {
+  native.invoke.mockResolvedValueOnce({ entityId: 'coach-turn' }).mockResolvedValueOnce({ turns: [{ id: 'coach-turn', awardSources: ['graph-effect:coach-result'] }] })
   click(20)
   await executeAction({ sessionId: 's' }, { kind: 'askCoach', conversationId: 'chat', text: 'Explain', expectedRevision: 1 })
   click(80)
   await watchConversation('chat')
-  publishEffortAwards([earned('coach-operation')])
+  publishEffortAwards([earned('graph-effect:coach-result')])
   expect(observed.mock.calls[0][0].origin.x).toBe(20)
 })
 it('binds a persona reservation before the later award arrives', async () => {

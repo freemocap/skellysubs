@@ -331,9 +331,31 @@ pub async fn request_streaming(
     dispatches: &[crate::ai::transport::text_request::TextRequest],
     outputs: &[provider::RequestOutput<'_>],
     deltas: bool,
+    publish: impl FnMut(usize, Result<Completion>) -> Result<()>,
+    on_delta: impl FnMut(usize, &str),
+) -> Result<()> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        super::workflow::text::request(client, key, dispatches, outputs, deltas, publish, on_delta)
+            .await
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    {
+        request_streaming_live(client, key, dispatches, outputs, deltas, publish, on_delta).await
+    }
+}
+
+pub(super) async fn request_streaming_live(
+    client: &reqwest::Client,
+    key: &str,
+    dispatches: &[crate::ai::transport::text_request::TextRequest],
+    outputs: &[provider::RequestOutput<'_>],
+    deltas: bool,
     mut publish: impl FnMut(usize, Result<Completion>) -> Result<()>,
     mut on_delta: impl FnMut(usize, &str),
 ) -> Result<()> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     if dispatches.len() != outputs.len() {
         return Err(AppError::new(
             ErrorCode::Validation,
@@ -367,6 +389,7 @@ pub async fn request_streaming(
             "Operation group exceeds its input limit.",
         ));
     }
+    crate::ai::content::capture::request("text", "application/json", &body, key)?;
     let request = client
         .post(&first.target.url)
         .header(reqwest::header::CONTENT_TYPE, "application/json")
@@ -393,9 +416,11 @@ pub async fn request_streaming(
             "Chat",
             response.status().as_u16(),
         ) {
+            crate::ai::content::capture::rejected(response).await?;
             return Err(AppError::new(ErrorCode::Provider, message));
         }
         if response.status().is_server_error() {
+            crate::ai::content::capture::rejected(response).await?;
             return Err(unknown());
         }
         return Err(crate::ai::hosted::body(response)
@@ -410,6 +435,7 @@ pub async fn request_streaming(
         .and_then(|v| v.split(';').next())
         != Some("application/x-ndjson")
     {
+        crate::ai::content::capture::rejected(response).await?;
         return Err(unknown());
     }
     let mut decoder = if deltas {
@@ -428,6 +454,7 @@ pub async fn request_streaming(
         .await
         .map_err(|error| network(&error, "grouped_response"))?
     {
+        crate::ai::content::capture::chunk(&chunk)?;
         decoder.push_with_deltas(
             &chunk,
             |operation, result| publish(index(operation)?, result),
@@ -437,11 +464,27 @@ pub async fn request_streaming(
             },
         )?;
     }
+    crate::ai::content::capture::complete()?;
     decoder.finish()
 }
 
 /// Validate the current frame protocol before inference admission.
 pub async fn supports_deltas(
+    client: &reqwest::Client,
+    key: &str,
+    dispatch: &crate::ai::transport::text_request::TextRequest,
+) -> Result<bool> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        super::workflow::text::protocol(client, key, dispatch).await
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    {
+        supports_deltas_live(client, key, dispatch).await
+    }
+}
+
+pub(super) async fn supports_deltas_live(
     client: &reqwest::Client,
     key: &str,
     dispatch: &crate::ai::transport::text_request::TextRequest,
@@ -460,6 +503,8 @@ pub async fn supports_deltas(
     } else {
         request
     };
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let response = tokio::time::timeout(std::time::Duration::from_secs(5), request.send())
         .await
         .map_err(|_| protocol_timeout())?

@@ -1,5 +1,5 @@
+import { WordHelpContent } from './WordHelpContent'
 import { isSentenceBlank } from '../../domain/reading/sentence-blanks'
-import { AskCoachButton } from '../learning/AskCoachButton'
 import { useUiDirection } from '../localization/useUiDirection'
 import { ErrorNotice } from '../feedback/ErrorNotice'
 import { positionWordHelp, wordHelpLayer } from './word-help-layer'
@@ -9,11 +9,7 @@ import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type
 import { createPortal } from 'react-dom'
 import { useI18n } from '../localization/i18n'
 import { ResponseDetails } from '../feedback/ResponseDetails'
-import { TokenAudio } from './TokenAudio'
-import { SpeechFollowText } from './SpeechFollowText'
-import { GlossHelpParts } from './GlossHelpParts'
-import { ReadingCompletionsContext, useReadingActions, useReadingLookup, useReadingPeek, type ReadingSelection } from './ReadingContext'
-import { useReadingPreferences } from './ReadingPreferences'
+import { ReadingCompletionsContext, useReadingLookup, useReadingPeek, type ReadingSelection } from './ReadingContext'
 import type { ReadingHelpResult as ReadingResult } from '../../domain/reading/reading-result'
 
 /** A separate top-layer card never replaces or participates in source text layout. */
@@ -36,8 +32,6 @@ export function WordHoverHelp({ selection, anchor, pinned, onEnter, onLeave, onC
     return [...source, ...cached.filter(part => !source.some(item => item.start < part.end && item.end > part.start))]
       .filter(part => part.start < selection.end && part.end > selection.start && part.kind === 'gloss')
   }, [saved, peek, selection, blank])
-  const actions = useReadingActions()
-  const { supportsRomanization } = useReadingPreferences()
   const helper = useRef<HTMLDivElement>(null)
   const layer = wordHelpLayer(anchor.current)
   const [result, setResult] = useState<ReadingResult | null>(null)
@@ -90,14 +84,12 @@ export function WordHoverHelp({ selection, anchor, pinned, onEnter, onLeave, onC
   const parts = localParts.length && attempt === 0 ? localParts : result?.gloss?.segments.filter(part => part.start < selection.end && part.end > selection.start && part.kind === 'gloss') ?? []
   const content = <div ref={helper} dir={direction} popover={layer.popover ? "manual" : undefined} data-word-help-layer={!layer.popover ? "portal" : undefined} className="saved-word-help reading-word-help" role="group" aria-label={tr(blank ? 'Suggested replies' : 'Word help')} data-reading-tools
     onPointerEnter={onEnter} onPointerLeave={() => { if (!pinned) onLeave() }} onClick={event => event.stopPropagation()}>
-    <AskCoachButton compact question={`Help me understand “${selection.text.slice(selection.start, selection.end)}” in this ${selection.scope.language} passage: “${selection.text}”.`} onClose={onClose} />
-    {!blank && <TokenAudio text={selection.text} start={selection.start} end={selection.end} />}
-    <SpeechFollowText text={selection.text.slice(selection.start, selection.end)} source={{ text: selection.text, start: selection.start }}><span data-speech-source className="reading-help-source" dir="auto">{selection.text.slice(selection.start, selection.end)}</span></SpeechFollowText>
+    <WordHelpContent text={selection.text} start={selection.start} end={selection.end} selection={selection} parts={parts} blank={blank} onClose={onClose}>
     {!parts.length && !result && !failure && <span role="status">{tr(blank ? 'Writing reply ideas…' : 'Finding word meanings…')}</span>}
-    {blank ? result?.explanations && Completions && <Completions cards={result.explanations.cards} /> : <GlossHelpParts text={selection.text} parts={parts} showRomanization={supportsRomanization} />}
+    {blank && result?.explanations && Completions && <Completions cards={result.explanations.cards} />}
     {failure != null && <ErrorNotice error={failure}>{errorMessage(failure)}<ResponseDetails value={errorDetails(failure)} /></ErrorNotice>}
     {(failure != null || result && (blank ? !result.explanations?.cards.length : !parts.length)) && <button className="reading-help-action" onClick={() => setAttempt(value => value + 1)}>{tr(blank ? 'Retry' : 'Retry word meanings')}</button>}
-    {actions && <button className="reading-help-action" onClick={() => { onClose(); actions?.inspect(selection) }}>{tr('Analysis')}</button>}
+    </WordHelpContent>
   </div>
   return createPortal(content, layer.host)
 }

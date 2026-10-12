@@ -156,9 +156,13 @@ pub fn validate_for_language(
 }
 
 /// Constrain generation to the same declared capability as persona validation.
+#[cfg(test)]
 pub fn generation_schema(language: &crate::model::Language) -> serde_json::Value {
+    generation_schema_for_romanization(language.romanization.is_some())
+}
+pub(crate) fn generation_schema_for_romanization(romanized: bool) -> serde_json::Value {
     let mut schema = output_schema();
-    schema["properties"]["romanizedName"] = if language.romanization.is_some() {
+    schema["properties"]["romanizedName"] = if romanized {
         serde_json::json!({"type": "string", "minLength": GENERATED_TEXT_MIN, "maxLength": NAME_MAX})
     } else {
         serde_json::json!({"type": "null"})

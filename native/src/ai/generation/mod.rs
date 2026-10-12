@@ -1,6 +1,7 @@
 //! Reviewable proposal ownership, separate from shared provider execution.
 //! Persona proposals stay volatile; durable Drill candidates belong to previews.
 pub(crate) mod generation_receipts;
+pub(crate) mod graph;
 use crate::ai::connections::access;
 use crate::model::*;
 use crate::storage::store::Store;
@@ -66,7 +67,7 @@ impl Request {
             brief,
             target,
             credential,
-            install_id: store.snapshot()?.learner.id,
+            install_id: store.learner_id()?,
             attempt,
             operation,
             created: Instant::now(),
@@ -117,9 +118,7 @@ impl Request {
     }
     /// Submission authority is independent of a closed proposal after dispatch.
     pub(crate) fn validate_execution(&self, store: &Store) -> Result<()> {
-        if self.install_id != store.snapshot()?.learner.id
-            || self.config_hash != store.config.hash()
-        {
+        if self.install_id != store.learner_id()? || self.config_hash != store.config.hash() {
             return Err(self.stopped("language configuration changed"));
         }
         let config = crate::ai::connections::configuration::config(&store.connection)?;
@@ -181,6 +180,20 @@ pub struct Registry {
     requests: Mutex<HashMap<String, Arc<Request>>>,
 }
 impl Registry {
+    pub(crate) fn native_request(&self, id: &str) -> Result<Arc<Request>> {
+        self.requests
+            .lock()
+            .map_err(|_| crate::diagnostics::failures::poisoned(crate::application::internal()))?
+            .get(id)
+            .cloned()
+            .ok_or_else(|| {
+                AppError::new(
+                    ErrorCode::Conflict,
+                    "Proposal ownership is no longer active.",
+                )
+            })
+    }
+
     /// Return expired ownership for the caller's durable terminal receipts.
     pub fn expire(&self) -> Result<Vec<Arc<Request>>> {
         let mut requests = self

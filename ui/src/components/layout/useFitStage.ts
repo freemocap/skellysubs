@@ -6,8 +6,8 @@ import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 /// the bar's `data-fit` attribute, which the bar's stylesheet reads to drop or
 /// shorten parts. The hook tries them in that order and keeps the first under
 /// which `overflows` finds nothing cut off; when none fits, the last. Every try
-/// happens synchronously before paint, so the bar never shows a layout that
-/// does not fit, and it never wraps onto a second row to find room.
+/// happens synchronously before paint. Initial fitting happens during mounting;
+/// subsequent notifications share one animation-frame pass.
 ///
 /// The room is the bar's own, not the window's: a side panel opening or
 /// closing changes it as much as a resize does. The bar fits again when it
@@ -25,25 +25,30 @@ export function useFitStage<Stage extends string>(bar: RefObject<HTMLElement | n
       const { stages, overflows } = latest.current
       let chosen = stages[stages.length - 1]
       for (const candidate of stages) {
-        element.dataset.fit = candidate
+        if (element.dataset.fit !== candidate) element.dataset.fit = candidate
         if (!overflows(element)) { chosen = candidate; break }
       }
-      element.dataset.fit = chosen
+      if (element.dataset.fit !== chosen) element.dataset.fit = chosen
       setStage(chosen)
     }
     fit()
+    let frame: number | null = null
+    const schedule = () => {
+      frame ??= requestAnimationFrame(() => { frame = null; fit() })
+    }
     // Trying a layout only changes the bar's data-fit attribute, which neither
     // observer watches, so fitting never triggers itself.
-    const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit)
+    const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule)
     resize?.observe(element)
-    const content = new MutationObserver(fit)
+    const content = new MutationObserver(schedule)
     content.observe(element, { subtree: true, childList: true, characterData: true })
     content.observe(document.documentElement, { attributes: true })
-    document.fonts?.addEventListener('loadingdone', fit)
+    document.fonts?.addEventListener('loadingdone', schedule)
     return () => {
       resize?.disconnect()
       content.disconnect()
-      document.fonts?.removeEventListener('loadingdone', fit)
+      if (frame !== null) cancelAnimationFrame(frame)
+      document.fonts?.removeEventListener('loadingdone', schedule)
     }
   }, [bar])
   return stage

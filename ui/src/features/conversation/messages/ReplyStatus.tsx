@@ -5,14 +5,13 @@ import type { ReplyState } from '../../../domain/conversation/reply-state'
 import { nativeError } from '../../../platform/ipc/workspace'
 import { ActivityIndicator } from '../../../components/feedback/ActivityIndicator'
 import { useI18n } from '../../../components/localization/i18n'
-import type { AttemptStreamUpdate } from '../../../generated/contracts'
 import { useReadingPreferences } from '../../../components/reading/ReadingPreferences'
 import { PendingBubble, ReceivedText } from './PendingBubble'
 
 /** The partner's reply before it lands. Only first admission requests the
  * `arriving` fade; the saved turn's existing placeholder leaves it off. */
 export function ReplyStatus({ reply, stream, retainedText, visibleText, rtl, onControl, onActivity, arriving = false }: {
-  reply?: ReplyState; stream?: AttemptStreamUpdate | null; retainedText?: string | null; rtl?: boolean
+  reply?: ReplyState; stream?: { text: string } | null; retainedText?: string | null; rtl?: boolean
   visibleText?: string
   onControl?: (control: 'retry' | 'resume') => Promise<void>; onActivity?: () => void; arriving?: boolean
 }) {

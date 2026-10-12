@@ -1,6 +1,15 @@
 use super::*;
 
 impl Store {
+    /// Read the current workspace owner without projecting unrelated UI data.
+    pub(crate) fn learner_id(&self) -> Result<String> {
+        Ok(self
+            .connection
+            .query_row("SELECT id FROM learner WHERE singleton=1", [], |row| {
+                row.get(0)
+            })?)
+    }
+
     pub fn snapshot(&self) -> Result<Snapshot> {
         read_snapshot(&self.connection, &self.session_id, &self.config)
     }

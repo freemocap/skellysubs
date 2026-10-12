@@ -68,6 +68,18 @@ pub fn resolve(
 /// Read configured model availability, not provider health or recognition quality.
 /// This does not submit learner content or invoke an inference provider.
 pub async fn available(target: &ResolvedTarget, key: &str) -> Result<Vec<String>> {
+    #[cfg(feature = "workflow-capture")]
+    {
+        return crate::ai::transport::workflow::unary::protocol(
+        serde_json::json!({"operation":"speech-availability","route":target.route,"model":target.model}),
+        key, available_live(target,key)).await;
+    }
+    #[cfg(not(feature = "workflow-capture"))]
+    available_live(target, key).await
+}
+async fn available_live(target: &ResolvedTarget, key: &str) -> Result<Vec<String>> {
+    #[cfg(feature = "workflow-capture")]
+    crate::ai::transport::workflow::require_live_network()?;
     let base = target
         .url
         .rsplit_once("/audio/")

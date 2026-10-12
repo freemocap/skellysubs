@@ -5,7 +5,6 @@ import { ReadingPreferencesContext } from '../../../components/reading/ReadingPr
 import { PendingTurn } from './PendingTurn'
 import { TurnView, type TurnShape } from './TurnView'
 import type { PendingMessage } from '../session/usePendingMessage'
-import { useAttemptStreams } from '../../../state/session/attempt-streams'
 
 const preferences = { autoTranslate: true, alwaysRomanize: true, alwaysPronunciation: true, supportsRomanization: true }
 const pending: PendingMessage = { key: 'send', text: 'البيوت cafe\u0301 中文', phase: 'sending', editing: null, failure: null, retry: null, known: new Set() }
@@ -70,24 +69,22 @@ it.each([
 
 it('continues the live reveal when a saved reply takes over, without replaying its prefix', () => {
   vi.useFakeTimers()
-  useAttemptStreams.getState().reset()
   const text = 'Hello one two three four five six seven eight'
   const execution: NonNullable<TurnShape['execution']> = {
     id: 'turn', state: 'pending', paused: false, route: 'hosted', hold: null, replacesTurnId: null, replacedBy: null,
-    operations: [{ id: 'operation', kind: 'persona_reply', state: 'running', role: 'standard', contractVersion: 1, dependencies: [], sourceMessageId: null }],
-    attempts: [{ id: 'attempt', operationId: 'operation', state: 'running', requestedModel: 'fixture', actualModel: null, providerId: null,
-      startedAt: '', finishedAt: null, inputTokens: null, outputTokens: null, error: null, diagnostics: null, unpublishedText: null }],
+    nativeExecutionAvailable: true,
+    nativePreview: { attempt: '1', execution: '1', capture: { session: 'session', sequence: '1', text, failure: null }, retained_sequence: '1', uncommitted: false, live: true, complete: false },
   }
   const content = (value: TurnShape) => <TurnView turn={value} editing={false} focused={false} reviewing={false} ttsReady={false} speaking={false} rtl={false} onBubbleTap={vi.fn()} onAskCoach={vi.fn()} />
   const pendingTurn: TurnShape = { id: 1, turnId: 'turn', user: 'Hi', pendingText: '', assistant: null, execution, replyState: { state: 'pending', error: null, control: null } }
-  const view = render(content(pendingTurn))
+  const view = render(content({ ...pendingTurn, execution: { ...execution, nativePreview: undefined } }))
   try {
-    act(() => { useAttemptStreams.getState().apply({ generation: 1, attemptId: 'attempt', conversationId: 'conversation', turnId: 'turn', operationId: 'operation', kind: 'persona_reply', seq: 1, text, terminal: null }) })
+    view.rerender(content(pendingTurn))
     act(() => vi.advanceTimersByTime(80))
     const remaining = view.container.querySelector('.reply-unrevealed')?.textContent
     expect(remaining).toBeTruthy()
     view.rerender(content({ ...pendingTurn, assistant: { ...turn('ready').assistant!, reply: text }, execution: {
-      ...execution, state: 'succeeded', attempts: execution.attempts.map(attempt => ({ ...attempt, state: 'succeeded' })),
+      ...execution, state: 'succeeded',
     } }))
     expect(view.container.querySelector('.reply-unrevealed')?.textContent).toBe(remaining)
     act(() => vi.advanceTimersByTime(800))
@@ -95,7 +92,6 @@ it('continues the live reveal when a saved reply takes over, without replaying i
     expect(view.container.querySelector('.msg.bot')).toHaveTextContent(text)
   } finally {
     view.unmount()
-    useAttemptStreams.getState().reset()
     vi.useRealTimers()
   }
 })

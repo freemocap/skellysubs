@@ -31,7 +31,11 @@ impl Adapter {
         }
         Ok(tag.clone())
     }
-    pub fn form(model: &str, input: TranscriptionRequest) -> Result<reqwest::multipart::Form> {
+    pub fn form(
+        model: &str,
+        input: TranscriptionRequest,
+        key: &str,
+    ) -> Result<reqwest::multipart::Form> {
         let tag = Self::language(&input.language)?;
         let catalog = crate::configuration::speech::Catalog::bundled();
         let primary = crate::configuration::speech::primary(&tag)
@@ -53,6 +57,11 @@ impl Adapter {
             ));
         }
         let word_provider = definition.is_some_and(|d| d.provider == "elevenlabs");
+        crate::ai::content::capture::source("transcription.audio", "audio/wav", &input.wav, "")?;
+        let mut fields = vec![
+            ("model", model.to_owned()),
+            ("language", language.to_owned()),
+        ];
         let mut form = reqwest::multipart::Form::new()
             .part(
                 "file",
@@ -70,9 +79,15 @@ impl Adapter {
                 ("diarize", "false"),
                 ("no_verbatim", "false"),
             ] {
+                fields.push((key, value.to_owned()));
                 form = form.text(key, value);
             }
         } else {
+            fields.extend([
+                ("response_format", "verbose_json".into()),
+                ("timestamp_granularities[]", "word".into()),
+                ("timestamp_granularities[]", "segment".into()),
+            ]);
             form = form
                 .text("response_format", "verbose_json")
                 .text("timestamp_granularities[]", "word")
@@ -83,9 +98,16 @@ impl Adapter {
                     .rev()
                     .find(|&n| context.is_char_boundary(n))
                     .unwrap();
+                fields.push(("prompt", context[..end].to_owned()));
                 form = form.text("prompt", context[..end].to_owned());
             }
         }
+        crate::ai::content::capture::request(
+            "transcription.multipart-fields",
+            "application/json",
+            &serde_json::to_vec(&fields)?,
+            key,
+        )?;
         Ok(form)
     }
     #[cfg(test)]

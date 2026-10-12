@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { useReducedMotion } from '../../../platform/appearance/motion'
+
 const TICK_MS = 40
 const MAX_TICKS = 20
 const words = new Intl.Segmenter(undefined, { granularity: 'word' })
@@ -8,18 +10,11 @@ const words = new Intl.Segmenter(undefined, { granularity: 'word' })
  * Small deltas appear immediately; bursts catch up within 800 ms. Never delay
  * publication, speech, controls or diagnostics. Existing history starts complete. */
 export function useReplyReveal(text: string, animate: boolean) {
-  const [reduced, setReduced] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
+  const reduced = useReducedMotion()
   const [shown, setShown] = useState(text)
   const previous = useRef(text)
   const target = useRef(text)
   target.current = text
-  useEffect(() => {
-    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-    if (!media) return
-    const update = () => setReduced(media.matches)
-    media.addEventListener('change', update)
-    return () => media.removeEventListener('change', update)
-  }, [])
   // Replacements and terminal errors must never retain another source's prefix.
   const compatible = text.startsWith(shown)
   let visible = !animate || reduced || !compatible ? text : shown

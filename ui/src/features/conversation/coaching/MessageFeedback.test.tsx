@@ -65,40 +65,42 @@ it('distinguishes pending, failed, and missing feedback', () => {
 })
 
 
-it.each(['Coach feedback for message 3', 'Coach'])('requires durable disclosure through %s before showing help', async label => {
+it.each(['Coach feedback for message 3', 'Coach'])('shows saved help immediately through %s while recording disclosure', async label => {
   let complete!: () => void
   const control = vi.fn(() => new Promise<void>(resolve => { complete = resolve }))
   const unexposed = { ...decision, exposedMove: null }
   const view = render(<MessageFeedback {...frame} {...base} decision={unexposed} onControl={control} />)
   fireEvent.click(screen.getByRole('button', { name: label }))
   expect(control).toHaveBeenCalledExactlyOnceWith('open_card')
-  expect(screen.queryByText('Which form goes with yo?')).toBeNull()
+  expect(screen.getByRole('dialog')).not.toHaveTextContent('No correction identified.')
+  expect(screen.getByRole('dialog')).not.toHaveTextContent('1 suggestion')
+  expect(screen.getByText('Which form goes with yo?')).toBeVisible()
   await act(async () => complete())
-  expect(screen.queryByText('Which form goes with yo?')).toBeNull()
+  expect(screen.getByText('Which form goes with yo?')).toBeVisible()
   view.rerender(<MessageFeedback {...frame} {...base} decision={decision} onControl={control} />)
   expect(within(screen.getByRole('dialog')).getByText('Which form goes with yo?')).toBeVisible()
 })
 
-it('keeps an unexposed hint hidden on a stale disclosure failure and allows explicit retry', async () => {
+it('retains the saved suggestion and reports a disclosure recording failure', async () => {
   const control = vi.fn().mockRejectedValue(new Error('Coaching is unavailable.'))
   render(<MessageFeedback {...frame} {...base} decision={{ ...decision, exposedMove: null }} onControl={control} />)
   await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Coach' })))
   expect(screen.getByRole('dialog')).toBeVisible()
-  expect(screen.queryByText('Which form goes with yo?')).toBeNull()
+  expect(screen.getByText('Which form goes with yo?')).toBeVisible()
   expect(screen.getByRole('alert')).toHaveTextContent('Coaching is unavailable.')
   expect(control).toHaveBeenCalledOnce()
   expect(screen.getByRole('button', { name: 'Coach' })).toBeEnabled()
 })
 
-it('records disclosure before showing newly arrived feedback in the open dialog', async () => {
+it('shows newly arrived saved feedback without waiting for disclosure in the open dialog', async () => {
   const control = vi.fn().mockResolvedValue(undefined)
   const view = render(<MessageFeedback {...frame} {...base} decision={undefined} feedback={undefined} reviewing onControl={control} />)
   fireEvent.click(screen.getByRole('button', { name: 'Coach' }))
   view.rerender(<MessageFeedback {...frame} {...base} decision={{ ...decision, exposedMove: null }} onControl={control} />)
-  expect(screen.queryByText('Which form goes with yo?')).toBeNull()
+  expect(screen.getByText('Which form goes with yo?')).toBeVisible()
   await act(async () => {})
   expect(control).toHaveBeenCalledExactlyOnceWith('open_card')
-  expect(screen.queryByText('Which form goes with yo?')).toBeNull()
+  expect(screen.getByText('Which form goes with yo?')).toBeVisible()
   view.rerender(<MessageFeedback {...frame} {...base} onControl={control} />)
   expect(within(screen.getByRole('dialog')).getByText('Which form goes with yo?')).toBeVisible()
 })
@@ -221,4 +223,20 @@ it('does not infer a clean verdict from ratings or omitted assessment items', ()
   expect(screen.queryByText('Clean')).toBeNull()
   view.rerender(<MessageFeedback {...frame} {...base} feedback={{ ...feedback, notes: ['One unusable item omitted.'] }} decision={{ ...decision, shown: null }} />)
   expect(screen.queryByText('Clean')).toBeNull()
+})
+
+
+it('renders the saved explicit correction on click and stays closed when recording finishes', async () => {
+  let complete!: () => void
+  const control = vi.fn(() => new Promise<void>(resolve => { complete = resolve }))
+  const saved = { ...decision, exposedMove: null, shown: { construct: 'form', quote: 'source phrase', text: 'corrected phrase', move: 'explicit' as const, explanation: 'Saved explanation.' } }
+  render(<MessageFeedback {...frame} {...base} decision={saved} onControl={control} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Coach' }))
+  expect(screen.getByText('Saved explanation.')).toBeVisible()
+  expect(screen.getByRole('dialog').querySelector('.cor-replacement')).toHaveTextContent('corrected phrase')
+  expect(screen.getByRole('dialog')).not.toHaveTextContent('1 suggestion')
+  expect(control).toHaveBeenCalledExactlyOnceWith('open_card')
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Close Feedback on your message' }))
+  await act(async () => complete())
+  expect(screen.queryByRole('dialog')).toBeNull()
 })

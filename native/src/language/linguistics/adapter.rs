@@ -1,5 +1,6 @@
 //! Pure candidate adapter. No request dispatch, durable publication or UI actions.
 pub mod recovery;
+pub mod settings;
 use super::{
     Annotation, BOUNDARY_POLICY, Candidate, CandidateSpan, MAX_GLOSS_SCALARS, MAX_SPANS,
     SourceIdentity, SourceMap, Unit, ValidatedAnalysis, ValidationError,
@@ -196,13 +197,13 @@ impl<'de> Deserialize<'de> for BoundedSpans {
 fn source_map<'a>(
     identity: &SourceIdentity,
     source: &'a str,
-    context: Option<&crate::configuration::LanguageContext>,
+    context: Option<&settings::Settings>,
 ) -> Result<SourceMap<'a>, AdapterError> {
     if let Some(ctx) = context {
-        if ctx.language_id != identity.target_language_id {
+        if ctx.target_language != identity.target_language_id {
             return Err(AdapterError::UnsupportedTargetLanguage);
         }
-        if ctx.explanation_language_id != identity.explanation_language_id {
+        if ctx.explanation_language != identity.explanation_language_id {
             return Err(AdapterError::UnsupportedExplanationLanguage);
         }
     } else {
@@ -255,14 +256,19 @@ pub fn decode_word_gloss_with_context(
     raw: &str,
     context: &crate::configuration::LanguageContext,
 ) -> Result<ValidatedAnalysis, AdapterError> {
-    decode_word_gloss_context(identity, source, raw, Some(context))
+    decode_word_gloss_context(
+        identity,
+        source,
+        raw,
+        Some(&settings::Settings::from(context)),
+    )
 }
 
 fn decode_word_gloss_context(
     identity: &SourceIdentity,
     source: &str,
     raw: &str,
-    context: Option<&crate::configuration::LanguageContext>,
+    context: Option<&settings::Settings>,
 ) -> Result<ValidatedAnalysis, AdapterError> {
     if raw.len() > MAX_RESPONSE_BYTES {
         return Err(AdapterError::PayloadTooLarge);
@@ -424,15 +430,15 @@ pub fn build_word_gloss_prompt_with_context(
     source: &str,
     context: &crate::configuration::LanguageContext,
 ) -> Result<GlossPrompt, AdapterError> {
-    build_word_gloss_prompt_context(identity, source, Some(context))
+    build_word_gloss_prompt_context(identity, source, Some(&settings::Settings::from(context)))
 }
 
 fn supports_romanization(
     identity: &SourceIdentity,
-    context: Option<&crate::configuration::LanguageContext>,
+    context: Option<&settings::Settings>,
 ) -> Result<bool, AdapterError> {
     if let Some(context) = context {
-        return Ok(context.script != "latin" && !context.guidance("romanization").is_empty());
+        return Ok(context.romanization_enabled);
     }
     languages::romanization(&identity.target_language_id)
         .map(|scheme| scheme.is_some())
@@ -442,7 +448,7 @@ fn supports_romanization(
 fn build_word_gloss_prompt_context(
     identity: &SourceIdentity,
     source: &str,
-    context: Option<&crate::configuration::LanguageContext>,
+    context: Option<&settings::Settings>,
 ) -> Result<GlossPrompt, AdapterError> {
     let map = source_map(identity, source, context)?;
     let catalog = grapheme_rows(&map);
@@ -463,9 +469,9 @@ fn build_word_gloss_prompt_context(
     };
     let (writing, romanization, segmentation) = if let Some(ctx) = context {
         (
-            ctx.guidance("explanation_writing").join("\n"),
-            ctx.guidance("romanization").join("\n"),
-            ctx.guidance("segmentation").join("\n"),
+            ctx.explanation_writing.join("\n"),
+            ctx.romanization.join("\n"),
+            ctx.segmentation.join("\n"),
         )
     } else {
         (

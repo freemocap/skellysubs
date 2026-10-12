@@ -1,22 +1,24 @@
 import { expect, it } from 'vitest'
-import type { TurnView } from '../../generated/contracts'
+import type { Disposition, InspectionSnapshot } from '../../generated/graph-contracts'
+import definition from '../../generated/coach-graph.json'
 import english from '../localization/locales/english.json'
-import { aiStatus, OPERATION_WORDS, STEP_WORDS, type AiStatusInput } from './ai-status'
+import { aiStatus, STEP_WORDS, type AiStatusInput } from './ai-status'
 
 type Turn = AiStatusInput['turns'][number]
 
-/// A turn from [operation id, kind, state] rows and the attempts that ran them.
-function turn(id: string, operations: [string, string, string][], attempts: Partial<TurnView['attempts'][number]>[] = []): Turn {
-  return {
-    id,
-    operations: operations.map(([operationId, kind, state]) => ({ id: operationId, kind, state, dependencies: [], role: 'standard', contractVersion: 1, sourceMessageId: null })),
-    attempts: attempts.map((attempt, index) => ({ id: `${id}-a${index}`, operationId: 'x', state: 'running', requestedModel: 'model-m', actualModel: null, providerId: null,
-      startedAt: '2026-09-30T10:00:00.000Z', finishedAt: null, inputTokens: null, outputTokens: null, error: null, unpublishedText: null, ...attempt })),
-  }
+function turn(id: string, nodes: Record<string, Disposition>, reply?: string): Turn {
+  const graph: InspectionSnapshot = { ...definition, engine: 'engine', revision: '1', run: id,
+    nodes, activation: {}, paused: false, active: true, stepping: null, step_available: false, attempts: {}, reasons: {},
+    artifact: definition.artifact as InspectionSnapshot['artifact'] }
+  if (reply) graph.attempts[reply] = [{ id: 'attempt', execution: 'execution', state: 'Running', acquisition: 'Produced' }]
+  return { id, nativeGraph: graph, nativePreview: reply ? {
+    attempt: 'attempt', execution: 'execution', capture: { session: 'session', sequence: '1', text: '', failure: null },
+    live: true, complete: false, retained_sequence: null, uncommitted: false,
+  } : undefined }
 }
 
 function input(overrides: Partial<AiStatusInput> = {}): AiStatusInput {
-  return { transcribing: false, scheduling: false, turns: [], streaming: new Set(), audio: null, connection: 'connected',
+  return { transcribing: false, scheduling: false, turns: [], audio: null, connection: 'connected',
     models: { transcription: 'whisper-large-v3', speech: 'voice-model' }, ...overrides }
 }
 
@@ -38,73 +40,45 @@ it('reports a send as scheduling a turn until native storage holds it', () => {
   expect(line).toMatchObject({ id: 'schedule', announce: true, words: ['Scheduling reply turn…', 'Scheduling turn…', 'Scheduling…'] })
 })
 
-it('tells a requested reply apart from one streaming tokens', () => {
-  const running = turn('t1', [['c', 'persona_context', 'succeeded'], ['r', 'persona_reply', 'running']], [
-    { operationId: 'c', state: 'succeeded', finishedAt: '2026-09-30T10:00:00.050Z' },
-    { operationId: 'r', requestedModel: 'partner-model' },
-  ])
+it('identifies a streaming reply by its attempt and execution, ahead of sibling work', () => {
+  const running = turn('t1', { reply: 'Running', feedback: 'Running' }, 'reply')
   expect(aiStatus(input({ turns: [running] })).line).toMatchObject({
-    id: 'request:persona_reply', announce: true, kinds: ['persona_reply'], models: ['partner-model'],
-    words: ['Generating partner reply…', 'Generating reply…', 'Generating…'],
+    id: 'request:t1:reply', announce: true, kinds: ['reply'], models: [], words: STEP_WORDS.replyRequest,
   })
-  expect(aiStatus(input({ turns: [running], streaming: new Set(['t1-a1']) })).line).toMatchObject({
-    id: 'stream:persona_reply', announce: false, words: ['Streaming reply tokens…', 'Receiving reply…', 'Streaming…'],
-  })
+  running.nativePreview!.capture.text = 'Hola'
+  expect(aiStatus(input({ turns: [running] })).line).toMatchObject({ id: 'stream:t1:reply', announce: false, words: STEP_WORDS.replyStream })
+  running.channel = 'coach'
+  expect(aiStatus(input({ turns: [running] })).line?.words).toEqual(STEP_WORDS.coachStream)
+  running.nativePreview!.execution = 'another-execution'
+  expect(aiStatus(input({ turns: [running] })).line).toMatchObject({ words: null, kinds: ['reply', 'feedback'] })
 })
 
-it('keeps the partner reply ahead of work running beside it', () => {
-  const running = turn('t1', [['r', 'persona_reply', 'running'], ['f', 'coach_feedback', 'running']], [
-    { operationId: 'r', startedAt: '2026-09-30T10:00:00.000Z' },
-    { operationId: 'f', startedAt: '2026-09-30T10:00:01.000Z' },
-  ])
-  expect(aiStatus(input({ turns: [running] })).line?.kinds).toEqual(['persona_reply'])
-})
-
-it('follows the follow-on operation that started most recently, without announcing it', () => {
-  const running = turn('t1', [['r', 'persona_reply', 'succeeded'], ['t', 'reply_translation', 'running'], ['g', 'persona_word_gloss', 'running'], ['w', 'reply_brief', 'waiting_dependencies']], [
-    { operationId: 'r', state: 'succeeded', finishedAt: '2026-09-30T10:00:03.000Z' },
-    { operationId: 't', startedAt: '2026-09-30T10:00:03.100Z', requestedModel: 'translation-model' },
-    { operationId: 'g', startedAt: '2026-09-30T10:00:03.200Z', requestedModel: 'gloss-model' },
-  ])
+it('reports concurrent nodes without inventing a model or start order', () => {
+  const running = turn('t1', { reply: 'Adopted', translation: 'Running', gloss: 'Running', brief: 'Waiting' })
   expect(aiStatus(input({ turns: [running] }))).toEqual({ busy: true, line: {
-    id: 'run:persona_word_gloss', tone: 'work', announce: false, kinds: ['persona_word_gloss'], models: ['gloss-model'],
-    words: ['Glossing reply words…', 'Glossing words…', 'Glossing…'],
+    id: 'run:t1:translation:gloss', tone: 'work', announce: false, kinds: ['translation', 'gloss'], models: [], words: null,
   } })
 })
 
 it('reads the newest turn that has running work', () => {
-  const settled = turn('t2', [['r', 'persona_reply', 'succeeded']], [{ operationId: 'r', state: 'succeeded', finishedAt: '2026-09-30T10:00:09.000Z' }])
-  const older = turn('t1', [['g', 'user_word_gloss', 'running']], [{ operationId: 'g' }])
-  expect(aiStatus(input({ turns: [settled, older] })).line?.kinds).toEqual(['user_word_gloss'])
+  expect(aiStatus(input({ turns: [turn('t2', { reply: 'Adopted' }), turn('t1', { gloss: 'Running' })] })).line?.kinds).toEqual(['gloss'])
 })
 
-it('names an operation it has no wording for by its scheduler kind', () => {
-  const running = turn('t1', [['n', 'brand_new_check', 'running']], [{ operationId: 'n' }])
-  expect(aiStatus(input({ turns: [running] })).line).toMatchObject({ id: 'run:brand_new_check', words: null, kinds: ['brand_new_check'] })
+it('names an unfamiliar executable node without a separate catalog', () => {
+  expect(aiStatus(input({ turns: [turn('t1', { new_check: 'Running' })] })).line).toMatchObject({ words: null, kinds: ['new_check'] })
 })
 
-it('reports queued work that no request is running for yet', () => {
-  const queued = turn('t1', [['c', 'persona_context', 'ready'], ['r', 'persona_reply', 'waiting_dependencies']])
-  expect(aiStatus(input({ turns: [queued] }))).toMatchObject({ busy: true, line: { id: 'dispatch', words: ['Awaiting request dispatch…', 'Awaiting dispatch…', 'Queued…'] } })
+it.each<Disposition>(['Ready', 'Prepared', 'Available'])('reports local work awaiting dispatch or adoption: %s', state => {
+  expect(aiStatus(input({ turns: [turn('t1', { node: state })] }))).toMatchObject({ busy: true, line: { id: 'dispatch' } })
 })
 
-it('does not treat held work as running', () => {
-  const held = turn('t1', [['r', 'persona_reply', 'held']])
-  expect(aiStatus(input({ turns: [held] }))).toEqual({ busy: false, line: null })
+it.each<Disposition>(['Held', 'Paused', 'Unrequested', 'Disabled', 'Skipped', 'Blocked', 'Failed', 'Unknown', 'Cancelled', 'Adopted'])('does not call inactive work busy: %s', state => {
+  expect(aiStatus(input({ turns: [turn('t1', { node: state })] }))).toEqual({ busy: false, line: null })
 })
 
-it('reports speech synthesis, from a turn or from a replay', () => {
-  const speaking = turn('t1', [['s', 'persona_speech', 'running']], [{ operationId: 's', requestedModel: 'turn-voice-model' }])
-  const words = ['Synthesizing partner voice…', 'Synthesizing voice…', 'Synthesizing…']
-  expect(aiStatus(input({ turns: [speaking] })).line).toMatchObject({ id: 'run:persona_speech', words, models: ['turn-voice-model'] })
-  expect(aiStatus(input({ audio: 'partner' }))).toMatchObject({ busy: true, line: { id: 'synthesize', words, kinds: ['persona_speech'], models: ['voice-model'] } })
-})
-
-it('reports received audio as buffering even while other turn work runs', () => {
-  const speaking = turn('t1', [['s', 'persona_speech', 'running']])
-  expect(aiStatus(input({ turns: [speaking], audio: 'buffering' })).line).toMatchObject({
-    id: 'buffering', words: ['Buffering partner voice…', 'Buffering voice…', 'Buffering…'],
-  })
+it('reports requested speech and prioritizes playback buffering over graph work', () => {
+  expect(aiStatus(input({ audio: 'partner' }))).toMatchObject({ busy: true, line: { id: 'synthesize', models: ['voice-model'] } })
+  expect(aiStatus(input({ turns: [turn('t1', { synthesis: 'Running' })], audio: 'buffering' })).line?.id).toBe('buffering')
 })
 
 it('reports a practice card’s audio as fetched, since native may answer it from its cache', () => {
@@ -124,7 +98,7 @@ it('reports the connection only while no work runs, and never as work', () => {
 
 it('words every status in at most three words, then two, then one, each a catalog message', () => {
   const catalog = english as Record<string, unknown>
-  for (const [kind, tiers] of Object.entries({ ...STEP_WORDS, ...OPERATION_WORDS })) {
+  for (const [kind, tiers] of Object.entries(STEP_WORDS)) {
     tiers.forEach((key, tier) => {
       expect(catalog[key], `${kind}: ${key}`).toBe(key)
       const words = key.replace('…', '').trim().split(/\s+/).length

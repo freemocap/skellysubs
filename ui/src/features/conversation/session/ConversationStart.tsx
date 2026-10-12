@@ -1,3 +1,4 @@
+import { reducedMotion } from '../../../platform/appearance/motion'
 import { ErrorNotice } from '../../../components/feedback/ErrorNotice'
 import { ActivityIndicator } from '../../../components/feedback/ActivityIndicator'
 import { PersonaAvatar } from '../../../components/media/PersonaAvatar'
@@ -50,7 +51,7 @@ export function ConversationStart({ topics, busy, onStart, partnerName, partnerS
   const options = useRef<HTMLDivElement>(null)
   // Opened after the stream has scrolled, the options may reach past its edge:
   // once open, the stream scrolls just far enough to show them.
-  const stillMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const stillMotion = () => reducedMotion()
   const revealOptions = () => options.current?.scrollIntoView({ block: 'nearest', behavior: stillMotion() ? 'auto' : 'smooth' })
   useEffect(() => {
     let current = true

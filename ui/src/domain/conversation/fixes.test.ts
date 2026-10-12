@@ -1,12 +1,12 @@
 import { expect, it } from 'vitest'
 import { fixCount } from './fixes'
 
-const turns = [
+const turns = new Map([
   { id: 'first', replacesTurnId: null },
   { id: 'second', replacesTurnId: 'first' },
   { id: 'third', replacesTurnId: 'second' },
   { id: 'other', replacesTurnId: null },
-]
+].map(turn => [turn.id, turn]))
 
 it('counts the fixes behind a message: each revision sent in place of the one before', () => {
   expect(fixCount('first', turns)).toBe(0)
@@ -17,9 +17,9 @@ it('counts the fixes behind a message: each revision sent in place of the one be
 })
 
 it('counts a replaced turn older than the loaded window, then stops', () => {
-  expect(fixCount('late', [{ id: 'late', replacesTurnId: 'unloaded' }])).toBe(1)
+  expect(fixCount('late', new Map([['late', { replacesTurnId: 'unloaded' }]]))).toBe(1)
 })
 
 it('never loops on a malformed chain', () => {
-  expect(fixCount('a', [{ id: 'a', replacesTurnId: 'b' }, { id: 'b', replacesTurnId: 'a' }])).toBe(2)
+  expect(fixCount('a', new Map([['a', { replacesTurnId: 'b' }], ['b', { replacesTurnId: 'a' }]]))).toBe(2)
 })
