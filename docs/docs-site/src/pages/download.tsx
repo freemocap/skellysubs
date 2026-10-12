@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from '@docusaurus/Link';
 import Head from '@docusaurus/Head';
 import Layout from '@theme/Layout';
-import { architectureLabel, detectSystem, hintedArchitecture, installers, OS_LABELS, parseRelease, recommend, RELEASE_API, RELEASES_URL } from '../lib/downloads';
+import { architectureLabel, detectSystem, featuredInstallers, hintedArchitecture, installers, OS_LABELS, parseRelease, recommend, RELEASE_API, RELEASES_URL } from '../lib/downloads';
 import type { Architecture, ClientHints, Installer, OperatingSystem, Release, System } from '../lib/downloads';
 import './download.css';
 
@@ -22,11 +22,12 @@ function InstallSteps({ installer }: { installer: Installer }) {
   return <p><strong className="dl-install-term">{installer.format}</strong> {instructions[installer.format]}</p>;
 }
 
-function DownloadCard({ installer, primary }: { installer: Installer; primary: boolean }) {
+function DownloadCard({ installer, primary, label }: { installer: Installer; primary: boolean; label?: string }) {
   return <a href={installer.asset.browser_download_url} className={`dl-card${primary ? ' dl-card-recommended' : ''}`}>
     <div className="dl-card-info">
       <div className="dl-card-name">{OS_LABELS[installer.os]} {installer.format === 'MSI' ? 'MSI package' : installer.format === 'EXE' ? 'EXE setup' : `${installer.format} installer`}
         {primary && <span className="dl-badge dl-badge-rec">recommended</span>}
+        {label && <span className="dl-badge">{label}</span>}
       </div>
       <div className="dl-card-meta">{architectureLabel(installer.arch, installer.os)} · {installer.format}</div>
     </div>
@@ -78,8 +79,9 @@ export default function DownloadPage() {
 
   const available = state.status === 'ready' ? installers(state.release) : [];
   const recommended = recommend(available, system);
+  const featured = featuredInstallers(available, system);
   const needsProcessor = ['macos', 'windows', 'linux'].includes(system.os) && system.arch === 'unknown';
-  const alternatives = available.filter(item => item.os === system.os && item !== recommended);
+  const alternatives = available.filter(item => item.os === system.os && !featured.includes(item));
   const choices: { value: string; label: string }[] = [
     { value: 'windows:x64', label: 'Windows (x64)' },
     { value: 'windows:arm64', label: 'Windows (ARM64)' },
@@ -87,7 +89,7 @@ export default function DownloadPage() {
     { value: 'macos:x64', label: 'Mac (Intel)' },
     { value: 'linux:x64', label: 'Linux x64' },
     { value: 'linux:arm64', label: 'Linux ARM64' },
-    { value: 'android:unknown', label: 'Android (Universal / unknown processor)' },
+    { value: 'android:unknown', label: 'Android (unknown processor)' },
     { value: 'android:arm64', label: 'Android ARM64 (arm64-v8a)' },
     { value: 'android:armv7', label: 'Android ARM 32-bit (armeabi-v7a)' },
     { value: 'android:x64', label: 'Android Intel / AMD 64-bit (x86_64)' },
@@ -137,9 +139,11 @@ export default function DownloadPage() {
             {state.status === 'loading' && <p className="dl-no-detect">Loading the latest published release…</p>}
             {state.status === 'error' && <div className="dl-no-detect" role="alert"><p>Couldn’t load downloads: {state.message}</p><button type="button" onClick={() => setAttempt(value => value + 1)}>Try again</button> · <a href={RELEASES_URL}>Open GitHub releases</a></div>}
             {state.status === 'ready' && system.os !== 'ios' && <>
-                  {system.os === 'android' && <p className="dl-no-detect">Architecture-specific APKs are smaller. {system.arch === 'unknown' ? 'Your browser has not identified your processor. Choose Universal if unsure, or select a known architecture above.' : `Selected ${architectureLabel(system.arch, 'android')}. Universal also supports this processor.`}</p>}
+                  {system.os === 'android' && <p className="dl-no-detect">Architecture-specific APKs are smaller. {system.arch === 'unknown' ? 'Your browser has not reported your processor; this can happen with privacy protections. Choose ARM64 if your device supports arm64-v8a, or Universal if unsure. Other architectures are available below.' : `Selected ${architectureLabel(system.arch, 'android')}. The matching APK is recommended; Universal is also compatible.`}</p>}
                   {needsProcessor && recommended && <p className="dl-no-detect">Suggested: {architectureLabel(recommended.arch, system.os)}. Your browser does not expose the processor; choose another installer below if needed.</p>}
-                  {recommended && <div className="dl-downloads"><DownloadCard installer={recommended} primary /></div>}
+                  {featured.length > 0 && <div className="dl-downloads">{featured.map(installer => <DownloadCard key={installer.asset.name} installer={installer}
+                    primary={installer === recommended && !(system.os === 'android' && system.arch === 'unknown')}
+                    label={system.os === 'android' && system.arch === 'unknown' ? (installer.arch === 'universal' ? 'if unsure' : 'for ARM64 devices') : undefined} />)}</div>}
                   {!recommended && <p className="dl-no-detect">{system.os === 'unknown' ? 'Could not detect your OS. All available downloads are shown below with their system and processor labels.' : `No matching installer for ${OS_LABELS[system.os]} in this release.`}</p>}
                   {alternatives.length > 0 && <details className="dl-details">
                     <summary className="dl-toggle">Other installers for {OS_LABELS[system.os]}</summary>

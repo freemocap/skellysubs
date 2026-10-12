@@ -186,3 +186,16 @@ def test_work_claims_coordinate_separate_server_processes(database) -> None:
     receipts = list(account.collection("work_attempts").stream())
     assert len(active) == len(receipts) == work_admission.MAX_INFLIGHT
     assert set(active) == {receipt.id for receipt in receipts}
+
+
+def test_installation_eviction_is_atomic_under_concurrent_registration(database):
+    from uuid import UUID
+    def register(number):
+        quota.record_device(database, 'learner', install_id=str(UUID(int=number)), platform='test', app_version='test')
+    for number in range(1, 101):
+        register(number)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(register, range(101, 109)))
+    rows = list(database.collection(quota.USERS).document('learner').collection(quota.DEVICES).stream())
+    assert len(rows) == quota.MAX_DEVICES
+    assert {str(UUID(int=number)) for number in range(101, 109)} <= {row.id for row in rows}

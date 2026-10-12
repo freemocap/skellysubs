@@ -92,10 +92,9 @@ def test_device_registration_is_bounded_and_rejects_paths(ledger: FakeDb) -> Non
     for index in range(quota.MAX_DEVICES):
         quota.record_device(ledger, "learner", install_id=f"00000000-0000-4000-8000-{index:012d}",
                             platform="macos", app_version="test")
-    with pytest.raises(HTTPException) as failure:
-        quota.record_device(ledger, "learner", install_id="00000000-0000-4000-8000-999999999999",
-                            platform="macos", app_version="test")
-    assert failure.value.status_code == 409
+    quota.record_device(ledger, "learner", install_id="00000000-0000-4000-8000-999999999999",
+                        platform="macos", app_version="test")
+    assert len(ledger.store) == quota.MAX_DEVICES
     quota.record_device(ledger, "learner", install_id="00000000-0000-4000-8000-000000000000",
                         platform="macos", app_version="next")
     assert len(ledger.store) == quota.MAX_DEVICES

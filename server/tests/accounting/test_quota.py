@@ -20,8 +20,9 @@ import server.app.accounting.budget as budget
 
 
 class FakeSnapshot:
-    def __init__(self, data: dict | None):
+    def __init__(self, data: dict | None, document_id: str = ""):
         self._data = data
+        self.id = document_id
 
     @property
     def exists(self) -> bool:
@@ -82,7 +83,7 @@ class FakeQuery:
         for key in list(self._store):
             # Direct children only — `users/x` counts, `users/x/usage/d` does not.
             if key.startswith(prefix) and "/" not in key[len(prefix):]:
-                yield FakeSnapshot(self._store[key])
+                yield FakeSnapshot(self._store[key], key[len(prefix):])
 
 
 class FakeCollection:

@@ -56,7 +56,7 @@ def change(db, *, actor, operation_id, expected_revision, action, target, values
         raise HTTPException(422, 'A canonical operation UUID is required.') from None
     if type(expected_revision) is not int or expected_revision < 0:
         raise HTTPException(422, 'A nonnegative revision is required.')
-    if action not in {'policy', 'user_limit', 'reset_requests', 'reset_diagnostics', 'reset_allowance', 'revoke_sessions'}:
+    if action not in {'policy', 'user_limit', 'reset_requests', 'reset_diagnostics', 'reset_allowance', 'revoke_sessions', 'clear_installations', 'remove_installations'}:
         raise HTTPException(422, 'Unknown administrative action.')
     if action == 'policy':
         if target != 'service':
@@ -68,6 +68,14 @@ def change(db, *, actor, operation_id, expected_revision, action, target, values
         limit = values['daily_limit_micros']
         if limit is not None and (type(limit) is not int or not 0 <= limit <= 10**9):
             raise HTTPException(422, 'Invalid daily spending limit.')
+    elif action == 'remove_installations':
+        if not isinstance(values, dict) or set(values) != {'installation_ids'}:
+            raise HTTPException(422, 'Specify installation IDs.')
+        ids = values['installation_ids']
+        if not isinstance(ids, list) or not 1 <= len(ids) <= quota.MAX_DEVICES:
+            raise HTTPException(422, 'Select between 1 and 100 installations.')
+        if any(not isinstance(item, str) or not item or '/' in item or len(item) > 128 for item in ids) or len(set(ids)) != len(ids):
+            raise HTTPException(422, 'Invalid or duplicate installation IDs.')
     elif values != {}:
         raise HTTPException(422, 'This action has no parameters.')
     if not isinstance(target, str) or not target or '/' in target or len(target) > 128:
@@ -103,6 +111,14 @@ def change(db, *, actor, operation_id, expected_revision, action, target, values
             before = {'daily_limit_micros': current.get('daily_limit_micros')}
             update.update(values)
             after = values
+        elif action in {'clear_installations', 'remove_installations'}:
+            devices = ref.collection(quota.DEVICES)
+            records = list(transaction.get(devices.select([])))
+            selected = records if action == 'clear_installations' else [row for row in records if row.id in values['installation_ids']]
+            before = {'retained_installations': len(records)}
+            after = {'retained_installations': len(records) - len(selected), 'removed_installations': len(selected)}
+            for row in selected:
+                transaction.delete(devices.document(row.id))
         elif action == 'revoke_sessions':
             before = {'token_version': int(current.get('token_version', 0))}
             after = {'token_version': before['token_version'] + 1}

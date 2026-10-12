@@ -114,7 +114,7 @@ it('keeps email masked until clicked, hides it again and supports account inspec
   const original = vi.mocked(fetch).getMockImplementation()!
   vi.mocked(fetch).mockImplementation(async (...args) => {
     if (String(args[0]).includes('/users/')) return { ok: true, status: 200, json: async () => ({ user,
-      identity: { email: 'learner@example.invalid', name: '<script>private</script>' }, usage: [], devices: [], reservations: [],
+      identity: { email: 'learner@example.invalid', name: '<script>private</script>' }, usage: [], devices: [{ id: 'test-installation', platform: 'Android', app_version: 'test' }], reservations: [], installation_policy: { maximum_retained: 100, inactivity_days: 90 },
     }) } as Response
     const response = await original(...args), data = await response.json()
     return { ...response, json: async () => ({ ...data, users: [user] }) } as Response
@@ -152,6 +152,30 @@ it('keeps email masked until clicked, hides it again and supports account inspec
   expect(document.querySelector('#user-detail script')).toBeNull()
   expect(document.querySelector('#user-detail')!.textContent).toContain('Latest reservations')
   expect(document.querySelector('#user-detail')!.textContent).toContain('Restore spending allowance')
+  expect(document.querySelector('#user-detail')!.textContent).toContain('Retained installations: 1')
+  expect(document.querySelector('#user-detail')!.textContent).toContain('This history does not limit sign-in.')
+  const remove = [...document.querySelectorAll<HTMLButtonElement>('#user-detail button')].find(b => b.textContent === 'Remove selected')!
+  expect(remove.disabled).toBe(true)
+  const show = vi.spyOn(HTMLDialogElement.prototype, 'showModal').mockImplementation(() => {})
+  fireEvent.click(document.querySelector('#user-detail input[aria-label="Select installation test-installation"]')!)
+  expect(remove.disabled).toBe(false)
+  fireEvent.click(remove)
+  expect(show).toHaveBeenCalled()
+  expect(document.querySelector('#change-preview')!.textContent).toContain('test-installation')
+  expect(document.querySelector('#change-effect')!.textContent).toContain('sessions are preserved')
+  expect(vi.mocked(fetch).mock.calls.some(call => String(call[0]).includes('/change'))).toBe(false)
+  vi.spyOn(HTMLDialogElement.prototype, 'close').mockImplementation(() => {})
+  fireEvent.click(document.querySelector('#apply-change')!)
+  await waitFor(() => expect(document.querySelector('#status')!.textContent).toContain('Change applied'))
+  const removal = vi.mocked(fetch).mock.calls.find(call => String(call[0]).includes('/change'))!
+  expect(JSON.parse(String(removal[1]?.body))).toMatchObject({ action: 'remove_installations', target: user.id, expected_revision: 0, values: { installation_ids: ['test-installation'] } })
+  fireEvent.click([...document.querySelectorAll('#user-detail button')].find(b => b.textContent === 'Clear installation history')!)
+  expect(document.querySelector('#change-preview')!.textContent).toContain('Clear installation history')
+  fireEvent.click(document.querySelector('#apply-change')!)
+  await waitFor(() => expect(vi.mocked(fetch).mock.calls.filter(call => String(call[0]).includes('/change'))).toHaveLength(2))
+  const clearing = vi.mocked(fetch).mock.calls.filter(call => String(call[0]).includes('/change'))[1]
+  expect(JSON.parse(String(clearing[1]?.body))).toMatchObject({ action: 'clear_installations', target: user.id, values: {} })
+  await waitFor(() => expect(document.body.hasAttribute('aria-busy')).toBe(false))
 })
 
 it('sorts loaded log events by numeric duration and exposes optional timing context', async () => {

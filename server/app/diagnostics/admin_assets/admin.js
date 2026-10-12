@@ -608,7 +608,8 @@ async function run(work) {
   $("error").hidden = true;
   $("change-error").hidden = true;
   document.body.setAttribute("aria-busy", "true");
-  document.querySelectorAll("button").forEach((button2) => button2.disabled = true);
+  const buttons = [...document.querySelectorAll("button")].map((button2) => ({ button: button2, disabled: button2.disabled }));
+  buttons.forEach(({ button: button2 }) => button2.disabled = true);
   try {
     await work();
     return true;
@@ -621,7 +622,7 @@ async function run(work) {
   } finally {
     busy = false;
     document.body.removeAttribute("aria-busy");
-    document.querySelectorAll("button").forEach((button2) => button2.disabled = false);
+    buttons.forEach(({ button: button2, disabled }) => button2.disabled = disabled);
     $("next-users").disabled = !overview?.next_cursor;
     void renderLive();
   }
@@ -753,7 +754,7 @@ function usageTable(rows) {
 }
 function review(action, target, revision, values, before, effect) {
   command = { operation_id: crypto.randomUUID(), expected_revision: revision, action, target, values };
-  const labels = { user_limit: "Change daily allowance", reset_diagnostics: "Restore account checks", reset_requests: "Restore inference requests", reset_allowance: "Restore spending allowance", revoke_sessions: "Revoke sessions", policy: "Change service limits" };
+  const labels = { user_limit: "Change daily allowance", reset_diagnostics: "Restore account checks", reset_requests: "Restore inference requests", reset_allowance: "Restore spending allowance", revoke_sessions: "Revoke sessions", policy: "Change service limits", clear_installations: "Clear installation history", remove_installations: "Remove selected installations" };
   const display = (key, value) => value === null || value === void 0 ? "Use service default" : key.endsWith("_micros") ? money(Number(value)) : String(value);
   const previous = before && typeof before === "object" ? before : {};
   const changes = Object.entries(values).map(([key, value]) => `${policyLabels[key] ?? (key === "daily_limit_micros" ? "Daily allowance" : key)}: ${display(key, previous[key])} \u2192 ${display(key, value)}`);
@@ -819,9 +820,9 @@ async function loadOverview(live = false, pushed, pushedTimeline) {
   }
 }
 async function inspectUser(user) {
-  const label = user.email_label ?? "Account details";
   const result = await api(`/admin/api/users/${encodeURIComponent(user.id)}?days=${$("days").value}`);
   user = result.user;
+  const label = user.email_label ?? "Account details";
   const pane = $("user-detail");
   pane.hidden = false;
   pane.replaceChildren(el("h3", label), button("Close account details", () => {
@@ -865,12 +866,12 @@ async function inspectUser(user) {
   pane.append(controls);
   const resets = el("div");
   resets.className = "filters";
-  for (const [action, label2, effect] of [
+  for (const [action, label2, effect2] of [
     ["reset_diagnostics", "Restore account checks", "Restores today\u2019s personal account-check allowance. Shared request counts remain unchanged."],
     ["reset_requests", "Restore inference requests", "Restores today\u2019s personal inference-request allowance. Shared request counts remain unchanged."],
     ["reset_allowance", "Restore spending allowance", "Grants allowance equal to currently recorded usage, including pending holds. Usage, shared totals, reservations and later settlements remain intact. This can permit additional spending today."],
     ["revoke_sessions", "Revoke sessions", "Invalidates existing app and admin sessions for this account. The user can sign in again; this does not ban the account."]
-  ]) resets.append(button(label2, () => review(action, user.id, user.admin_revision, {}, { token_version: user.token_version, today: result.usage.at(-1) }, effect)));
+  ]) resets.append(button(label2, () => review(action, user.id, user.admin_revision, {}, { token_version: user.token_version, today: result.usage.at(-1) }, effect2)));
   const reservations = new ReportTable([
     { key: "created", label: "Created (UTC)", required: true, value: (r) => timestamp(r.created_at), render: (r) => dateTime(r.created_at) },
     { key: "state", label: "State", value: (r) => text(r.status), render: (r) => badge(r.status) },
@@ -883,10 +884,31 @@ async function inspectUser(user) {
     { key: "metadata", label: "Metadata", required: true, render: metadata }
   ], { label: "Account reservations", scope: "Latest 100 reservations. Created \u2192 updated is recorded bookkeeping time, not provider execution duration. Unknown cost is not zero.", sort: "created", descending: true });
   reservations.update(result.reservations);
+  const selected = /* @__PURE__ */ new Set(), installationControls = el("div");
+  installationControls.className = "filters";
+  const effect = "Removes installation metadata only. Accounts, usage, allowances and sessions are preserved. An installation is recorded again on its next account check.";
+  const remove = button("Remove selected", () => review("remove_installations", user.id, user.admin_revision, { installation_ids: [...selected] }, {}, `${selected.size} selected. ${effect}`));
+  remove.disabled = true;
+  const clear = button("Clear installation history", () => review("clear_installations", user.id, user.admin_revision, {}, {}, `Clears all retained installations for this account at the time of confirmation. ${effect}`));
+  clear.disabled = result.devices.length === 0;
+  installationControls.append(remove, clear);
+  const installations = table(["Select", "Platform", "App version", "First seen (UTC)", "Last seen (UTC)"], result.devices.map((row) => {
+    const input2 = el("input");
+    input2.type = "checkbox";
+    input2.setAttribute("aria-label", `Select installation ${row.id}`);
+    input2.onchange = () => {
+      if (input2.checked) selected.add(String(row.id));
+      else selected.delete(String(row.id));
+      remove.disabled = selected.size === 0;
+    };
+    return [input2, row.platform, row.app_version, dateTime(row.first_seen), dateTime(row.last_seen)];
+  }));
   pane.append(
     resets,
-    el("h4", `Registered installations${result.devices_truncated ? " \xB7 limited to 100" : ""}`),
-    table(["Platform", "App version", "First seen (UTC)", "Last seen (UTC)"], result.devices.map((row) => [row.platform, row.app_version, dateTime(row.first_seen), dateTime(row.last_seen)])),
+    el("h4", `Retained installations: ${result.devices.length}${result.devices_truncated ? "+" : ""}`),
+    el("p", `Keeps the ${result.installation_policy.maximum_retained} most recently seen installations. Older entries are replaced automatically. Entries expire after ${result.installation_policy.inactivity_days} days without an account check; background deletion may lag. This history does not limit sign-in.`),
+    installationControls,
+    installations,
     el("h4", `Latest reservations${result.reservations_truncated ? " \xB7 limited to 100" : ""}`),
     reservations.node
   );
@@ -1101,10 +1123,12 @@ $("cancel-change").onclick = () => {
 };
 $("apply-change").onclick = () => void run(async () => {
   if (!command) return;
+  const target = command.target;
   await api("/admin/api/change", command);
   command = void 0;
   $("confirm").close();
   await loadOverview();
+  if (target !== "service" && !$("user-detail").hidden) await inspectUser({ id: target });
   $("status").textContent += " Change applied and audit record saved.";
 });
 void run(loadOverview);

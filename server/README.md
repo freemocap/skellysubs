@@ -696,6 +696,21 @@ records have a 365-day TTL, included in deployment retention provisioning. This
 source work does not authorize deployment, IAM changes or live account resets.
 See [implementation, verification and remaining decisions](../docs/notes/server-admin-panel-2026-09-20.md).
 
+### Installation history
+
+Account details show the retained installation count and the newest check-ins first.
+The service retains up to 100 installation metadata records per account. A new
+installation at capacity atomically replaces the least recently seen record;
+this reporting limit does not reject sign-in. Undated legacy entries are retired
+first. Each check-in renews a 90-day inactivity expiry; Firestore TTL cleanup can lag.
+
+**Remove selected** and **Clear installation history** use the usual review dialog,
+account revision check and transactional audit receipt. Clearing removes all
+installation records present when the change executes. These actions retire only
+platform/version and first/last-seen metadata, preserving the account, sessions,
+usage and allowances. An installation is recorded again on its next account check.
+Use **Revoke sessions** separately when access should be invalidated.
+
 ### Local administration
 
 `npm run server:local` builds the admin assets and serves the panel with the normal

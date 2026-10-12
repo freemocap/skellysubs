@@ -121,3 +121,15 @@ export function architectureLabel(arch: Installer['arch'], os: OperatingSystem):
   if (os === 'macos') return arch === 'arm64' ? 'Apple Silicon' : 'Intel';
   return arch === 'arm64' ? 'ARM64' : 'Intel / AMD 64-bit';
 }
+
+// Keep the compact Android option and the compatible fallback visible together.
+// Showing ARM64 when detection is unavailable is not evidence of compatibility.
+export function featuredInstallers(available: Installer[], system: System): Installer[] {
+  const recommended = recommend(available, system);
+  if (system.os !== 'android') return recommended ? [recommended] : [];
+  const arch = system.arch === 'unknown' ? 'arm64' : system.arch;
+  return [
+    available.find(item => item.os === 'android' && item.arch === arch),
+    available.find(item => item.os === 'android' && item.arch === 'universal'),
+  ].filter((item): item is Installer => item !== undefined);
+}

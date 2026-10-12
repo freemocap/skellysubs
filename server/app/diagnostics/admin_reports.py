@@ -121,14 +121,15 @@ def user_detail(db, cfg, user_id, days):
     doc = ref.get()
     if not doc.exists:
         raise HTTPException(404, 'Account not found.')
-    devices = [{k: (item.to_dict() or {}).get(k) for k in ('platform', 'app_version', 'first_seen', 'last_seen')}
-               for item in ref.collection(quota.DEVICES).limit(101).stream()]
+    devices = [{'id': item.id, **{k: (item.to_dict() or {}).get(k) for k in ('platform', 'app_version', 'first_seen', 'last_seen')}}
+               for item in sorted(ref.collection(quota.DEVICES).limit(quota.MAX_DEVICES + 1).stream(), key=quota.installation_order, reverse=True)]
     reservations = list(ref.collection('reservations').order_by('created_at', direction=firestore.Query.DESCENDING).limit(101).stream())
     fields = ('day', 'status', 'reserved_micros', 'actual_micros', 'tokens', 'cost_basis', 'created_at', 'updated_at', 'provider_id')
     identity = {key: (doc.to_dict() or {}).get(key) for key in ('email', 'name')}
     return {'user': profile(doc, admin_controls.effective(db, cfg)), 'identity': identity,
             'usage': usage(ref.collection(quota.USAGE), days),
             'devices': devices[:100], 'devices_truncated': len(devices) > 100,
+            'installation_policy': {'maximum_retained': quota.MAX_DEVICES, 'inactivity_days': quota.INSTALLATION_RETENTION_DAYS},
             'reservations': [{'id': item.id, **{k: (item.to_dict() or {}).get(k) for k in fields}} for item in reservations[:100]],
             'reservations_truncated': len(reservations) > 100}
 

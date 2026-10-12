@@ -45,7 +45,8 @@ createServer((request, response) => {
     const user = users.find(u => u.id === decodeURIComponent(path.split('/').at(-1)!))
     if (!user) { response.writeHead(404); response.end(); return }
     data = { user, identity: { email: 'synthetic-learner@example.invalid', name: 'Synthetic account' }, usage: [user.usage],
-      devices: [{ platform: 'Windows', app_version: 'preview', first_seen: user.created_at, last_seen: user.last_seen }],
+      installation_policy: { maximum_retained: 100, inactivity_days: 90 },
+      devices: [{ id: 'synthetic-installation', platform: 'Windows', app_version: 'preview', first_seen: user.created_at, last_seen: user.last_seen }],
       reservations: [{ id: 'synthetic-reservation', created_at: stamp(24000), updated_at: stamp(1000),
         status: 'settled', reserved_micros: 8000, actual_micros: 2500, tokens: 420, cost_basis: 'provider_reported', provider_id: 'synthetic-receipt' }] }
   } else if (path === '/admin/api/logs') data = { entries: events, scope: 'Synthetic events only.', since: stamp(86400000) }

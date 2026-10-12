@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectSystem, hintedArchitecture, installers, matchingInstallers, parseRelease, recommend, RELEASES_URL } from './downloads';
+import { detectSystem, featuredInstallers, hintedArchitecture, installers, matchingInstallers, parseRelease, recommend, RELEASES_URL } from './downloads';
 import type { Architecture, OperatingSystem, Release } from './downloads';
 
 describe('device detection', () => {
@@ -47,6 +47,19 @@ const release: Release = {
 };
 
 describe('published installer selection', () => {
+  it('exposes ARM64 beside Universal when Android hides its processor without claiming a match', () => {
+    const system = detectSystem({ userAgent: 'Mozilla/5.0 (Linux; Android 10; K)', platform: 'Linux armv81', maxTouchPoints: 5 });
+    system.arch = hintedArchitecture({ architecture: '', bitness: '' }, system.os);
+    const available = installers(release);
+    expect(system.arch).toBe('unknown');
+    expect(featuredInstallers(available, system).map(item => item.arch)).toEqual(['arm64', 'universal']);
+    expect(recommend(available, system)?.arch).toBe('universal');
+    expect(featuredInstallers(available.filter(item => item.arch === 'universal'), system).map(item => item.arch)).toEqual(['universal']);
+    expect(featuredInstallers([], system)).toEqual([]);
+  });
+  it.each(['arm64', 'armv7', 'x86', 'x64'] as const)('keeps the matching Android APK and Universal visible: %s', arch => {
+    expect(featuredInstallers(installers(release), { os: 'android', arch }).map(item => item.arch)).toEqual([arch, 'universal']);
+  });
   it('excludes updater and store artifacts', () => {
     expect(installers(release)).toHaveLength(13);
     expect(installers(release).map(item => item.format)).not.toContain('IPA');

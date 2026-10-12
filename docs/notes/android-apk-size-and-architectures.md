@@ -77,10 +77,22 @@ The documentation page recognizes all five filenames and uses Android browser
 client hints for architecture/bitness when available. It does not infer an ABI
 from a device model or assume all Android devices are ARM64. A known architecture
 prefers its exact APK, falling back to universal when absent (including old
-releases). Unknown architecture recommends only universal. Manual selection and
-all Android alternatives remain available; a late hints response cannot override
+releases). The page keeps the matching APK and Universal visible together.
+For an unknown processor, ARM64 is shown as an explicit option for ARM64 devices
+beside Universal ("if unsure"); neither card claims a detected match or carries
+the recommendation badge. Compatibility selection still falls back only to
+Universal. Other architectures remain in the selector and expandable alternatives.
+A late hints response cannot override
 the user's selection. The page explains `adb shell getprop ro.product.cpu.abilist`
 as an optional way to inspect supported ABIs.
+
+The October 12 follow-up addresses the smaller APK being hidden when detection
+returns no architecture. This is not necessarily a device recognition defect:
+[Chromium Android tests](https://chromium.googlesource.com/chromium/src/+/b37a4c8219404240614ef11bb1ef25aeaed488ac/android_webview/javatests/src/org/chromium/android_webview/test/ClientHintsTest.java)
+document empty architecture and bitness hints, and
+[GrapheneOS](https://grapheneos.org/features) limits high-entropy client hints in
+Vanadium. The user's phone/browser values have not been captured, so its specific
+cause remains unverified. No device-model guessing or privacy workarounds were added.
 
 ## Verification
 
@@ -88,8 +100,9 @@ as an optional way to inspect supported ABIs.
   totals measured from the packaged libraries.
 - APK inspection tests: passed (ABI mismatches, missing app library, stripped
   versus unstripped libraries, ELF32 and ELF64).
-- Documentation download tests: 34 passed, including exact-ABI preference,
-  unknown processors, missing architectures and older universal-only releases.
+- Documentation download tests: 39 passed, including exact-ABI preference,
+  unknown processors, visible ARM64/Universal choices, missing architectures and
+  older universal-only releases.
 - Documentation demo and dependency-security tests, site type-check, docs links,
   site production build, root fast gate and root UI production build: passed.
 - Both workflow YAML documents parse, and every Android release shell step

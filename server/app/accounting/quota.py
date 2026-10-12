@@ -49,6 +49,7 @@ AUTH_STATES = "auth_states"
 DEVICES = "devices"
 # Installation records are not physical devices: fresh app data creates a new ID.
 MAX_DEVICES: int = 100
+INSTALLATION_RETENTION_DAYS: int = 90
 DEVICE_WARNING_THRESHOLD: int = 50
 logger = logging.getLogger(__name__)
 
@@ -221,6 +222,12 @@ def load_principal(
     return Principal(user_id=user_id, daily_limit=limit, overridden=override is not None)
 
 
+def installation_order(snapshot) -> tuple[datetime, str]:
+    """Least recently seen first; undated legacy metadata is retired first."""
+    seen = (snapshot.to_dict() or {}).get("last_seen")
+    return (seen if isinstance(seen, datetime) and seen.tzinfo else datetime.min.replace(tzinfo=timezone.utc), snapshot.id)
+
+
 def record_device(
     db: firestore.Client,
     user_id: str,
@@ -249,7 +256,7 @@ def record_device(
         "platform": platform,
         "app_version": app_version,
         "last_seen": firestore.SERVER_TIMESTAMP,
-        "ttl": ttl_after(USAGE_RETENTION_DAYS),
+        "ttl": ttl_after(INSTALLATION_RETENTION_DAYS),
     }
     # Only on the first sighting: merging SERVER_TIMESTAMP every time would
     # move `first_seen` forward with it and the two would always be equal.
@@ -258,11 +265,14 @@ def record_device(
         new_count: int | None = None
         existing: firestore.DocumentSnapshot = ref.get(transaction=transaction)
         if not existing.exists:
-            devices: firestore.Query = db.collection(USERS).document(user_id).collection(DEVICES).select([])
-            count = sum(1 for _ in transaction.get(devices))
-            if count >= MAX_DEVICES:
-                raise HTTPException(status_code=409, detail="Account installation limit reached (100 registrations). Contact the service administrator to review inactive registrations.")
-            new_count = count + 1
+            devices = db.collection(USERS).document(user_id).collection(DEVICES)
+            # The collection is bounded by registration, not a login entitlement.
+            # Read before writing so concurrent registrations retry atomically.
+            records = sorted(transaction.get(devices.select(["last_seen"])), key=installation_order)
+            retired = records[:max(0, len(records) - MAX_DEVICES + 1)]
+            for record in retired:
+                transaction.delete(devices.document(record.id))
+            new_count = len(records) - len(retired) + 1
             entry["first_seen"] = firestore.SERVER_TIMESTAMP
         transaction.set(ref, entry, merge=True)
         return new_count

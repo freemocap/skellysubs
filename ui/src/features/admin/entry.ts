@@ -127,11 +127,12 @@ async function run(work: () => Promise<void>) {
   busy = true
   $('error').hidden = true; $('change-error').hidden = true
   document.body.setAttribute('aria-busy', 'true')
-  document.querySelectorAll<HTMLButtonElement>('button').forEach(button => button.disabled = true)
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('button')].map(button => ({ button, disabled: button.disabled }))
+  buttons.forEach(({ button }) => button.disabled = true)
   try { await work(); return true } catch (error) { const notice = $<HTMLDialogElement>('confirm').open ? $('change-error') : $('error'); notice.textContent = error instanceof Error ? error.message : String(error); notice.hidden = false; notice.scrollIntoView({ block: 'nearest' }); return false }
   finally {
     busy = false; document.body.removeAttribute('aria-busy')
-    document.querySelectorAll<HTMLButtonElement>('button').forEach(button => button.disabled = false)
+    buttons.forEach(({ button, disabled }) => button.disabled = disabled)
     $<HTMLButtonElement>('next-users').disabled = !overview?.next_cursor
     void renderLive()
   }
@@ -213,7 +214,7 @@ function usageTable(rows: Usage[]) {
 }
 function review(action: string, target: string, revision: number, values: Row, before: unknown, effect: string) {
   command = { operation_id: crypto.randomUUID(), expected_revision: revision, action, target, values }
-  const labels: Record<string, string> = { user_limit: 'Change daily allowance', reset_diagnostics: 'Restore account checks', reset_requests: 'Restore inference requests', reset_allowance: 'Restore spending allowance', revoke_sessions: 'Revoke sessions', policy: 'Change service limits' }
+  const labels: Record<string, string> = { user_limit: 'Change daily allowance', reset_diagnostics: 'Restore account checks', reset_requests: 'Restore inference requests', reset_allowance: 'Restore spending allowance', revoke_sessions: 'Revoke sessions', policy: 'Change service limits', clear_installations: 'Clear installation history', remove_installations: 'Remove selected installations' }
   const display = (key: string, value: unknown) => value === null || value === undefined ? 'Use service default' : key.endsWith('_micros') ? money(Number(value)) : String(value)
   const previous = (before && typeof before === 'object' ? before : {}) as Row
   const changes = Object.entries(values).map(([key, value]) => `${policyLabels[key] ?? (key === 'daily_limit_micros' ? 'Daily allowance' : key)}: ${display(key, previous[key])} → ${display(key, value)}`)
@@ -266,9 +267,9 @@ async function loadOverview(live = false, pushed?: Overview, pushedTimeline?: Ti
   }
 }
 async function inspectUser(user: User) {
-  const label = user.email_label ?? 'Account details'
-  const result = await api<{ user: User; identity: { email: string | null; name: string | null }; usage: Usage[]; devices: Row[]; reservations: Row[]; devices_truncated: boolean; reservations_truncated: boolean }>(`/admin/api/users/${encodeURIComponent(user.id)}?days=${$<HTMLSelectElement>('days').value}`)
+  const result = await api<{ user: User; identity: { email: string | null; name: string | null }; usage: Usage[]; devices: Row[]; installation_policy: { maximum_retained: number; inactivity_days: number }; reservations: Row[]; devices_truncated: boolean; reservations_truncated: boolean }>(`/admin/api/users/${encodeURIComponent(user.id)}?days=${$<HTMLSelectElement>('days').value}`)
   user = result.user
+  const label = user.email_label ?? 'Account details'
   const pane = $('user-detail'); pane.hidden = false; pane.replaceChildren(el('h3', label), button('Close account details', () => { pane.hidden = true; pane.replaceChildren() }))
   const identity = el('details'); identity.append(el('summary', 'Identity details'), table(['User ID', 'Email', 'Name'], [[user.id, result.identity.email, result.identity.name]])); pane.append(identity)
   const chart = el('div'); usageView(chart, result.usage); pane.append(chart)
@@ -298,7 +299,20 @@ async function inspectUser(user: User) {
     { key: 'metadata', label: 'Metadata', required: true, render: metadata },
   ], { label: 'Account reservations', scope: 'Latest 100 reservations. Created → updated is recorded bookkeeping time, not provider execution duration. Unknown cost is not zero.', sort: 'created', descending: true })
   reservations.update(result.reservations)
-  pane.append(resets, el('h4', `Registered installations${result.devices_truncated ? ' · limited to 100' : ''}`), table(['Platform', 'App version', 'First seen (UTC)', 'Last seen (UTC)'], result.devices.map(row => [row.platform, row.app_version, dateTime(row.first_seen), dateTime(row.last_seen)])),
+  const selected = new Set<string>(), installationControls = el('div'); installationControls.className = 'filters'
+  const effect = 'Removes installation metadata only. Accounts, usage, allowances and sessions are preserved. An installation is recorded again on its next account check.'
+  const remove = button('Remove selected', () => review('remove_installations', user.id, user.admin_revision, { installation_ids: [...selected] }, {}, `${selected.size} selected. ${effect}`))
+  remove.disabled = true
+  const clear = button('Clear installation history', () => review('clear_installations', user.id, user.admin_revision, {}, {}, `Clears all retained installations for this account at the time of confirmation. ${effect}`))
+  clear.disabled = result.devices.length === 0
+  installationControls.append(remove, clear)
+  const installations = table(['Select', 'Platform', 'App version', 'First seen (UTC)', 'Last seen (UTC)'], result.devices.map(row => {
+    const input = el('input'); input.type = 'checkbox'; input.setAttribute('aria-label', `Select installation ${row.id}`)
+    input.onchange = () => { if (input.checked) selected.add(String(row.id)); else selected.delete(String(row.id)); remove.disabled = selected.size === 0 }
+    return [input, row.platform, row.app_version, dateTime(row.first_seen), dateTime(row.last_seen)]
+  }))
+  pane.append(resets, el('h4', `Retained installations: ${result.devices.length}${result.devices_truncated ? '+' : ''}`),
+    el('p', `Keeps the ${result.installation_policy.maximum_retained} most recently seen installations. Older entries are replaced automatically. Entries expire after ${result.installation_policy.inactivity_days} days without an account check; background deletion may lag. This history does not limit sign-in.`), installationControls, installations,
     el('h4', `Latest reservations${result.reservations_truncated ? ' · limited to 100' : ''}`), reservations.node)
   pane.scrollIntoView({ block: 'start', behavior: 'smooth' })
 }
@@ -420,7 +434,9 @@ $('cancel-change').onclick = () => { command = undefined; $<HTMLDialogElement>('
 $('apply-change').onclick = () => void run(async () => {
   if (!command) return
   // Keep the same operation ID after network ambiguity; never automatically resubmit.
+  const target = command.target
   await api('/admin/api/change', command); command = undefined; $<HTMLDialogElement>('confirm').close(); await loadOverview()
+  if (target !== 'service' && !$('user-detail').hidden) await inspectUser({ id: target } as User)
   $('status').textContent += ' Change applied and audit record saved.'
 })
 void run(loadOverview)
