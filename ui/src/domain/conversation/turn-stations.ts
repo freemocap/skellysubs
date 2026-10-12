@@ -2,6 +2,7 @@ import type { ChatMessage, SpeechRequestView } from '../../generated/contracts'
 import type { InspectionSnapshot } from '../../generated/graph-contracts'
 import type { Tone } from '../activity/graph-overlay'
 import { messageKey } from '../localization'
+import { operationPhase, type OperationPhase } from './activity-summary'
 
 /// Stations around a conversation turn's run: the learner's message, which
 /// `sendMessage` turns into the graph inputs that carry it, and the playback of
@@ -26,8 +27,8 @@ export interface TurnStation {
 const MESSAGE_INPUTS = ['context', 'learner_source']
 const AUDIO_RESULT = 'audio'
 
-/// Speech request states, as the conversation reports them, mapped to tones.
-const PLAYBACK_TONE: Record<string, Tone> = { ready: 'waiting', pending: 'waiting', running: 'running', succeeded: 'done', failed: 'problem', unknown: 'problem', held: 'held', cancelled: 'ended' }
+/// Reuse the product state's shared interpretation; only presentation differs.
+const PHASE_TONE = { waiting: 'waiting', running: 'running', succeeded: 'done', failed: 'problem', unknown: 'problem', held: 'held', ended: 'ended' } as const satisfies Record<OperationPhase, Tone>
 
 export function turnStations(graph: InspectionSnapshot, message: ChatMessage | undefined, speech: SpeechRequestView | undefined): TurnStation[] {
   const stations: TurnStation[] = []
@@ -40,7 +41,9 @@ export function turnStations(graph: InspectionSnapshot, message: ChatMessage | u
     })
   }
   if (speech && Object.hasOwn(definition.results, AUDIO_RESULT)) {
-    const tone = PLAYBACK_TONE[speech.state]
+    const phase = operationPhase(speech.state)
+    // Native speech discovery can report unrequested; retain the earlier pending alias.
+    const tone = phase ? PHASE_TONE[phase] : speech.state === 'unrequested' ? 'ask' : speech.state === 'pending' ? 'waiting' : null
     if (!tone) throw new Error(`Unknown speech request state: ${speech.state}`)
     stations.push({
       id: 'station:playback', side: 'after', nameKey: messageKey('Playback'), tone, ports: [AUDIO_RESULT],

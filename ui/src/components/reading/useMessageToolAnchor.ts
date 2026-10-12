@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 
 /** Expanding above a toolbar keeps its toggle under the pointer. Stop anchoring
  * as soon as the learner scrolls; never fight intentional navigation. */
-export function useInspectorAnchor(open: boolean | undefined) {
+export function useMessageToolAnchor(state: string) {
   const anchor = useRef<{ button: HTMLElement; top: number } | null>(null)
   useLayoutEffect(() => {
     const saved = anchor.current
@@ -23,15 +23,17 @@ export function useInspectorAnchor(open: boolean | undefined) {
     adjust()
     const observer = new ResizeObserver(adjust)
     observer.observe(bubble)
+    scroll.addEventListener('pointerdown', stop, { passive: true })
     scroll.addEventListener('wheel', stop, { passive: true })
     scroll.addEventListener('touchstart', stop, { passive: true })
     scroll.addEventListener('keydown', stop)
     return () => {
       observer.disconnect()
+      scroll.removeEventListener('pointerdown', stop)
       scroll.removeEventListener('wheel', stop)
       scroll.removeEventListener('touchstart', stop)
       scroll.removeEventListener('keydown', stop)
     }
-  }, [open])
+  }, [state])
   return (button: HTMLElement) => { anchor.current = { button, top: button.getBoundingClientRect().top } }
 }

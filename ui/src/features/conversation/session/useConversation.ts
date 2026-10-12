@@ -24,8 +24,8 @@ export function useConversation({ settings, setHistoryOpen, resetView }: Options
   const [openingFailed, setOpeningFailed] = useState(false)
   const observation = useConversationSnapshot(currentChatId)
   const { snapshot } = observation
-  const turns = useMemo(() => snapshot ? conversationTurns(snapshot).map(t => ({ ...t, pendingText: '' })) : [], [snapshot])
-  useEffect(() => { if (snapshot) useSkillEvidenceStore.getState().reload() }, [snapshot?.revision, currentChatId])
+  const turns = useMemo(() => snapshot ? conversationTurns(snapshot).map(t => ({ ...t, pendingText: '' })) : [], [snapshot?.messages, snapshot?.turns, snapshot?.connection])
+  useEffect(() => { if (snapshot) useSkillEvidenceStore.getState().reload() }, [snapshot?.contentRevision, currentChatId])
   const turnsRef = useRef<Turn[]>([])
   turnsRef.current = turns
   const chatIdRef = useRef<{ target: string; native: string; id: string } | null>(null)

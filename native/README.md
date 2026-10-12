@@ -47,6 +47,51 @@ acceptance remain on the
 
 ## Source folder map
 
+`application/conversation_reads/` owns the ordinary conversation display response
+and its workspace-lifetime memory cache. A cold read uses the existing validated
+projection; unchanged reads reuse its encoded JSON without SQL, graph inspection
+or repeated encoding. The cache is bounded to 32 MiB and keyed by conversation,
+page, session and the owning SQLite connection's in-memory change counter. Local
+writes invalidate it conservatively, including rolled-back writes. Navigation-only
+`OpenConversation` commands preserve current content and advance its observation
+revision under the same store guard as commit. If that command gains a new
+display-affecting side effect, remove or revise this optimization and its parity
+test. Other commands must not promote cached content.
+
+Conversation responses also carry an ephemeral decimal `contentRevision`, taken
+from that connection's mutation counter. Within a session, conversation and page,
+retaining this token means retaining the same display fields even when navigation
+advances the observation revision. The UI keeps message/history object identities
+and skips learner refreshes in that case. Different tokens trigger normal refresh;
+numeric token ordering breaks ties between same-revision history/live responses.
+Cold reads may assign a newer token conservatively. This is not a persisted
+version, execution identity or cross-session comparison key.
+
+Rendering outside the store lock may finish after another write; such a response
+is never installed as the current cache entry. The ordinary watcher observes the
+new revision on its next read. Reset clears retained responses; fatal workspace
+state prevents cache access. This relies on exclusive workspace ownership and
+does not detect unsupported writes from another connection or offline corruption
+on every warm display hit. Protected storage/execution reads, startup validation
+and persisted history are unchanged. This cache is a derived display projection,
+never authority for commands, graph execution or result adoption.
+
+`application/learning_reads.rs` applies the same workspace version and exact
+navigation exception to skill evidence, language totals and scoped effort
+progress. Its 16 MiB encoded-value cache shares the bounded cache implementation
+in `application/response_cache.rs` with graph inspection. Encoding and warm
+decoding happen outside the store guard. Credit publication, award claims and
+time-dependent reports remain uncached; their writes invalidate display entries.
+
+The scheduler retains its 100 ms wake interval, but an unchanged idle workspace
+requires no SQL or graph inspection. `application/scheduler.rs` remembers a scan
+only when it returned no claim and made no writes. Each tick still checks actual
+provider capacity; any capacity, session or database change requires a new scan.
+Navigation can preserve an exact idle observation because it changes no scheduling
+input. A scan that advances/adopts/cancels without launching work is not idle and
+must remain eligible for another scan. This is a memoized scheduler observation,
+not another readiness model or permission to bypass dispatch/adoption validation.
+
 | Folder | Responsibility |
 | --- | --- |
 | [src/application/](src/application/) | Startup, runtime state, native command registration and background scheduling |

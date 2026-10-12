@@ -214,18 +214,15 @@ pub(crate) async fn get_skill_evidence(
     target: String,
 ) -> Result<Value> {
     let state = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let store = state.lock()?;
-        snapshot(&store, &target)
-    })
-    .await
-    .map_err(|cause| {
-        crate::diagnostics::failures::join(
-            &cause,
-            "skill_evidence_read",
-            AppError::new(ErrorCode::Internal, "Could not read skill evidence."),
-        )
-    })?
+    tauri::async_runtime::spawn_blocking(move || state.read_skill_evidence(&target))
+        .await
+        .map_err(|cause| {
+            crate::diagnostics::failures::join(
+                &cause,
+                "skill_evidence_read",
+                AppError::new(ErrorCode::Internal, "Could not read skill evidence."),
+            )
+        })?
 }
 /// One row per catalog language: its XP, saved conversations and lifetime effort
 /// units, for comparing languages without loading every evidence snapshot.
@@ -249,20 +246,17 @@ pub(crate) async fn get_language_totals(
     state: tauri::State<'_, Arc<crate::application::Application>>,
 ) -> Result<Vec<LanguageTotals>> {
     let state = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let store = state.lock()?;
-        language_totals(&store)
-    })
-    .await
-    .map_err(|cause| {
-        crate::diagnostics::failures::join(
-            &cause,
-            "language_totals_read",
-            AppError::new(ErrorCode::Internal, "Could not read language totals."),
-        )
-    })?
+    tauri::async_runtime::spawn_blocking(move || state.read_language_totals())
+        .await
+        .map_err(|cause| {
+            crate::diagnostics::failures::join(
+                &cause,
+                "language_totals_read",
+                AppError::new(ErrorCode::Internal, "Could not read language totals."),
+            )
+        })?
 }
-fn language_totals(store: &Store) -> Result<Vec<LanguageTotals>> {
+pub(crate) fn language_totals(store: &Store) -> Result<Vec<LanguageTotals>> {
     super::language_totals::read(store)
 }
 #[tauri::command]

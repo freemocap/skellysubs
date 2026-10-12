@@ -180,7 +180,12 @@ export type ContentPayload = { record: ContentRecord, text: string | null, base6
 export type NativeRunEntry = { engine: string, run: string, artifact: string, kind: string, };
 export type NativeRunPage = { runs: Array<NativeRunEntry>, before: string | null, };
 export type AiWindowState = { supported: boolean, open: boolean, };
-export type ConversationSnapshot = { phraseSeed?: string, topicChoices: Array<TopicCard>,
+export type ConversationSnapshot = {
+/**
+ * Ephemeral display identity, scoped by session, conversation and page.
+ * Navigation may advance revision while retaining identical display fields.
+ */
+contentRevision: string, phraseSeed?: string, topicChoices: Array<TopicCard>,
 /**
  * The greeting the start surface offers as a first thing to say, resolved
  * for this conversation's target language and variety.

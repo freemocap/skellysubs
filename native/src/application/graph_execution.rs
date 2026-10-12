@@ -145,6 +145,15 @@ fn schedule_one(state: &Arc<Application>, client: &reqwest::Client) -> Result<bo
     let (claim, session) = {
         let mut guard = state.lock()?;
         let store: &mut Store = &mut guard;
+        let before = super::workspace_version::Version::of(store);
+        if state
+            .scheduler_idle
+            .lock()
+            .map_err(|_| internal())?
+            .matches(&before, permit.is_some())
+        {
+            return Ok(false);
+        }
         super::graph_speech::bind(state, store, client);
         let text_state = Arc::downgrade(state);
         let evidence_state = Arc::downgrade(state);
@@ -197,6 +206,16 @@ fn schedule_one(state: &Arc<Application>, client: &reqwest::Client) -> Result<bo
             &store.config,
             &store.session_id,
         )?;
+        state
+            .scheduler_idle
+            .lock()
+            .map_err(|_| internal())?
+            .observe(
+                before,
+                super::workspace_version::Version::of(store),
+                permit.is_some(),
+                claim.is_some(),
+            );
         (claim, store.session_id.clone())
     };
     let Some(claim) = claim else {

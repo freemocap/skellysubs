@@ -1122,6 +1122,9 @@ pub struct TurnHistoryPage {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ConversationSnapshot {
+    /// Ephemeral display identity, scoped by session, conversation and page.
+    /// Navigation may advance revision while retaining identical display fields.
+    pub content_revision: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[ts(optional)]
     pub phrase_seed: Option<String>,

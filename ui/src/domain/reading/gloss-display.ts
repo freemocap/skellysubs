@@ -8,6 +8,7 @@ import { requiresWholeWordShaping } from '../language/script-text'
  * annotations can never interrupt shaping inside a word with joining or combining characters.
  */
 export function glossDisplayGroups(text: string, segments: GlossSegment[]) {
+  if (!segments.length) return []
   const words = [...text.matchAll(/[\p{L}\p{M}\p{N}\u200c\u200d]+/gu)]
     .filter(match => requiresWholeWordShaping(match[0]))
     .map(match => ({ start: match.index, end: match.index + match[0].length }))

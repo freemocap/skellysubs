@@ -1,7 +1,10 @@
 use super::*;
 
 pub(crate) struct Application {
-    inspection_cache: Mutex<crate::ai::inspection::cache::Cache>,
+    pub(super) scheduler_idle: Mutex<super::scheduler::Idle>,
+    pub(super) conversation_reads: Mutex<super::conversation_reads::Cache>,
+    inspection_cache: Mutex<super::response_cache::Cache>,
+    pub(super) learning_reads: Mutex<super::learning_reads::Cache>,
     #[cfg(feature = "workflow-capture")]
     pub(super) local_timings: super::local_timing::Measurements,
     pub(super) scheduler_wake: tokio::sync::Notify,
@@ -98,6 +101,18 @@ impl Application {
     }
     pub(crate) fn clear_graph_reports(&self) {
         *self
+            .learning_reads
+            .lock()
+            .unwrap_or_else(|p| p.into_inner()) = Default::default();
+        *self
+            .scheduler_idle
+            .lock()
+            .unwrap_or_else(|p| p.into_inner()) = Default::default();
+        *self
+            .conversation_reads
+            .lock()
+            .unwrap_or_else(|p| p.into_inner()) = Default::default();
+        *self
             .inspection_cache
             .lock()
             .unwrap_or_else(|p| p.into_inner()) = Default::default();
@@ -121,7 +136,10 @@ impl Application {
             Err(error) => (None, Some(error)),
         };
         Arc::new(Self {
+            scheduler_idle: Default::default(),
+            conversation_reads: Default::default(),
             inspection_cache: Default::default(),
+            learning_reads: Default::default(),
             #[cfg(feature = "workflow-capture")]
             local_timings: Default::default(),
             scheduler_wake: Default::default(),

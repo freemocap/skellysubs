@@ -10,8 +10,8 @@
 }
 /* The pad at the inline start: the same grid, mirrored. */
 .voice-panel[data-pad='start'] .voice-grid { grid-template-columns: 7.5rem minmax(0, 1fr); grid-template-areas: "pad face" "modes controls"; }
-/* A draft gets room for a few lines; longer text scrolls inside the face. */
-.voice-panel:has(.voice-draft) .voice-grid { grid-template-rows: 7.5rem auto; }
+/* Idle, recording and typing share the same face height. Long drafts scroll
+   inside it; entering a draft must not resize the microphone or conversation. */
 
 .voice-face {
   grid-area: face; position: relative; display: grid; height: 100%; min-width: 0; overflow: hidden;
@@ -45,7 +45,7 @@
 .voice-panel[data-pad-side='left'] .voice-prompt svg { right: auto; left: var(--space-6); transform: translateY(-50%) rotate(90deg); }
 
 /* Chat's draft: the transcript as editable text, with its own Discard and Send. */
-.voice-draft { display: grid; grid-template-columns: minmax(0, 1fr) auto; min-height: 0; height: 100%; }
+.voice-draft { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr); min-height: 0; height: 100%; }
 .voice-draft .field.voice-text {
   height: 100%; min-height: 0; resize: none; border: 0; border-radius: 0; box-shadow: none; outline: none; background: transparent;
   line-height: var(--leading-normal); word-spacing: var(--word-spacing);

@@ -8,6 +8,7 @@ import { replyState } from './reply-state'
 export function conversationTurns(snapshot: ConversationSnapshot): StoredTurn[] {
   const turns: StoredTurn[] = []
   const byIdentity = new Map<string, StoredTurn>()
+  const executions = new Map(snapshot.turns.map(turn => [turn.id, turn]))
   for (const message of snapshot.messages) {
     if (!message.turnId) throw new Error('Conversation message is missing its durable turn identity.')
     if (message.wordGloss && message.wordGloss.sourceMessageId !== message.id) {
@@ -15,8 +16,8 @@ export function conversationTurns(snapshot: ConversationSnapshot): StoredTurn[] 
     }
     let turn = byIdentity.get(message.turnId)
     if (!turn) {
-      const execution = snapshot.turns.find(item => item.id === message.turnId)
-      turn = { replyState: replyState(execution, snapshot), execution, id: message.sequence, turnId: message.turnId, replacesTurnId: message.replacesTurnId, replacedBy: message.replacedBy, fixes: fixCount(message.turnId, snapshot.turns), user: null, assistant: null, analysisState: null }
+      const execution = executions.get(message.turnId)
+      turn = { replyState: replyState(execution, snapshot), execution, id: message.sequence, turnId: message.turnId, replacesTurnId: message.replacesTurnId, replacedBy: message.replacedBy, fixes: fixCount(message.turnId, executions), user: null, assistant: null, analysisState: null }
       byIdentity.set(message.turnId, turn)
       turns.push(turn)
     }

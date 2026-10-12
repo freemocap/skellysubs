@@ -13,10 +13,80 @@ function messages(first: number, last: number): ChatMessage[] {
   })
 }
 function page(first: number, last: number, revision = 1, chatId = 'chat'): ConversationSnapshot {
-  return { sessionId: 'session', conversationId: chatId, revision, messages: messages(first, last), turns: [], revisionSuffixCounts: [], hasOlder: first > 1 } as unknown as ConversationSnapshot
+  return { sessionId: 'session', conversationId: chatId, revision, contentRevision: String(revision), messages: messages(first, last), turns: [], revisionSuffixCounts: [], hasOlder: first > 1 } as unknown as ConversationSnapshot
 }
 function deferred<T>() { let resolve!: (value: T) => void; let reject!: (reason: unknown) => void; const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no }); return { promise, resolve, reject } }
 beforeEach(() => { vi.resetAllMocks(); watch.mockImplementation(() => new Promise(() => {})) })
+it.each([undefined, null, '', 'invalid', 1])('rejects an incompatible native content revision %s before showing a false empty conversation', async contentRevision => {
+  const initial = { ...page(1, 0), contentRevision } as unknown as ConversationSnapshot
+  watch.mockResolvedValueOnce(initial)
+  const hook = renderHook(() => useConversationSnapshot('chat'))
+  await waitFor(() => expect(hook.result.current.readError).toContain('native app and interface are incompatible'))
+  expect(hook.result.current.snapshot).toBeNull()
+  expect(watch).toHaveBeenCalledTimes(1)
+})
+
+it('stops observation when a later response loses its content revision instead of silently retaining stale content', async () => {
+  const update = deferred<ConversationSnapshot>()
+  watch.mockResolvedValueOnce(page(1, 0)).mockImplementationOnce(() => update.promise)
+  const hook = renderHook(() => useConversationSnapshot('chat'))
+  await waitFor(() => expect(watch).toHaveBeenCalledTimes(2))
+  const changed = { ...page(1, 1, 2), contentRevision: undefined } as unknown as ConversationSnapshot
+  await act(async () => { update.resolve(changed) })
+  await waitFor(() => expect(hook.result.current.readError).toContain('native app and interface are incompatible'))
+  expect(hook.result.current.snapshot?.revision).toBe(1)
+  expect(watch).toHaveBeenCalledTimes(2)
+})
+
+it('preserves loaded history and object identities through navigation, but publishes same-revision content changes', async () => {
+  const navigation = deferred<ConversationSnapshot>(), update = deferred<ConversationSnapshot>()
+  watch.mockResolvedValueOnce(page(3, 4)).mockImplementationOnce(() => navigation.promise)
+  const hook = renderHook(() => useConversationSnapshot('chat'))
+  await waitFor(() => expect(watch).toHaveBeenCalledTimes(2))
+  watch.mockResolvedValueOnce(page(1, 2))
+  await act(async () => { await hook.result.current.loadOlder() })
+  const previous = hook.result.current.snapshot!
+  watch.mockImplementationOnce(() => update.promise)
+  await act(async () => { navigation.resolve({ ...page(3, 4, 2), contentRevision: '1' }) })
+  expect(hook.result.current.snapshot?.revision).toBe(2)
+  expect(hook.result.current.snapshot?.messages).toBe(previous.messages)
+  expect(hook.result.current.snapshot?.turns).toBe(previous.turns)
+  expect(watch).toHaveBeenCalledTimes(4)
+  watch.mockImplementation((_id, _revision, before) => before === 3 ? Promise.resolve(page(1, 2, 2)) : new Promise(() => {}))
+  const changed = page(3, 4, 2)
+  changed.messages[0].text = 'Updated without metadata revision'
+  await act(async () => { update.resolve(changed) })
+  await waitFor(() => expect(hook.result.current.snapshot?.messages[2].text).toBe('Updated without metadata revision'))
+  expect(hook.result.current.snapshot?.messages).toHaveLength(4)
+})
+
+it('rejects a different session even when content and observation revisions match', async () => {
+  const update = deferred<ConversationSnapshot>()
+  watch.mockResolvedValueOnce(page(1, 2)).mockImplementationOnce(() => update.promise)
+  const hook = renderHook(() => useConversationSnapshot('chat'))
+  await waitFor(() => expect(watch).toHaveBeenCalledTimes(2))
+  await act(async () => { update.resolve({ ...page(1, 2), sessionId: 'replacement' }) })
+  await waitFor(() => expect(hook.result.current.readError).toContain('scope mismatch'))
+})
+
+it('does not let delayed same-revision history overwrite newer content', async () => {
+  const update = deferred<ConversationSnapshot>(), old = deferred<ConversationSnapshot>()
+  watch.mockResolvedValueOnce(page(3, 4)).mockImplementationOnce(() => update.promise)
+  const hook = renderHook(() => useConversationSnapshot('chat'))
+  await waitFor(() => expect(watch).toHaveBeenCalledTimes(2))
+  watch.mockImplementationOnce(() => old.promise)
+  let loading!: Promise<void>
+  act(() => { loading = hook.result.current.loadOlder() })
+  const newer = { ...page(3, 4), contentRevision: '10' }
+  newer.messages[0].text = 'Newest content'
+  watch.mockImplementation((_id, _revision, before) => before === 3 ? Promise.resolve({ ...page(1, 2), contentRevision: '10' }) : new Promise(() => {}))
+  await act(async () => { update.resolve(newer) })
+  await waitFor(() => expect(hook.result.current.snapshot?.contentRevision).toBe('10'))
+  await act(async () => { old.resolve({ ...page(1, 3), contentRevision: '9' }); await loading })
+  expect(hook.result.current.snapshot?.messages).toHaveLength(4)
+  expect(hook.result.current.snapshot?.messages[2].text).toBe('Newest content')
+  expect(hook.result.current.snapshot?.contentRevision).toBe('10')
+})
 it.each([true, false])('recovers an %s initial/read failure only after explicit read retry', async initial => {
   if (!initial) watch.mockResolvedValueOnce(page(1, 2))
   watch.mockRejectedValueOnce(new Error('Read failed'))

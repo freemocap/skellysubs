@@ -1160,3 +1160,335 @@ Final-state verification:
 
 The prepared local workflow executable is the final optimized candidate. The
 normal running application remains untouched. Changes remain uncommitted.
+
+## Validated conversation display reuse (2026-10-11)
+
+Status: implemented and verified after the user committed the preceding work as
+`c9f867f3`. This batch remains uncommitted. The accepted direction
+is to retain validated display state in memory and tolerate ordinary observation
+lag, without weakening command durability or deleting diagnostic history.
+
+The application now retains the complete encoded conversation response, bounded
+to 32 MiB with least-recently-used eviction. Warm reads check the store lifetime
+and SQLite's in-memory local change counter; they perform no SQL, protected record
+reads, graph reconstruction or full JSON encoding. The revision header is separate
+from the immutable encoded content. The UI receives the same JSON object contract.
+
+Any local write conservatively invalidates all conversation pages, even if it
+does not increment metadata revision or is rolled back. A cache miss uses the
+existing validated projection. The application checks the captured version again
+before retaining a response assembled outside the store lock; a racing write
+cannot install an older response as current. First hydration and hydration after
+content changes still have their previous reconstruction costs; this change does
+not claim incremental per-message projection during active streaming.
+
+Actual chat navigation required an explicit exception: `OpenConversation` writes
+recency, metadata revision and a receipt, none of which changes conversation
+display fields other than its observation revision. The application command
+coordinator preserves cache entries only when they matched the exact pre-command
+version and that navigation command successfully committed. Their content stays
+shared; only the revision advances. Replayed old receipts and failed commands do
+not promote entries. This is an application projection policy, not a graph
+ontology or execution-semantics exception.
+
+The retained data belongs to the exclusively owned workspace session. Reset clears
+it, restart begins cold and fatal state rejects even warm reads. Unsupported
+external database writers, schema-only edits and offline corruption are not
+revalidated on every display hit. Independent protected reads retain their
+integrity guarantees. No migration, released storage contract, content retention
+or provider behavior changes.
+
+Specification and standards reviews found no actionable issue, including the
+navigation exception. Tests cover exact warm reuse, SQL-denied warm access,
+same-revision writes, rollback, deletion, stale hydration, fatal state, explicit
+clearing, session/page isolation, byte eviction, raw JSON transport and navigation
+parity/idempotency.
+
+### Verification and matched optimized measurements
+
+Final source checks passed: fast gate; Clippy with `workflow-capture`, library and
+tests, warnings denied; native binary checks; generated contracts; documentation
+links and diff whitespace checks. Full native feature suite: 1,006 passed, zero
+failed, five intentionally ignored (1,011 total), 392.67 seconds. The warm-read
+test installs a SQLite authorizer denying every SQL operation and still obtains
+the same retained response. The remaining nine focused tests passed as well.
+
+The four affected UI suites passed all 65 tests: IPC workspace, native command
+registration, conversation snapshot observation and conversation-page behavior.
+The initial sandbox run failed before tests because esbuild could not read the
+Vite configuration; the same suites passed with filesystem access. No UI source
+or generated contract changed. The final debug candidate passed the recorded
+seven-action workflow, rendered state and playback checks:
+`.local/workflow/7659efdf-e55f-4325-a772-e5ebc2c10134`.
+
+The optimized baseline is `c9f867f3` source (saved executable hash
+`caed07a58756362b3b0c78e585f419bb7fe0467c5e5f63a134b31c19f14aa098`);
+candidate hash `8cad193e7386f240984441def534fe74a9766bdb018e287604847a8ed6b0a804`.
+All compiler and test processes finished before measurement. Two alternating
+runs per version and scenario supplied 20 samples each on isolated copies of the
+same recorded 19-message, 10-turn workspace. The desktop UI and its watchers were
+active. The reopen scenario executes the real `OpenConversation` command before
+each forced read; it therefore includes concurrent revision-triggered UI work.
+
+| Optimized measurement | Baseline | Memory reuse |
+| --- | ---: | ---: |
+| Unchanged read median | 82.40 ms | 8.85 ms |
+| Unchanged read p95 | 126.30 ms | 20.90 ms |
+| Conversation lock held median, unchanged reads | 76.375 ms | 0.004 ms |
+| Workspace read queued during conversation read, median | 71.60 ms | 5.60 ms |
+| Reopen command plus read, median | 239.00 ms | 82.85 ms |
+| Reopen command plus read, p95 | 294.40 ms | 142.30 ms |
+| Conversation lock held median, reopen scenario | 91.177 ms | 0.004 ms |
+
+Unchanged baseline run medians varied from 54.50 to 121.95 ms; candidate run
+medians were 9.20 and 8.85 ms. Reopen timing varied too. These are local samples,
+not a hardware-independent latency guarantee. They measure IPC/command response,
+not click-to-paint. All eight receipts have identical canonical content digests
+for messages, turns and recording diagnostics. Canonicalization sorts object
+keys outside the measured interval because the new response encoding changes
+key order without changing JSON values. Root revision is intentionally excluded
+from that cross-navigation comparison; native tests separately verify its value.
+
+Aggregate timings, build hashes and receipt paths:
+`.local/review-memory-comparison.json`. Local harnesses:
+`.local/review-conversation-profile.ts` and
+`.local/review-conversation-navigation.ts`. The prepared workflow executable is
+the final optimized candidate. The normal running application was not replaced.
+The previously documented optimized exact-screen updater-banner limitation is
+unchanged; the passing end-to-end recording above used the debug candidate.
+
+### Remaining work, not claimed solved
+
+The conversation cache lookup now takes microseconds under the store lock, but
+reopening still triggers other work. Candidate traces include scheduler scans
+(`application/graph_execution.rs:146`), learner-progress reads
+(`learning/learner/progression.rs:218,253`) and workspace refreshes. In the first
+reopen run those lock-hold medians were approximately 16.6 ms for the scheduler,
+11.3/5.0 ms for progression and 2.9 ms for workspace reads. The conversation-cache
+lock wait p95 across reopen runs was 19.28 ms. These are separate measured costs;
+time outside the lock has not yet been attributed fully to UI rendering, IPC or
+scheduling. Inspect why navigation wakes these consumers before adding more
+cache layers. Initial hydration, broad invalidation after content writes and
+active-stream refreshes remain candidates for a later incremental projection pass.
+No claim is made that all local interactions are now instantaneous.
+
+## Idle scheduling and learner display reuse — 2026-10-11
+
+### Implemented behavior
+
+This follow-up addresses two remaining sources identified above. The scheduler
+previously scanned durable graph state every 100 ms and after every navigation
+command, even when the workspace had no eligible work. Conversation observation
+also reloads learner evidence on each global revision; new evidence objects
+trigger effort and language-total refreshes even when navigation changed only
+recency. The refresh signals are conservative; rebuilding their projections was
+unnecessary.
+
+The application now remembers the scheduler's last unchanged, claim-free scan,
+keyed by workspace session, the SQLite connection's local change counter and
+actual provider permit availability. The timer and notifications remain. A tick
+with identical inputs takes the store guard briefly but performs no SQL, graph
+inspection or host rebinding. Any write (including rollback), new session or
+capacity change requires the authoritative scheduler to run again. Critically,
+a scan that writes but returns no claim is not considered idle: advancing can
+discover a retained result that needs a subsequent adoption pass. No independent
+ready queue or graph semantics were introduced.
+
+Skill evidence, language totals and scoped effort progress reuse validated
+projections with the same workspace version. Their encoded values share a 16 MiB
+bounded LRU; cold encoding and warm decoding occur outside the store guard.
+Insertion rechecks the version. The previously inspection-owned byte cache now
+lives with its application consumers in `application/response_cache.rs`, with no
+compatibility alias or second implementation. Projection and validation rules
+remain with learning; publication and presentation claims still write normally.
+Time-dependent reports, including the seven-day effort report, are not cached.
+
+Successful `OpenConversation` commits promote these observations only if they
+match the exact pre-command version. A preceding write cannot be hidden by
+navigation. Command receipt, history, execution authority, credit policy,
+persistence format and command contracts are unchanged. The conversation display
+response gains the ephemeral identity described below. The exclusive
+workspace ownership limitation described above applies to these caches too.
+
+### Review and verification
+
+The independent Spec review identified the changed-but-claim-free scheduler case
+before implementation. The final implementation includes its guard. Both Spec
+and Standards reviews subsequently reported no actionable findings. New native
+tests deny every SQL operation during warm navigation reads, exercise permit
+exhaustion/release, same-revision writes, award claims, rollback, scope isolation,
+fresh-projection parity and validation failures.
+
+### Separating content changes from navigation
+
+The first matched optimized runs proved native savings but did **not** prove an
+end-to-end latency improvement. Twenty samples per version (two runs each) gave
+57.75 ms baseline versus 70.50 ms candidate median for the reopen command plus
+forced conversation read; p95 was 76.00 versus 110.30 ms. Scheduler lock median
+fell from 8.484 to 0.002 ms, and warm learner reads from 0.50–6.08 ms to 0.002 ms.
+Conversation lock-wait p95 fell from 10.343 ms to zero. These results are retained
+in `.local/review-idle-learning-comparison.json`; eliminating SQL did not remove
+the concurrent UI work.
+
+A browser CPU profile and IPC trace found repeated segmentation and a refresh
+cascade: ten navigation commands caused ten evidence reads, twenty totals reads
+and ten workspace reads. The UI treated the global observation revision as a
+conversation-content revision. Every navigation therefore rebuilt message and
+reading views and reloaded learner state despite unchanged content.
+
+Implemented corrections:
+
+- Native conversation snapshots carry `contentRevision`, a decimal string from
+  the connection's in-memory mutation counter. Exact navigation promotion retains
+  it with the encoded body. Ordinary writes invalidate it even when the global
+  revision is unchanged; rolled-back writes invalidate conservatively too.
+- The UI tracks live-page content identity separately from merged history.
+  Navigation updates the observation revision while preserving message, turn and
+  reading-source identities. Learner reloads depend on content identity. Workspace
+  directory refreshes still observe navigation so recency remains correct.
+- Same-root-revision responses are ordered by the numeric mutation token. A late
+  history response can add unseen rows without overwriting newer overlapping
+  records or metadata. Scope validation precedes equality suppression.
+- Word segmentation reuses at most 32 `Intl.Segmenter` instances, without caching
+  text. Empty gloss displays and scopes without saved gloss groups skip unnecessary
+  segmentation. Reading context memoization uses the actual scope primitives.
+  Unicode/language behavior is unchanged.
+
+The token is ephemeral and session/conversation/page scoped. It is neither a
+persisted schema version nor execution authority. A cold read can receive a
+newer token despite identical content. Existing long-poll wake-up behavior remains:
+a write without a root-revision bump can still wait for the forced timeout read;
+this change ensures that its content is then published instead of ignored.
+
+The Spec review caught the delayed same-revision history race; the implementation
+and regression cover it. Final Spec and Standards reviews reported no actionable
+findings. This does not constitute a whole-branch merge approval.
+
+
+### Final matched measurements
+
+Two alternating runs per version, ten samples each, used the same restored
+19-message/10-turn recorded workspace with no compiler or test process running.
+The baseline is this turn's starting memory-response-cache build; the candidate
+includes scheduler/learner reuse and the UI content-identity changes together.
+The normal desktop application was not replaced. These are command/IPC timings,
+not click-to-paint measurements, and the baseline is rerun rather than compared
+only with the earlier 82.85 ms figure from a different measurement period.
+
+| Optimized reopen workload | Matched baseline | Final candidate |
+| --- | ---: | ---: |
+| Open command plus forced conversation read, median | 61.30 ms | 26.15 ms |
+| Open command plus forced conversation read, p95 | 77.80 ms | 31.70 ms |
+| Open command, median | 34.60 ms | 9.65 ms |
+| Forced conversation read, median | 32.95 ms | 15.50 ms |
+| Scheduler store-lock hold, median | 8.213 ms | 0.002 ms |
+| Conversation store-lock wait, p95 | 9.378 ms | 0.000 ms |
+| Conversation store-lock hold, median | 0.003 ms | 0.003 ms |
+| Queued workspace read, p95 | 22.60 ms | 7.40 ms |
+
+Combined median improved 57.3%; p95 improved 59.3%. Candidate run medians were
+22.05 and 28.85 ms, so normal process variability remains visible. All four
+receipts have the same canonical messages/turns/recording diagnostic digest:
+`a41bc793a2b5d71aa926f7b42822be9ff1508b039b0246d313ee82ce16173afe`.
+A separate profiled candidate run observed nine completed long-poll reads and ten
+workspace refreshes, with **zero** learner evidence, effort or language-total
+reloads during ten navigations. The prior profile saw ten evidence and twenty
+totals reloads. Profiler timings are excluded from the paired latency aggregate.
+
+Aggregate, build hashes, individual samples and lock sites:
+`.local/review-content-comparison.json`. Baseline build:
+`8cad193e7386f240984441def534fe74a9766bdb018e287604847a8ed6b0a804`;
+final candidate build:
+`3654cb4dd7c4781b8b9d494642915bc0c3e182848f515596055ba558ae88c8f3`.
+Receipts under `.local/workflow/`:
+
+- Baseline: `3979da57-1249-423f-a954-2cc3bfa1e589`,
+  `427a57cd-4396-48b5-b61f-43111078172a`.
+- Candidate: `6bbeecfe-6ccc-480f-99d2-52e3e9039159`,
+  `6ab666ba-58e2-4a98-9fc2-082a54f83c8d`.
+- Separate CPU/IPC profile: `4ddbddfe-2249-403e-9232-0dbed4127bcc`.
+
+The prepared workflow executable and served assets are the final optimized
+candidate. The remaining forced response still transfers about 462 kB; the open
+command's actual transaction holds the store about 5.37 ms, and directory reads
+about 1.81 ms. This pass does not attribute every remaining millisecond or claim
+that every application interaction is optimized. Cold hydration, invalidation
+after content writes, active-stream projection work and narrower IPC payloads
+remain separate candidates. Durable command receipts and history are preserved.
+
+### Final verification
+
+- Native library with workflow capture: **1,010 passed, 5 ignored**, 482.09 s.
+- Clippy library/tests with workflow capture and warnings denied: passed.
+- Native binary checks and generated-contract check: passed.
+- Conversation/reading regression selection: **151 passed**.
+- Final production UI build and fast validation: passed.
+- Documentation links and diff whitespace: passed.
+- Final debug seven-action replay: passed all rendered, playback and provider-tape
+  checkpoints at `.local/workflow/4d40ec1f-d809-4b1a-be30-76169ff29058`.
+  Recording source is `.local/workflow/38c1ef9b-5f48-41e0-bd24-2e135d15f87d/recording`.
+  The historical recovered long recording was also attempted and failed its
+  saved-state checkpoint; it is not used as passing evidence. The previously
+  documented optimized updater-banner exact-screen limitation remains.
+
+The first broad UI run exposed a coaching fixture lacking the new identity; it
+was corrected. A subsequent full run passed 2,067 tests and had one onboarding
+microphone timing failure while native tests were running. That test, coaching
+and the earlier timing-sensitive architecture test passed together in isolation
+(22 tests). The final full suite, run without compiler/native-test contention and with four
+workers, passed **all 301 suites and 2,068 tests** in 111.63 s. No test timeout
+limits or assertions were relaxed.
+
+
+## Bounded final easy-win pass — 2026-10-11
+
+**Implemented and verified; this performance cleanup pass is complete.** The
+user requested one final search for inexpensive improvements, then closure.
+Review covered conversation projection, reading lookup, navigation/detail reads,
+and evidence/effort/totals refresh consumers. Further changes to command reads,
+notification protocols or response shapes were left out of this bounded pass.
+
+Two small source changes were justified:
+
+1. `conversationTurns` now builds one execution lookup per projection and shares
+   it with replacement-history counting. Previously every visible turn scanned
+   the execution array and rebuilt the entire replacement map. History traversal
+   still counts an unloaded predecessor and terminates on malformed cycles.
+   No cross-snapshot cache or new invalidation mechanism was added.
+2. `readingPassage` stops sentence iteration once the containing sentence is
+   found. It no longer materializes all sentences in a long report to select one.
+   Source offsets, repeated occurrences, oversized-sentence fallback and selections
+   spanning sentences retain the same behavior.
+
+Local Node/ICU microbenchmarks used the same bundled functions before and after,
+with warm-up and 40 projection / 30 passage samples. These are synthetic function
+measurements, not new claims about desktop reopen latency:
+
+| Function workload | Before median | After median |
+| --- | ---: | ---: |
+| Project 50 turns | 0.113 ms | 0.030 ms |
+| Project 500 turns | 8.585 ms | 0.254 ms |
+| Project 2,000 turns (stress case) | 169.407 ms | 0.896 ms |
+| Select early sentence in 105,000 characters | 0.755 ms | 0.133 ms |
+| Select final sentence in the same text | 0.723 ms | 0.721 ms |
+
+Projection output digests matched for all sizes; passage results matched exactly.
+The fixture uses short replacement chains: this does not claim constant-time
+traversal of arbitrarily long edit chains. Ordinary short-chat savings are small;
+the main benefit is removing avoidable growth when more history is loaded.
+Harness and receipts: `.local/review-easy-wins.ts`,
+`.local/review-easy-before.json`, `.local/review-easy-after.json`.
+
+Final-state checks: fast validation, UI production build, **183 tests across 17
+conversation/reading/UI suites**, documentation links and diff whitespace passed.
+The saved seven-action debug replay passed rendered, playback and provider-tape
+checks at `.local/workflow/08815852-e5f5-4c67-ab50-b1615ed861b6`.
+Native source is unchanged since the preceding full native/Clippy verification.
+The prepared release executable is retained with the newly built UI assets;
+the running normal application was untouched and no commit was created.
+
+The preceding 26.15 ms matched reopen result remains the last end-to-end command
+measurement; it is not relabeled as a measurement of these final two UI edits.
+Larger cold-load, streaming and payload changes are deferred until a concrete
+user-visible slowdown warrants a new investigation. Completion here refers to
+this performance cleanup, not a blanket whole-branch merge approval.

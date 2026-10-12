@@ -8,7 +8,6 @@ use crate::model::{AppError, ErrorCode, Result};
 use rusqlite::{Connection, OptionalExtension, params};
 use serde::Serialize;
 use ts_rs::TS;
-pub mod cache;
 mod content;
 
 #[derive(Serialize, serde::Deserialize, TS)]

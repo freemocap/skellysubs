@@ -1,5 +1,4 @@
-//! Private derived inspection responses. Exact committed stamp and selection are
-//! the key; callers must revalidate ownership before every lookup.
+//! Bounded encoded display values. Callers own selection and freshness checks.
 use std::{collections::VecDeque, sync::Arc};
 
 #[derive(Default)]

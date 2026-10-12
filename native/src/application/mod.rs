@@ -25,8 +25,8 @@ use crate::storage::store;
 use crate::updates as updater;
 
 use model::{
-    AppError, Command, ConnectionConfig, ConnectionRoute, ConversationSnapshot, ErrorCode,
-    HostedAccount, PersonaDetails, ProfileSnapshot, Receipt, Result, Snapshot, StartupState,
+    AppError, Command, ConnectionConfig, ConnectionRoute, ErrorCode, HostedAccount, PersonaDetails,
+    ProfileSnapshot, Receipt, Result, Snapshot, StartupState,
 };
 use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -40,14 +40,17 @@ use zeroize::Zeroizing;
 mod audio_analysis;
 mod commands;
 mod content;
+mod conversation_reads;
 mod graph_execution;
 mod graph_speech;
+mod learning_reads;
 #[cfg(feature = "workflow-capture")]
 mod local_timing;
 mod native_reading;
 mod native_speech;
 mod native_transcription;
 mod reading_results;
+mod response_cache;
 mod scheduler;
 mod speech_results;
 mod startup;
@@ -55,6 +58,7 @@ mod state;
 mod transcription_results;
 mod workflow;
 mod workspace_text;
+mod workspace_version;
 
 use scheduler::scheduler;
 pub use startup::run;

@@ -866,7 +866,7 @@ export default function ConversationPage({
                 {tr("Or set up AI access in another way")}
               </button>
             </div>
-          ) : turns.length === 0 && !error && !pendingMessage && (
+          ) : turns.length === 0 && !readError && !error && !pendingMessage && (
             snapshot && (snapshot.opening ? <OpeningStatus snapshot={snapshot} onActivity={() => useNavigationStore.getState().showOverlay('activity')} /> : startConfiguration && <ConversationStart conversationId={snapshot.conversationId} value={startConfiguration} onChange={value => setStartDraft({ id: snapshot.conversationId, value })} partnerSymbol={contactChoices.find(choice => choice.id === activeContactId)?.symbol} partnerName={details.persona ? personaName(details.persona.details) : undefined} key={snapshot.conversationId} topics={snapshot.topicChoices} busy={sending || pendingReply} onStart={startConversation} targetTag={targetLanguage?.languageTag ?? undefined} targetDir={rtl ? 'rtl' : 'ltr'} recording={mic.recording} transcribing={mic.transcribing} canPartnerStart={!input.trim() && !mic.recording && !mic.transcribing} onChangePartner={() => setPartnerMenuOpen(true)} onAboutPartner={details.persona ? () => setEditingPersonaId(details.persona!.id) : undefined} />)
           )}
           {snapshot?.phraseSeed && <details><summary>{tr('Starting phrase')}</summary><p dir="auto">{snapshot.phraseSeed}</p></details>}

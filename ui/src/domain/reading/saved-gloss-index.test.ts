@@ -1,6 +1,17 @@
-import { expect, it } from 'vitest'
+import { expect, it, vi } from 'vitest'
 import { savedGlossIndex } from './saved-gloss-index'
 const scope = {language:'spanish', variety:'spain', explanation:'english', explanationVariety:'us'}
+it('does no segmentation when the selected scope has no saved meanings', () => {
+  const empty = savedGlossIndex([{scope, text:'Unannotated source', segments:[]}])
+  const populated = savedGlossIndex([{scope,text:'banco',segments:[{start:0,end:5,kind:'gloss',gloss:'bank'}]}])
+  const segment = vi.spyOn(Intl.Segmenter.prototype, 'segment')
+  try {
+    expect(empty('Anything here.', scope)).toEqual([])
+    expect(populated('banco', {...scope, explanation:'french'})).toEqual([])
+    expect(segment).not.toHaveBeenCalled()
+    expect(populated('banco', scope)[0].gloss).toBe('bank')
+  } finally { segment.mockRestore() }
+})
 it('keeps dictionary senses together and lets contextual sources win in either order', () => {
   const dictionary = ['financial institution', 'bench'].map(gloss => ({scope, text:'banco', dictionary:true, segments:[{start:0,end:5,kind:'gloss' as const,gloss}]}))
   const contextual = {scope,text:'Un banco.',segments:[{start:3,end:8,kind:'gloss' as const,gloss:'bank'}]}

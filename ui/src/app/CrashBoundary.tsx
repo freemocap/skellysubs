@@ -16,7 +16,7 @@ export class CrashBoundary extends Component<{ children: ReactNode }, { details:
     if (!this.state.details) return this.props.children
     return <main className="not-tauri" role="alert">
       <p>{String(this.state.details.message)}</p>
-      <pre>{JSON.stringify(this.state.details, null, 2)}</pre>
+      <pre className="error-raw">{JSON.stringify(this.state.details, null, 2)}</pre>
       <button className="btn" onClick={() => window.location.reload()}>{t('english', 'Reload app')}</button>
     </main>
   }

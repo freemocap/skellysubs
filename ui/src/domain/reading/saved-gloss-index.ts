@@ -15,11 +15,13 @@ export const glossScopeKey = (scope: GlossScope) => JSON.stringify([scope.langua
 export function savedGlossIndex(sources: SavedGlossSource[]) {
   const passages = new Map<string, GlossSegment[]>()
   const words = new Map<string, SavedGlossSegment[][]>()
+  const scopesWithWords = new Set<string>()
   for (const source of sources) {
     const scope = glossScopeKey(source.scope)
     const valid = source.segments.filter(part => part.kind === 'gloss' && part.gloss && part.start >= 0 && part.end <= source.text.length && part.end > part.start)
     if (!source.dictionary) passages.set(JSON.stringify([scope, source.text]), valid)
     for (const group of glossDisplayGroups(source.text, valid)) {
+      scopesWithWords.add(scope)
       const key = JSON.stringify([scope, source.text.slice(group.start, group.end)])
       const parts = group.parts.map(part => ({ ...part, ...(source.dictionary ? { dictionary: true } : {}), start: part.start - group.start, end: part.end - group.start }))
       const existing = words.get(key) ?? []
@@ -29,6 +31,9 @@ export function savedGlossIndex(sources: SavedGlossSource[]) {
   }
   return (text: string, scope: GlossScope): SavedGlossSegment[] => {
     const key = glossScopeKey(scope)
+    // There can be no exact or reusable gloss in this scope. Avoid segmenting
+    // every displayed passage just to discover that there are no candidates.
+    if (!scopesWithWords.has(key)) return []
     const exact = passages.get(JSON.stringify([key, text]))
     const parts = readingWords(text).flatMap(word => {
       if (!word.word || exact?.some(part => part.start < word.end && part.end > word.start)) return []

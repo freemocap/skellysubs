@@ -9,7 +9,7 @@ vi.mock('../../../platform/ipc/tauri', () => ({ isTauri: true }))
 vi.mock('../../../platform/ipc/workspace', () => ({ readWorkspace: backend.read, executeAction: backend.execute, watchConversation: backend.watch, nativeError: (error: unknown) => String(error) }))
 vi.mock('../../../domain/input/back', () => ({ openOverlay: () => () => {} }))
 vi.mock('../progress/ConversationMap', () => ({ ConversationMap: () => null }))
-const snapshot = { conversationId: 'chat-1', sessionId: 'session', revision: 7, coachMessages: [], turns: [], messages: [], revisionSuffixCounts: [], hasOlder: false } as unknown as ConversationSnapshot
+const snapshot = { conversationId: 'chat-1', sessionId: 'session', revision: 7, contentRevision: '7', coachMessages: [], turns: [], messages: [], revisionSuffixCounts: [], hasOlder: false } as unknown as ConversationSnapshot
 function panel(chatId = 'chat-1', draftQuestion = '', autoSendDraft = false, conversationBusy = false, revealRequest = 0) {
   return <CoachAnalysisPanel targetLanguageName="Spanish" autoSendDraft={autoSendDraft} revealRequest={revealRequest} chatId={chatId} conversationBusy={conversationBusy} tab="coaching" onTab={vi.fn()} draftQuestion={draftQuestion} onDraftConsumed={vi.fn()} pinnedTurn={null} nativeLanguageName="English" showRomanization={false} rtl={false} />
 }
@@ -96,7 +96,7 @@ describe('native private coaching', () => {
     await waitFor(() => expect(backend.execute).toHaveBeenCalledTimes(1))
     expect(separator).toHaveAttribute('aria-valuenow', '65')
     fireEvent.click(screen.getByRole('button', { name: 'Minimize coach chat' }))
-    publishReply({ ...snapshot, revision: 8, coachMessages: [{ id: 'reply', role: 'assistant', text: 'Saved new reply' }] } as ConversationSnapshot)
+    publishReply({ ...snapshot, revision: 8, contentRevision: '8', coachMessages: [{ id: 'reply', role: 'assistant', text: 'Saved new reply' }] } as ConversationSnapshot)
     await screen.findByText('Saved new reply')
     expect(screen.getByLabelText('Coach conversation')).not.toBeVisible()
   })

@@ -57,6 +57,22 @@ it('shows the selected executable run and persists the inspected operation', asy
   expect(api.watchConversation).toHaveBeenLastCalledWith('chat', 1)
 })
 
+it.each([
+  ['waiting_dependencies', 'waiting'], ['ready', 'waiting'], ['running', 'running'],
+  ['succeeded', 'done'], ['held', 'held'], ['failed', 'problem'],
+  ['unknown', 'problem'], ['cancelled', 'ended'], ['unrequested', 'ask'],
+])('renders a speech request in state %s without crashing the activity view', async (state, tone) => {
+  const run = { ...turn('speech-run'), speech: { id: 'speech', sourceMessageId: 'message', state } }
+  Object.assign(run.nativeGraph.artifact.definition.results, { audio: { node: 'speech', port: 'audio' } })
+  api.watchConversation.mockReset().mockResolvedValueOnce(snapshot('chat', 1, [run])).mockImplementation(() => new Promise(() => {}))
+  render(<AiView mode="docked" actions={null} />)
+  expect(await screen.findByTestId('run')).toHaveTextContent('speech-run')
+  expect(api.workspace.mock.lastCall![0].stations).toEqual([expect.objectContaining({
+    id: 'station:playback', tone,
+    rows: expect.arrayContaining([expect.objectContaining({ value: state })]),
+  })])
+})
+
 it('reads history only through the selected run identity', async () => {
   api.readGraphHistory.mockResolvedValue({ engine: 'engine', run: 'run', current_revision: '1', frames: [], before: null })
   render(<AiView mode="docked" actions={null} />)

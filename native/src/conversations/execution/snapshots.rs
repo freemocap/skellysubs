@@ -203,6 +203,7 @@ impl Store {
             .find(|c| c.id == conversation)
             .ok_or_else(|| AppError::new(ErrorCode::NotFound, "Conversation no longer exists."))?;
         Ok(ConversationSnapshot {
+            content_revision: db.total_changes().to_string(),
             phrase_seed: db.query_row("SELECT json_extract(t.context,'$.phraseSeed.text') FROM conversation_openings o JOIN turns t ON t.id=o.turn_id WHERE o.conversation_id=?1",[conversation],|r|r.get(0)).optional()?.flatten(),
             topic_choices: crate::conversations::openers::choices(
                 &self.config,
