@@ -42,14 +42,17 @@ fn server_on(
             return Vec::new();
         }
         listener.set_nonblocking(true).unwrap();
-        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        // Polling transcription still precedes audio inspection and durable
+        // admission. This is a hang guard, not a five-second performance test;
+        // allow those operations to finish on contended CI workers.
+        let deadline = std::time::Instant::now() + Duration::from_secs(30);
         let (mut socket, _) = loop {
             match listener.accept() {
                 Ok(connection) => break connection,
                 Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
                     assert!(
                         std::time::Instant::now() < deadline,
-                        "No transcription request arrived"
+                        "No transcription request arrived within 30 seconds"
                     );
                     std::thread::sleep(Duration::from_millis(10));
                 }
@@ -121,6 +124,38 @@ async fn mock_request_deadline_excludes_fixture_setup() {
         worker.join().unwrap()
     };
     assert!(request.await.starts_with(b"POST /v1/audio/transcriptions "));
+}
+
+#[tokio::test]
+async fn mock_request_allows_slow_pre_dispatch_work() {
+    let (url, ready, release, worker) = server(reply());
+    let request = async {
+        // Audio inspection and durable admission happen after transcription is
+        // polled but before HTTP dispatch. They can exceed five seconds on CI.
+        tokio::time::sleep(Duration::from_millis(5100)).await;
+        let mut socket = std::net::TcpStream::connect(
+            url.strip_prefix("http://")
+                .unwrap()
+                .strip_suffix("/v1")
+                .unwrap(),
+        )
+        .unwrap();
+        socket
+            .write_all(b"POST /v1/audio/transcriptions HTTP/1.1\r\nContent-Length: 0\r\n\r\n")
+            .unwrap();
+        socket
+    };
+    let gate = async {
+        ready.await.unwrap();
+        release.send(()).unwrap();
+    };
+    let (_, _socket) = tokio::join!(gate, request);
+    assert!(
+        worker
+            .join()
+            .unwrap()
+            .starts_with(b"POST /v1/audio/transcriptions ")
+    );
 }
 fn setup(
     url: &str,
