@@ -4350,7 +4350,7 @@ checksum = "8ee5873ec9cce0195efcb7a4e9507a04cd49aec9c83d0389df45b1ef7ba2e649"
 
 [[package]]
 name = "skellyspeak"
-version = "4.0.5"
+version = "4.0.6"
 dependencies = [
  "android-native-keyring-store",
  "base64 0.22.1",
