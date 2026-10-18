@@ -1,5 +1,4 @@
 //! Mobile bridges present system share sheets; desktop exports to Downloads.
-#[cfg(not(target_os = "ios"))]
 use tauri::Manager;
 
 #[cfg(target_os = "ios")]
@@ -24,6 +23,7 @@ pub fn plugin() -> tauri::plugin::TauriPlugin<tauri::Wry> {
 
 #[tauri::command]
 pub async fn share_diagnostic_logs(app: tauri::AppHandle) -> crate::model::Result<()> {
+    prepare_execution_diagnostics(&app).await?;
     #[cfg(target_os = "android")]
     {
         let root = super::log_root()?;
@@ -79,6 +79,7 @@ pub async fn share_diagnostic_logs(app: tauri::AppHandle) -> crate::model::Resul
 /// Mobile uses system export UI; desktop saves to Downloads.
 #[tauri::command]
 pub async fn save_diagnostic_logs(app: tauri::AppHandle) -> crate::model::Result<Option<String>> {
+    prepare_execution_diagnostics(&app).await?;
     #[cfg(not(target_os = "ios"))]
     let root = super::log_root()?;
     #[cfg(target_os = "android")]
@@ -137,4 +138,29 @@ pub async fn save_diagnostic_logs(app: tauri::AppHandle) -> crate::model::Result
             )
         })?
     }
+}
+
+/// Backfill retained failures before every platform builds its archive. A failed
+/// snapshot fails export, rather than publishing an apparently complete bundle.
+async fn prepare_execution_diagnostics(app: &tauri::AppHandle) -> crate::model::Result<()> {
+    let state = app
+        .state::<std::sync::Arc<crate::application::Application>>()
+        .inner()
+        .clone();
+    let root = super::log_root()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let guard = state
+            .store
+            .lock()
+            .map_err(|_| super::failures::poisoned(crate::application::internal()))?;
+        super::execution::save(guard.as_ref().map(|store| &store.connection), &root)
+    })
+    .await
+    .map_err(|cause| {
+        super::failures::join(
+            &cause,
+            "execution_diagnostics_worker",
+            crate::application::internal(),
+        )
+    })?
 }

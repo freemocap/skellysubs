@@ -74,7 +74,7 @@ class DiagnosticSharePlugin(private val activity: Activity) : Plugin(activity) {
                     .put("webViewVersion", if (Build.VERSION.SDK_INT >= 26) WebView.getCurrentWebViewPackage()?.versionName else JSONObject.NULL)
                     .put("rendering", "software_activity")
                     .put("logFileCount", logs.size)
-                    .put("content", "Structured app diagnostics; no conversation database, audio, credentials or raw system log.")
+                    .put("content", "Structured app diagnostics and redacted execution history; no conversation database, audio, credentials or raw system log.")
                     .put("snapshot", "All retained diagnostic runs. Active files may end with an incomplete final record.")
                     .put("graphics", graphics)
                 stage = "write_archive"

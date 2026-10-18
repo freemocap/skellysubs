@@ -19,15 +19,18 @@ class DiagnosticArchiveTest {
                 File(run, "credentials.json").writeText("SECRET")
                 File(run, "recording.wav").writeText("AUDIO")
             }
+            File(root, "execution-diagnostics.jsonl").writeText("{\"request_id\":\"req-speech-failed\"}\n")
             File(root, "skellyspeak.sqlite3").writeText("PRIVATE CONVERSATION")
             val files = DiagnosticArchive.files(root)
-            assertEquals(6, files.size)
+            assertEquals(7, files.size)
             val out = File(root, "bundle.zip")
             ZipOutputStream(out.outputStream()).use { DiagnosticArchive.copyLogs(root, files, it) }
             ZipFile(out).use { zip ->
-                assertEquals(6, zip.size())
+                assertEquals(7, zip.size())
                 val text = zip.entries().asSequence().joinToString { zip.getInputStream(it).reader().readText() }
                 assertTrue(text.contains("safe-request-id"))
+                assertTrue(text.contains("req-speech-failed"))
+                assertNotNull(zip.getEntry("logs/execution-diagnostics.jsonl"))
                 assertFalse(text.contains("SECRET"))
                 assertFalse(text.contains("PRIVATE CONVERSATION"))
                 assertFalse(text.contains("AUDIO"))

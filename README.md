@@ -756,8 +756,17 @@ Use the single log-export control in More or an error surface. On Android,
 file picker. Error panels use a compact export icon beside the dismiss control.
 On iOS, **Share logs** presents the system share sheet with the ZIP attached;
 choose a sharing app or **Save to Files**. Dismissing the sheet cancels export.
-Desktop uses **Save logs** and saves to Downloads. The ZIP excludes conversations,
-recordings and credentials.
+Desktop uses **Save logs** and saves to Downloads. Every export also refreshes
+`logs/execution-diagnostics.jsonl` from the current workspace's retained AI history.
+It includes conversation and workspace runs, all attempts (including retries),
+shared execution IDs, recorded states and adapter-redacted response observations.
+Generation failures are included even if playback never starts or no UI fault is
+raised. Partial response metadata is retained alongside the final failure.
+The snapshot explicitly identifies unavailable workspaces and missing evidence;
+a snapshot read/write failure fails export rather than silently omitting history.
+The ZIP excludes conversation content, graph inputs/outputs, provisional text/audio,
+recordings and credentials. Existing retained failures are included after updating;
+no regeneration is needed.
 
 Privacy rules live in `redaction-policy/policy.json`; run
 `npm run diagnostics:policy` after editing and `npm run diagnostics:check` to check

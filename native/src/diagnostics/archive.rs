@@ -13,11 +13,13 @@ fn io(error: std::io::Error, stage: &str) -> AppError {
     super::response::io_context(&error, stage, failure())
 }
 fn is_log(name: &str) -> bool {
-    matches!(name, "native.jsonl" | "diagnostics.jsonl")
-        || name
-            .strip_prefix("native-")
-            .and_then(|s| s.strip_suffix(".manifest.json"))
-            .is_some_and(|s| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit()))
+    matches!(
+        name,
+        "native.jsonl" | "diagnostics.jsonl" | "execution-diagnostics.jsonl"
+    ) || name
+        .strip_prefix("native-")
+        .and_then(|s| s.strip_suffix(".manifest.json"))
+        .is_some_and(|s| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit()))
 }
 fn files(root: &Path) -> Result<Vec<PathBuf>> {
     let mut files = Vec::new();
@@ -96,7 +98,7 @@ fn write(root: &Path, files: Vec<PathBuf>, file: fs::File) -> Result<()> {
     };
     zip.start_file("manifest.json", options)
         .map_err(zip_error)?;
-    let manifest = serde_json::json!({"formatVersion":1,"appVersion":env!("CARGO_PKG_VERSION"),"platform":std::env::consts::OS,"logFileCount":files.len(),"diagnosticPolicyVersion":1,"snapshot":"Structured logs only; active last records may be incomplete"});
+    let manifest = serde_json::json!({"formatVersion":1,"appVersion":env!("CARGO_PKG_VERSION"),"platform":std::env::consts::OS,"logFileCount":files.len(),"diagnosticPolicyVersion":1,"snapshot":"Structured logs and redacted execution history; active last log records may be incomplete"});
     zip.write_all(manifest.to_string().as_bytes())
         .map_err(|e| io(e, "export_manifest"))?;
     for path in files {
@@ -175,6 +177,27 @@ mod tests {
         for secret in ["source-canary", "secret-canary", "private-file-canary"] {
             assert!(!stored.contains(secret));
         }
+    }
+    #[test]
+    fn exported_zip_includes_retained_execution_diagnostics() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("logs");
+        fs::create_dir(&root).unwrap();
+        fs::write(root.join("native.jsonl"), "{}\n").unwrap();
+        fs::write(
+            root.join("execution-diagnostics.jsonl"),
+            "{\"code\":\"execution_evidence\",\"request_id\":\"req-speech-failed\"}\n",
+        )
+        .unwrap();
+        let path = save(&root, temp.path()).unwrap();
+        let mut archive = zip::ZipArchive::new(fs::File::open(path).unwrap()).unwrap();
+        let mut stored = String::new();
+        archive
+            .by_name("logs/execution-diagnostics.jsonl")
+            .unwrap()
+            .read_to_string(&mut stored)
+            .unwrap();
+        assert!(stored.contains("req-speech-failed"));
     }
     #[cfg(unix)]
     #[test]

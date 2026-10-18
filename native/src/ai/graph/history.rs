@@ -202,6 +202,11 @@ pub struct ProducerReceipt {
     pub outcome: Option<Result<()>>,
 }
 impl HistoricalInspection {
+    /// Enumerate retained runs at this immutable cut, without loading source values.
+    pub fn run_ids(&self) -> impl Iterator<Item = &str> {
+        self.engine.state.runs.keys().map(String::as_str)
+    }
+
     /// Protected source values at this exact cut. This is deliberate private
     /// inspection, not the content-free automatic graph projection.
     pub fn execution_content(

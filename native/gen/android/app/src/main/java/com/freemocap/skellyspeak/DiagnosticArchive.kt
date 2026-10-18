@@ -8,7 +8,7 @@ import java.util.zip.ZipOutputStream
 internal object DiagnosticArchive {
     private val runName = Regex("native-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
     private val manifestName = Regex("native-[0-9]+\\.manifest\\.json")
-    fun isLog(name: String) = name == "diagnostics.jsonl" || name == "native.jsonl" || manifestName.matches(name)
+    fun isLog(name: String) = name == "diagnostics.jsonl" || name == "native.jsonl" || name == "execution-diagnostics.jsonl" || manifestName.matches(name)
 
     fun files(root: File): List<File> {
         require(root.isDirectory) { "Log directory unavailable" }

@@ -1,6 +1,7 @@
 //! Durable, redacted diagnostics; the bounded ring is only a recent-read view.
 #[cfg(any(not(target_os = "android"), test))]
-mod archive;
+pub(crate) mod archive;
+pub(crate) mod execution;
 pub(crate) mod failures;
 mod policy;
 pub(crate) mod response;
